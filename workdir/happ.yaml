@@ -1,0 +1,33 @@
+---
+manifest_version: "1"
+name: request-and-offers
+description: ~
+roles:
+  - name: profile
+    provisioning:
+      strategy: create
+      deferred: false
+    dna:
+      bundled: "../dnas/profile/workdir/profile.dna"
+      modifiers:
+        network_seed: ~
+        properties: ~
+        origin_time: ~
+        quantum_time: ~
+      installed_hash: ~
+      _version: ~
+      clone_limit: 0
+  - name: requests_and_offers
+    provisioning:
+      strategy: create
+      deferred: false
+    dna:
+      bundled: "../dnas/requests_and_offers/workdir/requests_and_offers.dna"
+      modifiers:
+        network_seed: ~
+        properties: ~
+        origin_time: ~
+        quantum_time: ~
+      installed_hash: ~
+      _version: ~
+      clone_limit: 0

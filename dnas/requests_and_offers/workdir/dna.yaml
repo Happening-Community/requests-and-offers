@@ -1,0 +1,19 @@
+---
+manifest_version: "1"
+name: requests_and_offers
+integrity:
+  network_seed: ~
+  properties: ~
+  origin_time: 1702951068502589
+  zomes:
+    - name: profiles_integrity
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/profiles_integrity.wasm"
+      dependencies: ~
+coordinator:
+  zomes:
+    - name: profiles
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/profiles.wasm"
+      dependencies:
+        - name: profiles_integrity
