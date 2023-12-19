@@ -1,5 +1,70 @@
 # Request And Offers
 
+Request And Offers is a hAppenings.community project to facilitate exchanges between Holochain Creators & Advocates! It's a Holochain application.
+
+- [Litepaper](https://happenings-community.gitbook.io/)
+
+## Architecture
+
+### Profile zome
+
+The profile zome give metadata to the agents, links many agents to a profiles and allow user to retrieve a profile with a new agent.
+
+These types are three entry types in the DHT, one for each type of member :
+- Individual Profiles
+- Project Profiles
+- Organization Profiles
+
+#### Individual Profiles
+
+- Name: `String`
+- Nicname: `String`
+- Profile Picture: `Vec<u8>`
+- Bio: `String`
+- Type:
+  - Advocate
+  - Developer
+- Skills: `Vec<String>`
+- Email: `String`
+- Phone: `String`
+- Time Zone: `String`
+- Location: `String`
+
+Links : 
+- Organizations: `IndividualToOrganization`
+- Projects: `IndividualToProject`
+
+#### Project Profiles
+
+- Name: `String`
+- Description: `String`
+- Logo: `Vec<u8>`
+- Website URL: `String`
+- GitHub URL: `String`
+- Type: `String`
+- Status: `String`
+- Team Members: `Vec<EntryHash>`
+
+#### Organization Profiles
+
+- Name: `String`
+- Description: `String`
+- Logo: `Vec<u8>`
+- Website URL: `String`
+- Type: `String`
+- Year Established: `String`
+- Team Members: `Vec<EntryHash>`
+
+Links:
+- Projects: `OrganizationToProject`
+
+#### Know Your Costumer (KYC)
+
+#### Retrieve Account
+
+DeepKey could be a solution for managing multiple agents per individual profiles.
+
+
 ## Environment Setup
 
 > PREREQUISITE: set up the [holochain development environment](https://developer.holochain.org/docs/install/).
