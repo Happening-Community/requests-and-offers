@@ -35,4 +35,16 @@ export type ProfilesSignal = {
   link_type: string;
 };
 
-export type EntryTypes = {};
+export type EntryTypes =
+ | ({  type: 'IndiviualProfile'; } & IndiviualProfile);
+
+
+
+export interface IndiviualProfile { 
+  name: string;
+
+  nickname: string;
+
+  bio: string;
+}
+

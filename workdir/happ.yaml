@@ -3,12 +3,12 @@ manifest_version: "1"
 name: request-and-offers
 description: ~
 roles:
-  - name: profile
+  - name: profiles
     provisioning:
       strategy: create
       deferred: false
     dna:
-      bundled: "../dnas/profile/workdir/profile.dna"
+      bundled: "../dnas/profiles/workdir/profile.dna"
       modifiers:
         network_seed: ~
         properties: ~
