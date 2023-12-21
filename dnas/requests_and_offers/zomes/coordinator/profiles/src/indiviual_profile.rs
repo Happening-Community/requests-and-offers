@@ -1,5 +1,6 @@
 use hdk::prelude::*;
 use profiles_integrity::*;
+
 #[hdk_extern]
 pub fn create_indiviual_profile(indiviual_profile: IndiviualProfile) -> ExternResult<Record> {
     let indiviual_profile_hash =
@@ -11,6 +12,7 @@ pub fn create_indiviual_profile(indiviual_profile: IndiviualProfile) -> ExternRe
     ))?;
     Ok(record)
 }
+
 #[hdk_extern]
 pub fn get_indiviual_profile(
     original_indiviual_profile_hash: ActionHash,
@@ -29,12 +31,14 @@ pub fn get_indiviual_profile(
     };
     get(latest_indiviual_profile_hash, GetOptions::default())
 }
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateIndiviualProfileInput {
     pub original_indiviual_profile_hash: ActionHash,
     pub previous_indiviual_profile_hash: ActionHash,
     pub updated_indiviual_profile: IndiviualProfile,
 }
+
 #[hdk_extern]
 pub fn update_indiviual_profile(input: UpdateIndiviualProfileInput) -> ExternResult<Record> {
     let updated_indiviual_profile_hash = update_entry(
@@ -56,6 +60,7 @@ pub fn update_indiviual_profile(input: UpdateIndiviualProfileInput) -> ExternRes
     ))))?;
     Ok(record)
 }
+
 #[hdk_extern]
 pub fn delete_indiviual_profile(
     original_indiviual_profile_hash: ActionHash,
