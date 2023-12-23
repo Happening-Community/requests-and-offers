@@ -22,9 +22,10 @@ import { decode } from "@msgpack/msgpack";
 import {
   IndividualProfile,
   IndividualType,
-  createIndiviualProfile,
-  getIndivualProfile,
-  sampleIndiviualProfile,
+  createIndividualProfile,
+  getAllIndividualProfiles,
+  getIndividualProfile,
+  sampleIndividualProfile,
 } from "./common.js";
 
 const hAppPath = process.cwd() + "/../workdir/request-and-offers.happ";
@@ -46,16 +47,19 @@ async function runScenarioWithTwoAgents(
 
 test("create and read IndiviualProfile", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
-    const sample = await sampleIndiviualProfile();
+    const sample = await sampleIndividualProfile({ name: "Alice" });
 
     // Alice creates a IndividualProfile
-    const record: Record = await createIndiviualProfile(alice.cells[0], sample);
+    const record: Record = await createIndividualProfile(
+      alice.cells[0],
+      sample
+    );
     assert.ok(record);
 
     await pause(1200);
 
     // Bob gets the created IndividualProfile
-    const createReadOutput: Record = await getIndivualProfile(
+    const createReadOutput: Record = await getIndividualProfile(
       bob.cells[0],
       record
     );
@@ -66,12 +70,28 @@ test("create and read IndiviualProfile", async () => {
     );
 
     // Bob create an IndividualProfile with erroneous IndividualType
-    const errSample: IndividualProfile = sampleIndiviualProfile({
+    const errSample: IndividualProfile = sampleIndividualProfile({
       individual_type: IndividualType.NonAuth,
     });
 
     await expect(
-      createIndiviualProfile(bob.cells[0], errSample)
+      createIndividualProfile(bob.cells[0], errSample)
     ).rejects.toThrow();
+
+    await pause(1200);
+
+    // Bob creates a IndividualProfile
+    const sample2 = await sampleIndividualProfile({ name: "Bob" });
+    const record2: Record = await createIndividualProfile(
+      bob.cells[0],
+      sample2
+    );
+    assert.ok(record2);
+
+    await pause(1200);
+
+    // Alice try to get all the individual profiles
+    const record3: Record[] = await getAllIndividualProfiles(alice.cells[0]);
+    assert.equal(record3.length, 2);
   });
 });

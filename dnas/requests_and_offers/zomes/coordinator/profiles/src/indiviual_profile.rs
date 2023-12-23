@@ -2,7 +2,7 @@ use hdk::prelude::*;
 use profiles_integrity::*;
 
 #[hdk_extern]
-pub fn create_indiviual_profile(indiviual_profile: IndiviualProfile) -> ExternResult<Record> {
+pub fn create_individual_profile(indiviual_profile: IndiviualProfile) -> ExternResult<Record> {
     let indiviual_profile_hash =
         create_entry(&EntryTypes::IndiviualProfile(indiviual_profile.clone()))?;
     let record = get(indiviual_profile_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(
@@ -10,11 +10,20 @@ pub fn create_indiviual_profile(indiviual_profile: IndiviualProfile) -> ExternRe
             "Could not find the newly created IndiviualProfile"
         ))
     ))?;
+
+    let path = Path::from("all_individual_profiles");
+    create_link(
+        path.path_entry_hash()?,
+        indiviual_profile_hash,
+        LinkTypes::AllIndividualProfiles,
+        (),
+    )?;
+
     Ok(record)
 }
 
 #[hdk_extern]
-pub fn get_indiviual_profile(
+pub fn get_individual_profile(
     original_indiviual_profile_hash: ActionHash,
 ) -> ExternResult<Option<Record>> {
     let links = get_links(
@@ -30,6 +39,26 @@ pub fn get_indiviual_profile(
         None => original_indiviual_profile_hash.clone(),
     };
     get(latest_indiviual_profile_hash, GetOptions::default())
+}
+
+#[hdk_extern]
+pub fn get_all_individual_profiles(_: ()) -> ExternResult<Vec<Record>> {
+    let mut individual_profiles = Vec::new();
+
+    let links = get_links(
+        Path::from("all_individual_profiles").path_entry_hash()?,
+        LinkTypes::AllIndividualProfiles,
+        None,
+    )?;
+
+    for link in links {
+        let indiviual_profile = get_individual_profile(ActionHash::from(link.target.clone()))?;
+        if let Some(indiviual_profile) = indiviual_profile {
+            individual_profiles.push(indiviual_profile)
+        }
+    }
+
+    Ok(individual_profiles)
 }
 
 #[derive(Serialize, Deserialize, Debug)]

@@ -29,7 +29,7 @@ export type IndividualProfile = {
   location: string;
 };
 
-export function sampleIndiviualProfile(partialIndiviualProfile = {}) {
+export function sampleIndividualProfile(partialIndividualProfile = {}) {
   return {
     ...{
       name: "User",
@@ -43,28 +43,37 @@ export function sampleIndiviualProfile(partialIndiviualProfile = {}) {
       time_zone: "EST",
       location: "here",
     },
-    ...partialIndiviualProfile,
+    ...partialIndividualProfile,
   };
 }
 
-export async function getIndivualProfile(
+export async function getIndividualProfile(
   cell: CallableCell,
   record: Record
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "profiles",
-    fn_name: "get_indiviual_profile",
+    fn_name: "get_individual_profile",
     payload: record.signed_action.hashed.hash,
   });
 }
 
-export async function createIndiviualProfile(
+export async function getAllIndividualProfiles(
+  cell: CallableCell
+): Promise<Record[]> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "get_all_individual_profiles",
+  });
+}
+
+export async function createIndividualProfile(
   cell: CallableCell,
-  indiviualProfile: IndividualProfile
+  individualProfile: IndividualProfile
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "profiles",
-    fn_name: "create_indiviual_profile",
-    payload: indiviualProfile,
+    fn_name: "create_individual_profile",
+    payload: individualProfile,
   });
 }
