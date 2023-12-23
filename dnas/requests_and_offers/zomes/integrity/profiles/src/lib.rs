@@ -1,19 +1,19 @@
-pub mod indiviual_profile;
+pub mod individual_profile;
 use hdi::prelude::*;
-pub use indiviual_profile::*;
+pub use individual_profile::*;
 
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
 #[hdk_entry_defs]
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
-    IndiviualProfile(IndiviualProfile),
+    IndividualProfile(IndividualProfile),
 }
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
 pub enum LinkTypes {
     AllIndividualProfiles,
-    IndiviualProfileUpdates,
+    IndividualProfileUpdates,
 }
 
 #[hdk_extern]
@@ -35,8 +35,8 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
         match store_entry {
             OpEntry::CreateEntry { app_entry, .. } | OpEntry::UpdateEntry { app_entry, .. } => {
                 match app_entry {
-                    EntryTypes::IndiviualProfile(individual_profile) => {
-                        return validate_create_indiviual_profile(individual_profile);
+                    EntryTypes::IndividualProfile(individual_profile) => {
+                        return validate_create_individual_profile(individual_profile);
                     }
                 }
             }

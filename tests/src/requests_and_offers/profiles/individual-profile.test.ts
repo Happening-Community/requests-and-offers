@@ -45,7 +45,7 @@ async function runScenarioWithTwoAgents(
   });
 }
 
-test("create and read IndiviualProfile", async () => {
+test("create and read IndividualProfile", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     const sample = await sampleIndividualProfile({ name: "Alice" });
 

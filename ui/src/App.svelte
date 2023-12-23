@@ -5,8 +5,8 @@
   import "@material/mwc-circular-progress";
 
   import { clientContext } from "./contexts";
-  import IndiviualProfileDetail from "./requests_and_offers/profiles/IndiviualProfileDetail.svelte";
-  import CreateIndiviualProfile from "./requests_and_offers/profiles/CreateIndiviualProfile.svelte";
+  import IndividualProfileDetail from "./requests_and_offers/profiles/IndividualProfileDetail.svelte";
+  import CreateIndividualProfile from "./requests_and_offers/profiles/CreateIndividualProfile.svelte";
 
   let client: AppAgentClient | undefined;
 
@@ -34,7 +34,7 @@
   {:else}
     <h1>Hello World !</h1>
 
-    <CreateIndiviualProfile />
+    <CreateIndividualProfile />
   {/if}
 </main>
 

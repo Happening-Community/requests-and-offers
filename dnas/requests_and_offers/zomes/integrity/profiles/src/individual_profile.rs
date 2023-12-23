@@ -2,7 +2,7 @@ use hdi::prelude::*;
 
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
-pub struct IndiviualProfile {
+pub struct IndividualProfile {
     pub name: String,
     pub nickname: String,
     pub bio: String,
@@ -15,10 +15,10 @@ pub struct IndiviualProfile {
     pub location: String,
 }
 
-pub fn validate_create_indiviual_profile(
-    indiviual_profile: IndiviualProfile,
+pub fn validate_create_individual_profile(
+    individual_profile: IndividualProfile,
 ) -> ExternResult<ValidateCallbackResult> {
-    let individual_type = indiviual_profile.individual_type;
+    let individual_type = individual_profile.individual_type;
     let allowed_types = ["advocate", "developer"];
     if !allowed_types.contains(&individual_type.as_str()) {
         return Ok(ValidateCallbackResult::Invalid(String::from(
@@ -31,31 +31,34 @@ pub fn validate_create_indiviual_profile(
     Ok(ValidateCallbackResult::Valid)
 }
 
-pub fn validate_update_indiviual_profile(
+pub fn validate_update_individual_profile(
     _action: Update,
-    _indiviual_profile: IndiviualProfile,
+    _individual_profile: IndividualProfile,
     _original_action: EntryCreationAction,
-    _original_indiviual_profile: IndiviualProfile,
+    _original_individual_profile: IndividualProfile,
 ) -> ExternResult<ValidateCallbackResult> {
-    let individual_type = _indiviual_profile.individual_type;
+    let individual_type = _individual_profile.individual_type;
     let allowed_types = ["advocate", "developer"];
     if !allowed_types.contains(&individual_type.as_str()) {
         return Ok(ValidateCallbackResult::Invalid(String::from(
             "Individual Type must be \"advocate\" or \"developer\".",
         )));
     }
+
     Ok(ValidateCallbackResult::Valid)
 }
 
-pub fn validate_delete_indiviual_profile(
+pub fn validate_delete_individual_profile(
     _action: Delete,
     _original_action: EntryCreationAction,
-    _original_indiviual_profile: IndiviualProfile,
+    _original_individual_profile: IndividualProfile,
 ) -> ExternResult<ValidateCallbackResult> {
-    Ok(ValidateCallbackResult::Valid)
+    Ok(ValidateCallbackResult::Invalid(String::from(
+        "Indiviual Profile cannot be deleted",
+    )))
 }
 
-pub fn validate_create_link_indiviual_profile_updates(
+pub fn validate_create_link_individual_profile_updates(
     _action: CreateLink,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
@@ -64,7 +67,7 @@ pub fn validate_create_link_indiviual_profile_updates(
     // Check the entry type for the given action hash
     let action_hash = ActionHash::from(base_address);
     let record = must_get_valid_record(action_hash)?;
-    let _indiviual_profile: crate::IndiviualProfile = record
+    let _individual_profile: crate::IndividualProfile = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
@@ -74,7 +77,7 @@ pub fn validate_create_link_indiviual_profile_updates(
     // Check the entry type for the given action hash
     let action_hash = ActionHash::from(target_address);
     let record = must_get_valid_record(action_hash)?;
-    let _indiviual_profile: crate::IndiviualProfile = record
+    let _individual_profile: crate::IndividualProfile = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
@@ -85,7 +88,7 @@ pub fn validate_create_link_indiviual_profile_updates(
     Ok(ValidateCallbackResult::Valid)
 }
 
-pub fn validate_delete_link_indiviual_profile_updates(
+pub fn validate_delete_link_individual_profile_updates(
     _action: DeleteLink,
     _original_action: CreateLink,
     _base: AnyLinkableHash,
@@ -93,6 +96,6 @@ pub fn validate_delete_link_indiviual_profile_updates(
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Invalid(String::from(
-        "IndiviualProfileUpdates links cannot be deleted",
+        "IndividualProfileUpdates links cannot be deleted",
     )))
 }

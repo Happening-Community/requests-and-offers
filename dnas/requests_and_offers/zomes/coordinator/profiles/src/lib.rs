@@ -1,4 +1,4 @@
-pub mod indiviual_profile;
+pub mod individual_profile;
 use hdk::prelude::*;
 use profiles_integrity::*;
 

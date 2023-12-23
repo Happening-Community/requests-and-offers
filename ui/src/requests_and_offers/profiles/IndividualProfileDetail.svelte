@@ -11,16 +11,16 @@
     DnaHash,
   } from "@holochain/client";
   import { clientContext } from "../../contexts";
-  import type { IndiviualProfile } from "./types";
+  import type { IndividualProfile } from "./types";
   import "@material/mwc-circular-progress";
   import type { Snackbar } from "@material/mwc-snackbar";
   import "@material/mwc-snackbar";
   import "@material/mwc-icon-button";
-  import EditIndiviualProfile from "./EditIndiviualProfile.svelte";
+  import EditIndividualProfile from "./EditIndividualProfile.svelte";
 
   const dispatch = createEventDispatcher();
 
-  export let indiviualProfileHash: ActionHash;
+  export let IndividualProfileHash: ActionHash;
 
   let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
@@ -28,41 +28,41 @@
   let error: any = undefined;
 
   let record: Record | undefined;
-  let indiviualProfile: IndiviualProfile | undefined;
+  let IndividualProfile: IndividualProfile | undefined;
 
   let editing = false;
 
   let errorSnackbar: Snackbar;
 
-  $: editing, error, loading, record, indiviualProfile;
+  $: editing, error, loading, record, IndividualProfile;
 
   onMount(async () => {
-    if (indiviualProfileHash === undefined) {
+    if (IndividualProfileHash === undefined) {
       throw new Error(
-        `The indiviualProfileHash input is required for the IndiviualProfileDetail element`
+        `The IndividualProfileHash input is required for the IndividualProfileDetail element`
       );
     }
-    await fetchIndiviualProfile();
+    await fetchIndividualProfile();
   });
 
-  async function fetchIndiviualProfile() {
+  async function fetchIndividualProfile() {
     loading = true;
     error = undefined;
     record = undefined;
-    indiviualProfile = undefined;
+    IndividualProfile = undefined;
 
     try {
       record = await client.callZome({
         cap_secret: null,
         role_name: "requests_and_offers",
         zome_name: "profiles",
-        fn_name: "get_indiviual_profile",
-        payload: indiviualProfileHash,
+        fn_name: "get_individual_profile",
+        payload: IndividualProfileHash,
       });
       if (record) {
-        indiviualProfile = decode(
+        IndividualProfile = decode(
           (record.entry as any).Present.entry
-        ) as IndiviualProfile;
+        ) as IndividualProfile;
       }
     } catch (e) {
       error = e;
@@ -71,17 +71,17 @@
     loading = false;
   }
 
-  async function deleteIndiviualProfile() {
+  async function deleteIndividualProfile() {
     try {
       await client.callZome({
         cap_secret: null,
         role_name: "requests_and_offers",
         zome_name: "profiles",
-        fn_name: "delete_indiviual_profile",
-        payload: indiviualProfileHash,
+        fn_name: "delete_individual_profile",
+        payload: IndividualProfileHash,
       });
       dispatch("indiviual-profile-deleted", {
-        indiviualProfileHash: indiviualProfileHash,
+        IndividualProfileHash: IndividualProfileHash,
       });
     } catch (e: any) {
       errorSnackbar.labelText = `Error deleting the indiviual profile: ${e.data.data}`;
@@ -101,17 +101,17 @@
 {:else if error}
   <span>Error fetching the indiviual profile: {error.data.data}</span>
 {:else if editing}
-  <EditIndiviualProfile
-    originalIndiviualProfileHash={indiviualProfileHash}
+  <EditIndividualProfile
+    originalIndividualProfileHash={IndividualProfileHash}
     currentRecord={record}
     on:indiviual-profile-updated={async () => {
       editing = false;
-      await fetchIndiviualProfile();
+      await fetchIndividualProfile();
     }}
     on:edit-canceled={() => {
       editing = false;
     }}
-  ></EditIndiviualProfile>
+  ></EditIndividualProfile>
 {:else}
   <div style="display: flex; flex-direction: column">
     <div style="display: flex; flex-direction: row">
@@ -126,23 +126,23 @@
       <mwc-icon-button
         style="margin-left: 8px"
         icon="delete"
-        on:click={() => deleteIndiviualProfile()}
+        on:click={() => deleteIndividualProfile()}
       ></mwc-icon-button>
     </div>
 
     <div style="display: flex; flex-direction: row; margin-bottom: 16px">
       <span style="margin-right: 4px"><strong>Name:</strong></span>
-      <span style="white-space: pre-line">{indiviualProfile.name}</span>
+      <span style="white-space: pre-line">{IndividualProfile.name}</span>
     </div>
 
     <div style="display: flex; flex-direction: row; margin-bottom: 16px">
       <span style="margin-right: 4px"><strong>Nickname:</strong></span>
-      <span style="white-space: pre-line">{indiviualProfile.nickname}</span>
+      <span style="white-space: pre-line">{IndividualProfile.nickname}</span>
     </div>
 
     <div style="display: flex; flex-direction: row; margin-bottom: 16px">
       <span style="margin-right: 4px"><strong>Bio:</strong></span>
-      <span style="white-space: pre-line">{indiviualProfile.bio}</span>
+      <span style="white-space: pre-line">{IndividualProfile.bio}</span>
     </div>
   </div>
 {/if}

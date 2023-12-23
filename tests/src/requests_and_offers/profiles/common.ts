@@ -47,6 +47,17 @@ export function sampleIndividualProfile(partialIndividualProfile = {}) {
   };
 }
 
+export async function createIndividualProfile(
+  cell: CallableCell,
+  individualProfile: IndividualProfile
+): Promise<Record> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "create_individual_profile",
+    payload: individualProfile,
+  });
+}
+
 export async function getIndividualProfile(
   cell: CallableCell,
   record: Record
@@ -64,16 +75,5 @@ export async function getAllIndividualProfiles(
   return cell.callZome({
     zome_name: "profiles",
     fn_name: "get_all_individual_profiles",
-  });
-}
-
-export async function createIndividualProfile(
-  cell: CallableCell,
-  individualProfile: IndividualProfile
-): Promise<Record> {
-  return cell.callZome({
-    zome_name: "profiles",
-    fn_name: "create_individual_profile",
-    payload: individualProfile,
   });
 }
