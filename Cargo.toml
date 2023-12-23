@@ -10,7 +10,7 @@ members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
 [workspace.dependencies]
 hdi = "=0.2.4"
 hdk = "=0.1.4"
-serde = "=1.0.166"
+serde = "1.0"
 
 [workspace.dependencies.profiles]
 path = "dnas/requests_and_offers/zomes/coordinator/profiles"

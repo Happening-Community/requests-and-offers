@@ -1,4 +1,4 @@
-import { assert, test } from "vitest";
+import { assert, expect, test } from "vitest";
 
 import {
   runScenario,
@@ -19,7 +19,13 @@ import {
 } from "@holochain/client";
 import { decode } from "@msgpack/msgpack";
 
-import { createIndiviualProfile, sampleIndiviualProfile } from "./common.js";
+import {
+  IndividualProfile,
+  IndividualType,
+  createIndiviualProfile,
+  getIndivualProfile,
+  sampleIndiviualProfile,
+} from "./common.js";
 
 const hAppPath = process.cwd() + "/../workdir/request-and-offers.happ";
 const appSource = { appBundleSource: { path: hAppPath } };
@@ -40,20 +46,19 @@ async function runScenarioWithTwoAgents(
 
 test("create and read IndiviualProfile", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
-    const sample = await sampleIndiviualProfile(alice.cells[0]);
+    const sample = await sampleIndiviualProfile();
 
-    // Alice creates a IndiviualProfile
+    // Alice creates a IndividualProfile
     const record: Record = await createIndiviualProfile(alice.cells[0], sample);
     assert.ok(record);
 
     await pause(1200);
 
-    // Bob gets the created IndiviualProfile
-    const createReadOutput: Record = await bob.cells[0].callZome({
-      zome_name: "profiles",
-      fn_name: "get_indiviual_profile",
-      payload: record.signed_action.hashed.hash,
-    });
+    // Bob gets the created IndividualProfile
+    const createReadOutput: Record = await getIndivualProfile(
+      bob.cells[0],
+      record
+    );
 
     console.log(decode((createReadOutput.entry as any).Present.entry) as any);
 
@@ -61,5 +66,11 @@ test("create and read IndiviualProfile", async () => {
       sample,
       decode((createReadOutput.entry as any).Present.entry) as any
     );
+
+    // Bob create an IndividualProfile with erroneous IndividualType
+    const errSample: IndividualProfile = sampleIndiviualProfile({
+      individual_type: IndividualType.NonAuth,
+    });
+    expect(createIndiviualProfile(bob.cells[0], errSample)).rejects.toThrow();
   });
 });

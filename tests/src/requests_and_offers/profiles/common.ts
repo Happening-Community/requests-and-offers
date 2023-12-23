@@ -10,12 +10,18 @@ import {
   fakeDnaHash,
 } from "@holochain/client";
 
-type IndividualProfile = {
+export enum IndividualType {
+  Advocate = "advocate",
+  Developer = "developer",
+  NonAuth = "Non authororized", // For testing invalid inputs
+}
+
+export type IndividualProfile = {
   name: string;
   nickname: string;
   bio: string;
   profile_picture?: Uint8Array;
-  individual_type: string;
+  individual_type: IndividualType;
   skills: string[];
   email: string;
   phone?: string;
@@ -23,17 +29,14 @@ type IndividualProfile = {
   location: string;
 };
 
-export async function sampleIndiviualProfile(
-  cell: CallableCell,
-  partialIndiviualProfile = {}
-) {
+export function sampleIndiviualProfile(partialIndiviualProfile = {}) {
   return {
     ...{
       name: "User",
       nickname: "NickName",
       bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       profile_picture: new Uint8Array(500),
-      individual_type: "developer",
+      individual_type: IndividualType.Developer,
       skills: ["html", "css", "typescript", "rust"],
       email: "abc@abc.com",
       phone: null,
@@ -42,6 +45,17 @@ export async function sampleIndiviualProfile(
     },
     ...partialIndiviualProfile,
   };
+}
+
+export async function getIndivualProfile(
+  cell: CallableCell,
+  record: Record
+): Promise<Record> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "get_indiviual_profile",
+    payload: record.signed_action.hashed.hash,
+  });
 }
 
 export async function createIndiviualProfile(

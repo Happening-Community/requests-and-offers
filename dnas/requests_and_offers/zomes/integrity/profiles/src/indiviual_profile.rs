@@ -1,11 +1,5 @@
 use hdi::prelude::*;
 
-#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
-pub enum Type {
-    Advocate,
-    Developer,
-}
-
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct IndiviualProfile {
@@ -25,7 +19,16 @@ pub fn validate_create_indiviual_profile(
     _action: EntryCreationAction,
     _indiviual_profile: IndiviualProfile,
 ) -> ExternResult<ValidateCallbackResult> {
+    let individual_type = _indiviual_profile.individual_type;
+    let allowed_types = ["advocate", "developer"];
+    if !allowed_types.contains(&individual_type.as_str()) {
+        return Ok(ValidateCallbackResult::Invalid(String::from(
+            "Individual Type must be \"advocate\" or \"developer\".",
+        )));
+    }
+
     // TODO: Validate the profile picture, the email and the time zone
+
     Ok(ValidateCallbackResult::Valid)
 }
 
@@ -35,6 +38,13 @@ pub fn validate_update_indiviual_profile(
     _original_action: EntryCreationAction,
     _original_indiviual_profile: IndiviualProfile,
 ) -> ExternResult<ValidateCallbackResult> {
+    let individual_type = _indiviual_profile.individual_type;
+    let allowed_types = ["advocate", "developer"];
+    if !allowed_types.contains(&individual_type.as_str()) {
+        return Ok(ValidateCallbackResult::Invalid(String::from(
+            "Individual Type must be \"advocate\" or \"developer\".",
+        )));
+    }
     Ok(ValidateCallbackResult::Valid)
 }
 
