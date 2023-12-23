@@ -60,8 +60,6 @@ test("create and read IndiviualProfile", async () => {
       record
     );
 
-    console.log(decode((createReadOutput.entry as any).Present.entry) as any);
-
     assert.deepEqual(
       sample,
       decode((createReadOutput.entry as any).Present.entry) as any
@@ -71,6 +69,9 @@ test("create and read IndiviualProfile", async () => {
     const errSample: IndividualProfile = sampleIndiviualProfile({
       individual_type: IndividualType.NonAuth,
     });
-    expect(createIndiviualProfile(bob.cells[0], errSample)).rejects.toThrow();
+
+    await expect(
+      createIndiviualProfile(bob.cells[0], errSample)
+    ).rejects.toThrow();
   });
 });
