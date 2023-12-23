@@ -27,9 +27,12 @@ export type IndividualProfile = {
   phone?: string;
   time_zone: string;
   location: string;
+  created_at: number;
 };
 
-export function sampleIndividualProfile(partialIndividualProfile = {}) {
+export function sampleIndividualProfile(
+  partialIndividualProfile = {}
+): IndividualProfile {
   return {
     ...{
       name: "User",
@@ -42,6 +45,7 @@ export function sampleIndividualProfile(partialIndividualProfile = {}) {
       phone: null,
       time_zone: "EST",
       location: "here",
+      created_at: 0,
     },
     ...partialIndividualProfile,
   };

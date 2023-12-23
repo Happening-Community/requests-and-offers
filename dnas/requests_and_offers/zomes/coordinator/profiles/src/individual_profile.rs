@@ -3,6 +3,9 @@ use profiles_integrity::*;
 
 #[hdk_extern]
 pub fn create_individual_profile(individual_profile: IndividualProfile) -> ExternResult<Record> {
+    let mut individual_profile = individual_profile;
+    individual_profile.created_at = sys_time()?;
+
     let individual_profile_hash =
         create_entry(&EntryTypes::IndividualProfile(individual_profile.clone()))?;
     let record = get(individual_profile_hash.clone(), GetOptions::default())?.ok_or(

@@ -13,18 +13,22 @@ pub struct IndividualProfile {
     pub phone: Option<String>,
     pub time_zone: String,
     pub location: String,
+    pub created_at: Timestamp,
+}
+
+fn validate_individual_type(individual_type: String) -> bool {
+    let allowed_types = ["advocate", "developer"];
+    !allowed_types.contains(&individual_type.as_str())
 }
 
 pub fn validate_create_individual_profile(
     individual_profile: IndividualProfile,
 ) -> ExternResult<ValidateCallbackResult> {
-    let individual_type = individual_profile.individual_type;
-    let allowed_types = ["advocate", "developer"];
-    if !allowed_types.contains(&individual_type.as_str()) {
+    if validate_individual_type(individual_profile.individual_type) {
         return Ok(ValidateCallbackResult::Invalid(String::from(
-            "Individual Type must be \"advocate\" or \"developer\".",
+            "Individual Type must be 'advocate' or 'developer'.",
         )));
-    }
+    };
 
     // TODO: Validate the profile picture, the email and the time zone
 
@@ -33,15 +37,13 @@ pub fn validate_create_individual_profile(
 
 pub fn validate_update_individual_profile(
     _action: Update,
-    _individual_profile: IndividualProfile,
+    individual_profile: IndividualProfile,
     _original_action: EntryCreationAction,
     _original_individual_profile: IndividualProfile,
 ) -> ExternResult<ValidateCallbackResult> {
-    let individual_type = _individual_profile.individual_type;
-    let allowed_types = ["advocate", "developer"];
-    if !allowed_types.contains(&individual_type.as_str()) {
+    if validate_individual_type(individual_profile.individual_type) {
         return Ok(ValidateCallbackResult::Invalid(String::from(
-            "Individual Type must be \"advocate\" or \"developer\".",
+            "Individual Type must be 'advocate' or 'developer'.",
         )));
     }
 

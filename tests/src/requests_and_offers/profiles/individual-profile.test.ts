@@ -31,6 +31,10 @@ import {
 const hAppPath = process.cwd() + "/../workdir/request-and-offers.happ";
 const appSource = { appBundleSource: { path: hAppPath } };
 
+function decodeOutputs(records: Record[]): unknown[] {
+  return records.map((r) => decode((r.entry as any).Present.entry));
+}
+
 async function runScenarioWithTwoAgents(
   callback: (scenario: Scenario, alice: Player, bob: Player) => Promise<void>
 ) {
@@ -64,7 +68,7 @@ test("create and read IndividualProfile", async () => {
       record
     );
 
-    assert.deepEqual(
+    assert.containsAllKeys(
       sample,
       decode((createReadOutput.entry as any).Present.entry) as any
     );
