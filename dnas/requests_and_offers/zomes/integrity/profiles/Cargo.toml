@@ -11,3 +11,5 @@ name = "profiles_integrity"
 hdi = { workspace = true }
 
 serde = { workspace = true }
+
+image = { workspace = true }

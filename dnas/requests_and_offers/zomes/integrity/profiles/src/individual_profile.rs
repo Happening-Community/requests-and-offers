@@ -1,4 +1,5 @@
 use hdi::prelude::*;
+use image::io::Reader as ImageReader;
 
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
@@ -16,19 +17,39 @@ pub struct IndividualProfile {
     pub created_at: Timestamp,
 }
 
-fn validate_individual_type(individual_type: String) -> bool {
+fn is_individual_type(individual_type: String) -> bool {
     let allowed_types = ["advocate", "developer"];
     !allowed_types.contains(&individual_type.as_str())
+}
+
+fn is_image(bytes: SerializedBytes) -> bool {
+    let data = bytes.bytes().to_vec();
+    if let Ok(_img) = ImageReader::new(std::io::Cursor::new(data))
+        .with_guessed_format()
+        .unwrap()
+        .decode()
+    {
+        return true;
+    }
+    false
 }
 
 pub fn validate_create_individual_profile(
     individual_profile: IndividualProfile,
 ) -> ExternResult<ValidateCallbackResult> {
-    if validate_individual_type(individual_profile.individual_type) {
+    if is_individual_type(individual_profile.individual_type) {
         return Ok(ValidateCallbackResult::Invalid(String::from(
             "Individual Type must be 'advocate' or 'developer'.",
         )));
     };
+
+    // if let Some(bytes) = individual_profile.profile_picture {
+    //     if !is_image(bytes) {
+    //         return Ok(ValidateCallbackResult::Invalid(String::from(
+    //             "Profile picture must be a valid image",
+    //         )));
+    //     }
+    // }
 
     // TODO: Validate the profile picture, the email and the time zone
 
@@ -37,16 +58,10 @@ pub fn validate_create_individual_profile(
 
 pub fn validate_update_individual_profile(
     _action: Update,
-    individual_profile: IndividualProfile,
+    _individual_profile: IndividualProfile,
     _original_action: EntryCreationAction,
     _original_individual_profile: IndividualProfile,
 ) -> ExternResult<ValidateCallbackResult> {
-    if validate_individual_type(individual_profile.individual_type) {
-        return Ok(ValidateCallbackResult::Invalid(String::from(
-            "Individual Type must be 'advocate' or 'developer'.",
-        )));
-    }
-
     Ok(ValidateCallbackResult::Valid)
 }
 
