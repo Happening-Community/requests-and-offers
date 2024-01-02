@@ -1,4 +1,6 @@
-import { assert, expect, test } from "vitest";
+import { promises as fs } from "fs";
+import { assert, expect, test, vi } from "vitest";
+import TestProfilePicture from "./assets/Test-Logo-Small-Black-transparent-1.png";
 
 import {
   runScenario,
@@ -52,12 +54,12 @@ async function runScenarioWithTwoAgents(
 
 test("create and read IndividualProfile", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
-    let sample = await sampleIndividualProfile({ name: "Alice" });
-
+    let sample: IndividualProfile;
     let record: Record;
     let records: Record[];
 
     // Alice creates a IndividualProfile
+    sample = await sampleIndividualProfile({ name: "Alice" });
     record = await createIndividualProfile(alice.cells[0], sample);
     assert.ok(record);
 
@@ -90,8 +92,24 @@ test("create and read IndividualProfile", async () => {
 
     await pause(1200);
 
-    // Bob creates a IndividualProfile
-    sample = await sampleIndividualProfile({ name: "Bob" });
+    // Bob create an IndividualProfile with erroneous profile Picture
+    errSample = sampleIndividualProfile({
+      name: "Bob",
+      profile_picture: new Uint8Array(20),
+    });
+    await expect(
+      createIndividualProfile(bob.cells[0], errSample)
+    ).rejects.toThrow();
+
+    await pause(1200);
+
+    // Bob creates a IndividualProfile with a real image file
+    const buffer = await fs.readFile(TestProfilePicture);
+
+    sample = await sampleIndividualProfile({
+      name: "Bob",
+      profile_picture: new Uint8Array(buffer),
+    });
     record = await createIndividualProfile(bob.cells[0], sample);
     assert.ok(record);
 
@@ -104,5 +122,13 @@ test("create and read IndividualProfile", async () => {
     // Alice try to update her profile with an invalid profile picture
 
     // Bob try to update Alice's profile
+  });
+});
+
+test.only("current test", async () => {
+  await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
+    let sample: IndividualProfile;
+    let record: Record;
+    let records: Record[];
   });
 });
