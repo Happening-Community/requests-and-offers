@@ -14,6 +14,7 @@ pub enum EntryTypes {
 pub enum LinkTypes {
     AllIndividualProfiles,
     IndividualProfileUpdates,
+    MyProfile,
 }
 
 #[hdk_extern]

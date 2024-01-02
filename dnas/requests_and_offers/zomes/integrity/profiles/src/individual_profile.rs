@@ -43,15 +43,15 @@ pub fn validate_create_individual_profile(
         )));
     };
 
-    // if let Some(bytes) = individual_profile.profile_picture {
-    //     if !is_image(bytes) {
-    //         return Ok(ValidateCallbackResult::Invalid(String::from(
-    //             "Profile picture must be a valid image",
-    //         )));
-    //     }
-    // }
+    if let Some(bytes) = individual_profile.profile_picture {
+        if !is_image(bytes) {
+            return Ok(ValidateCallbackResult::Invalid(String::from(
+                "Profile picture must be a valid image",
+            )));
+        }
+    }
 
-    // TODO: Validate the profile picture, the email and the time zone
+    // TODO: Validate the email and the time zone
 
     Ok(ValidateCallbackResult::Valid)
 }

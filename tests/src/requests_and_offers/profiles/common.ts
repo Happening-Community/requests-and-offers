@@ -38,7 +38,7 @@ export function sampleIndividualProfile(
       name: "User",
       nickname: "NickName",
       bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      profile_picture: new Uint8Array(500),
+      profile_picture: null,
       individual_type: IndividualType.Developer,
       skills: ["html", "css", "typescript", "rust"],
       email: "abc@abc.com",
@@ -79,5 +79,21 @@ export async function getAllIndividualProfiles(
   return cell.callZome({
     zome_name: "profiles",
     fn_name: "get_all_individual_profiles",
+  });
+}
+
+export async function updateIndividualProfiles(
+  cell: CallableCell
+): Promise<Record[]> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "update_individual_profiles",
+  });
+}
+
+export async function getMyProfile(cell: CallableCell): Promise<Record> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "get_my_profile",
   });
 }

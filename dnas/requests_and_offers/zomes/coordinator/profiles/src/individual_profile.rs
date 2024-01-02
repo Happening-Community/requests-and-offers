@@ -17,8 +17,15 @@ pub fn create_individual_profile(individual_profile: IndividualProfile) -> Exter
     let path = Path::from("all_individual_profiles");
     create_link(
         path.path_entry_hash()?,
-        individual_profile_hash,
+        individual_profile_hash.clone(),
         LinkTypes::AllIndividualProfiles,
+        (),
+    )?;
+
+    create_link(
+        agent_info()?.agent_initial_pubkey,
+        individual_profile_hash,
+        LinkTypes::MyProfile,
         (),
     )?;
 
@@ -66,11 +73,27 @@ pub fn get_all_individual_profiles(_: ()) -> ExternResult<Vec<Record>> {
     Ok(individual_profiles)
 }
 
-// #[hdk_extern]
-// fn get_my_profile(_: ()) -> ExternResult<Record> {
-//     let pubkey = agent_info()?.agent_initial_pubkey;
-//     unimplemented!()
-// }
+#[hdk_extern]
+fn get_my_profile(_: ()) -> ExternResult<Option<Record>> {
+    let pubkey = agent_info()?.agent_initial_pubkey;
+    let links = get_links(pubkey, LinkTypes::MyProfile, None)?;
+
+    let latest_link = links
+        .into_iter()
+        .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
+
+    latest_link
+        .map(|link| {
+            let latest_individual_profile_hash = ActionHash::from(link.target);
+            get(latest_individual_profile_hash, GetOptions::default())
+        })
+        .transpose()?
+        .ok_or_else(|| {
+            wasm_error!(WasmErrorInner::Guest(String::from(
+                "Could not find the profile"
+            )))
+        })
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateIndividualProfileInput {

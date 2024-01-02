@@ -25,6 +25,7 @@ import {
   createIndividualProfile,
   getAllIndividualProfiles,
   getIndividualProfile,
+  getMyProfile,
   sampleIndividualProfile,
 } from "./common.js";
 
@@ -51,14 +52,19 @@ async function runScenarioWithTwoAgents(
 
 test("create and read IndividualProfile", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
-    const sample = await sampleIndividualProfile({ name: "Alice" });
+    let sample = await sampleIndividualProfile({ name: "Alice" });
+
+    let record: Record;
+    let records: Record[];
 
     // Alice creates a IndividualProfile
-    const record: Record = await createIndividualProfile(
-      alice.cells[0],
-      sample
-    );
+    record = await createIndividualProfile(alice.cells[0], sample);
     assert.ok(record);
+
+    await pause(1200);
+
+    // Alice get her profile
+    record = await getMyProfile(alice.cells[0]);
 
     await pause(1200);
 
@@ -68,13 +74,13 @@ test("create and read IndividualProfile", async () => {
       record
     );
 
-    assert.containsAllKeys(
-      sample,
-      decode((createReadOutput.entry as any).Present.entry) as any
-    );
+    assert.containsAllKeys(sample, decodeOutputs([createReadOutput])[0]);
+
+    // Bob try to get his profile before he create it
+    await expect(getMyProfile(bob.cells[0])).rejects.toThrow();
 
     // Bob create an IndividualProfile with erroneous IndividualType
-    const errSample: IndividualProfile = sampleIndividualProfile({
+    let errSample: IndividualProfile = sampleIndividualProfile({
       individual_type: IndividualType.NonAuth,
     });
 
@@ -85,17 +91,18 @@ test("create and read IndividualProfile", async () => {
     await pause(1200);
 
     // Bob creates a IndividualProfile
-    const sample2 = await sampleIndividualProfile({ name: "Bob" });
-    const record2: Record = await createIndividualProfile(
-      bob.cells[0],
-      sample2
-    );
-    assert.ok(record2);
+    sample = await sampleIndividualProfile({ name: "Bob" });
+    record = await createIndividualProfile(bob.cells[0], sample);
+    assert.ok(record);
 
     await pause(1200);
 
     // Alice try to get all the individual profiles
-    const record3: Record[] = await getAllIndividualProfiles(alice.cells[0]);
-    assert.equal(record3.length, 2);
+    records = await getAllIndividualProfiles(alice.cells[0]);
+    assert.equal(records.length, 2);
+
+    // Alice try to update her profile with an invalid profile picture
+
+    // Bob try to update Alice's profile
   });
 });
