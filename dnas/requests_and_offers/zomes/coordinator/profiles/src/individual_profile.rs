@@ -126,10 +126,3 @@ pub fn update_individual_profile(input: UpdateIndividualProfileInput) -> ExternR
 
     Ok(record)
 }
-
-// #[hdk_extern]
-// pub fn delete_individual_profile(
-//     original_individual_profile_hash: ActionHash,
-// ) -> ExternResult<ActionHash> {
-//     delete_entry(original_individual_profile_hash)
-// }

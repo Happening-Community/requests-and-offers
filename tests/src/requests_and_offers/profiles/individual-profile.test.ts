@@ -29,7 +29,7 @@ import {
   getIndividualProfile,
   getMyProfile,
   sampleIndividualProfile,
-  updateIndividualProfiles,
+  updateIndividualProfile,
 } from "./common.js";
 
 const hAppPath = process.cwd() + "/../workdir/request-and-offers.happ";
@@ -67,8 +67,8 @@ test("create and read IndividualProfile", async () => {
     await pause(1200);
 
     // Alice get her profile
-    record = await getMyProfile(alice.cells[0]);
-
+    const aliceProfile = await getMyProfile(alice.cells[0]);
+    assert.ok(aliceProfile);
     await pause(1200);
 
     // Bob gets the created IndividualProfile
@@ -105,7 +105,11 @@ test("create and read IndividualProfile", async () => {
     await pause(1200);
 
     // Bob creates a IndividualProfile with a real image file
-    const buffer = await fs.readFile(TestProfilePicture);
+    const response = await fetch("https://picsum.photos/200/300");
+    const buffer = await response.arrayBuffer();
+
+    // TODO: test with local image
+    // const buffer = await fs.readFile(TestProfilePicture);
 
     sample = await sampleIndividualProfile({
       name: "Bob",
@@ -125,16 +129,46 @@ test("create and read IndividualProfile", async () => {
       name: "Alice",
       profile_picture: new Uint8Array(20),
     });
-    records = await updateIndividualProfiles(alice.cells[0]);
+    await expect(
+      updateIndividualProfile(alice.cells[0], aliceProfile)
+    ).rejects.toThrow();
+
+    // Alice try to update her profile with a valid profile picture
+    // sample = sampleIndividualProfile({
+    //   name: "Alice",
+    //   profile_picture: new Uint8Array(20),
+    // });
+    // record = await updateIndividualProfile(alice.cells[0], aliceProfile);
+    // console.log(decodeOutputs([record])[0]);
 
     // Bob try to update Alice's profile
   });
 });
 
-test.only("current test", async () => {
-  await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
-    let sample: IndividualProfile;
-    let record: Record;
-    let records: Record[];
-  });
-});
+// test.only("current test", async () => {
+//   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
+//     let sample: IndividualProfile;
+//     let record: Record;
+//     let records: Record[];
+
+//     sample = await sampleIndividualProfile({ name: "Alice" });
+//     record = await createIndividualProfile(alice.cells[0], sample);
+//     const aliceProfile = await getMyProfile(alice.cells[0]);
+
+//     sample = sampleIndividualProfile({
+//       name: "Alice",
+//       profile_picture: new Uint8Array(20),
+//     });
+//     await expect(
+//       updateIndividualProfile(alice.cells[0], aliceProfile)
+//     ).rejects.toThrow();
+
+//     // Alice try to update her profile with a valid profile picture
+//     sample = sampleIndividualProfile({
+//       name: "Alice",
+//       profile_picture: new Uint8Array(20),
+//     });
+//     record = await updateIndividualProfile(alice.cells[0], aliceProfile);
+//     console.log(decodeOutputs([record])[0]);
+//   });
+// });

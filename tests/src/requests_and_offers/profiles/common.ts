@@ -89,11 +89,13 @@ export async function getAllIndividualProfiles(
   });
 }
 
-export async function updateIndividualProfiles(
-  cell: CallableCell
-): Promise<Record[]> {
+export async function updateIndividualProfile(
+  cell: CallableCell,
+  record: Record
+): Promise<Record> {
   return cell.callZome({
     zome_name: "profiles",
-    fn_name: "update_individual_profiles",
+    fn_name: "update_individual_profile",
+    payload: record.signed_action.hashed.hash,
   });
 }

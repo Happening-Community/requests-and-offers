@@ -102,7 +102,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 match original_app_entry {
                     EntryTypes::IndividualProfile(_original_individual_person) => {
                         return Ok(ValidateCallbackResult::Invalid(String::from(
-                            "Indiviual Profile cannot be deleted",
+                            "Individual Profile cannot be deleted",
                         )))
                     }
                 }
