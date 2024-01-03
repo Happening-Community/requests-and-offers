@@ -29,6 +29,7 @@ import {
   getIndividualProfile,
   getMyProfile,
   sampleIndividualProfile,
+  updateIndividualProfiles,
 } from "./common.js";
 
 const hAppPath = process.cwd() + "/../workdir/request-and-offers.happ";
@@ -120,6 +121,11 @@ test("create and read IndividualProfile", async () => {
     assert.equal(records.length, 2);
 
     // Alice try to update her profile with an invalid profile picture
+    sample = sampleIndividualProfile({
+      name: "Alice",
+      profile_picture: new Uint8Array(20),
+    });
+    records = await updateIndividualProfiles(alice.cells[0]);
 
     // Bob try to update Alice's profile
   });

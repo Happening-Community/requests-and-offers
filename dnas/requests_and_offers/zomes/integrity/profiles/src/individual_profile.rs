@@ -34,7 +34,7 @@ fn is_image(bytes: SerializedBytes) -> bool {
     false
 }
 
-pub fn validate_create_individual_profile(
+pub fn validate_individual_profile(
     individual_profile: IndividualProfile,
 ) -> ExternResult<ValidateCallbackResult> {
     if is_individual_type(individual_profile.individual_type) {

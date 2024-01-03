@@ -62,6 +62,13 @@ export async function createIndividualProfile(
   });
 }
 
+export async function getMyProfile(cell: CallableCell): Promise<Record> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "get_my_profile",
+  });
+}
+
 export async function getIndividualProfile(
   cell: CallableCell,
   record: Record
@@ -88,12 +95,5 @@ export async function updateIndividualProfiles(
   return cell.callZome({
     zome_name: "profiles",
     fn_name: "update_individual_profiles",
-  });
-}
-
-export async function getMyProfile(cell: CallableCell): Promise<Record> {
-  return cell.callZome({
-    zome_name: "profiles",
-    fn_name: "get_my_profile",
   });
 }
