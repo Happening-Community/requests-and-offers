@@ -67,8 +67,9 @@ test("create and read IndividualProfile", async () => {
     await pause(1200);
 
     // Alice get her profile
-    const aliceProfile = await getMyProfile(alice.cells[0]);
-    assert.ok(aliceProfile);
+    let aliceProfileRecord = await getMyProfile(alice.cells[0]);
+    assert.ok(aliceProfileRecord);
+
     await pause(1200);
 
     // Bob gets the created IndividualProfile
@@ -80,7 +81,8 @@ test("create and read IndividualProfile", async () => {
     assert.containsAllKeys(sample, decodeOutputs([createReadOutput])[0]);
 
     // Bob try to get his profile before he create it
-    await expect(getMyProfile(bob.cells[0])).rejects.toThrow();
+    record = await getMyProfile(bob.cells[0]);
+    assert.notExists(record);
 
     // Bob create an IndividualProfile with erroneous IndividualType
     let errSample: IndividualProfile = sampleIndividualProfile({
@@ -120,28 +122,44 @@ test("create and read IndividualProfile", async () => {
 
     await pause(1200);
 
-    // Alice try to get all the individual profiles
+    // Alice get all the individual profiles
     records = await getAllIndividualProfiles(alice.cells[0]);
     assert.equal(records.length, 2);
 
-    // Alice try to update her profile with an invalid profile picture
+    // Alice update her profile with a valid profile picture
     sample = sampleIndividualProfile({
-      name: "Alice",
-      profile_picture: new Uint8Array(20),
+      name: "Alicia",
+      profile_picture: new Uint8Array(buffer),
     });
-    await expect(
-      updateIndividualProfile(alice.cells[0], aliceProfile)
-    ).rejects.toThrow();
+    record = await updateIndividualProfile(
+      alice.cells[0],
+      aliceProfileRecord.signed_action.hashed.hash,
+      sample
+    );
 
-    // Alice try to update her profile with a valid profile picture
-    // sample = sampleIndividualProfile({
-    //   name: "Alice",
-    //   profile_picture: new Uint8Array(20),
-    // });
-    // record = await updateIndividualProfile(alice.cells[0], aliceProfile);
-    // console.log(decodeOutputs([record])[0]);
+    let aliceProfile = decodeOutputs([
+      await getMyProfile(alice.cells[0]),
+    ])[0] as IndividualProfile;
+    assert.equal(aliceProfile.name, "Alicia");
+
+    aliceProfile = decodeOutputs([
+      await getIndividualProfile(alice.cells[0], record),
+    ])[0] as IndividualProfile;
+    assert.equal(aliceProfile.name, "Alicia");
+
+    await pause(1200);
 
     // Bob try to update Alice's profile
+    sample = sampleIndividualProfile({
+      name: "Bob",
+    });
+    await expect(
+      updateIndividualProfile(
+        bob.cells[0],
+        aliceProfileRecord.signed_action.hashed.hash,
+        sample
+      )
+    ).rejects.toThrow();
   });
 });
 
@@ -151,24 +169,12 @@ test("create and read IndividualProfile", async () => {
 //     let record: Record;
 //     let records: Record[];
 
-//     sample = await sampleIndividualProfile({ name: "Alice" });
-//     record = await createIndividualProfile(alice.cells[0], sample);
-//     const aliceProfile = await getMyProfile(alice.cells[0]);
+//     sample = sampleIndividualProfile({ name: "Alice" });
+//     let aliceProfileRecord = await createIndividualProfile(
+//       alice.cells[0],
+//       sample
+//     );
 
-//     sample = sampleIndividualProfile({
-//       name: "Alice",
-//       profile_picture: new Uint8Array(20),
-//     });
-//     await expect(
-//       updateIndividualProfile(alice.cells[0], aliceProfile)
-//     ).rejects.toThrow();
-
-//     // Alice try to update her profile with a valid profile picture
-//     sample = sampleIndividualProfile({
-//       name: "Alice",
-//       profile_picture: new Uint8Array(20),
-//     });
-//     record = await updateIndividualProfile(alice.cells[0], aliceProfile);
-//     console.log(decodeOutputs([record])[0]);
+//     await pause(1200);
 //   });
 // });

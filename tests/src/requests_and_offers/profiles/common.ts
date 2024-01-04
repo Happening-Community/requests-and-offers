@@ -91,11 +91,12 @@ export async function getAllIndividualProfiles(
 
 export async function updateIndividualProfile(
   cell: CallableCell,
-  record: Record
+  individual_profile_hash: ActionHash,
+  updated_individual_profile: IndividualProfile
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "profiles",
     fn_name: "update_individual_profile",
-    payload: record.signed_action.hashed.hash,
+    payload: { individual_profile_hash, updated_individual_profile },
   });
 }

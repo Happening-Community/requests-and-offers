@@ -33,11 +33,39 @@ pub fn create_individual_profile(individual_profile: IndividualProfile) -> Exter
 }
 
 #[hdk_extern]
-pub fn get_individual_profile(
-    original_individual_profile_hash: ActionHash,
-) -> ExternResult<Option<Record>> {
+fn get_my_profile(_: ()) -> ExternResult<Option<Record>> {
+    let pubkey = agent_info()?.agent_initial_pubkey;
+    let profile_links = get_links(pubkey, LinkTypes::MyProfile, None)?;
+
+    if profile_links.is_empty() {
+        return Ok(None);
+    }
+
+    let profile_link = profile_links[0].clone();
+
+    let update_links = get_links(
+        profile_link.target.clone(),
+        LinkTypes::IndividualProfileUpdates,
+        None,
+    )?;
+
+    let latest_link = update_links
+        .into_iter()
+        .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
+
+    match latest_link {
+        Some(link) => get(ActionHash::from(link.target.clone()), GetOptions::default()),
+        None => get(
+            ActionHash::from(profile_link.target.clone()),
+            GetOptions::default(),
+        ),
+    }
+}
+
+#[hdk_extern]
+pub fn get_individual_profile(individual_profile_hash: ActionHash) -> ExternResult<Option<Record>> {
     let links = get_links(
-        original_individual_profile_hash.clone(),
+        individual_profile_hash.clone(),
         LinkTypes::IndividualProfileUpdates,
         None,
     )?;
@@ -48,7 +76,7 @@ pub fn get_individual_profile(
 
     let latest_individual_profile_hash = match latest_link {
         Some(link) => ActionHash::from(link.target.clone()),
-        None => original_individual_profile_hash.clone(),
+        None => individual_profile_hash.clone(),
     };
 
     get(latest_individual_profile_hash, GetOptions::default())
@@ -73,44 +101,65 @@ pub fn get_all_individual_profiles(_: ()) -> ExternResult<Vec<Record>> {
     Ok(individual_profiles)
 }
 
-#[hdk_extern]
-fn get_my_profile(_: ()) -> ExternResult<Option<Record>> {
-    let pubkey = agent_info()?.agent_initial_pubkey;
-    let links = get_links(pubkey, LinkTypes::MyProfile, None)?;
-
-    let latest_link = links
-        .into_iter()
-        .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
-
-    latest_link
-        .map(|link| {
-            let latest_individual_profile_hash = ActionHash::from(link.target);
-            get(latest_individual_profile_hash, GetOptions::default())
-        })
-        .transpose()?
-        .ok_or_else(|| {
-            wasm_error!(WasmErrorInner::Guest(String::from(
-                "Could not find the profile"
-            )))
-        })
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateIndividualProfileInput {
-    pub original_individual_profile_hash: ActionHash,
-    pub previous_individual_profile_hash: ActionHash,
+    pub individual_profile_hash: ActionHash,
     pub updated_individual_profile: IndividualProfile,
 }
 
 #[hdk_extern]
 pub fn update_individual_profile(input: UpdateIndividualProfileInput) -> ExternResult<Record> {
+    let individual_profile_hash = input.individual_profile_hash;
+    let updated_individual_profile = input.updated_individual_profile;
+
+    let record = match get(
+        ActionHash::from(individual_profile_hash.clone()),
+        GetOptions::default(),
+    )? {
+        Some(record) => record,
+        None => {
+            return Err(wasm_error!(WasmErrorInner::Guest(String::from(
+                "Could not find the related IndividualProfile"
+            ))))
+        }
+    };
+
+    let author = record.action().author();
+
+    if *author != agent_info()?.agent_initial_pubkey {
+        return Err(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Can not update a profile of a different agent"
+        ))));
+    }
+
+    let all_update_links = get_links(
+        individual_profile_hash.clone(),
+        LinkTypes::IndividualProfileUpdates,
+        None,
+    )?;
+
+    let latest_link = all_update_links
+        .into_iter()
+        .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
+
+    let previous_individual_profile_hash = match latest_link {
+        Some(link) => Some(ActionHash::from(link.target.clone())),
+        None => None,
+    };
+
+    let individual_profile_hash = if previous_individual_profile_hash.is_some() {
+        previous_individual_profile_hash.unwrap()
+    } else {
+        individual_profile_hash.clone()
+    };
+
     let updated_individual_profile_hash = update_entry(
-        input.previous_individual_profile_hash.clone(),
-        &input.updated_individual_profile,
+        individual_profile_hash.clone(),
+        &updated_individual_profile.clone(),
     )?;
 
     create_link(
-        input.original_individual_profile_hash.clone(),
+        individual_profile_hash.clone(),
         updated_individual_profile_hash.clone(),
         LinkTypes::IndividualProfileUpdates,
         (),
