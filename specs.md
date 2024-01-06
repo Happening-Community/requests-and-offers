@@ -28,6 +28,7 @@ struct IndividualProfile {
     phone: Option<String>
     time_zone: String // validation: must be a valide time zone
     location: String
+    created_at: TimeStamp
 }
 
 enum Links {

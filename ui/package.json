@@ -8,29 +8,19 @@
     "package": "npm run build && cd public && bestzip ../dist.zip *"
   },
   "dependencies": {
-    "@holochain/client": "^0.12.2",
-    "@material/mwc-circular-progress": "^0.27.0",
-    "@material/mwc-button": "^0.27.0",
-    "@material/mwc-textfield": "^0.27.0",
-    "@material/mwc-textarea": "^0.27.0",
-    "@material/mwc-icon-button": "^0.27.0",
-    "@material/mwc-checkbox": "^0.27.0",    
-    "@material/mwc-snackbar": "^0.27.0",
-    "@material/mwc-slider": "^0.27.0",
-    "@material/mwc-select": "^0.27.0",
-    "@material/mwc-formfield": "^0.27.0",
-    "@msgpack/msgpack": "^2.7.2",
-    "@vaadin/date-time-picker": "^23.2.8"
+    "@holochain/client": "^0.16.7",
+    "@msgpack/msgpack": "^3.0.0-beta2",
+    "@vaadin/date-time-picker": "^24.3.2"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^2.0.2",
-    "@tsconfig/svelte": "^3.0.0",
-    "bestzip": "^2.2.0",
-    "svelte": "^3.55.1",
-    "svelte-check": "^2.10.3",
-    "tslib": "^2.4.1",
-    "typescript": "^4.9.3",
-    "vite": "^4.0.4"
+    "@sveltejs/vite-plugin-svelte": "^3.0.1",
+    "@tsconfig/svelte": "^5.0.2",
+    "bestzip": "^2.2.1",
+    "svelte": "^4.2",
+    "svelte-check": "^3.6.2",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.11"
   },
   "type": "module"
 }

@@ -10,6 +10,7 @@ import type {
   Delete,
   CreateLink,
   DeleteLink,
+  Timestamp,
 } from "@holochain/client";
 
 export type ProfilesSignal =
@@ -45,7 +46,6 @@ export type EntryTypes = { type: "IndividualProfile" } & IndividualProfile;
 export enum IndividualType {
   Advocate = "advocate",
   Developer = "developer",
-  NonAuth = "Non authororized", // For testing invalid inputs
 }
 
 export interface IndividualProfile {
@@ -59,4 +59,5 @@ export interface IndividualProfile {
   phone?: string;
   time_zone: string;
   location: string;
+  created_at: Timestamp;
 }

@@ -2,11 +2,10 @@
   import { onMount, setContext } from "svelte";
   import type { ActionHash, AppAgentClient } from "@holochain/client";
   import { AppAgentWebsocket } from "@holochain/client";
-  import "@material/mwc-circular-progress";
 
   import { clientContext } from "./contexts";
-  import IndividualProfileDetail from "./requests_and_offers/profiles/IndividualProfileDetail.svelte";
-  import CreateIndividualProfile from "./requests_and_offers/profiles/CreateIndividualProfile.svelte";
+  import CreateIndividualProfile from "./profiles/CreateIndividualProfile.svelte";
+  // import { getMyProfile } from "./profiles/stores/profile.store";
 
   let client: AppAgentClient | undefined;
 
@@ -14,9 +13,13 @@
 
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
-    client = await AppAgentWebsocket.connect("", "request-and-offers");
+    client = await AppAgentWebsocket.connect(
+      "" as unknown as URL,
+      "requests-and-offers"
+    );
 
     loading = false;
+    // getMyProfile();
   });
 
   setContext(clientContext, {
@@ -28,13 +31,15 @@
   {#if loading}
     <div
       style="display: flex; flex: 1; align-items: center; justify-content: center"
-    >
-      <mwc-circular-progress indeterminate />
-    </div>
+    ></div>
   {:else}
     <h1>Hello World !</h1>
 
-    <CreateIndividualProfile />
+    <!-- {#if $myProfile}
+      You have a profile
+    {:else}
+      <CreateIndividualProfile />
+    {/if} -->
   {/if}
 </main>
 

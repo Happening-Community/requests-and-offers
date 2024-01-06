@@ -17,9 +17,10 @@ pub struct IndividualProfile {
     pub created_at: Timestamp,
 }
 
+const ALLOWED_TYPES: [&str; 2] = ["advocate", "developer"];
+
 fn is_individual_type(individual_type: String) -> bool {
-    let allowed_types = ["advocate", "developer"];
-    !allowed_types.contains(&individual_type.as_str())
+    !ALLOWED_TYPES.contains(&individual_type.as_str())
 }
 
 fn is_image(bytes: SerializedBytes) -> bool {
