@@ -136,3 +136,13 @@ fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTy
         entry,
     )?)
 }
+
+fn get_latest_link(links: Vec<Link>) -> Option<Link> {
+    links
+        .into_iter()
+        .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp))
+}
+
+fn error(message: &str) -> WasmError {
+    wasm_error!(WasmErrorInner::Guest(message.to_string()))
+}

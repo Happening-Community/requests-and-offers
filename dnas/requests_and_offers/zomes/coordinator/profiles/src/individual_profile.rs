@@ -1,6 +1,8 @@
 use hdk::prelude::*;
 use profiles_integrity::*;
 
+use crate::{error, get_latest_link};
+
 #[hdk_extern]
 pub fn create_individual_profile(individual_profile: IndividualProfile) -> ExternResult<Record> {
     let mut individual_profile = individual_profile;
@@ -8,11 +10,8 @@ pub fn create_individual_profile(individual_profile: IndividualProfile) -> Exter
 
     let individual_profile_hash =
         create_entry(&EntryTypes::IndividualProfile(individual_profile.clone()))?;
-    let record = get(individual_profile_hash.clone(), GetOptions::default())?.ok_or(
-        wasm_error!(WasmErrorInner::Guest(String::from(
-            "Could not find the newly created IndividualProfile"
-        ))),
-    )?;
+    let record = get(individual_profile_hash.clone(), GetOptions::default())?
+        .ok_or(error("Could not find the newly created IndividualProfile"))?;
 
     let path = Path::from("all_individual_profiles");
     create_link(
@@ -49,9 +48,7 @@ fn get_my_profile(_: ()) -> ExternResult<Option<Record>> {
         None,
     )?;
 
-    let latest_link = update_links
-        .into_iter()
-        .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
+    let latest_link = get_latest_link(update_links);
 
     match latest_link {
         Some(link) => get(ActionHash::from(link.target.clone()), GetOptions::default()),
@@ -70,9 +67,7 @@ pub fn get_individual_profile(individual_profile_hash: ActionHash) -> ExternResu
         None,
     )?;
 
-    let latest_link = links
-        .into_iter()
-        .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
+    let latest_link = get_latest_link(links);
 
     let latest_individual_profile_hash = match latest_link {
         Some(link) => ActionHash::from(link.target.clone()),
@@ -117,19 +112,13 @@ pub fn update_individual_profile(input: UpdateIndividualProfileInput) -> ExternR
         GetOptions::default(),
     )? {
         Some(record) => record,
-        None => {
-            return Err(wasm_error!(WasmErrorInner::Guest(String::from(
-                "Could not find the related IndividualProfile"
-            ))))
-        }
+        None => return Err(error("Could not find the related IndividualProfile")),
     };
 
     let author = record.action().author();
 
     if *author != agent_info()?.agent_initial_pubkey {
-        return Err(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Can not update a profile of a different agent"
-        ))));
+        return Err(error("Can not update a profile of a different agent"));
     }
 
     let all_update_links = get_links(
@@ -138,9 +127,7 @@ pub fn update_individual_profile(input: UpdateIndividualProfileInput) -> ExternR
         None,
     )?;
 
-    let latest_link = all_update_links
-        .into_iter()
-        .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
+    let latest_link = get_latest_link(all_update_links);
 
     let previous_individual_profile_hash = match latest_link {
         Some(link) => Some(ActionHash::from(link.target.clone())),
@@ -169,9 +156,7 @@ pub fn update_individual_profile(input: UpdateIndividualProfileInput) -> ExternR
         updated_individual_profile_hash.clone(),
         GetOptions::default(),
     )?
-    .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
-        "Could not find the newly updated IndividualProfile"
-    ))))?;
+    .ok_or(error("Could not find the newly updated IndividualProfile"))?;
 
     Ok(record)
 }

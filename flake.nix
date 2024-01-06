@@ -28,7 +28,7 @@
             devShells.default = pkgs.mkShell {
               inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
               packages = [
-                pkgs.nodejs-18_x
+                pkgs.nodejs
                 # more packages go here
               ];
             };
