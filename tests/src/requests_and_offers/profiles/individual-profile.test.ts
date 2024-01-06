@@ -125,6 +125,25 @@ test("create and read IndividualProfile", async () => {
     // Alice get all the individual profiles
     records = await getAllIndividualProfiles(alice.cells[0]);
     assert.equal(records.length, 2);
+  });
+});
+
+test("create and update IndividualProfile", async () => {
+  await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
+    let sample: IndividualProfile;
+    let record: Record;
+    let records: Record[];
+
+    sample = sampleIndividualProfile({ name: "Alice" });
+    let aliceProfileRecord = await createIndividualProfile(
+      alice.cells[0],
+      sample
+    );
+
+    const response = await fetch("https://picsum.photos/200/300");
+    const buffer = await response.arrayBuffer();
+
+    await pause(1200);
 
     // Alice update her profile with a valid profile picture
     sample = sampleIndividualProfile({
@@ -162,19 +181,3 @@ test("create and read IndividualProfile", async () => {
     ).rejects.toThrow();
   });
 });
-
-// test.only("current test", async () => {
-//   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
-//     let sample: IndividualProfile;
-//     let record: Record;
-//     let records: Record[];
-
-//     sample = sampleIndividualProfile({ name: "Alice" });
-//     let aliceProfileRecord = await createIndividualProfile(
-//       alice.cells[0],
-//       sample
-//     );
-
-//     await pause(1200);
-//   });
-// });
