@@ -29,6 +29,7 @@
               inputsFrom = [ inputs'.holochain-flake.devShells.holonix ];
               packages = [
                 pkgs.nodejs
+                pkgs.nodePackages.pnpm
                 # more packages go here
               ];
             };

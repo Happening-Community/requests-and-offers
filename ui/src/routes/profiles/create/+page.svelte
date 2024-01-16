@@ -50,7 +50,7 @@
 
 		<label class="label text-lg">
 			Email :
-			<input type="text" class="input" name="email" required />
+			<input type="email" class="input" name="email" />
 		</label>
 
 		<label class="label text-lg">
@@ -60,12 +60,12 @@
 
 		<label class="label text-lg">
 			Time Zone :
-			<input type="text" class="input" name="timezone" required />
+			<input type="text" class="input" name="timezone" />
 		</label>
 
 		<label class="label text-lg">
 			Location :
-			<input type="text" class="input" name="location" required />
+			<input type="text" class="input" name="location" />
 		</label>
 
 		<button type="submit" class="btn variant-filled-primary w-fit self-center"> Submit </button>

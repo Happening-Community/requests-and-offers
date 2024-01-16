@@ -1,1 +1,1 @@
-export const clientContext = "appAgentClient";
+export const clientContext = 'appAgentClient';
