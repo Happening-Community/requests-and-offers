@@ -10,3 +10,4 @@ node_modules/
 .hc*
 .hc
 .running
+.vscode

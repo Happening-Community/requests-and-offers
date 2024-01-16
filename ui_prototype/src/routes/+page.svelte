@@ -1,15 +1,8 @@
+<script>
+	import { TableOfContents, tocCrawler } from '@skeletonlabs/skeleton';
+</script>
+
 <!-- YOU CAN DELETE EVERYTHING IN THIS PAGE -->
 
-<div class="container h-full mx-auto flex justify-center items-center">
-	<div class="space-y-5">
-		<h1 class="h1 text-primary-500">Let's get cracking bones!</h1>
-		<p class="h2 text-secondary-500">Start by exploring:</p>
-		<ul>
-			<li><code class="code">/src/routes/+layout.svelte</code> - barebones layout</li>
-			<li><code class="code">/src/app.postcss</code> - app wide css</li>
-			<li>
-				<code class="code">/src/routes/+page.svelte</code> - this page, you can replace the contents
-			</li>
-		</ul>
-	</div>
-</div>
+<p class="mb-10 h3">It looks like you don't have a profile yet !</p>
+<div class="btn variant-filled-primary"><a href="/profiles/create">Create profile</a></div>
