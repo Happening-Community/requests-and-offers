@@ -10,6 +10,6 @@
 
 <Navbar />
 
-<section class="container h-screen mt-[-8rem] mx-auto flex justify-center items-center flex-col">
+<main class="container min-h-screen mx-auto flex justify-center items-center flex-col pt-40 pb-10">
 	<slot />
-</section>
+</main>
