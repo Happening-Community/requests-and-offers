@@ -1,7 +1,7 @@
 ---
 manifest_version: "1"
-name: request-and-offers
+name: requests-and-offers
 ui:
   bundled: "../ui/dist.zip"
 happ_manifest:
-  bundled: "./request-and-offers.happ"
+  bundled: "./requests-and-offers.happ"

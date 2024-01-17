@@ -32,7 +32,7 @@ import {
   updateIndividualProfile,
 } from "./common.js";
 
-const hAppPath = process.cwd() + "/../workdir/request-and-offers.happ";
+const hAppPath = process.cwd() + "/../workdir/requests-and-offers.happ";
 const appSource = { appBundleSource: { path: hAppPath } };
 
 function decodeOutputs(records: Record[]): unknown[] {
