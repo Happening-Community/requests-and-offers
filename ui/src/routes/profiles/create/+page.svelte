@@ -12,6 +12,7 @@
 	let files: FileList;
 	let fileMessage: HTMLParagraphElement;
 	let timezones = moment.tz.names();
+	let filteredTimezones: string[] = [];
 	let formattedTimezones: FormattedTimezone[] = [];
 	let search = '';
 
@@ -36,8 +37,6 @@
 		});
 	}
 
-	let filteredTimezones: string[] = [];
-
 	$: search
 		? (formattedTimezones = formatTimezones(filteredTimezones).sort((a, b) => a.offset - b.offset))
 		: (formattedTimezones = formatTimezones(timezones)).sort((a, b) => a.offset - b.offset);
@@ -47,9 +46,8 @@
 		filteredTimezones = timezones.filter((tz) => tz.toLowerCase().includes(search.toLowerCase()));
 	}
 
-	function onPictureFileChange(evt: Event) {
-		console.log(evt);
-		console.log(files);
+	function onPictureFileChange() {
+		fileMessage.innerHTML = `${files[0].name}`;
 	}
 </script>
 
@@ -57,12 +55,13 @@
 	<h2 class="h2">Create Profile</h2>
 
 	<form class="flex flex-col gap-4" method="post">
+		<p>*required fields</p>
 		<label class="label text-lg">
-			Name :<input type="text" class="input" name="name" required />
+			Name* :<input type="text" class="input" name="name" required />
 		</label>
 
 		<label class="label text-lg">
-			Nickname :
+			Nickname* :
 			<input type="text" class="input" name="nickname" required />
 		</label>
 
@@ -73,7 +72,7 @@
 
 		<p class="label text-lg">Profile picture :</p>
 		<FileDropzone name="files" bind:files on:change={onPictureFileChange} />
-		<p bind:this={fileMessage} />
+		<p class="italic" bind:this={fileMessage} />
 
 		<div class="flex gap-6">
 			<p class="label text-lg">Type :</p>
@@ -93,7 +92,7 @@
 		<InputChip id="skills" name="skills" placeholder="Your skills" />
 
 		<label class="label text-lg">
-			Email :
+			Email* :
 			<input type="email" class="input" name="email" />
 		</label>
 
