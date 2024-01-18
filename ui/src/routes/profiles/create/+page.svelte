@@ -89,7 +89,12 @@
 			</div>
 		</div>
 
-		<InputChip id="skills" name="skills" placeholder="Your skills" />
+		<InputChip
+			id="skills"
+			name="skills"
+			placeholder="Your skills"
+			chips="variant-filled-secondary"
+		/>
 
 		<label class="label text-lg">
 			Email* :
