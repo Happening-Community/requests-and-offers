@@ -47,6 +47,7 @@
 	"type": "module",
 	"dependencies": {
 		"@floating-ui/dom": "1.5.4",
+		"moment-timezone": "^0.5.44",
 		"svelte-fa": "^4.0.2"
 	}
 }
