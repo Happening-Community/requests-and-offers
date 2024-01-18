@@ -86,7 +86,7 @@
 			<p class="italic" bind:this={fileMessage} />
 
 			<div class="flex gap-6">
-				<p class="label text-lg">Type :</p>
+				<p class="label text-lg">Type* :</p>
 
 				<div class="flex gap-4">
 					<label class="label flex items-center gap-2">
