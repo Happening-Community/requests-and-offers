@@ -60,7 +60,7 @@ test("create and read IndividualProfile", async () => {
     let records: Record[];
 
     // Alice creates a IndividualProfile
-    sample = await sampleIndividualProfile({ name: "Alice" });
+    sample = sampleIndividualProfile({ name: "Alice" });
     record = await createIndividualProfile(alice.cells[0], sample);
     assert.ok(record);
 
@@ -113,7 +113,7 @@ test("create and read IndividualProfile", async () => {
     // TODO: test with local image
     // const buffer = await fs.readFile(TestProfilePicture);
 
-    sample = await sampleIndividualProfile({
+    sample = sampleIndividualProfile({
       name: "Bob",
       profile_picture: new Uint8Array(buffer),
     });
