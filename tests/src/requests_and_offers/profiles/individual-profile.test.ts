@@ -86,7 +86,7 @@ test("create and read IndividualProfile", async () => {
 
     // Bob create an IndividualProfile with erroneous IndividualType
     let errSample: IndividualProfile = sampleIndividualProfile({
-      individual_type: IndividualType.NonAuth,
+      individual_type: "Non Authorized",
     });
 
     await expect(

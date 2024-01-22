@@ -10,11 +10,13 @@ import {
   fakeDnaHash,
 } from "@holochain/client";
 
-export enum IndividualType {
-  Advocate = "advocate",
-  Developer = "developer",
-  NonAuth = "Non authororized", // For testing invalid inputs
-}
+// export enum IndividualType {
+//   Advocate = "advocate",
+//   Developer = "developer",
+//   NonAuth = "Non authororized", // For testing invalid inputs
+// }
+
+export type IndividualType = "advocate" | "developer" | "Non Authorized";
 
 export type IndividualProfile = {
   name: string;
@@ -31,7 +33,7 @@ export type IndividualProfile = {
 };
 
 export function sampleIndividualProfile(
-  partialIndividualProfile = {}
+  partialIndividualProfile: Partial<IndividualProfile>
 ): IndividualProfile {
   return {
     ...{
@@ -39,7 +41,7 @@ export function sampleIndividualProfile(
       nickname: "NickName",
       bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       profile_picture: null,
-      individual_type: IndividualType.Developer,
+      individual_type: "developer",
       skills: ["html", "css", "typescript", "rust"],
       email: "abc@abc.com",
       phone: null,
