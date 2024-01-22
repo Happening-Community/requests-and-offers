@@ -1,5 +1,10 @@
-import type { Actions } from '@sveltejs/kit';
-import { createProfile, type Profile } from '$lib/stores/profiles';
+import { redirect, type Actions } from '@sveltejs/kit';
+import {
+	createProfile,
+	getMyProfile,
+	type IndividualType,
+	type Profile
+} from '$lib/stores/profiles';
 
 export const actions: Actions = {
 	default: async ({ request }) => {
@@ -7,21 +12,21 @@ export const actions: Actions = {
 		const name = data.get('name') as string;
 		const nickname = data.get('nickname') as string;
 		const bio = data.get('bio') as string;
-		const profile_picture = data.get('picture') as string;
-		const individual_type = data.get('individual_type') as 'developer' | 'advocate';
+		const profile_picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
+		const individual_type = data.get('individual_type') as IndividualType;
 		const skills = data.getAll('skills') as string[];
 		const email = data.get('email') as string;
 		const phone = data.get('phone') as string;
 		const time_zone = data.get('timezone') as string;
 		const location = data.get('location') as string;
 
-		// console.log(profile_picture);
+		console.log(profile_picture);
 
 		const profile: Profile = {
 			name,
 			nickname,
 			bio,
-			profile_picture: new Uint8Array(),
+			profile_picture,
 			individual_type,
 			skills,
 			email,
@@ -34,6 +39,7 @@ export const actions: Actions = {
 
 		try {
 			await createProfile(profile);
+			console.log(await getMyProfile());
 		} catch (e) {
 			console.error(e);
 			success = false;

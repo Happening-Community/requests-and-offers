@@ -4,12 +4,8 @@
 	import { FileDropzone, InputChip } from '@skeletonlabs/skeleton';
 	import { myProfile } from '$lib/stores/profiles.js';
 
-	// export let form;
-
-	// $: {
-	// 	console.log(form);
-	// 	console.log($myProfile);
-	// }
+	export let form;
+	console.log(form);
 
 	type FormattedTimezone = {
 		name: string;
@@ -65,7 +61,13 @@
 	{#if $myProfile}
 		<p>Profile already created.</p>
 	{:else}
-		<form class="flex flex-col gap-4" method="post">
+		{#if form?.success === false}
+			<p class="text-red-500">An error occured</p>
+		{/if}
+		{#if form?.success}
+			<p class="text-green-500">Profile Created successfully</p>
+		{/if}
+		<form id="form" class="flex flex-col gap-4" method="post" enctype="multipart/form-data">
 			<p>*required fields</p>
 			<label class="label text-lg">
 				Name* :<input type="text" class="input" name="name" required />
@@ -82,7 +84,7 @@
 			</label>
 
 			<p class="label text-lg">Profile picture :</p>
-			<FileDropzone name="picture" bind:files on:change={onPictureFileChange} />
+			<FileDropzone name="picture" bind:files on:change={onPictureFileChange} accept="image/*" />
 			<p class="italic" bind:this={fileMessage} />
 
 			<div class="flex gap-6">
@@ -100,12 +102,15 @@
 				</div>
 			</div>
 
-			<InputChip
-				id="skills"
-				name="skills"
-				placeholder="Your skills"
-				chips="variant-filled-secondary"
-			/>
+			<div class="flex gap-5">
+				<p class="label text-lg w-16">Skills :</p>
+				<InputChip
+					id="skills"
+					name="skills"
+					placeholder="Your skills"
+					chips="variant-filled-secondary"
+				/>
+			</div>
 
 			<label class="label text-lg">
 				Email* :

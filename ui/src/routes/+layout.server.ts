@@ -5,9 +5,9 @@ import type { PageLoad } from './$types';
 // import { clientContext } from '../contexts';
 
 export const load: PageLoad = async () => {
-	let client: AppAgentClient | undefined;
-	let parentDir = path.resolve(process.cwd(), '..');
-	const hAppPath = `ws:/${parentDir + '/workdir/requests-and-offers.happ'}` as unknown as URL;
+	// let client: AppAgentClient | undefined;
+	// let parentDir = path.resolve(process.cwd(), '..');
+	// const hAppPath = `ws:/${parentDir + '/workdir/requests-and-offers.happ'}` as unknown as URL;
 	// client = await AppAgentWebsocket.connect(hAppPath as unknown as URL, 'requests-and-offers');
 	// setContext(clientContext, {
 	// 	getClient: () => client

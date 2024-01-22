@@ -1,11 +1,13 @@
 import { get, writable, type Writable } from 'svelte/store';
 
+export type IndividualType = 'developer' | 'advocate';
+
 export type Profile = {
 	name: string;
 	nickname: string;
 	bio?: string;
 	profile_picture?: Uint8Array;
-	individual_type: 'developer' | 'advocate';
+	individual_type: IndividualType;
 	skills?: string[];
 	email: string;
 	phone?: string;
