@@ -5,7 +5,6 @@
 	import { myProfile } from '$lib/stores/profiles.js';
 
 	export let form;
-	console.log(form);
 
 	type FormattedTimezone = {
 		name: string;

@@ -1,10 +1,5 @@
-import { redirect, type Actions } from '@sveltejs/kit';
-import {
-	createProfile,
-	getMyProfile,
-	type IndividualType,
-	type Profile
-} from '$lib/stores/profiles';
+import { type Actions } from '@sveltejs/kit';
+import { createProfile, type IndividualType, type Profile } from '$lib/stores/profiles';
 
 export const actions: Actions = {
 	default: async ({ request }) => {
@@ -38,13 +33,12 @@ export const actions: Actions = {
 		let success = true;
 
 		try {
-			await createProfile(profile);
-			console.log(await getMyProfile());
+			createProfile(profile);
 		} catch (e) {
 			console.error(e);
 			success = false;
 		}
 
-		return { success };
+		return { success, profile };
 	}
 };

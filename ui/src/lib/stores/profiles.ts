@@ -1,4 +1,5 @@
-import { get, writable, type Writable } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
+import { localStorageStore } from '@skeletonlabs/skeleton';
 
 export type IndividualType = 'developer' | 'advocate';
 
@@ -16,16 +17,16 @@ export type Profile = {
 	created_at?: number;
 };
 
-export const myProfile: Writable<Profile | null> = writable();
+export const myProfile: Writable<Profile | null> = localStorageStore('my-profile', null);
 
-export async function getMyProfile() {
+export function getMyProfile() {
 	return get(myProfile);
 }
 
-export async function createProfile(profile: Profile) {
+export function createProfile(profile: Profile) {
 	myProfile.set(profile);
 }
 
-export async function updateProfile(profile: Profile) {
+export function updateProfile(profile: Profile) {
 	myProfile.update(() => profile);
 }
