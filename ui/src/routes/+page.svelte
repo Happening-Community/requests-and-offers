@@ -1,10 +1,18 @@
-<script>
+<script lang="ts">
 	import { goto } from '$app/navigation';
+	import CreateProfileBtn from '$lib/CreateProfileBtn.svelte';
+	import { getMyProfile } from '$lib/stores/profiles';
+
+	let myProfile = getMyProfile();
 </script>
 
 <section class="flex flex-col items-center">
-	<p class="mb-10 h3">It looks like you don't have a profile yet !</p>
-	<button class="btn variant-filled-primary w-fit" on:click={() => goto('/profile/create')}>
-		Create profil
-	</button>
+	{#if !myProfile}
+		<CreateProfileBtn />
+	{:else}
+		<h2 class="h2 mb-10">Welcome {myProfile.name} !</h2>
+		<button class="btn variant-filled-primary w-fit" on:click={() => goto('/profile')}>
+			View profil
+		</button>
+	{/if}
 </section>

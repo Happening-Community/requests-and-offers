@@ -1,5 +1,6 @@
+import type { IndividualType, Profile } from '$lib/stores/profiles';
+import { bufferToBase64 } from '$lib/utils';
 import { type Actions } from '@sveltejs/kit';
-import { createProfile, type IndividualType, type Profile } from '$lib/stores/profiles';
 
 export const actions: Actions = {
 	default: async ({ request }) => {
@@ -15,8 +16,6 @@ export const actions: Actions = {
 		const time_zone = data.get('timezone') as string;
 		const location = data.get('location') as string;
 
-		console.log(profile_picture);
-
 		const profile: Profile = {
 			name,
 			nickname,
@@ -30,15 +29,17 @@ export const actions: Actions = {
 			location
 		};
 
-		let success = true;
-
 		try {
-			createProfile(profile);
+			// TODO: create profile on the DHT
+
+			return {
+				profile: { ...profile, profile_picture: bufferToBase64(profile_picture) },
+				success: true
+			};
 		} catch (e) {
 			console.error(e);
-			success = false;
 		}
 
-		return { success, profile };
+		return { profile: null, success: false };
 	}
 };
