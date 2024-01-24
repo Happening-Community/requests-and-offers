@@ -70,94 +70,91 @@
 </script>
 
 <section class="flex flex-col gap-10 w-1/2">
-  {#if form?.success}
-    <h2 class="h2 text-green-500">Profile Created successfully</h2>
+  <h2 class="h2">Create Profile</h2>
+  {#if myProfile}
+    <p>Profile already created.</p>
+  {:else if form?.success}
+    <h2 class="h2 text-green-500 text-center">Profile Created successfully.</h2>
   {:else}
-    <h2 class="h2">Create Profile</h2>
-
-    {#if myProfile}
-      <p>Profile already created.</p>
-    {:else}
-      {#if form?.success === false}
-        <p class="text-red-500">An error occured</p>
-      {/if}
-      <form id="form" class="flex flex-col gap-4" method="post" enctype="multipart/form-data">
-        <p>*required fields</p>
-        <label class="label text-lg">
-          Name* :<input type="text" class="input" name="name" required />
-        </label>
-
-        <label class="label text-lg">
-          Nickname* :
-          <input type="text" class="input" name="nickname" required />
-        </label>
-
-        <label class="label text-lg">
-          Bio :
-          <textarea class="textarea" name="bio" />
-        </label>
-
-        <p class="label text-lg">Profile picture :</p>
-        <FileDropzone name="picture" bind:files on:change={onPictureFileChange} accept="image/*" />
-        <p class="italic" bind:this={fileMessage} />
-
-        <div class="flex gap-6">
-          <p class="label text-lg">Type* :</p>
-
-          <div class="flex gap-4">
-            <label class="label flex items-center gap-2">
-              <input type="radio" name="individual_type" value="advocate" required />
-              Advocate
-            </label>
-            <label class="label flex items-center gap-2">
-              <input type="radio" name="individual_type" value="developer" />
-              Developer
-            </label>
-          </div>
-        </div>
-
-        <div class="flex gap-5">
-          <p class="label text-lg w-16">Skills :</p>
-          <InputChip
-            id="skills"
-            name="skills"
-            placeholder="Write a skill and press enter"
-            chips="variant-filled-secondary"
-          />
-        </div>
-
-        <label class="label text-lg">
-          Email* :
-          <input type="email" class="input" name="email" />
-        </label>
-
-        <label class="label text-lg">
-          Phone number :
-          <input type="text" class="input" name="phone" />
-        </label>
-
-        <label class="label text-lg">
-          Time Zone :
-          <input
-            type="text"
-            placeholder="Search timezones..."
-            class="input w-1/2"
-            on:input={filterTimezones}
-          />
-          <select name="timezone" id="timezone" class="select">
-            {#each formattedTimezones as tz}
-              <option class="" value={tz.name}>{tz.formatted}</option>
-            {/each}
-          </select>
-        </label>
-
-        <label class="label text-lg">
-          Location :
-          <input type="text" class="input" name="location" />
-        </label>
-
-        <button type="submit" class="btn variant-filled-primary w-fit self-center">Submit</button>
-      </form>
+    {#if form?.success === false}
+      <p class="text-red-500">An error occured</p>
     {/if}
+    <form id="form" class="flex flex-col gap-4" method="post" enctype="multipart/form-data">
+      <p>*required fields</p>
+      <label class="label text-lg">
+        Name* :<input type="text" class="input" name="name" required />
+      </label>
+
+      <label class="label text-lg">
+        Nickname* :
+        <input type="text" class="input" name="nickname" required />
+      </label>
+
+      <label class="label text-lg">
+        Bio :
+        <textarea class="textarea" name="bio" />
+      </label>
+
+      <p class="label text-lg">Profile picture :</p>
+      <FileDropzone name="picture" bind:files on:change={onPictureFileChange} accept="image/*" />
+      <p class="italic" bind:this={fileMessage} />
+
+      <div class="flex gap-6">
+        <p class="label text-lg">Type* :</p>
+
+        <div class="flex gap-4">
+          <label class="label flex items-center gap-2">
+            <input type="radio" name="individual_type" value="advocate" required />
+            Advocate
+          </label>
+          <label class="label flex items-center gap-2">
+            <input type="radio" name="individual_type" value="developer" />
+            Developer
+          </label>
+        </div>
+      </div>
+
+      <div class="flex gap-5">
+        <p class="label text-lg w-16">Skills :</p>
+        <InputChip
+          id="skills"
+          name="skills"
+          placeholder="Write a skill and press enter"
+          chips="variant-filled-secondary"
+        />
+      </div>
+
+      <label class="label text-lg">
+        Email* :
+        <input type="email" class="input" name="email" />
+      </label>
+
+      <label class="label text-lg">
+        Phone number :
+        <input type="text" class="input" name="phone" />
+      </label>
+
+      <label class="label text-lg">
+        Time Zone :
+        <input
+          type="text"
+          placeholder="Search timezones..."
+          class="input w-1/2"
+          on:input={filterTimezones}
+        />
+        <select name="timezone" id="timezone" class="select">
+          {#each formattedTimezones as tz}
+            <option class="" value={tz.name}>{tz.formatted}</option>
+          {/each}
+        </select>
+      </label>
+
+      <label class="label text-lg">
+        Location :
+        <input type="text" class="input" name="location" />
+      </label>
+
+      <button type="submit" class="btn variant-filled-primary w-fit self-center">Submit</button>
+    </form>
   {/if}
 </section>

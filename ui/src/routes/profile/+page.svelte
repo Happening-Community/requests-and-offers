@@ -8,9 +8,6 @@
   let myProfile = getMyProfile();
 
   onMount(() => {
-    console.log(myProfile?.profile_picture);
-    console.log(Object.keys(myProfile?.profile_picture).length);
-
     if (Object.keys(myProfile?.profile_picture).length) {
       let profilePictureBlob = new Blob([myProfile?.profile_picture!], { type: 'image/png' });
       profilePictureUrl = URL.createObjectURL(profilePictureBlob);
@@ -33,7 +30,9 @@
   {#if !myProfile}
     <CreateProfileBtn />
   {:else}
-    <div class="flex flex-col gap-5 items-center">
+    <div
+      class="flex flex-col gap-5 items-center border-8 border-surface-600 rounded-xl p-5 w-1/2 min-w-96 bg-surface-400"
+    >
       <h2 class="h2">{myProfile.name}</h2>
       <h3 class="h3">{myProfile.nickname}</h3>
       <!-- svelte-ignore a11y-img-redundant-alt -->
@@ -44,13 +43,13 @@
         alt="Profile Picture"
         on:load={() => URL.revokeObjectURL(profilePictureUrl)}
       />
-      <p>Bio : {myProfile.bio}</p>
-      <p>Type : {myProfile.individual_type}</p>
-      <p>Skills : {myProfile.skills?.join(', ')}</p>
-      <p>Email : {myProfile.email}</p>
-      <p>Phone number : {myProfile.phone}</p>
-      <p>Timezone : {myProfile.time_zone}</p>
-      <p>Location : {myProfile.location}</p>
+      <p class="text-center">{myProfile.bio}</p>
+      <p><b>Type :</b> {myProfile.individual_type}</p>
+      <p><b>Skills :</b> {myProfile.skills?.join(', ')}</p>
+      <p><b>Email :</b> {myProfile.email}</p>
+      <p><b>Phone number :</b> {myProfile.phone}</p>
+      <p><b>Timezone :</b> {myProfile.time_zone}</p>
+      <p><b>Location :</b> {myProfile.location}</p>
     </div>
   {/if}
 </section>
