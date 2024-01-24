@@ -3,7 +3,6 @@
   import { FileDropzone, InputChip } from '@skeletonlabs/skeleton';
   import { createProfile, getMyProfile, type Profile } from '$lib/stores/profiles.js';
   import { onMount } from 'svelte';
-  import { base64ToBuffer } from '$lib/utils';
   import { goto } from '$app/navigation';
 
   type FormattedTimezone = {
@@ -26,7 +25,7 @@
     if (form?.success) {
       const profile: Profile = {
         ...form.profile!,
-        profile_picture: base64ToBuffer(form.profile?.profile_picture!)
+        profile_picture: new TextEncoder().encode(form.profile?.profile_picture!)
       };
       createProfile(profile);
 
@@ -70,12 +69,12 @@
 </script>
 
 <section class="flex flex-col gap-10 w-1/2">
-  <h2 class="h2">Create Profile</h2>
   {#if myProfile}
-    <p>Profile already created.</p>
+    <p class="h2">Profile already created.</p>
   {:else if form?.success}
     <h2 class="h2 text-green-500 text-center">Profile Created successfully.</h2>
   {:else}
+    <h2 class="h2">Create Profile</h2>
     {#if form?.success === false}
       <p class="text-red-500">An error occured</p>
     {/if}

@@ -3,25 +3,33 @@
   import { getMyProfile } from '$lib/stores/profiles';
   import { onDestroy, onMount } from 'svelte';
   import defaultAvatarUrl from '$lib/assets/default_avatar.webp';
+  import { isEmptyObj } from '$lib/utils';
+  import { writable } from 'svelte/store';
 
-  let profilePictureUrl: string;
+  let profilePictureUrl = writable('');
   let myProfile = getMyProfile();
 
   onMount(() => {
-    if (Object.keys(myProfile?.profile_picture).length) {
-      let profilePictureBlob = new Blob([myProfile?.profile_picture!], { type: 'image/png' });
-      profilePictureUrl = URL.createObjectURL(profilePictureBlob);
-      console.log(profilePictureBlob);
+    if (!isEmptyObj(myProfile?.profile_picture!)) {
+      const uint8Array = new Uint8Array(Object.values(myProfile?.profile_picture!));
+      let profilePictureBlob = new Blob([uint8Array], { type: 'image/png' });
+      profilePictureUrl.set(URL.createObjectURL(profilePictureBlob));
+
+      console.group('Profile Picture :');
+      console.log('UInt8Array :', myProfile?.profile_picture);
+      console.log('UInt8Array lenght :', Object.entries(myProfile?.profile_picture!).length);
+      console.log('Blob', profilePictureBlob);
     } else {
-      profilePictureUrl = defaultAvatarUrl;
+      profilePictureUrl.set(defaultAvatarUrl);
     }
 
-    console.log(profilePictureUrl);
+    console.log('profilePictureUrl :', $profilePictureUrl);
+    console.groupEnd();
   });
 
   onDestroy(() => {
     if (profilePictureUrl) {
-      URL.revokeObjectURL(profilePictureUrl);
+      profilePictureUrl.set('');
     }
   });
 </script>
@@ -39,9 +47,9 @@
       <img
         class="rounded-full"
         width="300"
-        src={profilePictureUrl}
+        src={$profilePictureUrl}
         alt="Profile Picture"
-        on:load={() => URL.revokeObjectURL(profilePictureUrl)}
+        on:load={() => profilePictureUrl.set('')}
       />
       <p class="text-center">{myProfile.bio}</p>
       <p><b>Type :</b> {myProfile.individual_type}</p>

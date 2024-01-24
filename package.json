@@ -8,7 +8,9 @@
   "scripts": {
     "start": "AGENTS=1 npm run network",
     "network": "hc s clean && npm run build:happ && UI_PORT=5173 concurrently \"npm run dev -w ui\" \"npm run launch:happ\" \"holochain-playground\"",
-    "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
+    "test": "pnpm run test:zomes && pnpm run test:ui",
+    "test:zomes": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
+    "test:ui": "cd ui && npm test",
     "launch:happ": "echo \"pass\" | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/requests-and-offers.happ --ui-port $UI_PORT network mdns",
     "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
     "build:happ": "npm run build:zomes && hc app pack workdir --recursive",

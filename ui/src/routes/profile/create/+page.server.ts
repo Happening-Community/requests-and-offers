@@ -1,5 +1,4 @@
 import type { IndividualType, Profile } from '$lib/stores/profiles';
-import { bufferToBase64 } from '$lib/utils';
 import { type Actions } from '@sveltejs/kit';
 
 export const actions: Actions = {
@@ -32,8 +31,10 @@ export const actions: Actions = {
     try {
       // TODO: create profile on the DHT
 
+      console.log(profile_picture);
+
       return {
-        profile: { ...profile, profile_picture: bufferToBase64(profile_picture) },
+        profile: { ...profile, profile_picture: new TextDecoder().decode(profile_picture) },
         success: true
       };
     } catch (e) {
