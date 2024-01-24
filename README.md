@@ -13,7 +13,7 @@ Enter the nix shell by running this in the root folder of the repository:
 
 ```bash
 nix develop
-npm install
+pnpm install
 ```
 
 **Run all the other instructions in this README from inside this nix develop, otherwise they won't work**.
@@ -21,7 +21,7 @@ npm install
 ## Running 2 agents
  
 ```bash
-npm start
+pnpm start
 ```
 
 This will create a network of 2 nodes connected to each other and their respective UIs.
@@ -30,7 +30,7 @@ It will also bring up the Holochain Playground for advanced introspection of the
 ## Running the backend tests
 
 ```bash
-npm test
+pnpm test
 ```
 
 ## Bootstrapping a network
@@ -38,7 +38,7 @@ npm test
 Create a custom network of nodes connected to each other and their respective UIs with:
 
 ```bash
-AGENTS=3 npm run network
+AGENTS=3 pnpm run network
 ```
 
 Substitute the "3" for the number of nodes that you want to bootstrap in your network.
@@ -48,7 +48,7 @@ This will also bring up the Holochain Playground for advanced introspection of t
 
 To package the web happ:
 ``` bash
-npm run package
+pnpm run package
 ```
 
 You'll have the `requests-and-offers.webhapp` in `workdir`. This is what you should distribute so that the Holochain Launcher can install it.
