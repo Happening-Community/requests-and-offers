@@ -3,11 +3,13 @@
 </script>
 
 <nav class="bg-primary-500 flex p-4 justify-between items-center h-32 absolute w-full">
-  <a href="/"><img src="/hAppeningsLogoWsun2.webp" alt="" class="h-28" /></a>
+  <a href="/" class="w-1/3"><img src="/hAppeningsLogoWsun2.webp" alt="" class="w-28" /></a>
 
-  <h1 class="h1 text-white text-center">Requests and Offerts <br />hApp</h1>
+  <h1 class="h2 text-white text-center">Requests and Offers hApp</h1>
 
-  <button type="button" class="btn variant-filled-secondary p-4 group">
-    <Bars svgClass={`fill-[#4720b7] group-hover:fill-white`} />
-  </button>
+  <div class="w-1/3 flex justify-end">
+    <button type="button" class="btn variant-filled-secondary p-4 group">
+      <Bars svgClass={`fill-[#4720b7] group-hover:fill-white`} />
+    </button>
+  </div>
 </nav>

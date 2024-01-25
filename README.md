@@ -18,7 +18,7 @@ pnpm install
 
 **Run all the other instructions in this README from inside this nix develop, otherwise they won't work**.
 
-## Running 2 agents
+## Running 1 agent
  
 ```bash
 pnpm start
@@ -27,11 +27,22 @@ pnpm start
 This will create a network of 2 nodes connected to each other and their respective UIs.
 It will also bring up the Holochain Playground for advanced introspection of the conductors.
 
-## Running the backend tests
+## Running the tests
+
+```bash
+pnpm test:zomes
+```
+This command run the holochain backend tests.
+
+```bash
+pnpm test:ui
+```
+This one run the sveltekit ui tests.
 
 ```bash
 pnpm test
 ```
+And finally, this command run the backend tests then the ui tests.
 
 ## Bootstrapping a network
 

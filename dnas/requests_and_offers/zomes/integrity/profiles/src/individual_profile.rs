@@ -19,8 +19,8 @@ pub struct IndividualProfile {
 
 const ALLOWED_TYPES: [&str; 2] = ["advocate", "developer"];
 
-fn is_individual_type(individual_type: String) -> bool {
-    !ALLOWED_TYPES.contains(&individual_type.as_str())
+fn is_valid_individual_type(individual_type: &str) -> bool {
+    !ALLOWED_TYPES.contains(&individual_type)
 }
 
 fn is_image(bytes: SerializedBytes) -> bool {
@@ -38,7 +38,7 @@ fn is_image(bytes: SerializedBytes) -> bool {
 pub fn validate_individual_profile(
     individual_profile: IndividualProfile,
 ) -> ExternResult<ValidateCallbackResult> {
-    if is_individual_type(individual_profile.individual_type) {
+    if is_valid_individual_type(individual_profile.individual_type.as_str()) {
         return Ok(ValidateCallbackResult::Invalid(String::from(
             "Individual Type must be 'advocate' or 'developer'.",
         )));
@@ -82,7 +82,6 @@ pub fn validate_create_link_individual_profile_updates(
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    // Check the entry type for the given action hash
     let action_hash = ActionHash::from(base_address);
     let record = must_get_valid_record(action_hash)?;
     let _individual_profile: crate::IndividualProfile = record
@@ -102,7 +101,6 @@ pub fn validate_create_link_individual_profile_updates(
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
             "Linked action must reference an entry"
         ))))?;
-    // TODO: add the appropriate validation rules
     Ok(ValidateCallbackResult::Valid)
 }
 

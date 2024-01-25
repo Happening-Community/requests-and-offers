@@ -11,7 +11,7 @@
   onMount(() => {
     if (!isEmptyObj(myProfile?.profile_picture!)) {
       const uint8Array = new Uint8Array(Object.values(myProfile?.profile_picture!));
-      let profilePictureBlob = new Blob([uint8Array], { type: 'image/png' });
+      let profilePictureBlob = new Blob([uint8Array], { type: 'image/*' });
       profilePictureUrl = URL.createObjectURL(profilePictureBlob);
 
       console.group('Profile Picture :');
@@ -38,13 +38,14 @@
     <CreateProfileBtn />
   {:else}
     <div
-      class="flex flex-col gap-5 items-center border-8 border-surface-600 rounded-xl p-5 w-1/2 min-w-96 bg-surface-400"
+      class="flex flex-col gap-5 items-center border-8 border-surface-600 rounded-xl p-5 w-1/2 min-w-96 bg-surface-400 drop-shadow-xl"
     >
       <h2 class="h2">{myProfile.name}</h2>
       <h3 class="h3">{myProfile.nickname}</h3>
+      <!-- TODO: Use Avatar Skeleton component for display profile picture -->
       <!-- svelte-ignore a11y-img-redundant-alt -->
       <img
-        class="rounded-full"
+        class="rounded-full drop-shadow-lg"
         width="300"
         src={profilePictureUrl}
         alt="Profile Picture"

@@ -115,6 +115,7 @@
 
       <div class="flex gap-5">
         <p class="label text-lg w-16">Skills :</p>
+        <!-- TODO:When skills indexation done, use Autocomplete Input Chip Skeleton component for skills selection -->
         <InputChip
           id="skills"
           name="skills"
@@ -135,6 +136,7 @@
 
       <label class="label text-lg">
         Time Zone :
+        <!-- TODO: Use Autocomplete Skeleton compunent for timezone selection -->
         <input
           type="text"
           placeholder="Search timezones..."
