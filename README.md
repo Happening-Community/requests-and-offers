@@ -73,3 +73,9 @@ This repository is using these tools:
 - [@holochain/tryorama](https://www.npmjs.com/package/@holochain/tryorama): test framework.
 - [@holochain/client](https://www.npmjs.com/package/@holochain/client): client library to connect to Holochain from the UI.
 - [@holochain-playground/cli](https://www.npmjs.com/package/@holochain-playground/cli): introspection tooling to understand what's going on in the Holochain nodes.
+
+## License
+
+Copyright (C) 2024, hAppening Community
+
+This program is free software: you can redistribute it and/or modify it under the terms of the license provided in the LICENSE file (CAL-1.0). This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
