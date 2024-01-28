@@ -24,7 +24,7 @@ pnpm install
 pnpm start
 ```
 
-This will create a network of 2 nodes connected to each other and their respective UIs.
+This will create a network of 1 nodes connected to its UI.
 It will also bring up the Holochain Playground for advanced introspection of the conductors.
 
 ## Running the tests
