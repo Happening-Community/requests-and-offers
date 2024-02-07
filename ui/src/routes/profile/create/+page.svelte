@@ -68,11 +68,11 @@
   }
 </script>
 
-<section class="flex flex-col gap-10 w-1/2">
+<section class="flex w-1/2 flex-col gap-10">
   {#if myProfile}
     <p class="h2">Profile already created.</p>
   {:else if form?.success}
-    <h2 class="h2 text-green-500 text-center">Profile Created successfully.</h2>
+    <h2 class="h2 text-center text-green-500">Profile Created successfully.</h2>
   {:else}
     <h2 class="h2">Create Profile</h2>
     {#if form?.success === false}
@@ -114,7 +114,7 @@
       </div>
 
       <div class="flex gap-5">
-        <p class="label text-lg w-16">Skills :</p>
+        <p class="label w-16 text-lg">Skills :</p>
         <!-- TODO:When skills indexation done, use Autocomplete Input Chip Skeleton component for skills selection -->
         <InputChip
           id="skills"

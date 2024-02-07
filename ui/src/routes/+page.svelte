@@ -12,7 +12,7 @@
   {:else}
     <h2 class="h2 mb-10">Welcome {myProfile.name} !</h2>
     <button class="btn variant-filled-primary w-fit" on:click={() => goto('/profile')}>
-      View profil
+      View profile
     </button>
   {/if}
 </section>

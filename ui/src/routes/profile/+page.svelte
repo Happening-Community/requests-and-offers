@@ -38,7 +38,7 @@
     <CreateProfileBtn />
   {:else}
     <div
-      class="flex flex-col gap-5 items-center border-8 border-surface-600 rounded-xl p-5 w-1/2 min-w-96 bg-surface-400 drop-shadow-xl"
+      class="border-surface-600 bg-surface-400 flex w-1/2 min-w-96 flex-col items-center gap-5 rounded-xl border-8 p-5 drop-shadow-xl"
     >
       <h2 class="h2">{myProfile.name}</h2>
       <h3 class="h3">{myProfile.nickname}</h3>

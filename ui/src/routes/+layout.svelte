@@ -6,7 +6,7 @@
 <Navbar />
 
 <main
-  class="container min-h-screen mx-auto flex justify-center items-center flex-col pt-40 pb-10 px-5"
+  class="container mx-auto flex min-h-screen flex-col items-center justify-center px-5 pb-10 pt-40"
 >
   <slot />
 </main>

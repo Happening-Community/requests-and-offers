@@ -4,9 +4,8 @@ import { setContext } from 'svelte';
 import { clientContext } from '../contexts';
 
 export const load: PageLoad = async () => {
-  // const parentDir = path.resolve(process.cwd(), '..');
-  // const hAppPath = '' as unknown as URL;
-  // const client = await AppAgentWebsocket.connect(hAppPath as unknown as URL, 'requests-and-offers');
+  // const hAppPath = new URL(`ws://localhost:35899`);
+  // const client = await AppAgentWebsocket.connect(hAppPath, 'requests-and-offers');
   // setContext(clientContext, {
   //   getClient: () => client
   // });
