@@ -1,19 +1,31 @@
 use hdi::prelude::*;
 use image::io::Reader as ImageReader;
 
+/// Represents an individual profile Entry with various attributes such as name, nickname, bio, etc.
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct IndividualProfile {
+    /// The full name of the individual.
     pub name: String,
+    /// A shorter version of the individual's name, often used for display purposes.
     pub nickname: String,
+    /// A brief biography about the individual.
     pub bio: String,
+    /// An optional serialized image representing the individual's profile picture.
     pub profile_picture: Option<SerializedBytes>,
+    /// The type of individual, either 'advocate' or 'developer'.
     pub individual_type: String,
+    /// A list of skills associated with the individual.
     pub skills: Vec<String>,
+    /// The individual's email address.
     pub email: String,
+    /// An optional phone number for the individual.
     pub phone: Option<String>,
+    /// The time zone in which the individual resides.
     pub time_zone: String,
+    /// The location where the individual is based.
     pub location: String,
+    /// The timestamp indicating when the individual's profile was created.
     pub created_at: Timestamp,
 }
 
