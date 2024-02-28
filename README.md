@@ -3,6 +3,7 @@
 Request And Offers is a hAppenings.community project to facilitate exchanges between Holochain Creators & Advocates! It's a Holochain application.
 
 - [Litepaper](https://happenings-community.gitbook.io/)
+- [Specifications](documentation/specifications.md)
 
 ## Environment Setup
 
