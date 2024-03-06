@@ -25,6 +25,60 @@ This application is specifically tailored for the participants in the Holochain 
 - **Custom Holochain Zome**: A custom zome for managing user profiles within the application.
 - **Skills Indexation**: Skills are an array of strings in the agent profile, linked to an Anchor at its name for efficient searching and matching.
 
+###   4.1.1 AgentProfile Entity
+
+The `AgentProfile` entity represents the profile of an agent within the hAppenings.community. An agent can be a single user or a device associated with a user, allowing for the sharing of profiles across multiple devices. This entity includes various fields to capture essential information about the agent, facilitating personalized experiences and targeted interactions within the community.
+
+#####   4.1.1.1 Fields
+
+- **name**: The full name of the agent.
+  - **Type**: `String`
+  - **Validation**: Must not be empty.
+- **nickname**: A shorter version of the agent's name, often used for display purposes.
+  - **Type**: `String`
+  - **Validation**: Must not be empty.
+- **bio**: A brief biography about the agent.
+  - **Type**: `String`
+  - **Validation**: Optional, but recommended for a richer user experience.
+- **profile_picture**: An optional serialized image representing the agent's profile picture.
+  - **Type**: `Option<SerializedBytes>`
+  - **Validation**: Optional, but if provided, must be a valid image.
+- **agent_type**: The type of agent, either 'advocate' or 'developer'.
+  - **Type**: `String`
+  - **Validation**: Must be either 'advocate' or 'developer'.
+- **skills**: A list of skills associated with the agent.
+  - **Type**: `Vec<String>`
+  - **Validation**: Must contain at least one skill.
+- **email**: The agent's email address.
+  - **Type**: `String`
+  - **Validation**: Must be a valid email address format.
+- **phone**: An optional phone number for the agent.
+  - **Type**: `Option<String>`
+  - **Validation**: Optional, but if provided, must be a valid phone number format.
+- **time_zone**: The time zone in which the agent resides.
+  - **Type**: `String`
+  - **Validation**: Must be a valid time zone identifier.
+- **location**: The location where the agent is based.
+  - **Type**: `String`
+  - **Validation**: Optional, but recommended for community engagement and networking.
+- **created_at**: The timestamp indicating when the agent's profile was created.
+  - **Type**: `Timestamp`
+  - **Validation**: Automatically set upon profile creation, ensuring accurate tracking of profile creation time.
+
+#####   4.1.1.2 Validation Rules
+
+- **name** and **nickname** must not be empty to ensure basic identification and display purposes.
+- **agent_type** must be either 'advocate' or 'developer' to categorize agents effectively.
+- **skills** must contain at least one skill to facilitate skill-based matching and collaboration.
+- **email** must be a valid email address format to ensure communication is possible.
+- **phone**, if provided, must be a valid phone number format for contact purposes.
+- **time_zone** must be a valid time zone identifier to support time-sensitive interactions.
+- **location**, while optional, is recommended for community engagement and networking.
+- **created_at** is automatically set upon profile creation, ensuring accurate tracking of profile creation time.
+- **profile_picture**, if provided, must be a valid image.
+
+This detailed specification of the `AgentProfile` entity ensures that all stakeholders have a clear understanding of the data model, its requirements, and the validation rules that govern its use. This clarity is essential for the successful development and implementation of the application.
+
 ###   4.2 Projects and Organizations
 
 - **Project and Organization Creation**: Users can create projects and organizations, with projects owned by organizations.
@@ -81,7 +135,6 @@ This application is specifically tailored for the participants in the Holochain 
 
 - **Use Case**: Users can search for projects, offers, and users based on keywords, skills, and project requirements.
 - **Benefit**: Enhances the discoverability of projects, offers, and users, making it easier for users to find what they are looking for.
-
 
 ##   6. Infrastructure
 
