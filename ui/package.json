@@ -3,14 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "vite dev",
-    "dev": "vite dev --clearScreen false --port $UI_PORT",
-    "build": "vite build",
-    "preview": "vite preview",
-    "start:browser": "VITE_HC_PORT=$HC_PORT VITE_HC_ADMIN_PORT=$HC_ADMIN_PORT vite",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "package": "npm run build && node zip.js",
+    "start": "vite dev --clearScreen false --port $UI_PORT",
+    "build": "npm run check && vite build",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "package": "npm run build && cd dist && bestzip ../dist.zip *",
     "test": "vitest",
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write ."

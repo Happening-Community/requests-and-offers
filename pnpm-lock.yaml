@@ -9,8 +9,8 @@ devDependencies:
     specifier: ^0.1.1
     version: 0.1.1
   '@holochain/hc-spin':
-    specifier: ^0.100.1
-    version: 0.100.5
+    specifier: ^0.200.10
+    version: 0.200.10
   concurrently:
     specifier: ^6.2.1
     version: 6.5.1
@@ -97,8 +97,8 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@holochain/hc-spin-rust-utils-darwin-arm64@0.100.2:
-    resolution: {integrity: sha512-vyJj3dqqy7iLGMy+M7rTow6jBdIlYXJjqh1lk1Gc5a7qiSz7PIDxM+xYgtcXiovzDt4E0p8/8q+vRw7yxixdaQ==}
+  /@holochain/hc-spin-rust-utils-darwin-arm64@0.200.3:
+    resolution: {integrity: sha512-2MuCVRiZdekyr0scvcieUhzYsp+TGwtxMOLqHqrPKLoMagB39M8PygA/mf8XGjQWMNuyWUVDenYezFIYMNxiig==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
@@ -106,8 +106,8 @@ packages:
     dev: true
     optional: true
 
-  /@holochain/hc-spin-rust-utils-darwin-x64@0.100.2:
-    resolution: {integrity: sha512-UEaxgJrLzZbMbBsf/d3QYX58FPrGXjOFWev19fvtK5hJXFPXrSwO1IqmeCLUo7HWuTLNVOfP4rCP59kb3bGwgA==}
+  /@holochain/hc-spin-rust-utils-darwin-x64@0.200.3:
+    resolution: {integrity: sha512-upcfJMHf2QhyZ6uNoVoMuoWNcuRL1WmWgcbflEWZHEu7I0QJh5ZY/z3LXKviU3tgdUZxRGntXm27vTablD7iOg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
@@ -115,8 +115,8 @@ packages:
     dev: true
     optional: true
 
-  /@holochain/hc-spin-rust-utils-linux-x64-gnu@0.100.2:
-    resolution: {integrity: sha512-JT8XFQJ2ghgXLqejJLUcEY95ANuGkwy1aaq7NNntY529Pp01hI10zrDKOvIxC1MX7yZn7yaPc0sjzkJhtkocCQ==}
+  /@holochain/hc-spin-rust-utils-linux-x64-gnu@0.200.3:
+    resolution: {integrity: sha512-Amwyrx/oSlbk5khOkyHbQqGFe16yXKJCDMA4lDM3cVtRl60ClwiY2g1ywxWckOoPiXtgBAL4AI5Ba4bDaysfDA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -124,8 +124,8 @@ packages:
     dev: true
     optional: true
 
-  /@holochain/hc-spin-rust-utils-win32-x64-msvc@0.100.2:
-    resolution: {integrity: sha512-ScFgsqV/Sf4bcDDPYSMQ511V6ID2aXRlcgh7NBxbX5KLX/CX/HANuZk5gcdhvK0MNkFW2lS81GrFh0iH93EASA==}
+  /@holochain/hc-spin-rust-utils-win32-x64-msvc@0.200.3:
+    resolution: {integrity: sha512-yGcZFqYdPk3NXSgVcC8L3+65jRJrZPOD5qm9mGfJKACz4u/z47Co69RDTt5ZhCFJBXZ8N2fotFLwmeBKd00aCg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
@@ -133,24 +133,24 @@ packages:
     dev: true
     optional: true
 
-  /@holochain/hc-spin-rust-utils@0.100.2:
-    resolution: {integrity: sha512-KYljLQmH5rKGbigvBE92sEqNcD6b+ZIvsvhhd8enivaSYAPB97feGzWm3veUe50dLWdXskrzai1NlUIxQ+TCag==}
+  /@holochain/hc-spin-rust-utils@0.200.3:
+    resolution: {integrity: sha512-tOGsO7FXU2IjMvr44zdnsv48niE1A9UWzF5F9z3Su1g9K4gzhBCeKESUIGR8RyFHO1G7sfB43010uKGijcVYfA==}
     engines: {node: '>= 10'}
     optionalDependencies:
-      '@holochain/hc-spin-rust-utils-darwin-arm64': 0.100.2
-      '@holochain/hc-spin-rust-utils-darwin-x64': 0.100.2
-      '@holochain/hc-spin-rust-utils-linux-x64-gnu': 0.100.2
-      '@holochain/hc-spin-rust-utils-win32-x64-msvc': 0.100.2
+      '@holochain/hc-spin-rust-utils-darwin-arm64': 0.200.3
+      '@holochain/hc-spin-rust-utils-darwin-x64': 0.200.3
+      '@holochain/hc-spin-rust-utils-linux-x64-gnu': 0.200.3
+      '@holochain/hc-spin-rust-utils-win32-x64-msvc': 0.200.3
     dev: true
 
-  /@holochain/hc-spin@0.100.5:
-    resolution: {integrity: sha512-XJNUwgjMSNWe2c7tGH0mTJ5ETDMIfTDYsDycmRbQL0NQZUhaGY7nT27+tecjW0Y2hHDS5Qq3rmMUo3JKEviKNA==}
+  /@holochain/hc-spin@0.200.10:
+    resolution: {integrity: sha512-FmoSKP8S7dioF3KStv4zizg/M/Np9MH7DH2jSdJKEja0E+59+GpMWr1xD2KJbo497ZQYjvHr10GGJE+/1IrTgA==}
     hasBin: true
     dependencies:
       '@electron-toolkit/preload': 3.0.0(electron@28.2.2)
       '@electron-toolkit/utils': 3.0.0(electron@28.2.2)
       '@holochain/client': 0.16.9
-      '@holochain/hc-spin-rust-utils': 0.100.2
+      '@holochain/hc-spin-rust-utils': 0.200.3
       '@msgpack/msgpack': 2.8.0
       commander: 11.1.0
       electron: 28.2.2

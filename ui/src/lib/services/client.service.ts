@@ -1,8 +1,8 @@
-import { AppAgentWebsocket } from '@holochain/client';
+import { AppAgentWebsocket, type AppAgentClient } from '@holochain/client';
 
 export default class HolochainClientService {
   private static instance: HolochainClientService;
-  client: AppAgentWebsocket | null = null;
+  client: AppAgentClient | null = null;
 
   private readonly HOLOCHAIN_APP_ID = 'requests-and-offers';
   private readonly IS_LAUNCHER = import.meta.env.VITE_IS_LAUNCHER;
