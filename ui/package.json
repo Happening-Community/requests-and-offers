@@ -16,7 +16,7 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@holochain/client": "^0.12.6",
+    "@holochain/client": "^0.16",
     "@msgpack/msgpack": "^3.0.0-beta2",
     "@skeletonlabs/skeleton": "2.7.0",
     "@skeletonlabs/tw-plugin": "0.3.1",
