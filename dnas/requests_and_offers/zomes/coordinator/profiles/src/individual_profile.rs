@@ -77,9 +77,12 @@ fn get_my_profile(_: ()) -> ExternResult<Option<Record>> {
     let latest_link = get_latest_link(update_links);
 
     match latest_link {
-        Some(link) => get(ActionHash::from(link.target.clone()), GetOptions::default()),
+        Some(link) => get(
+            link.target.into_action_hash().unwrap(),
+            GetOptions::default(),
+        ),
         None => get(
-            ActionHash::from(profile_link.target.clone()),
+            profile_link.target.into_action_hash().unwrap(),
             GetOptions::default(),
         ),
     }
@@ -109,7 +112,7 @@ pub fn get_individual_profile(individual_profile_hash: ActionHash) -> ExternResu
     let latest_link = get_latest_link(links);
 
     let latest_individual_profile_hash = match latest_link {
-        Some(link) => ActionHash::from(link.target.clone()),
+        Some(link) => link.target.clone().into_action_hash().unwrap(),
         None => individual_profile_hash.clone(),
     };
 
@@ -139,7 +142,8 @@ pub fn get_all_individual_profiles(_: ()) -> ExternResult<Vec<Record>> {
     )?;
 
     for link in links {
-        let individual_profile = get_individual_profile(ActionHash::from(link.target.clone()))?;
+        let individual_profile =
+            get_individual_profile(link.target.clone().into_action_hash().unwrap())?;
         if let Some(individual_profile) = individual_profile {
             individual_profiles.push(individual_profile)
         }
@@ -176,7 +180,7 @@ pub fn update_individual_profile(input: UpdateIndividualProfileInput) -> ExternR
     let updated_individual_profile = input.updated_individual_profile;
 
     let record = match get(
-        ActionHash::from(individual_profile_hash.clone()),
+        individual_profile_hash.clone().into_hash(),
         GetOptions::default(),
     )? {
         Some(record) => record,
@@ -198,7 +202,7 @@ pub fn update_individual_profile(input: UpdateIndividualProfileInput) -> ExternR
     let latest_link = get_latest_link(all_update_links);
 
     let previous_individual_profile_hash = match latest_link {
-        Some(link) => Some(ActionHash::from(link.target.clone())),
+        Some(link) => Some(link.target.clone().into_action_hash().unwrap()),
         None => None,
     };
 

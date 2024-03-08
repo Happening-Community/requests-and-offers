@@ -14,6 +14,9 @@ devDependencies:
   concurrently:
     specifier: ^6.2.1
     version: 6.5.1
+  new-port-cli:
+    specifier: ^1.0.0
+    version: 1.0.0
   rimraf:
     specifier: ^3.0.2
     version: 3.0.2
@@ -827,6 +830,17 @@ packages:
     resolution: {integrity: sha512-vAjmBf13gsmhXSgBrtIclinISzFFy22WwCYoyilZlsrRXNIHSwgFQ1bEdjRwMT3aoadeIF6HMuDRlOxzfXV8ig==}
     engines: {node: ^18 || >=20}
     hasBin: true
+    dev: true
+
+  /new-port-cli@1.0.0:
+    resolution: {integrity: sha512-9uMPTw2loJJ5423n4GT2uW7y12IeqiLiuUsNaXHZb3pBWNQ/pCnSi8nJ/EHBEBO58FQszvH2YCMDoCh7pnXN4Q==}
+    hasBin: true
+    dependencies:
+      new-port: 1.0.0
+    dev: true
+
+  /new-port@1.0.0:
+    resolution: {integrity: sha512-2rEL1cZj78LekYSfYHDGP7lIhrCauYbPy92QvEyfJcNzrXIuDjEMWlpxrgGic2BNM7S+viHn8ajuYx0b9UlJJQ==}
     dev: true
 
   /normalize-url@6.1.0:
