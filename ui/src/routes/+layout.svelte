@@ -4,6 +4,10 @@
   import '../app.postcss';
   import hc, { isConnected } from '@services/client.service';
   import { getMyProfileZomeCall } from '@stores/profiles.store';
+  import { ConicGradient, Modal, type ConicStop } from '@skeletonlabs/skeleton';
+  import { initializeStores } from '@skeletonlabs/skeleton';
+
+  initializeStores();
 
   onMount(async () => {
     await hc.connectClient();
@@ -12,6 +16,11 @@
     console.log('Ping response:', record);
     console.log('appInfo :', await hc.getAppInfo());
   });
+
+  const conicStops: ConicStop[] = [
+    { color: 'transparent', start: 0, end: 0 },
+    { color: 'rgb(var(--color-primary-500))', start: 75, end: 50 }
+  ];
 </script>
 
 <Navbar />
@@ -21,7 +30,10 @@
 >
   {#if !$isConnected}
     <p>Not connected yet.</p>
+    <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {:else}
     <slot />
   {/if}
 </main>
+
+<Modal />
