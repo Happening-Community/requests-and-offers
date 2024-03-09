@@ -1,63 +1,40 @@
 <script lang="ts">
   import CreateProfileBtn from '$lib/CreateProfileBtn.svelte';
-  import { getMyProfile } from '@stores/profiles.store';
-  import { onDestroy, onMount } from 'svelte';
+  import { myProfile } from '@stores/profiles.store';
   import defaultAvatarUrl from '$lib/assets/default_avatar.webp';
-  import { isEmptyObj } from '$lib/utils';
+  import { Avatar } from '@skeletonlabs/skeleton';
 
   let profilePictureUrl: string;
-  let myProfile = getMyProfile();
 
-  onMount(() => {
-    if (!isEmptyObj(myProfile?.profile_picture!)) {
-      const uint8Array = new Uint8Array(Object.values(myProfile?.profile_picture!));
-      let profilePictureBlob = new Blob([uint8Array], { type: 'image/*' });
-      profilePictureUrl = URL.createObjectURL(profilePictureBlob);
-
-      console.group('Profile Picture :');
-      console.log('UInt8Array :', myProfile?.profile_picture);
-      console.log('UInt8Array lenght :', Object.entries(myProfile?.profile_picture!).length);
-      console.log('Blob', profilePictureBlob);
-    } else {
-      profilePictureUrl = defaultAvatarUrl;
-    }
-
-    console.log('profilePictureUrl :', profilePictureUrl);
-    console.groupEnd();
-  });
-
-  onDestroy(() => {
-    if (profilePictureUrl) {
-      URL.revokeObjectURL(profilePictureUrl);
-    }
-  });
+  profilePictureUrl = $myProfile?.profile_picture
+    ? URL.createObjectURL(new Blob([new Uint8Array($myProfile.profile_picture)]))
+    : defaultAvatarUrl;
 </script>
 
 <section class="flex flex-col items-center">
-  {#if !myProfile}
+  {#if !$myProfile}
     <CreateProfileBtn />
   {:else}
+    <div class="mb-10 flex flex-col items-center gap-5">
+      <h2 class="h2">
+        Welcome <span class="text-primary-500 font-bold">{$myProfile.name}</span> !
+      </h2>
+      <p><a href="/profile/edit" class="text-primary-500 hover:underline">Edit profile</a></p>
+    </div>
     <div
       class="border-surface-600 bg-surface-400 flex w-1/2 min-w-96 flex-col items-center gap-5 rounded-xl border-8 p-5 drop-shadow-xl"
     >
-      <h2 class="h2">{myProfile.name}</h2>
-      <h3 class="h3">{myProfile.nickname}</h3>
-      <!-- TODO: Use Avatar Skeleton component for display profile picture -->
-      <!-- svelte-ignore a11y-img-redundant-alt -->
-      <img
-        class="rounded-full drop-shadow-lg"
-        width="300"
-        src={profilePictureUrl}
-        alt="Profile Picture"
-        on:load={() => URL.revokeObjectURL(profilePictureUrl)}
-      />
-      <p class="text-center">{myProfile.bio}</p>
-      <p><b>Type :</b> {myProfile.individual_type}</p>
-      <p><b>Skills :</b> {myProfile.skills?.join(', ')}</p>
-      <p><b>Email :</b> {myProfile.email}</p>
-      <p><b>Phone number :</b> {myProfile.phone}</p>
-      <p><b>Timezone :</b> {myProfile.time_zone}</p>
-      <p><b>Location :</b> {myProfile.location}</p>
+      <h3 class="h3"><b>Nickname :</b> {$myProfile.nickname}</h3>
+      <div class="p-10 drop-shadow-lg" on:load={() => URL.revokeObjectURL(profilePictureUrl)}>
+        <Avatar src={profilePictureUrl} width="200" />
+      </div>
+      <p class="text-center">{$myProfile.bio}</p>
+      <p><b>Type :</b> {$myProfile.individual_type}</p>
+      <p><b>Skills :</b> {$myProfile.skills?.join(', ')}</p>
+      <p><b>Email :</b> {$myProfile.email}</p>
+      <p><b>Phone number :</b> {$myProfile.phone}</p>
+      <p><b>Timezone :</b> {$myProfile.time_zone}</p>
+      <p><b>Location :</b> {$myProfile.location}</p>
     </div>
   {/if}
 </section>

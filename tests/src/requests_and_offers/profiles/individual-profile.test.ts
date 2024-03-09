@@ -22,16 +22,16 @@ import {
 import {
   IndividualProfile,
   IndividualType,
-  createIndividualProfile,
+  createProfile,
   decodeOutputs,
-  getAllIndividualProfiles,
+  getAllProfiles,
   getIndividualProfile,
   getMyProfile,
   sampleIndividualProfile,
   updateIndividualProfile,
 } from "./common.js";
 
-const hAppPath = process.cwd() + "/../workdir/requests-and-offers.happ";
+const hAppPath = process.cwd() + "/../workdir/requests_and_offers.happ";
 const appSource = { appBundleSource: { path: hAppPath } };
 
 async function runScenarioWithTwoAgents(
@@ -56,7 +56,7 @@ test("create and read IndividualProfile", async () => {
 
     // Alice creates a IndividualProfile
     sample = sampleIndividualProfile({ name: "Alice" });
-    record = await createIndividualProfile(alice.cells[0], sample);
+    record = await createProfile(alice.cells[0], sample);
     assert.ok(record);
 
     await pause(1200);
@@ -84,9 +84,7 @@ test("create and read IndividualProfile", async () => {
       individual_type: "Non Authorized",
     });
 
-    await expect(
-      createIndividualProfile(bob.cells[0], errSample)
-    ).rejects.toThrow();
+    await expect(createProfile(bob.cells[0], errSample)).rejects.toThrow();
 
     await pause(1200);
 
@@ -95,9 +93,7 @@ test("create and read IndividualProfile", async () => {
       name: "Bob",
       profile_picture: new Uint8Array(20),
     });
-    await expect(
-      createIndividualProfile(bob.cells[0], errSample)
-    ).rejects.toThrow();
+    await expect(createProfile(bob.cells[0], errSample)).rejects.toThrow();
 
     await pause(1200);
 
@@ -112,13 +108,13 @@ test("create and read IndividualProfile", async () => {
       name: "Bob",
       profile_picture: new Uint8Array(buffer),
     });
-    record = await createIndividualProfile(bob.cells[0], sample);
+    record = await createProfile(bob.cells[0], sample);
     assert.ok(record);
 
     await pause(1200);
 
     // Alice get all the individual profiles
-    records = await getAllIndividualProfiles(alice.cells[0]);
+    records = await getAllProfiles(alice.cells[0]);
     assert.equal(records.length, 2);
   });
 });
@@ -130,10 +126,7 @@ test("create and update IndividualProfile", async () => {
     let records: Record[];
 
     sample = sampleIndividualProfile({ name: "Alice" });
-    let aliceProfileRecord = await createIndividualProfile(
-      alice.cells[0],
-      sample
-    );
+    let aliceProfileRecord = await createProfile(alice.cells[0], sample);
 
     const response = await fetch("https://picsum.photos/200/300");
     const buffer = await response.arrayBuffer();

@@ -3,7 +3,7 @@ use profiles_integrity::*;
 
 use crate::{error, get_latest_link};
 
-/// Creates an individual profile entry in the DHT.
+/// Creates a new profile entry in the DHT.
 ///
 /// # Arguments
 ///
@@ -17,7 +17,7 @@ use crate::{error, get_latest_link};
 ///
 /// This function will return an error if there is a problem creating the entry or linking it to the appropriate paths.
 #[hdk_extern]
-pub fn create_individual_profile(individual_profile: IndividualProfile) -> ExternResult<Record> {
+pub fn create_profile(individual_profile: IndividualProfile) -> ExternResult<Record> {
     let mut individual_profile = individual_profile;
     individual_profile.created_at = sys_time()?;
 
@@ -133,7 +133,7 @@ pub fn get_individual_profile(individual_profile_hash: ActionHash) -> ExternResu
 ///
 /// This function will return an error if there is a problem retrieving the profiles or their links.
 #[hdk_extern]
-pub fn get_all_individual_profiles(_: ()) -> ExternResult<Vec<Record>> {
+pub fn get_all_profiles(_: ()) -> ExternResult<Vec<Record>> {
     let mut individual_profiles = Vec::new();
     let links = get_links(
         Path::from("all_individual_profiles").path_entry_hash()?,

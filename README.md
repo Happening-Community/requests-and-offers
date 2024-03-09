@@ -62,8 +62,8 @@ To package the web happ:
 pnpm run package
 ```
 
-You'll have the `requests-and-offers.webhapp` in `workdir`. This is what you should distribute so that the Holochain Launcher can install it.
-You will also have its subcomponent `requests-and-offers.happ` in the same folder`.
+You'll have the `requests_and_offers.webhapp` in `workdir`. This is what you should distribute so that the Holochain Launcher can install it.
+You will also have its subcomponent `requests_and_offers.happ` in the same folder`.
 
 ## Documentation
 

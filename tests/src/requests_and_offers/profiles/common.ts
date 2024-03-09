@@ -52,13 +52,13 @@ export function sampleIndividualProfile(
   };
 }
 
-export async function createIndividualProfile(
+export async function createProfile(
   cell: CallableCell,
   individualProfile: IndividualProfile
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "profiles",
-    fn_name: "create_individual_profile",
+    fn_name: "create_profile",
     payload: individualProfile,
   });
 }
@@ -81,12 +81,10 @@ export async function getIndividualProfile(
   });
 }
 
-export async function getAllIndividualProfiles(
-  cell: CallableCell
-): Promise<Record[]> {
+export async function getAllProfiles(cell: CallableCell): Promise<Record[]> {
   return cell.callZome({
     zome_name: "profiles",
-    fn_name: "get_all_individual_profiles",
+    fn_name: "get_all_profiles",
   });
 }
 

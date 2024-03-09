@@ -29,7 +29,7 @@ class HolochainClientService {
    * Connects the client to the Holochain network.
    */
   async connectClient() {
-    this.client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), 'requests-and-offers');
+    this.client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), 'requests_and_offers');
     this.loading = false;
     isConnected.set(true);
   }

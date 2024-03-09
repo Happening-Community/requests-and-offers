@@ -1,9 +1,15 @@
 <script lang="ts">
   import moment from 'moment-timezone';
   import { FileDropzone, InputChip } from '@skeletonlabs/skeleton';
-  import { getMyProfile, type Profile } from '@stores/profiles.store.js';
-  import { onMount } from 'svelte';
+  import {
+    createProfile,
+    myProfile,
+    getMyProfileZomeCall,
+    type IndividualType,
+    type Profile
+  } from '@stores/profiles.store.js';
   import { goto } from '$app/navigation';
+  import { decodeRecords } from '$lib/utils';
 
   type FormattedTimezone = {
     name: string;
@@ -11,31 +17,12 @@
     offset: number;
   };
 
-  export let form;
-
   let files: FileList;
   let fileMessage: HTMLParagraphElement;
   let timezones = moment.tz.names();
   let filteredTimezones: string[] = [];
   let formattedTimezones: FormattedTimezone[] = [];
   let search = '';
-  let myProfile = getMyProfile();
-
-  onMount(() => {
-    if (form?.success) {
-      const profile: Profile = {
-        ...form.profile!,
-        profile_picture: new TextEncoder().encode(form.profile?.profile_picture!)
-      };
-      // createProfile(profile);
-
-      console.log(profile);
-
-      setTimeout(() => {
-        goto('/profile');
-      }, 3000);
-    }
-  });
 
   function formatTimezones(timezones: string[]): FormattedTimezone[] {
     return timezones.map((timezone) => {
@@ -66,19 +53,57 @@
   function onPictureFileChange() {
     fileMessage.innerHTML = `${files[0].name}`;
   }
+
+  async function submitForm(event: SubmitEvent) {
+    event.preventDefault();
+    console.log('event :', event);
+
+    const data = new FormData(event.target as HTMLFormElement);
+    const profile_picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
+
+    const profile: Profile = {
+      name: data.get('name') as string,
+      nickname: data.get('nickname') as string,
+      bio: data.get('bio') as string,
+      profile_picture: profile_picture.byteLength > 0 ? new Uint8Array(profile_picture) : undefined,
+      individual_type: data.get('individual_type') as IndividualType,
+      skills: data.getAll('skills') as string[],
+      email: data.get('email') as string,
+      phone: data.get('phone') as string,
+      time_zone: data.get('timezone') as string,
+      location: data.get('location') as string,
+      created_at: 0
+    };
+
+    console.log('profile :', profile);
+
+    try {
+      await createProfile(profile);
+      await getMyProfileZomeCall();
+
+      goto('/profile');
+    } catch (error) {
+      console.log('error :', error);
+    }
+  }
 </script>
 
 <section class="flex w-1/2 flex-col gap-10">
-  {#if myProfile}
+  {#if $myProfile}
     <p class="h2">Profile already created.</p>
-  {:else if form?.success}
-    <h2 class="h2 text-center text-green-500">Profile Created successfully.</h2>
+    <!-- {:else if form?.success}
+    <h2 class="h2 text-center text-green-500">Profile Created successfully.</h2> -->
   {:else}
     <h2 class="h2">Create Profile</h2>
-    {#if form?.success === false}
+    <!-- {#if form?.success === false}
       <p class="text-red-500">An error occured</p>
-    {/if}
-    <form id="form" class="flex flex-col gap-4" method="post" enctype="multipart/form-data">
+    {/if} -->
+    <form
+      id="form"
+      class="flex flex-col gap-4"
+      enctype="multipart/form-data"
+      on:submit={submitForm}
+    >
       <p>*required fields</p>
       <label class="label text-lg">
         Name* :<input type="text" class="input" name="name" required />

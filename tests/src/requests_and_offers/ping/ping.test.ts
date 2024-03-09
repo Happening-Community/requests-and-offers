@@ -2,7 +2,7 @@ import { assert, expect, test } from "vitest";
 
 import { runScenario } from "@holochain/tryorama";
 
-const hAppPath = process.cwd() + "/../workdir/requests-and-offers.happ";
+const hAppPath = process.cwd() + "/../workdir/requests_and_offers.happ";
 const appSource = { appBundleSource: { path: hAppPath } };
 
 test.only("ping", async () => {

@@ -16,6 +16,6 @@ export function isEmptyObj(obj: object): boolean {
  * @param {Record[]} records - The records to decode.
  * @returns {unknown[]} - The decoded outputs.
  */
-export function decodeOutputs(records: Record[]): unknown[] {
+export function decodeRecords(records: Record[]): any[] {
   return records.map((r) => decode((r.entry as any).Present.entry));
 }
