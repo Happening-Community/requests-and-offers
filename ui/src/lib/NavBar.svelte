@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Bars from '$lib/assets/svg/bars.svelte';
+  // import Bars from '@lib/svg/bars.svelte';
   import { myProfile } from '@stores/profiles.store';
 </script>
 

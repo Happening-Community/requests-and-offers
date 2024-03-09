@@ -9,7 +9,6 @@
     type Profile
   } from '@stores/profiles.store.js';
   import { goto } from '$app/navigation';
-  import { decodeRecords } from '$lib/utils';
 
   type FormattedTimezone = {
     name: string;

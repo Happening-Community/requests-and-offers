@@ -1,14 +1,13 @@
 <script lang="ts">
   import CreateProfileBtn from '$lib/CreateProfileBtn.svelte';
   import { myProfile } from '@stores/profiles.store';
-  import defaultAvatarUrl from '$lib/assets/default_avatar.webp';
   import { Avatar } from '@skeletonlabs/skeleton';
 
   let profilePictureUrl: string;
 
   profilePictureUrl = $myProfile?.profile_picture
     ? URL.createObjectURL(new Blob([new Uint8Array($myProfile.profile_picture)]))
-    : defaultAvatarUrl;
+    : '/default_avatar.webp';
 </script>
 
 <section class="flex flex-col items-center">
