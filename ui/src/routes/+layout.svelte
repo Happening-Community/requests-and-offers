@@ -2,7 +2,7 @@
   import Navbar from '$lib/NavBar.svelte';
   import { onMount } from 'svelte';
   import '../app.postcss';
-  import hc from '@services/client.service';
+  import hc, { isConnected } from '@services/client.service';
 
   onMount(async () => {
     await hc.connectClient();
@@ -17,5 +17,9 @@
 <main
   class="container mx-auto flex min-h-screen flex-col items-center justify-center px-5 pb-10 pt-40"
 >
-  <slot />
+  {#if !$isConnected}
+    <p>Not connected yet.</p>
+  {:else}
+    <slot />
+  {/if}
 </main>

@@ -1,4 +1,4 @@
-import type { IndividualType, Profile } from '$lib/stores/profiles';
+import type { IndividualType, Profile } from '$lib/stores/profiles.store';
 import { type Actions } from '@sveltejs/kit';
 
 export const actions: Actions = {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import CreateProfileBtn from '$lib/CreateProfileBtn.svelte';
-  import { getMyProfile } from '$lib/stores/profiles';
+  import { getMyProfile } from '@stores/profiles.store';
   import { onDestroy, onMount } from 'svelte';
   import defaultAvatarUrl from '$lib/assets/default_avatar.webp';
   import { isEmptyObj } from '$lib/utils';

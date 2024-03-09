@@ -1,7 +1,7 @@
 <script lang="ts">
   import moment from 'moment-timezone';
   import { FileDropzone, InputChip } from '@skeletonlabs/skeleton';
-  import { createProfile, getMyProfile, type Profile } from '$lib/stores/profiles.js';
+  import { getMyProfile, type Profile } from '@stores/profiles.store.js';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
 
@@ -27,7 +27,7 @@
         ...form.profile!,
         profile_picture: new TextEncoder().encode(form.profile?.profile_picture!)
       };
-      createProfile(profile);
+      // createProfile(profile);
 
       console.log(profile);
 
