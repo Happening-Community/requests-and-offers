@@ -1,6 +1,6 @@
 ---
 manifest_version: "1"
-name: requests-and-offers
+name: requests_and_offers
 description: ~
 roles:
   - name: requests_and_offers

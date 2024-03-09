@@ -1,35 +1,14 @@
 <script lang="ts">
   import Navbar from '$lib/NavBar.svelte';
-  import { onMount, setContext } from 'svelte';
+  import { onMount } from 'svelte';
   import '../app.postcss';
-  import { AppAgentWebsocket, type AppAgentClient } from '@holochain/client';
-
-  let client: AppAgentClient | undefined;
-
-  let loading = true;
-
-  export const clientContext = 'client';
+  import hc from '@services/client.service';
 
   onMount(async () => {
-    // We pass an unused string as the url because it will dynamically be replaced in launcher environments
-    client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), 'requests-and-offers');
-
-    loading = false;
-
-    console.log('client :', client);
-    const record = await client.callZome({
-      cap_secret: null,
-      zome_name: 'ping',
-      role_name: 'requests_and_offers',
-      fn_name: 'ping',
-      payload: null
-    });
-
-    console.log('record :', record);
-  });
-
-  setContext(clientContext, {
-    getClient: () => client
+    await hc.connectClient();
+    const record = await hc.callZome('ping', 'ping', null);
+    console.log('Ping response:', record);
+    console.log('appInfo :', await hc.getAppInfo());
   });
 </script>
 

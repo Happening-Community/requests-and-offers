@@ -9,12 +9,7 @@ import {
   fakeEntryHash,
   fakeDnaHash,
 } from "@holochain/client";
-
-// export enum IndividualType {
-//   Advocate = "advocate",
-//   Developer = "developer",
-//   NonAuth = "Non authororized", // For testing invalid inputs
-// }
+import { decode } from "@msgpack/msgpack";
 
 export type IndividualType = "advocate" | "developer" | "Non Authorized";
 
@@ -31,6 +26,10 @@ export type IndividualProfile = {
   location: string;
   created_at: number;
 };
+
+export function decodeOutputs(records: Record[]): unknown[] {
+  return records.map((r) => decode((r.entry as any).Present.entry));
+}
 
 export function sampleIndividualProfile(
   partialIndividualProfile: Partial<IndividualProfile>

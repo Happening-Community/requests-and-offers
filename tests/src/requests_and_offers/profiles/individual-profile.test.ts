@@ -1,4 +1,3 @@
-import { promises as fs } from "fs";
 import { assert, expect, test, vi } from "vitest";
 import TestProfilePicture from "./assets/Test-Logo-Small-Black-transparent-1.png";
 
@@ -19,12 +18,12 @@ import {
   fakeAgentPubKey,
   fakeEntryHash,
 } from "@holochain/client";
-import { decode } from "@msgpack/msgpack";
 
 import {
   IndividualProfile,
   IndividualType,
   createIndividualProfile,
+  decodeOutputs,
   getAllIndividualProfiles,
   getIndividualProfile,
   getMyProfile,
@@ -34,10 +33,6 @@ import {
 
 const hAppPath = process.cwd() + "/../workdir/requests-and-offers.happ";
 const appSource = { appBundleSource: { path: hAppPath } };
-
-function decodeOutputs(records: Record[]): unknown[] {
-  return records.map((r) => decode((r.entry as any).Present.entry));
-}
 
 async function runScenarioWithTwoAgents(
   callback: (scenario: Scenario, alice: Player, bob: Player) => Promise<void>
