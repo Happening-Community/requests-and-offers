@@ -31,6 +31,15 @@ export const myProfile: Writable<Profile | null> = writable(null);
 export const profiles: Writable<Profile[]> = writable([]);
 
 /**
+ * Creates a new profile in the 'profiles' zome.
+ * @async
+ * @param {Profile} profile - The profile to be created.
+ */
+export async function createProfile(profile: Profile) {
+  await hc.callZome('profiles', 'create_profile', profile);
+}
+
+/**
  * Fetches the current user's profile from the 'profiles' zome and updates the `myProfile` store.
  * @async
  */
@@ -50,10 +59,11 @@ export async function getAllProfilesZomeCall() {
 }
 
 /**
- * Creates a new profile in the 'profiles' zome.
+ * Updates a profile in the 'profiles' zome.
  * @async
- * @param {Profile} profile - The profile to be created.
+ * @param {Profile} profile - The profile to be updated.
  */
-export async function createProfile(profile: Profile) {
-  await hc.callZome('profiles', 'create_profile', profile);
+export async function updateMyProfile(updatedProfile: Profile) {
+  const newProfileRecord = await hc.callZome('profiles', 'update_my_profile', updatedProfile);
+  myProfile.set(decodeRecords([newProfileRecord])[0]);
 }

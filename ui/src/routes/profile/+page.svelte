@@ -14,17 +14,6 @@
   profilePictureUrl = $myProfile?.profile_picture
     ? URL.createObjectURL(new Blob([new Uint8Array($myProfile.profile_picture)]))
     : '/default_avatar.webp';
-
-  const modalStore = getModalStore();
-  const modalComponent: ModalComponent = { ref: EditProfileModal };
-  const modal: ModalSettings = {
-    type: 'component',
-    component: modalComponent,
-    title: 'Edit profile',
-    meta: {
-      profile: $myProfile
-    }
-  };
 </script>
 
 <section class="flex flex-col items-center">
@@ -36,12 +25,9 @@
         Welcome <span class="text-primary-500 font-bold">{$myProfile.name}</span> !
       </h2>
       <p>
-        <button
-          class="btn variant-filled-primary hover:underline"
-          on:click={() => modalStore.trigger(modal)}
-        >
+        <a class="btn variant-filled-primary hover:underline" href="/profile/edit">
           Edit profile
-        </button>
+        </a>
       </p>
     </div>
     <div

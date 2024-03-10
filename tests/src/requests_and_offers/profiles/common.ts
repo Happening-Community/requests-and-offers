@@ -13,7 +13,7 @@ import { decode } from "@msgpack/msgpack";
 
 export type IndividualType = "advocate" | "developer" | "Non Authorized";
 
-export type IndividualProfile = {
+export type Profile = {
   name: string;
   nickname: string;
   bio: string;
@@ -31,9 +31,9 @@ export function decodeOutputs(records: Record[]): unknown[] {
   return records.map((r) => decode((r.entry as any).Present.entry));
 }
 
-export function sampleIndividualProfile(
-  partialIndividualProfile: Partial<IndividualProfile>
-): IndividualProfile {
+export function sampleProfile(
+  partialIndividualProfile: Partial<Profile>
+): Profile {
   return {
     ...{
       name: "User",
@@ -54,7 +54,7 @@ export function sampleIndividualProfile(
 
 export async function createProfile(
   cell: CallableCell,
-  individualProfile: IndividualProfile
+  individualProfile: Profile
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "profiles",
@@ -70,13 +70,13 @@ export async function getMyProfile(cell: CallableCell): Promise<Record> {
   });
 }
 
-export async function getIndividualProfile(
+export async function getProfile(
   cell: CallableCell,
   record: Record
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "profiles",
-    fn_name: "get_individual_profile",
+    fn_name: "get_profile",
     payload: record.signed_action.hashed.hash,
   });
 }
@@ -88,14 +88,13 @@ export async function getAllProfiles(cell: CallableCell): Promise<Record[]> {
   });
 }
 
-export async function updateIndividualProfile(
+export async function updateMyProfile(
   cell: CallableCell,
-  individual_profile_hash: ActionHash,
-  updated_individual_profile: IndividualProfile
+  updated_profile: Profile
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "profiles",
-    fn_name: "update_individual_profile",
-    payload: { individual_profile_hash, updated_individual_profile },
+    fn_name: "update_my_profile",
+    payload: updated_profile,
   });
 }

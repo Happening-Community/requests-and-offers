@@ -102,21 +102,21 @@ fn get_my_profile(_: ()) -> ExternResult<Option<Record>> {
 ///
 /// This function will return an error if there is a problem retrieving the profile or its updates.
 #[hdk_extern]
-pub fn get_individual_profile(individual_profile_hash: ActionHash) -> ExternResult<Option<Record>> {
+pub fn get_profile(profile_hash: ActionHash) -> ExternResult<Option<Record>> {
     let links = get_links(
-        individual_profile_hash.clone(),
+        profile_hash.clone(),
         LinkTypes::IndividualProfileUpdates,
         None,
     )?;
 
     let latest_link = get_latest_link(links);
 
-    let latest_individual_profile_hash = match latest_link {
+    let latest_profile_hash = match latest_link {
         Some(link) => link.target.clone().into_action_hash().unwrap(),
-        None => individual_profile_hash.clone(),
+        None => profile_hash.clone(),
     };
 
-    get(latest_individual_profile_hash, GetOptions::default())
+    get(latest_profile_hash, GetOptions::default())
 }
 
 /// Retrieves all individual profiles from the DHT.
@@ -142,8 +142,7 @@ pub fn get_all_profiles(_: ()) -> ExternResult<Vec<Record>> {
     )?;
 
     for link in links {
-        let individual_profile =
-            get_individual_profile(link.target.clone().into_action_hash().unwrap())?;
+        let individual_profile = get_profile(link.target.clone().into_action_hash().unwrap())?;
         if let Some(individual_profile) = individual_profile {
             individual_profiles.push(individual_profile)
         }
@@ -156,9 +155,9 @@ pub fn get_all_profiles(_: ()) -> ExternResult<Vec<Record>> {
 ///
 /// Contains the hash of the existing profile and the new profile data.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct UpdateIndividualProfileInput {
-    pub individual_profile_hash: ActionHash,
-    pub updated_individual_profile: IndividualProfile,
+pub struct UpdateProfileInput {
+    pub profile_hash: ActionHash,
+    pub updated_profile: IndividualProfile,
 }
 
 /// Updates an individual profile in the DHT.
@@ -175,14 +174,11 @@ pub struct UpdateIndividualProfileInput {
 ///
 /// This function will return an error if there is a problem updating the profile, such as attempting to update another agent's profile or if the profile does not exist.
 #[hdk_extern]
-pub fn update_individual_profile(input: UpdateIndividualProfileInput) -> ExternResult<Record> {
-    let individual_profile_hash = input.individual_profile_hash;
-    let updated_individual_profile = input.updated_individual_profile;
+pub fn update_my_profile(updated_profile: IndividualProfile) -> ExternResult<Record> {
+    let my_profile_record = get_my_profile(())?.unwrap();
+    let profile_hash = my_profile_record.action_address();
 
-    let record = match get(
-        individual_profile_hash.clone().into_hash(),
-        GetOptions::default(),
-    )? {
+    let record = match get(profile_hash.clone().into_hash(), GetOptions::default())? {
         Some(record) => record,
         None => return Err(error("Could not find the related IndividualProfile")),
     };
@@ -194,41 +190,35 @@ pub fn update_individual_profile(input: UpdateIndividualProfileInput) -> ExternR
     }
 
     let all_update_links = get_links(
-        individual_profile_hash.clone(),
+        profile_hash.clone(),
         LinkTypes::IndividualProfileUpdates,
         None,
     )?;
 
     let latest_link = get_latest_link(all_update_links);
 
-    let previous_individual_profile_hash = match latest_link {
+    let previous_profile_hash = match latest_link {
         Some(link) => Some(link.target.clone().into_action_hash().unwrap()),
         None => None,
     };
 
-    let individual_profile_hash = if previous_individual_profile_hash.is_some() {
-        previous_individual_profile_hash.unwrap()
+    let profile_hash = if previous_profile_hash.is_some() {
+        previous_profile_hash.unwrap()
     } else {
-        individual_profile_hash.clone()
+        profile_hash.clone()
     };
 
-    let updated_individual_profile_hash = update_entry(
-        individual_profile_hash.clone(),
-        &updated_individual_profile.clone(),
-    )?;
+    let updated_profile_hash = update_entry(profile_hash.clone(), &updated_profile.clone())?;
 
     create_link(
-        individual_profile_hash.clone(),
-        updated_individual_profile_hash.clone(),
+        profile_hash.clone(),
+        updated_profile_hash.clone(),
         LinkTypes::IndividualProfileUpdates,
         (),
     )?;
 
-    let record = get(
-        updated_individual_profile_hash.clone(),
-        GetOptions::default(),
-    )?
-    .ok_or(error("Could not find the newly updated IndividualProfile"))?;
+    let record = get(updated_profile_hash.clone(), GetOptions::default())?
+        .ok_or(error("Could not find the newly updated IndividualProfile"))?;
 
     Ok(record)
 }

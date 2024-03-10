@@ -74,10 +74,26 @@
       created_at: 0
     };
 
-    console.log('profile :', profile);
+    const mockedProfile: Profile = {
+      name: 'John Doe',
+      nickname: 'John',
+      bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      profile_picture: undefined,
+      individual_type: 'developer',
+      skills: ['JavaScript', 'Svelte', 'SvelteKit'],
+      email: 'pHjX5@example.com',
+      phone: '123456789',
+      time_zone: 'Europe/Paris',
+      location: 'Paris, France',
+      created_at: 0
+    };
+
+    // console.log('profile :', profile);
+    console.log('profile :', mockedProfile);
 
     try {
-      await createProfile(profile);
+      // await createProfile(profile);
+      await createProfile(mockedProfile);
       await getMyProfileZomeCall();
 
       goto('/profile');
@@ -90,27 +106,19 @@
 <section class="flex w-1/2 flex-col gap-10">
   {#if $myProfile}
     <p class="h2">Profile already created.</p>
-    <!-- {:else if form?.success}
-    <h2 class="h2 text-center text-green-500">Profile Created successfully.</h2> -->
   {:else}
     <h2 class="h2">Create Profile</h2>
-    <!-- {#if form?.success === false}
-      <p class="text-red-500">An error occured</p>
-    {/if} -->
-    <form
-      id="form"
-      class="flex flex-col gap-4"
-      enctype="multipart/form-data"
-      on:submit={submitForm}
-    >
+    <form class="flex flex-col gap-4" enctype="multipart/form-data" on:submit={submitForm}>
       <p>*required fields</p>
       <label class="label text-lg">
-        Name* :<input type="text" class="input" name="name" required />
+        Name* :<input type="text" class="input" name="name" />
+        <!-- Name* :<input type="text" class="input" name="name" required /> -->
       </label>
 
       <label class="label text-lg">
         Nickname* :
-        <input type="text" class="input" name="nickname" required />
+        <input type="text" class="input" name="nickname" />
+        <!-- <input type="text" class="input" name="nickname" required /> -->
       </label>
 
       <label class="label text-lg">
@@ -131,7 +139,8 @@
             Advocate
           </label>
           <label class="label flex items-center gap-2">
-            <input type="radio" name="individual_type" value="developer" />
+            <!-- <input type="radio" name="individual_type" value="developer" required /> -->
+            <input type="radio" name="individual_type" value="developer" checked required />
             Developer
           </label>
         </div>
@@ -151,6 +160,7 @@
       <label class="label text-lg">
         Email* :
         <input type="email" class="input" name="email" />
+        <!-- <input type="email" class="input" name="email" required /> -->
       </label>
 
       <label class="label text-lg">
@@ -179,7 +189,9 @@
         <input type="text" class="input" name="location" />
       </label>
 
-      <button type="submit" class="btn variant-filled-primary w-fit self-center">Submit</button>
+      <button type="submit" class="btn variant-filled-primary w-fit self-center">
+        Create Profile
+      </button>
     </form>
   {/if}
 </section>
