@@ -7,7 +7,7 @@ use crate::{error, get_latest_link};
 ///
 /// # Arguments
 ///
-/// * `individual_profile` - The data structure representing the individual profile to be created.
+/// * `profile` - The data structure representing the individual profile to be created.
 ///
 /// # Returns
 ///
@@ -17,26 +17,25 @@ use crate::{error, get_latest_link};
 ///
 /// This function will return an error if there is a problem creating the entry or linking it to the appropriate paths.
 #[hdk_extern]
-pub fn create_profile(individual_profile: IndividualProfile) -> ExternResult<Record> {
-    let mut individual_profile = individual_profile;
-    individual_profile.created_at = sys_time()?;
+pub fn create_profile(profile: Profile) -> ExternResult<Record> {
+    let mut profile = profile;
+    profile.created_at = sys_time()?;
 
-    let individual_profile_hash =
-        create_entry(&EntryTypes::IndividualProfile(individual_profile.clone()))?;
-    let record = get(individual_profile_hash.clone(), GetOptions::default())?
-        .ok_or(error("Could not find the newly created IndividualProfile"))?;
+    let profile_hash = create_entry(&EntryTypes::Profile(profile.clone()))?;
+    let record = get(profile_hash.clone(), GetOptions::default())?
+        .ok_or(error("Could not find the newly created Profile"))?;
 
-    let path = Path::from("all_individual_profiles");
+    let path = Path::from("all_profiles");
     create_link(
         path.path_entry_hash()?,
-        individual_profile_hash.clone(),
-        LinkTypes::AllIndividualProfiles,
+        profile_hash.clone(),
+        LinkTypes::AllProfiles,
         (),
     )?;
 
     create_link(
         agent_info()?.agent_initial_pubkey,
-        individual_profile_hash,
+        profile_hash,
         LinkTypes::MyProfile,
         (),
     )?;
@@ -68,11 +67,7 @@ fn get_my_profile(_: ()) -> ExternResult<Option<Record>> {
 
     let profile_link = profile_links[0].clone();
 
-    let update_links = get_links(
-        profile_link.target.clone(),
-        LinkTypes::IndividualProfileUpdates,
-        None,
-    )?;
+    let update_links = get_links(profile_link.target.clone(), LinkTypes::ProfileUpdates, None)?;
 
     let latest_link = get_latest_link(update_links);
 
@@ -92,7 +87,7 @@ fn get_my_profile(_: ()) -> ExternResult<Option<Record>> {
 ///
 /// # Arguments
 ///
-/// * `individual_profile_hash` - The `ActionHash` of the individual profile to retrieve.
+/// * `profile_hash` - The `ActionHash` of the individual profile to retrieve.
 ///
 /// # Returns
 ///
@@ -103,11 +98,7 @@ fn get_my_profile(_: ()) -> ExternResult<Option<Record>> {
 /// This function will return an error if there is a problem retrieving the profile or its updates.
 #[hdk_extern]
 pub fn get_profile(profile_hash: ActionHash) -> ExternResult<Option<Record>> {
-    let links = get_links(
-        profile_hash.clone(),
-        LinkTypes::IndividualProfileUpdates,
-        None,
-    )?;
+    let links = get_links(profile_hash.clone(), LinkTypes::ProfileUpdates, None)?;
 
     let latest_link = get_latest_link(links);
 
@@ -134,21 +125,21 @@ pub fn get_profile(profile_hash: ActionHash) -> ExternResult<Option<Record>> {
 /// This function will return an error if there is a problem retrieving the profiles or their links.
 #[hdk_extern]
 pub fn get_all_profiles(_: ()) -> ExternResult<Vec<Record>> {
-    let mut individual_profiles = Vec::new();
+    let mut profiles = Vec::new();
     let links = get_links(
-        Path::from("all_individual_profiles").path_entry_hash()?,
-        LinkTypes::AllIndividualProfiles,
+        Path::from("all_profiles").path_entry_hash()?,
+        LinkTypes::AllProfiles,
         None,
     )?;
 
     for link in links {
-        let individual_profile = get_profile(link.target.clone().into_action_hash().unwrap())?;
-        if let Some(individual_profile) = individual_profile {
-            individual_profiles.push(individual_profile)
+        let profile = get_profile(link.target.clone().into_action_hash().unwrap())?;
+        if let Some(profile) = profile {
+            profiles.push(profile)
         }
     }
 
-    Ok(individual_profiles)
+    Ok(profiles)
 }
 
 /// Input structure for updating an individual profile.
@@ -157,7 +148,7 @@ pub fn get_all_profiles(_: ()) -> ExternResult<Vec<Record>> {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateProfileInput {
     pub profile_hash: ActionHash,
-    pub updated_profile: IndividualProfile,
+    pub updated_profile: Profile,
 }
 
 /// Updates an individual profile in the DHT.
@@ -174,13 +165,13 @@ pub struct UpdateProfileInput {
 ///
 /// This function will return an error if there is a problem updating the profile, such as attempting to update another agent's profile or if the profile does not exist.
 #[hdk_extern]
-pub fn update_my_profile(updated_profile: IndividualProfile) -> ExternResult<Record> {
+pub fn update_my_profile(updated_profile: Profile) -> ExternResult<Record> {
     let my_profile_record = get_my_profile(())?.unwrap();
     let profile_hash = my_profile_record.action_address();
 
     let record = match get(profile_hash.clone().into_hash(), GetOptions::default())? {
         Some(record) => record,
-        None => return Err(error("Could not find the related IndividualProfile")),
+        None => return Err(error("Could not find the related Profile")),
     };
 
     let author = record.action().author().to_owned();
@@ -189,11 +180,7 @@ pub fn update_my_profile(updated_profile: IndividualProfile) -> ExternResult<Rec
         return Err(error("Can not update a profile of a different agent"));
     }
 
-    let all_update_links = get_links(
-        profile_hash.clone(),
-        LinkTypes::IndividualProfileUpdates,
-        None,
-    )?;
+    let all_update_links = get_links(profile_hash.clone(), LinkTypes::ProfileUpdates, None)?;
 
     let latest_link = get_latest_link(all_update_links);
 
@@ -213,12 +200,12 @@ pub fn update_my_profile(updated_profile: IndividualProfile) -> ExternResult<Rec
     create_link(
         profile_hash.clone(),
         updated_profile_hash.clone(),
-        LinkTypes::IndividualProfileUpdates,
+        LinkTypes::ProfileUpdates,
         (),
     )?;
 
     let record = get(updated_profile_hash.clone(), GetOptions::default())?
-        .ok_or(error("Could not find the newly updated IndividualProfile"))?;
+        .ok_or(error("Could not find the newly updated Profile"))?;
 
     Ok(record)
 }

@@ -72,7 +72,7 @@
       nickname: data.get('nickname') as string,
       bio: data.get('bio') as string,
       profile_picture: profile_picture.byteLength > 0 ? new Uint8Array(profile_picture) : undefined,
-      individual_type: data.get('individual_type') as IndividualType,
+      user_type: data.get('user_type') as IndividualType,
       skills: data.getAll('skills') as string[],
       email: data.get('email') as string,
       phone: data.get('phone') as string,
@@ -127,9 +127,9 @@
           <label class="label flex items-center gap-2">
             <input
               type="radio"
-              name="individual_type"
+              name="user_type"
               value="advocate"
-              checked={$myProfile.individual_type === 'advocate'}
+              checked={$myProfile.user_type === 'advocate'}
               required
             />
             Advocate
@@ -137,9 +137,9 @@
           <label class="label flex items-center gap-2">
             <input
               type="radio"
-              name="individual_type"
+              name="user_type"
               value="developer"
-              checked={$myProfile.individual_type === 'developer'}
+              checked={$myProfile.user_type === 'developer'}
               required
             />
             Developer

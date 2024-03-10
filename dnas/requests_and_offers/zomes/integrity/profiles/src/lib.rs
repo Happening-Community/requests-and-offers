@@ -1,19 +1,19 @@
-pub mod individual_profile;
+pub mod profile;
 use hdi::prelude::*;
-pub use individual_profile::*;
+pub use profile::*;
 
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
 #[hdk_entry_defs]
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
-    IndividualProfile(IndividualProfile),
+    Profile(Profile),
 }
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
 pub enum LinkTypes {
-    AllIndividualProfiles,
-    IndividualProfileUpdates,
+    AllProfiles,
+    ProfileUpdates,
     MyProfile,
 }
 
@@ -36,8 +36,8 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
         match store_entry {
             OpEntry::CreateEntry { app_entry, .. } | OpEntry::UpdateEntry { app_entry, .. } => {
                 match app_entry {
-                    EntryTypes::IndividualProfile(individual_profile) => {
-                        return validate_individual_profile(individual_profile);
+                    EntryTypes::Profile(profile) => {
+                        return validate_profile(profile);
                     }
                 }
             }
@@ -100,7 +100,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     }
                 };
                 match original_app_entry {
-                    EntryTypes::IndividualProfile(_original_individual_person) => {
+                    EntryTypes::Profile(_original_person) => {
                         return Ok(ValidateCallbackResult::Invalid(String::from(
                             "Individual Profile cannot be deleted",
                         )))

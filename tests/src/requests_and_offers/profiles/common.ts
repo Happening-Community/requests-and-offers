@@ -11,14 +11,14 @@ import {
 } from "@holochain/client";
 import { decode } from "@msgpack/msgpack";
 
-export type IndividualType = "advocate" | "developer" | "Non Authorized";
+export type UserType = "advocate" | "developer" | "Non Authorized";
 
 export type Profile = {
   name: string;
   nickname: string;
   bio: string;
   profile_picture?: Uint8Array;
-  individual_type: IndividualType;
+  user_type: UserType;
   skills: string[];
   email: string;
   phone?: string;
@@ -31,16 +31,14 @@ export function decodeOutputs(records: Record[]): unknown[] {
   return records.map((r) => decode((r.entry as any).Present.entry));
 }
 
-export function sampleProfile(
-  partialIndividualProfile: Partial<Profile>
-): Profile {
+export function sampleProfile(partialProfile: Partial<Profile>): Profile {
   return {
     ...{
       name: "User",
       nickname: "NickName",
       bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       profile_picture: null,
-      individual_type: "developer",
+      user_type: "developer",
       skills: ["html", "css", "typescript", "rust"],
       email: "abc@abc.com",
       phone: null,
@@ -48,18 +46,18 @@ export function sampleProfile(
       location: "here",
       created_at: 0,
     },
-    ...partialIndividualProfile,
+    ...partialProfile,
   };
 }
 
 export async function createProfile(
   cell: CallableCell,
-  individualProfile: Profile
+  Profile: Profile
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "profiles",
     fn_name: "create_profile",
-    payload: individualProfile,
+    payload: Profile,
   });
 }
 

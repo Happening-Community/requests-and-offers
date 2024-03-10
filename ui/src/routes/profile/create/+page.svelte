@@ -65,7 +65,7 @@
       nickname: data.get('nickname') as string,
       bio: data.get('bio') as string,
       profile_picture: profile_picture.byteLength > 0 ? new Uint8Array(profile_picture) : undefined,
-      individual_type: data.get('individual_type') as IndividualType,
+      user_type: data.get('user_type') as IndividualType,
       skills: data.getAll('skills') as string[],
       email: data.get('email') as string,
       phone: data.get('phone') as string,
@@ -79,7 +79,7 @@
       nickname: 'John',
       bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       profile_picture: undefined,
-      individual_type: 'developer',
+      user_type: 'developer',
       skills: ['JavaScript', 'Svelte', 'SvelteKit'],
       email: 'pHjX5@example.com',
       phone: '123456789',
@@ -135,12 +135,12 @@
 
         <div class="flex gap-4">
           <label class="label flex items-center gap-2">
-            <input type="radio" name="individual_type" value="advocate" required />
+            <input type="radio" name="user_type" value="advocate" required />
             Advocate
           </label>
           <label class="label flex items-center gap-2">
-            <!-- <input type="radio" name="individual_type" value="developer" required /> -->
-            <input type="radio" name="individual_type" value="developer" checked required />
+            <!-- <input type="radio" name="user_type" value="developer" required /> -->
+            <input type="radio" name="user_type" value="developer" checked required />
             Developer
           </label>
         </div>

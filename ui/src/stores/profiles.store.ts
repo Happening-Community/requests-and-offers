@@ -9,7 +9,7 @@ export type Profile = {
   nickname: string;
   bio?: string;
   profile_picture?: Uint8Array;
-  individual_type: IndividualType;
+  user_type: IndividualType;
   skills?: string[];
   email: string;
   phone?: string;

@@ -77,7 +77,7 @@ test("create and read Profile", async () => {
 
     // Bob create an Profile with erroneous IndividualType
     let errSample: Profile = sampleProfile({
-      individual_type: "Non Authorized",
+      user_type: "Non Authorized",
     });
 
     await expect(createProfile(bob.cells[0], errSample)).rejects.toThrow();
@@ -139,7 +139,17 @@ test("create and update Profile", async () => {
     let aliceProfile = decodeOutputs([
       await getMyProfile(alice.cells[0]),
     ])[0] as Profile;
-    assert.equal(aliceProfile, sample);
+    assert.equal(aliceProfile.nickname, sample.nickname);
+
+    await pause(1200);
+
+    // Alice update her profile with an invalid profile picture
+    sample = sampleProfile({
+      name: "Alicia",
+      nickname: "Alicialia",
+      profile_picture: new Uint8Array(20),
+    });
+    await expect(updateMyProfile(alice.cells[0], sample)).rejects.toThrow();
 
     await pause(1200);
 

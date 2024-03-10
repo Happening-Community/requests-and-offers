@@ -1,6 +1,6 @@
 <script lang="ts">
   import CreateProfileBtn from '$lib/CreateProfileBtn.svelte';
-  import { myProfile, type Profile } from '@stores/profiles.store';
+  import { getMyProfileZomeCall, myProfile, type Profile } from '@stores/profiles.store';
   import {
     Avatar,
     getModalStore,
@@ -8,8 +8,14 @@
     type ModalSettings
   } from '@skeletonlabs/skeleton';
   import EditProfileModal from '@lib/modals/EditProfileModal.svelte';
+  import { onMount } from 'svelte';
 
   let profilePictureUrl: string;
+
+  onMount(async () => {
+    await getMyProfileZomeCall();
+    console.log('My profile :', $myProfile);
+  });
 
   profilePictureUrl = $myProfile?.profile_picture
     ? URL.createObjectURL(new Blob([new Uint8Array($myProfile.profile_picture)]))
@@ -38,7 +44,7 @@
         <Avatar src={profilePictureUrl} width="w-64" />
       </div>
       <p class="text-center">{$myProfile.bio}</p>
-      <p><b>Type :</b> {$myProfile.individual_type}</p>
+      <p><b>Type :</b> {$myProfile.user_type}</p>
       <p><b>Skills :</b> {$myProfile.skills?.join(', ')}</p>
       <p><b>Email :</b> {$myProfile.email}</p>
       <p><b>Phone number :</b> {$myProfile.phone}</p>
