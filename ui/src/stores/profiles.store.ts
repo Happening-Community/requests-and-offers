@@ -1,7 +1,7 @@
 import { decodeRecords } from '@utils';
 import hc from '@services/client.service';
 import { writable, type Writable } from 'svelte/store';
-import type { ActionHash } from '@holochain/client';
+import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
 
 export type IndividualType = 'developer' | 'advocate';
 
@@ -16,7 +16,6 @@ export type Profile = {
   phone?: string;
   time_zone?: string;
   location?: string;
-  hash?: ActionHash;
 };
 
 /**
@@ -40,40 +39,69 @@ export async function createProfile(profile: Profile) {
   await hc.callZome('profiles', 'create_profile', profile);
 }
 
-/**
- * Fetches the current user's profile from the 'profiles' zome and updates the `myProfile` store.
- * @async
- */
-export async function getMyProfileZomeCall() {
-  const myProfileRecord = await hc.callZome('profiles', 'get_my_profile', null);
-  if (myProfileRecord) {
-    myProfile.update(() => {
-      return {
-        hash: myProfileRecord.signed_action.hashed.hash,
-        ...decodeRecords([myProfileRecord])[0]
-      };
-    });
-    // myProfile.set(decodeRecords([myProfileRecord])[0]);
+async function getLatestProfileRecord(original_profile_hash: ActionHash): Promise<Record | null> {
+  return hc.callZome('profiles', 'get_latest_profile', original_profile_hash);
+}
+
+export async function getLatestProfile(original_profile_hash: ActionHash): Promise<Profile | null> {
+  const record = await getLatestProfileRecord(original_profile_hash);
+
+  return record ? decodeRecords([record])[0] : null;
+}
+
+async function getAgentProfileRecord(agent: AgentPubKey): Promise<Record | null> {
+  const agentProfileLinks: Link[] = await hc.callZome('profiles', 'get_agent_profile', agent);
+
+  if (agentProfileLinks.length === 0) return null;
+
+  return await getLatestProfileRecord(agentProfileLinks[0].target);
+}
+
+export async function getAgentProfile(author: AgentPubKey): Promise<Profile | null> {
+  const agentProfileRecord = await getAgentProfileRecord(author);
+  return agentProfileRecord ? decodeRecords([agentProfileRecord])[0] : null;
+}
+
+export async function getMyProfile() {
+  const agentPubKey = (await hc.getAppInfo())!.agent_pub_key;
+  myProfile.set(await getAgentProfile(agentPubKey));
+}
+
+async function getAllProfilesRecords(): Promise<Record[]> {
+  const profilesLinks: Link[] = await hc.callZome('profiles', 'get_all_profiles', null);
+
+  let profilesRecords: Record[] = [];
+
+  for (const profileLink of profilesLinks) {
+    const record = await getLatestProfileRecord(profileLink.target);
+    if (record) profilesRecords.push(record);
   }
+
+  return profilesRecords;
+}
+export async function getAllProfiles() {
+  const profilesRecords: Record[] = await getAllProfilesRecords();
+
+  profiles.set(profilesRecords.map((r) => decodeRecords([r])[0]));
 }
 
-/**
- * Fetches all profiles from the 'profiles' zome and updates the `profiles` store.
- * @async
- */
-export async function getAllProfilesZomeCall() {
-  profiles.set(decodeRecords(await hc.callZome('profiles', 'get_all_profiles', null)));
-}
+export async function updateProfile(
+  agent: AgentPubKey,
+  updated_profile: Profile
+): Promise<Record | null> {
+  const agentProfileLinks: Link[] = await hc.callZome('profiles', 'get_agent_profile', agent);
 
-/**
- * Updates a profile in the 'profiles' zome.
- * @async
- * @param {Profile} profile - The profile to be updated.
- */
-export async function updateMyProfile(profile_hash: ActionHash, updated_profile: Profile) {
-  const newProfileRecord = await hc.callZome('profiles', 'update_my_profile', {
-    profile_hash,
+  if (agentProfileLinks.length === 0) return null;
+
+  const original_profile_hash = agentProfileLinks[0].target;
+  const previous_profile_hash = (await getLatestProfileRecord(original_profile_hash))?.signed_action
+    .hashed.hash;
+
+  const newProfileRecord = await hc.callZome('profiles', 'update_profile', {
+    original_profile_hash,
+    previous_profile_hash,
     updated_profile
   });
-  myProfile.set(decodeRecords([newProfileRecord])[0]);
+
+  return newProfileRecord;
 }

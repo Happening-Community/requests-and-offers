@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { getAllProfilesZomeCall, profiles } from '@stores/profiles.store';
+  import { getAllProfiles, profiles } from '@stores/profiles.store';
   import { onMount } from 'svelte';
 
   onMount(async () => {
-    await getAllProfilesZomeCall();
+    await getAllProfiles();
     console.log($profiles);
   });
 </script>

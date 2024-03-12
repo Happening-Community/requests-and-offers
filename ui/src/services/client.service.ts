@@ -13,7 +13,6 @@ class HolochainClientService {
   static instance: HolochainClientService;
   client: AppAgentClient | null = null;
   loading = true;
-
   /**
    * Constructor for the HolochainClientService.
    * Ensures only one instance of the service is created.

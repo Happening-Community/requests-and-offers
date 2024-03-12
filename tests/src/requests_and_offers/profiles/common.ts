@@ -8,6 +8,8 @@ import {
   fakeAgentPubKey,
   fakeEntryHash,
   fakeDnaHash,
+  Link,
+  AgentPubKey,
 } from "@holochain/client";
 import { decode } from "@msgpack/msgpack";
 
@@ -59,39 +61,44 @@ export async function createProfile(
   });
 }
 
-export async function getMyProfile(cell: CallableCell): Promise<Record> {
-  return cell.callZome({
-    zome_name: "profiles",
-    fn_name: "get_my_profile",
-  });
-}
-
-export async function getProfile(
+export async function getLatestProfile(
   cell: CallableCell,
-  record: Record
-): Promise<Record> {
+  original_profile_hash: ActionHash
+): Promise<Record | null> {
   return cell.callZome({
     zome_name: "profiles",
-    fn_name: "get_profile",
-    payload: record.signed_action.hashed.hash,
+    fn_name: "get_latest_profile",
+    payload: original_profile_hash,
   });
 }
 
-export async function getAllProfiles(cell: CallableCell): Promise<Record[]> {
+export async function getAgentProfile(
+  cell: CallableCell,
+  author: AgentPubKey
+): Promise<Link[]> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "get_agent_profile",
+    payload: author,
+  });
+}
+
+export async function getAllProfiles(cell: CallableCell): Promise<Link[]> {
   return cell.callZome({
     zome_name: "profiles",
     fn_name: "get_all_profiles",
   });
 }
 
-export async function updateMyProfile(
+export async function updateProfile(
   cell: CallableCell,
-  profile_hash: ActionHash,
+  original_profile_hash: ActionHash,
+  previous_profile_hash: ActionHash,
   updated_profile: Profile
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "profiles",
-    fn_name: "update_my_profile",
-    payload: { profile_hash, updated_profile },
+    fn_name: "update_profile",
+    payload: { original_profile_hash, previous_profile_hash, updated_profile },
   });
 }

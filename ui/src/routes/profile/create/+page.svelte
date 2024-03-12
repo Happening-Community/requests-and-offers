@@ -4,9 +4,9 @@
   import {
     createProfile,
     myProfile,
-    getMyProfileZomeCall,
     type IndividualType,
-    type Profile
+    type Profile,
+    getMyProfile
   } from '@stores/profiles.store.js';
   import { goto } from '$app/navigation';
 
@@ -70,8 +70,7 @@
       email: data.get('email') as string,
       phone: data.get('phone') as string,
       time_zone: data.get('timezone') as string,
-      location: data.get('location') as string,
-      created_at: 0
+      location: data.get('location') as string
     };
 
     const mockedProfile: Profile = {
@@ -84,8 +83,7 @@
       email: 'pHjX5@example.com',
       phone: '123456789',
       time_zone: 'Europe/Paris',
-      location: 'Paris, France',
-      created_at: 0
+      location: 'Paris, France'
     };
 
     // console.log('profile :', profile);
@@ -94,7 +92,7 @@
     try {
       // await createProfile(profile);
       await createProfile(mockedProfile);
-      await getMyProfileZomeCall();
+      await getMyProfile();
 
       goto('/profile');
     } catch (error) {

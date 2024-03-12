@@ -24,10 +24,10 @@ import {
   createProfile,
   decodeOutputs,
   getAllProfiles,
-  getMyProfile,
-  getProfile,
+  getAgentProfile,
+  getLatestProfile,
   sampleProfile,
-  updateMyProfile,
+  updateProfile,
 } from "./common.js";
 
 const hAppPath = process.cwd() + "/../workdir/requests_and_offers.happ";
@@ -61,19 +61,24 @@ test("create and read Profile", async () => {
     await pause(1200);
 
     // Alice get her profile
-    let aliceProfileRecord = await getMyProfile(alice.cells[0]);
-    assert.ok(aliceProfileRecord);
+    let aliceProfileLink = await getAgentProfile(
+      alice.cells[0],
+      alice.agentPubKey
+    );
+    assert.ok(aliceProfileLink);
 
     await pause(1200);
 
     // Bob gets the created Profile
-    const createReadOutput: Record = await getProfile(bob.cells[0], record);
-
+    const createReadOutput: Record = await getLatestProfile(
+      bob.cells[0],
+      record.signed_action.hashed.hash
+    );
     assert.containsAllKeys(sample, decodeOutputs([createReadOutput])[0]);
 
     // Bob try to get his profile before he create it
-    record = await getMyProfile(bob.cells[0]);
-    assert.notExists(record);
+    let links = await getAgentProfile(bob.cells[0], bob.agentPubKey);
+    assert.equal(links.length, 0);
 
     // Bob create an Profile with erroneous IndividualType
     let errSample: Profile = sampleProfile({
@@ -110,8 +115,8 @@ test("create and read Profile", async () => {
     await pause(1200);
 
     // Alice get all the individual profiles
-    records = await getAllProfiles(alice.cells[0]);
-    assert.equal(records.length, 2);
+    links = await getAllProfiles(alice.cells[0]);
+    assert.equal(links.length, 2);
   });
 });
 
@@ -122,7 +127,7 @@ test.only("create and update Profile", async () => {
 
     sample = sampleProfile({ name: "Alice" });
     record = await createProfile(alice.cells[0], sample);
-    const profileHash = record.signed_action.hashed.hash;
+    const originalProfileHash = record.signed_action.hashed.hash;
 
     const response = await fetch("https://picsum.photos/200/300");
     const buffer = await response.arrayBuffer();
@@ -135,12 +140,22 @@ test.only("create and update Profile", async () => {
       nickname: "Alicialia",
       profile_picture: new Uint8Array(buffer),
     });
-    record = await updateMyProfile(alice.cells[0], profileHash, sample);
 
-    let aliceProfile = decodeOutputs([
-      await getMyProfile(alice.cells[0]),
-    ])[0] as Profile;
-    assert.equal(aliceProfile.nickname, sample.nickname);
+    await updateProfile(
+      alice.cells[0],
+      originalProfileHash,
+      record.signed_action.hashed.hash,
+      sample
+    );
+
+    await pause(1200);
+
+    let latestProfileRecord = await getLatestProfile(
+      alice.cells[0],
+      originalProfileHash
+    );
+    let aliceProfile = decodeOutputs([latestProfileRecord])[0] as Profile;
+    assert.equal(sample.name, aliceProfile.name);
 
     await pause(1200);
 
@@ -151,7 +166,12 @@ test.only("create and update Profile", async () => {
       profile_picture: new Uint8Array(20),
     });
     await expect(
-      updateMyProfile(alice.cells[0], profileHash, sample)
+      updateProfile(
+        alice.cells[0],
+        originalProfileHash,
+        latestProfileRecord.signed_action.hashed.hash,
+        sample
+      )
     ).rejects.toThrow();
 
     await pause(1200);
@@ -161,17 +181,34 @@ test.only("create and update Profile", async () => {
       name: "Bob",
     });
     await expect(
-      updateMyProfile(bob.cells[0], profileHash, sample)
+      updateProfile(
+        bob.cells[0],
+        originalProfileHash,
+        latestProfileRecord.signed_action.hashed.hash,
+        sample
+      )
     ).rejects.toThrow();
+
+    await pause(1200);
 
     // Alice update here profile again
     sample = sampleProfile({
       name: "Alice",
       nickname: "Alicia",
     });
-    aliceProfile = decodeOutputs([
-      await getMyProfile(alice.cells[0]),
-    ])[0] as Profile;
+
+    await updateProfile(
+      alice.cells[0],
+      originalProfileHash,
+      latestProfileRecord.signed_action.hashed.hash,
+      sample
+    );
+
+    latestProfileRecord = await getLatestProfile(
+      alice.cells[0],
+      originalProfileHash
+    );
+    aliceProfile = decodeOutputs([latestProfileRecord])[0] as Profile;
     assert.equal(aliceProfile.nickname, sample.nickname);
   });
 });

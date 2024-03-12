@@ -12,8 +12,8 @@ pub enum EntryTypes {
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
 pub enum LinkTypes {
-    AllProfiles,
     ProfileUpdates,
+    AllProfiles,
     MyProfile,
 }
 

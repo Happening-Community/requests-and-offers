@@ -2,16 +2,16 @@
   import moment from 'moment-timezone';
   import { FileDropzone, InputChip } from '@skeletonlabs/skeleton';
   import {
-    createProfile,
     myProfile,
-    getMyProfileZomeCall,
     type IndividualType,
     type Profile,
-    updateMyProfile
+    updateProfile,
+    getMyProfile
   } from '@stores/profiles.store.js';
   import { goto } from '$app/navigation';
   import CreateProfileBtn from '@lib/CreateProfileBtn.svelte';
   import { onMount } from 'svelte';
+  import hc from '@services/client.service';
 
   type FormattedTimezone = {
     name: string;
@@ -83,8 +83,8 @@
     console.log('profile :', profile);
 
     try {
-      await updateMyProfile($myProfile?.hash!, profile);
-      await getMyProfileZomeCall();
+      await updateProfile((await hc.getAppInfo())?.agent_pub_key!, profile);
+      await getMyProfile();
 
       goto('/profile');
     } catch (error) {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import CreateProfileBtn from '$lib/CreateProfileBtn.svelte';
-  import { getMyProfileZomeCall, myProfile, type Profile } from '@stores/profiles.store';
+  import { getMyProfile, myProfile } from '@stores/profiles.store';
   import {
     Avatar,
     getModalStore,
@@ -13,7 +13,6 @@
   let profilePictureUrl: string;
 
   onMount(async () => {
-    await getMyProfileZomeCall();
     console.log('My profile :', $myProfile);
   });
 

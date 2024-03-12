@@ -6,7 +6,7 @@
       "tests"
     ],
     "scripts": {
-      "start": "AGENTS=1 BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) npm run network",
+      "start": "AGENTS=2 BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) npm run network",
       "network": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:happ\" \"holochain-playground\"",
       "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
         "test:ping": "npm run build:zomes && hc app pack workdir --recursive && npm t --filter ping -w tests",
