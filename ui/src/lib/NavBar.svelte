@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+
   // import Bars from '@lib/svg/bars.svelte';
   import { myProfile } from '@stores/profiles.store';
 </script>

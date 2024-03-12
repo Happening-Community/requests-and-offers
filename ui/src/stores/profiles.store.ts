@@ -1,6 +1,6 @@
 import { decodeRecords } from '@utils';
 import hc from '@services/client.service';
-import { writable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
 
 export type IndividualType = 'developer' | 'advocate';
@@ -23,6 +23,8 @@ export type Profile = {
  * @type {Writable<Profile | null>}
  */
 export const myProfile: Writable<Profile | null> = writable(null);
+
+export const myProfileHash: Writable<ActionHash | null> = writable(null);
 
 /**
  * Svelte writable store for all profiles.
@@ -64,11 +66,20 @@ export async function getAgentProfile(author: AgentPubKey): Promise<Profile | nu
 
 export async function getMyProfile() {
   const agentPubKey = (await hc.getAppInfo())!.agent_pub_key;
-  myProfile.set(await getAgentProfile(agentPubKey));
+  const agentProfileRecord = await getAgentProfileRecord(agentPubKey);
+
+  myProfile.set(agentProfileRecord ? decodeRecords([agentProfileRecord])[0] : null);
+
+  // const profileLink: Link | null = await hc.callZome('profiles', 'get_agent_profile', agentPubKey);
+  // if (profileLink) myProfileHash.set(profileLink.target);
+}
+
+export async function getAllProfilesLinks(): Promise<Link[]> {
+  return hc.callZome('profiles', 'get_all_profiles', null);
 }
 
 async function getAllProfilesRecords(): Promise<Record[]> {
-  const profilesLinks: Link[] = await hc.callZome('profiles', 'get_all_profiles', null);
+  const profilesLinks: Link[] = await getAllProfilesLinks();
 
   let profilesRecords: Record[] = [];
 
@@ -79,10 +90,11 @@ async function getAllProfilesRecords(): Promise<Record[]> {
 
   return profilesRecords;
 }
+
 export async function getAllProfiles() {
   const profilesRecords: Record[] = await getAllProfilesRecords();
 
-  profiles.set(profilesRecords.map((r) => decodeRecords([r])[0]));
+  profiles.set(decodeRecords(profilesRecords));
 }
 
 export async function updateProfile(
