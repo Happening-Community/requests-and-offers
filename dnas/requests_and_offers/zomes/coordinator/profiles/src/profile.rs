@@ -5,9 +5,13 @@ use crate::{error, get_latest_link};
 
 /// Creates a new profile entry in the DHT.
 ///
+/// This function takes a `Profile` struct as input, sets the creation timestamp,
+/// and stores it in the DHT. It also creates links to the profile under the "all_profiles"
+/// path and under the agent's public key.
+///
 /// # Arguments
 ///
-/// * `profile` - The data structure representing the individual profile to be created.
+/// * `profile` - The `Profile` struct representing the individual profile to be created.
 ///
 /// # Returns
 ///
@@ -15,12 +19,10 @@ use crate::{error, get_latest_link};
 ///
 /// # Errors
 ///
-/// This function will return an error if there is a problem creating the entry or linking it to the appropriate paths.
+/// This function will return an error if there is a problem creating the entry, linking it,
+/// or if the entry already exists.
 #[hdk_extern]
 pub fn create_profile(profile: Profile) -> ExternResult<Record> {
-    let mut profile = profile;
-    profile.created_at = sys_time()?;
-
     let profile_hash = create_entry(&EntryTypes::Profile(profile.clone()))?;
     let record = get(profile_hash.clone(), GetOptions::default())?
         .ok_or(error("Could not find the newly created Profile"))?;
@@ -44,6 +46,9 @@ pub fn create_profile(profile: Profile) -> ExternResult<Record> {
 }
 
 /// Retrieves the current agent's individual profile from the DHT.
+///
+/// This function retrieves the profile linked to the current agent's public key.
+/// It also attempts to retrieve the latest update to the profile.
 ///
 /// # Arguments
 ///
@@ -69,6 +74,8 @@ fn get_my_profile(_: ()) -> ExternResult<Option<Record>> {
 
     let update_links = get_links(profile_link.target.clone(), LinkTypes::ProfileUpdates, None)?;
 
+    warn!("update_links {:#?}", update_links);
+
     let latest_link = get_latest_link(update_links);
 
     match latest_link {
@@ -84,6 +91,9 @@ fn get_my_profile(_: ()) -> ExternResult<Option<Record>> {
 }
 
 /// Retrieves an individual profile from the DHT using its action hash.
+///
+/// This function retrieves a profile by its action hash. It also attempts to retrieve
+/// the latest update to the profile.
 ///
 /// # Arguments
 ///
@@ -111,6 +121,8 @@ pub fn get_profile(profile_hash: ActionHash) -> ExternResult<Option<Record>> {
 }
 
 /// Retrieves all individual profiles from the DHT.
+///
+/// This function retrieves all profiles linked under the "all_profiles" path.
 ///
 /// # Arguments
 ///
@@ -153,9 +165,12 @@ pub struct UpdateProfileInput {
 
 /// Updates an individual profile in the DHT.
 ///
+/// This function updates the profile linked to the current agent's public key.
+/// It creates a new entry for the updated profile and links it to the previous version.
+///
 /// # Arguments
 ///
-/// * `input` - The input structure containing the hash of the existing profile and the new profile data.
+/// * `updated_profile` - The `Profile` struct containing the new profile data.
 ///
 /// # Returns
 ///
@@ -165,9 +180,8 @@ pub struct UpdateProfileInput {
 ///
 /// This function will return an error if there is a problem updating the profile, such as attempting to update another agent's profile or if the profile does not exist.
 #[hdk_extern]
-pub fn update_my_profile(updated_profile: Profile) -> ExternResult<Record> {
-    let my_profile_record = get_my_profile(())?.unwrap();
-    let profile_hash = my_profile_record.action_address();
+pub fn update_my_profile(input: UpdateProfileInput) -> ExternResult<Record> {
+    let profile_hash = input.profile_hash;
 
     let record = match get(profile_hash.clone().into_hash(), GetOptions::default())? {
         Some(record) => record,
@@ -195,7 +209,7 @@ pub fn update_my_profile(updated_profile: Profile) -> ExternResult<Record> {
         profile_hash.clone()
     };
 
-    let updated_profile_hash = update_entry(profile_hash.clone(), &updated_profile.clone())?;
+    let updated_profile_hash = update_entry(profile_hash.clone(), input.updated_profile.clone())?;
 
     create_link(
         profile_hash.clone(),

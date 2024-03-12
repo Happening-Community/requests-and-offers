@@ -1,6 +1,7 @@
 import { decodeRecords } from '@utils';
 import hc from '@services/client.service';
 import { writable, type Writable } from 'svelte/store';
+import type { ActionHash } from '@holochain/client';
 
 export type IndividualType = 'developer' | 'advocate';
 
@@ -15,7 +16,7 @@ export type Profile = {
   phone?: string;
   time_zone?: string;
   location?: string;
-  created_at: number;
+  hash?: ActionHash;
 };
 
 /**
@@ -46,7 +47,13 @@ export async function createProfile(profile: Profile) {
 export async function getMyProfileZomeCall() {
   const myProfileRecord = await hc.callZome('profiles', 'get_my_profile', null);
   if (myProfileRecord) {
-    myProfile.set(decodeRecords([myProfileRecord])[0]);
+    myProfile.update(() => {
+      return {
+        hash: myProfileRecord.signed_action.hashed.hash,
+        ...decodeRecords([myProfileRecord])[0]
+      };
+    });
+    // myProfile.set(decodeRecords([myProfileRecord])[0]);
   }
 }
 
@@ -63,7 +70,10 @@ export async function getAllProfilesZomeCall() {
  * @async
  * @param {Profile} profile - The profile to be updated.
  */
-export async function updateMyProfile(updatedProfile: Profile) {
-  const newProfileRecord = await hc.callZome('profiles', 'update_my_profile', updatedProfile);
+export async function updateMyProfile(profile_hash: ActionHash, updated_profile: Profile) {
+  const newProfileRecord = await hc.callZome('profiles', 'update_my_profile', {
+    profile_hash,
+    updated_profile
+  });
   myProfile.set(decodeRecords([newProfileRecord])[0]);
 }

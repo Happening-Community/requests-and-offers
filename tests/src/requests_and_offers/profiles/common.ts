@@ -24,7 +24,6 @@ export type Profile = {
   phone?: string;
   time_zone: string;
   location: string;
-  created_at: number;
 };
 
 export function decodeOutputs(records: Record[]): unknown[] {
@@ -44,7 +43,6 @@ export function sampleProfile(partialProfile: Partial<Profile>): Profile {
       phone: null,
       time_zone: "EST",
       location: "here",
-      created_at: 0,
     },
     ...partialProfile,
   };
@@ -88,11 +86,12 @@ export async function getAllProfiles(cell: CallableCell): Promise<Record[]> {
 
 export async function updateMyProfile(
   cell: CallableCell,
+  profile_hash: ActionHash,
   updated_profile: Profile
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "profiles",
     fn_name: "update_my_profile",
-    payload: updated_profile,
+    payload: { profile_hash, updated_profile },
   });
 }

@@ -115,13 +115,14 @@ test("create and read Profile", async () => {
   });
 });
 
-test("create and update Profile", async () => {
+test.only("create and update Profile", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: Profile;
     let record: Record;
 
     sample = sampleProfile({ name: "Alice" });
-    await createProfile(alice.cells[0], sample);
+    record = await createProfile(alice.cells[0], sample);
+    const profileHash = record.signed_action.hashed.hash;
 
     const response = await fetch("https://picsum.photos/200/300");
     const buffer = await response.arrayBuffer();
@@ -134,7 +135,7 @@ test("create and update Profile", async () => {
       nickname: "Alicialia",
       profile_picture: new Uint8Array(buffer),
     });
-    record = await updateMyProfile(alice.cells[0], sample);
+    record = await updateMyProfile(alice.cells[0], profileHash, sample);
 
     let aliceProfile = decodeOutputs([
       await getMyProfile(alice.cells[0]),
@@ -149,7 +150,9 @@ test("create and update Profile", async () => {
       nickname: "Alicialia",
       profile_picture: new Uint8Array(20),
     });
-    await expect(updateMyProfile(alice.cells[0], sample)).rejects.toThrow();
+    await expect(
+      updateMyProfile(alice.cells[0], profileHash, sample)
+    ).rejects.toThrow();
 
     await pause(1200);
 
@@ -157,6 +160,18 @@ test("create and update Profile", async () => {
     sample = sampleProfile({
       name: "Bob",
     });
-    await expect(updateMyProfile(bob.cells[0], sample)).rejects.toThrow();
+    await expect(
+      updateMyProfile(bob.cells[0], profileHash, sample)
+    ).rejects.toThrow();
+
+    // Alice update here profile again
+    sample = sampleProfile({
+      name: "Alice",
+      nickname: "Alicia",
+    });
+    aliceProfile = decodeOutputs([
+      await getMyProfile(alice.cells[0]),
+    ])[0] as Profile;
+    assert.equal(aliceProfile.nickname, sample.nickname);
   });
 });

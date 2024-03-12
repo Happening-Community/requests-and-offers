@@ -25,8 +25,6 @@ pub struct Profile {
     pub time_zone: String,
     /// The location where the user is based.
     pub location: String,
-    /// The timestamp indicating when the user's profile was created.
-    pub created_at: Timestamp,
 }
 
 const ALLOWED_TYPES: [&str; 2] = ["advocate", "developer"];

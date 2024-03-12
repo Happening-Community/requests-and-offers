@@ -77,14 +77,13 @@
       email: data.get('email') as string,
       phone: data.get('phone') as string,
       time_zone: data.get('timezone') as string,
-      location: data.get('location') as string,
-      created_at: 0
+      location: data.get('location') as string
     };
 
     console.log('profile :', profile);
 
     try {
-      await updateMyProfile(profile);
+      await updateMyProfile($myProfile?.hash!, profile);
       await getMyProfileZomeCall();
 
       goto('/profile');
