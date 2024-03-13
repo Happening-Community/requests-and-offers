@@ -1,9 +1,24 @@
 <script lang="ts">
   import type { ActionHash } from '@holochain/client';
+  import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
+  import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
   import { getAllProfiles, getAllProfilesLinks, profiles } from '@stores/profiles.store';
   import { onMount } from 'svelte';
 
   let profilesHashes: ActionHash[];
+
+  const modalStore = getModalStore();
+  const modalComponent: ModalComponent = { ref: ProfileDetailsModal };
+  const modal = (id: number, hash: ActionHash): ModalSettings => {
+    return {
+      type: 'component',
+      component: modalComponent,
+      meta: {
+        id,
+        hash
+      }
+    };
+  };
 
   onMount(async () => {
     await getAllProfiles();
@@ -30,9 +45,13 @@
           <tr>
             <td>{profile.name}</td>
             <td>
-              <a href="/profile?id={i}&hash={profilesHashes[i]}" class="btn variant-filled-primary">
+              <!-- <a href="/profile?id={i}&hash={profilesHashes[i]}" class="btn variant-filled-primary">
                 View
-              </a>
+              </a> -->
+              <button
+                class="btn variant-filled-primary"
+                on:click={() => modalStore.trigger(modal(i, profilesHashes[i]))}>View</button
+              >
             </td>
           </tr>
         {/each}

@@ -3,7 +3,7 @@
   import { onMount } from 'svelte';
   import '../app.postcss';
   import hc, { isConnected } from '@services/client.service';
-  import { getMyProfile, myProfile } from '@stores/profiles.store';
+  import { getMyProfile } from '@stores/profiles.store';
   import { ConicGradient, Modal, type ConicStop } from '@skeletonlabs/skeleton';
   import { initializeStores } from '@skeletonlabs/skeleton';
 
