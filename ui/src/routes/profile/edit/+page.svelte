@@ -1,6 +1,6 @@
 <script lang="ts">
   import moment from 'moment-timezone';
-  import { FileDropzone, InputChip } from '@skeletonlabs/skeleton';
+  import { Avatar, FileDropzone, InputChip } from '@skeletonlabs/skeleton';
   import {
     myProfile,
     type IndividualType,
@@ -19,12 +19,17 @@
     offset: number;
   };
 
+  let form: HTMLFormElement;
   let files: FileList;
   let fileMessage: HTMLParagraphElement;
+  let profilePicture: Blob | undefined;
   let timezones = moment.tz.names();
   let filteredTimezones: string[] = [];
   let formattedTimezones: FormattedTimezone[] = [];
   let search = '';
+  let isChanged = false;
+
+  $: console.log('isChanged :', isChanged);
 
   function formatTimezones(timezones: string[]): FormattedTimezone[] {
     return timezones.map((timezone) => {
@@ -52,26 +57,50 @@
     filteredTimezones = timezones.filter((tz) => tz.toLowerCase().includes(search.toLowerCase()));
   }
 
-  function onPictureFileChange() {
+  async function onPictureFileChange() {
     fileMessage.innerHTML = `${files[0].name}`;
+    profilePicture = new Blob([new Uint8Array(await files[0].arrayBuffer())]);
+  }
+
+  function RemoveProfilePicture() {
+    isChanged = true;
+    profilePicture = undefined;
+    fileMessage.innerHTML = '';
+    const pictureInput = form.querySelector('input[name="picture"]') as HTMLInputElement;
+    if (pictureInput) {
+      pictureInput.value = '';
+    }
+
+    myProfile.update((profile) => {
+      if (!profile) return null;
+      return {
+        ...profile,
+        profile_picture: undefined
+      };
+    });
   }
 
   onMount(async () => {
-    console.log('My profile :', $myProfile);
+    if ($myProfile?.profile_picture) profilePicture = new Blob([$myProfile?.profile_picture]);
   });
 
   async function submitForm(event: SubmitEvent) {
     event.preventDefault();
     console.log('event :', event);
 
-    const data = new FormData(event.target as HTMLFormElement);
+    const data = new FormData(form);
     const profile_picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
+
+    console.log(data.get('picture'));
 
     const profile: Profile = {
       name: data.get('name') as string,
       nickname: data.get('nickname') as string,
       bio: data.get('bio') as string,
-      profile_picture: profile_picture.byteLength > 0 ? new Uint8Array(profile_picture) : undefined,
+      profile_picture:
+        profile_picture.byteLength > 0
+          ? new Uint8Array(profile_picture)
+          : $myProfile?.profile_picture,
       user_type: data.get('user_type') as IndividualType,
       skills: data.getAll('skills') as string[],
       email: data.get('email') as string,
@@ -79,8 +108,6 @@
       time_zone: data.get('timezone') as string,
       location: data.get('location') as string
     };
-
-    console.log('profile :', profile);
 
     try {
       await updateProfile((await hc.getAppInfo())?.agent_pub_key!, profile);
@@ -99,7 +126,13 @@
   {:else}
     <h2 class="h2">Create Profile</h2>
 
-    <form class="flex flex-col gap-4" enctype="multipart/form-data" on:submit={submitForm}>
+    <form
+      class="flex flex-col gap-4"
+      enctype="multipart/form-data"
+      bind:this={form}
+      on:submit={submitForm}
+      on:input={() => (isChanged = true)}
+    >
       <p>*required fields</p>
       <label class="label text-lg">
         Name* :<input type="text" class="input" name="name" value={$myProfile.name} required />
@@ -117,7 +150,24 @@
 
       <p class="label text-lg">Profile picture :</p>
       <FileDropzone name="picture" bind:files on:change={onPictureFileChange} accept="image/*" />
-      <p class="italic" bind:this={fileMessage} />
+      <div class="flex items-center justify-between">
+        <p class="italic" bind:this={fileMessage} />
+        {#if files && profilePicture}
+          <div>
+            <Avatar src={URL.createObjectURL(profilePicture)} />
+            <button class="cursor-pointer underline" on:click={RemoveProfilePicture}>
+              Remove
+            </button>
+          </div>
+        {/if}
+      </div>
+
+      {#if profilePicture && !files}
+        <div class="flex items-center gap-2">
+          <Avatar src={URL.createObjectURL(profilePicture)} />
+          <button class="cursor-pointer underline" on:click={RemoveProfilePicture}> Remove </button>
+        </div>
+      {/if}
 
       <div class="flex gap-6">
         <p class="label text-lg">Type* :</p>
@@ -191,7 +241,11 @@
         <input type="text" class="input" name="location" value={$myProfile.location} />
       </label>
 
-      <button type="submit" class="btn variant-filled-primary w-fit self-center">
+      <button
+        type="submit"
+        class="btn variant-filled-primary w-fit self-center"
+        disabled={!isChanged}
+      >
         Update Profile
       </button>
     </form>

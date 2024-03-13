@@ -120,7 +120,7 @@ test("create and read Profile", async () => {
   });
 });
 
-test.only("create and update Profile", async () => {
+test("create and update Profile", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: Profile;
     let record: Record;

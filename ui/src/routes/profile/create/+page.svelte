@@ -1,6 +1,6 @@
 <script lang="ts">
   import moment from 'moment-timezone';
-  import { FileDropzone, InputChip } from '@skeletonlabs/skeleton';
+  import { FileDropzone, InputChip, Avatar } from '@skeletonlabs/skeleton';
   import {
     createProfile,
     myProfile,
@@ -16,6 +16,7 @@
     offset: number;
   };
 
+  let form: HTMLFormElement;
   let files: FileList;
   let fileMessage: HTMLParagraphElement;
   let timezones = moment.tz.names();
@@ -49,8 +50,20 @@
     filteredTimezones = timezones.filter((tz) => tz.toLowerCase().includes(search.toLowerCase()));
   }
 
-  function onPictureFileChange() {
+  let profilePicture: Blob | undefined;
+
+  async function onPictureFileChange() {
     fileMessage.innerHTML = `${files[0].name}`;
+    profilePicture = new Blob([new Uint8Array(await files[0].arrayBuffer())]);
+  }
+
+  function RemoveProfilePicture() {
+    profilePicture = undefined;
+    fileMessage.innerHTML = '';
+    const pictureInput = form.querySelector('input[name="picture"]') as HTMLInputElement;
+    if (pictureInput) {
+      pictureInput.value = '';
+    }
   }
 
   async function submitForm(event: SubmitEvent) {
@@ -73,25 +86,23 @@
       location: data.get('location') as string
     };
 
-    const mockedProfile: Profile = {
-      name: 'John Doe',
-      nickname: 'John',
-      bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      profile_picture: undefined,
-      user_type: 'developer',
-      skills: ['JavaScript', 'Svelte', 'SvelteKit'],
-      email: 'pHjX5@example.com',
-      phone: '123456789',
-      time_zone: 'Europe/Paris',
-      location: 'Paris, France'
-    };
+    // const mockedProfile: Profile = {
+    //   name: 'John Doe',
+    //   nickname: 'John',
+    //   bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    //   profile_picture: undefined,
+    //   user_type: 'developer',
+    //   skills: ['JavaScript', 'Svelte', 'SvelteKit'],
+    //   email: 'pHjX5@example.com',
+    //   phone: '123456789',
+    //   time_zone: 'Europe/Paris',
+    //   location: 'Paris, France'
+    // };
 
-    // console.log('profile :', profile);
-    console.log('profile :', mockedProfile);
+    console.log('profile :', profile);
 
     try {
-      // await createProfile(profile);
-      await createProfile(mockedProfile);
+      await createProfile(profile);
       await getMyProfile();
 
       goto('/profile');
@@ -106,17 +117,20 @@
     <p class="h2">Profile already created.</p>
   {:else}
     <h2 class="h2">Create Profile</h2>
-    <form class="flex flex-col gap-4" enctype="multipart/form-data" on:submit={submitForm}>
+    <form
+      class="flex flex-col gap-4"
+      enctype="multipart/form-data"
+      on:submit={submitForm}
+      bind:this={form}
+    >
       <p>*required fields</p>
       <label class="label text-lg">
         Name* :<input type="text" class="input" name="name" />
-        <!-- Name* :<input type="text" class="input" name="name" required /> -->
       </label>
 
       <label class="label text-lg">
         Nickname* :
         <input type="text" class="input" name="nickname" />
-        <!-- <input type="text" class="input" name="nickname" required /> -->
       </label>
 
       <label class="label text-lg">
@@ -126,7 +140,17 @@
 
       <p class="label text-lg">Profile picture :</p>
       <FileDropzone name="picture" bind:files on:change={onPictureFileChange} accept="image/*" />
-      <p class="italic" bind:this={fileMessage} />
+      <div class="flex items-center justify-between">
+        <p class="italic" bind:this={fileMessage} />
+        {#if files && profilePicture}
+          <div>
+            <Avatar src={URL.createObjectURL(profilePicture)} />
+            <button class="cursor-pointer underline" on:click={RemoveProfilePicture}>
+              Remove
+            </button>
+          </div>
+        {/if}
+      </div>
 
       <div class="flex gap-6">
         <p class="label text-lg">Type* :</p>
@@ -137,7 +161,6 @@
             Advocate
           </label>
           <label class="label flex items-center gap-2">
-            <!-- <input type="radio" name="user_type" value="developer" required /> -->
             <input type="radio" name="user_type" value="developer" checked required />
             Developer
           </label>
@@ -158,7 +181,6 @@
       <label class="label text-lg">
         Email* :
         <input type="email" class="input" name="email" />
-        <!-- <input type="email" class="input" name="email" required /> -->
       </label>
 
       <label class="label text-lg">
