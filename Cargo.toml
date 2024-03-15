@@ -8,10 +8,10 @@ opt-level = "z"
 members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
 
 [workspace.dependencies]
-hdi = "=0.3.6"
-hdk = "=0.2.6"
-image = "0.24.7"
-serde = "=1.0"
+hdi = "0.3.6"
+hdk = "0.2.6"
+image = "0.24"
+serde = "1.0"
 
 [workspace.dependencies.ping]
 path = "dnas/requests_and_offers/zomes/coordinator/ping"
