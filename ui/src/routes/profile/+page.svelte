@@ -1,11 +1,7 @@
 <script lang="ts">
   import CreateProfileBtn from '$lib/CreateProfileBtn.svelte';
-  import { myProfile, profiles, getAllProfiles, myProfileHash } from '@stores/profiles.store';
+  import { myProfile } from '@stores/profiles.store';
   import { Avatar } from '@skeletonlabs/skeleton';
-  import { onMount } from 'svelte';
-  import type { PageData } from '../$types';
-
-  export let data: PageData;
 
   let profilePictureUrl: string;
 

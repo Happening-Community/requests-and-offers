@@ -1,8 +1,7 @@
 <script lang="ts">
   import CreateProfileBtn from '$lib/CreateProfileBtn.svelte';
-  import { getMyProfile, myProfile } from '@stores/profiles.store';
+  import { myProfile } from '@stores/profiles.store';
   import type { Record } from '@holochain/client';
-  import { onMount } from 'svelte';
 </script>
 
 <section class="flex flex-col items-center">
