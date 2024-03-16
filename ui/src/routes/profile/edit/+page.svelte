@@ -11,7 +11,7 @@
   import { goto } from '$app/navigation';
   import CreateProfileBtn from '@lib/CreateProfileBtn.svelte';
   import { onMount } from 'svelte';
-  import hc from '@services/client.service';
+  import hc from '@services/HolochainClientService';
 
   type FormattedTimezone = {
     name: string;

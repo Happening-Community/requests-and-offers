@@ -2,9 +2,7 @@
   "name": "tests",
   "private": true,
   "scripts": {
-    "test": "vitest run",
-    "test:ping": "vitest run --filter ping",
-    "test:profiles": "vitest run --filter profiles"
+    "test": "vitest run"
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.7.0",

@@ -2,7 +2,7 @@
   import Navbar from '$lib/NavBar.svelte';
   import { onMount } from 'svelte';
   import '../app.postcss';
-  import hc, { isConnected } from '@services/client.service';
+  import hc, { isConnected } from '@services/HolochainClientService';
   import { getMyProfile } from '@stores/profiles.store';
   import { ConicGradient, Modal, type ConicStop } from '@skeletonlabs/skeleton';
   import { initializeStores } from '@skeletonlabs/skeleton';

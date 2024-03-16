@@ -1,11 +1,11 @@
-import { assert, expect, test } from "vitest";
+import { expect, test } from "vitest";
 
 import { runScenario } from "@holochain/tryorama";
 
 const hAppPath = process.cwd() + "/../workdir/requests_and_offers.happ";
 const appSource = { appBundleSource: { path: hAppPath } };
 
-test.only("ping", async () => {
+test("ping", async () => {
   await runScenario(async (scenario) => {
     const [alice] = await scenario.addPlayersWithApps([appSource]);
     await scenario.shareAllAgents();
