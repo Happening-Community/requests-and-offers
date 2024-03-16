@@ -7,6 +7,7 @@ import {
   CallableCell,
   Scenario,
   Player,
+  dhtSync,
 } from "@holochain/tryorama";
 import {
   NewEntryAction,
@@ -48,7 +49,7 @@ async function runScenarioWithTwoAgents(
 }
 
 test("create and read Profile", async () => {
-  await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
+  await runScenarioWithTwoAgents(async (_scenario, alice, bob) => {
     let sample: Profile;
     let record: Record;
     let records: Record[];
@@ -58,7 +59,7 @@ test("create and read Profile", async () => {
     record = await createProfile(alice.cells[0], sample);
     assert.ok(record);
 
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Alice get her profile
     let aliceProfileLink = await getAgentProfile(
@@ -67,7 +68,7 @@ test("create and read Profile", async () => {
     );
     assert.ok(aliceProfileLink);
 
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Bob gets the created Profile
     const createReadOutput: Record = await getLatestProfile(
@@ -87,7 +88,7 @@ test("create and read Profile", async () => {
 
     await expect(createProfile(bob.cells[0], errSample)).rejects.toThrow();
 
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Bob create an Profile with erroneous profile Picture
     errSample = sampleProfile({
@@ -96,7 +97,7 @@ test("create and read Profile", async () => {
     });
     await expect(createProfile(bob.cells[0], errSample)).rejects.toThrow();
 
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Bob creates a Profile with a real image file
     const response = await fetch("https://picsum.photos/200/300");
@@ -112,7 +113,7 @@ test("create and read Profile", async () => {
     record = await createProfile(bob.cells[0], sample);
     assert.ok(record);
 
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Alice get all the individual profiles
     links = await getAllProfiles(alice.cells[0]);
@@ -121,7 +122,7 @@ test("create and read Profile", async () => {
 });
 
 test("create and update Profile", async () => {
-  await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
+  await runScenarioWithTwoAgents(async (_scenario, alice, bob) => {
     let sample: Profile;
     let record: Record;
 
@@ -129,10 +130,10 @@ test("create and update Profile", async () => {
     record = await createProfile(alice.cells[0], sample);
     const originalProfileHash = record.signed_action.hashed.hash;
 
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
     const response = await fetch("https://picsum.photos/200/300");
     const buffer = await response.arrayBuffer();
-
-    await pause(1200);
 
     // Alice update her profile with a valid profile picture
     sample = sampleProfile({
@@ -148,7 +149,7 @@ test("create and update Profile", async () => {
       sample
     );
 
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     let latestProfileRecord = await getLatestProfile(
       alice.cells[0],
@@ -157,7 +158,7 @@ test("create and update Profile", async () => {
     let aliceProfile = decodeOutputs([latestProfileRecord])[0] as Profile;
     assert.equal(sample.name, aliceProfile.name);
 
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Alice update her profile with an invalid profile picture
     sample = sampleProfile({
@@ -174,7 +175,7 @@ test("create and update Profile", async () => {
       )
     ).rejects.toThrow();
 
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Bob try to update Alice's profile
     sample = sampleProfile({
@@ -189,7 +190,7 @@ test("create and update Profile", async () => {
       )
     ).rejects.toThrow();
 
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Alice update here profile again
     sample = sampleProfile({
