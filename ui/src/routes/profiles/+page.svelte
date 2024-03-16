@@ -45,13 +45,12 @@
           <tr>
             <td>{profile.name}</td>
             <td>
-              <!-- <a href="/profile?id={i}&hash={profilesHashes[i]}" class="btn variant-filled-primary">
-                View
-              </a> -->
               <button
                 class="btn variant-filled-primary"
-                on:click={() => modalStore.trigger(modal(i, profilesHashes[i]))}>View</button
+                on:click={() => modalStore.trigger(modal(i, profilesHashes[i]))}
               >
+                View
+              </button>
             </td>
           </tr>
         {/each}

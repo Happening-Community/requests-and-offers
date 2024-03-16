@@ -1,5 +1,5 @@
 import { decodeRecords } from '@utils';
-import hc from '@services/client.service';
+import hc from '@services/HolochainClientService';
 import { get, writable, type Writable } from 'svelte/store';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
 
@@ -37,12 +37,12 @@ export const profiles: Writable<Profile[]> = writable([]);
  * @async
  * @param {Profile} profile - The profile to be created.
  */
-export async function createProfile(profile: Profile) {
-  await hc.callZome('profiles', 'create_profile', profile);
+export async function createProfile(profile: Profile): Promise<Record> {
+  return await hc.callZome('profiles', 'create_profile', profile);
 }
 
 async function getLatestProfileRecord(original_profile_hash: ActionHash): Promise<Record | null> {
-  return hc.callZome('profiles', 'get_latest_profile', original_profile_hash);
+  return await hc.callZome('profiles', 'get_latest_profile', original_profile_hash);
 }
 
 export async function getLatestProfile(original_profile_hash: ActionHash): Promise<Profile | null> {
@@ -64,14 +64,11 @@ export async function getAgentProfile(author: AgentPubKey): Promise<Profile | nu
   return agentProfileRecord ? decodeRecords([agentProfileRecord])[0] : null;
 }
 
-export async function getMyProfile() {
+export async function getMyProfile(): Promise<void> {
   const agentPubKey = (await hc.getAppInfo())!.agent_pub_key;
   const agentProfileRecord = await getAgentProfileRecord(agentPubKey);
 
   myProfile.set(agentProfileRecord ? decodeRecords([agentProfileRecord])[0] : null);
-
-  // const profileLink: Link | null = await hc.callZome('profiles', 'get_agent_profile', agentPubKey);
-  // if (profileLink) myProfileHash.set(profileLink.target);
 }
 
 export async function getAllProfilesLinks(): Promise<Link[]> {
@@ -91,19 +88,16 @@ async function getAllProfilesRecords(): Promise<Record[]> {
   return profilesRecords;
 }
 
-export async function getAllProfiles() {
+export async function getAllProfiles(): Promise<void> {
   const profilesRecords: Record[] = await getAllProfilesRecords();
 
   profiles.set(decodeRecords(profilesRecords));
 }
 
-export async function updateProfile(
-  agent: AgentPubKey,
-  updated_profile: Profile
-): Promise<Record | null> {
+export async function updateProfile(agent: AgentPubKey, updated_profile: Profile): Promise<Record> {
   const agentProfileLinks: Link[] = await hc.callZome('profiles', 'get_agent_profile', agent);
 
-  if (agentProfileLinks.length === 0) return null;
+  if (agentProfileLinks.length === 0) throw new Error('Agent has no profile');
 
   const original_profile_hash = agentProfileLinks[0].target;
   const previous_profile_hash = (await getLatestProfileRecord(original_profile_hash))?.signed_action
