@@ -60,9 +60,6 @@ The `AgentProfile` entity represents the profile of an agent within the hAppenin
 - **location**: The location where the agent is based.
   - **Type**: `String`
   - **Validation**: Optional, but recommended for community engagement and networking.
-- **created_at**: The timestamp indicating when the agent's profile was created.
-  - **Type**: `Timestamp`
-  - **Validation**: Automatically set upon profile creation, ensuring accurate tracking of profile creation time.
 
 This detailed specification of the `AgentProfile` entity ensures that all stakeholders have a clear understanding of the data model, its requirements, and the validation rules that govern its use. This clarity is essential for the successful development and implementation of the application.
 
