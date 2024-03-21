@@ -29,7 +29,7 @@
 
 <section>
   <h2 class="h2 mb-10">Profiles</h2>
-  {#if $profiles && profilesHashes}
+  {#if $profiles && profilesHashes && $profiles.length > 0}
     <table class="table">
       <thead>
         <tr>
