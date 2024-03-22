@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Avatar, getModalStore } from '@skeletonlabs/skeleton';
-  import { getAgentProfile, getLatestProfile, type Profile } from '@stores/profiles.store';
+  import { getLatestProfile, type Profile } from '@stores/profiles.store';
   import { onMount } from 'svelte';
 
   const modalStore = getModalStore();
@@ -20,7 +20,7 @@
 </script>
 
 <article
-  class="card bg-surface-800 flex w-fit flex-col items-center gap-4 overflow-auto p-10 text-white shadow-xl"
+  class="bg-surface-800 flex max-h-[90vh] w-3/5 flex-col items-center gap-4 overflow-auto p-10 text-white shadow-xl"
 >
   {#if profile}
     <h2 class="h2 font-bold">{profile.name}</h2>
@@ -36,4 +36,7 @@
     <p><b>Timezone :</b> {profile.time_zone}</p>
     <p><b>Location :</b> {profile.location}</p>
   {/if}
+  <button class="btn variant-filled-secondary mt-5" on:click={() => modalStore.close()}>
+    Close
+  </button>
 </article>

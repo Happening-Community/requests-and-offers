@@ -21,7 +21,7 @@
       <a href="/profile/edit" class="btn variant-filled-primary w-fit text-white">Edit profile</a>
     </div>
     <div
-      class="border-surface-600 bg-surface-400 flex w-1/2 min-w-96 flex-col items-center gap-5 rounded-xl border-8 p-5 drop-shadow-xl"
+      class="border-surface-600 bg-surface-400 flex w-4/5 min-w-96 flex-col items-center gap-5 rounded-xl border-8 p-5 drop-shadow-xl"
     >
       <h3 class="h3"><b>Nickname :</b> {$myProfile.nickname}</h3>
       <div class="drop-shadow-lg" on:load={() => URL.revokeObjectURL(profilePictureUrl)}>
