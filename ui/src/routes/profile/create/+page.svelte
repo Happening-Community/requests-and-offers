@@ -152,7 +152,7 @@
         {/if}
       </div>
 
-      <div class="flex gap-6">
+      <div class="flex flex-col gap-2 lg:flex-row lg:gap-6">
         <p class="label text-lg">Type* :</p>
 
         <div class="flex gap-4">
@@ -164,10 +164,14 @@
             <input type="radio" name="user_type" value="developer" checked required />
             Developer
           </label>
+          <label class="label flex items-center gap-2 text-gray-500">
+            <input type="radio" name="user_type" value="creator" disabled />
+            Creator
+          </label>
         </div>
       </div>
 
-      <div class="flex gap-5">
+      <div class="flex flex-col gap-2 lg:flex-row lg:gap-6">
         <p class="label w-16 text-lg">Skills :</p>
         <!-- TODO:When skills indexation done, use Autocomplete Input Chip Skeleton component for skills selection -->
         <InputChip
