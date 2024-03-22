@@ -65,7 +65,8 @@ This detailed specification of the `AgentProfile` entity ensures that all stakeh
 
 ### 4.2 Projects and Organizations
 
-- **Project and Organization Creation**: Users can create projects and organizations, with projects owned by organizations.
+- **Project and Organization Creation**: Users can create projects and organizations, with projects owned by organizations. Projects have specific requirements and status.
+![Project status](images/project-status.png)
 - **Team Members**: Projects and organizations can include team members, which are agent profiles.
 - **External Repository Linking**: Projects and organizations can be linked to external repositories.
 
@@ -85,6 +86,8 @@ This detailed specification of the `AgentProfile` entity ensures that all stakeh
 
 - **Skills**: Users can create skills, which are used to filter agents profiles, requests and offers.
 - **Categories**: Administrators can create categories, which are used to organize projects, requests and offers.
+![Types of project](images/types-of-projects.png)
+![Types of support requested](images/types-of-support-requested.png)
 
 ### 4.5 Search Functionality
 
