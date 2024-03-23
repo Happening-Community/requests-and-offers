@@ -24,9 +24,9 @@ This application is specifically tailored for the participants in the Holochain 
 - **Profile Linking**: Profiles can be linked to organizations, requests, offers, and projects.
 - **Custom Holochain Zome**: A custom zome for managing user profiles within the application.
 
-### 4.1.1 AgentProfile Entity
+### 4.1.1 Profile Entity
 
-The `AgentProfile` entity represents the profile of an agent within the hAppenings.community. An agent can be a single user or a device associated with a user, allowing for the sharing of profiles across multiple devices. This entity includes various fields to capture essential information about the agent, facilitating personalized experiences and targeted interactions within the community.
+The `Profile` entity represents the profile of an agent within the hAppenings.community. An agent can be a single user or a device associated with a user, allowing for the sharing of profiles across multiple devices. This entity includes various fields to capture essential information about the agent, facilitating personalized experiences and targeted interactions within the community.
 
 ##### 4.1.1.1 Fields
 
@@ -61,7 +61,7 @@ The `AgentProfile` entity represents the profile of an agent within the hAppenin
   - **Type**: `String`
   - **Validation**: Optional, but recommended for community engagement and networking.
 
-This detailed specification of the `AgentProfile` entity ensures that all stakeholders have a clear understanding of the data model, its requirements, and the validation rules that govern its use. This clarity is essential for the successful development and implementation of the application.
+This detailed specification of the `Profile` entity ensures that all stakeholders have a clear understanding of the data model, its requirements, and the validation rules that govern its use. This clarity is essential for the successful development and implementation of the application.
 
 ### 4.2 Projects and Organizations
 
