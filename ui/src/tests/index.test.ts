@@ -1,11 +1,6 @@
 import type { Record } from '@holochain/client';
-import { decodeRecords, isEmptyObj } from '../utils';
+import { decodeRecords } from '../utils';
 import { expect, test } from 'vitest';
-
-test('isEmptyObj function', () => {
-  expect(isEmptyObj({})).toBeTruthy();
-  expect(isEmptyObj({ 0: 11 })).toBeFalsy();
-});
 
 test('decodeRecords function', () => {
   expect(decodeRecords([])).toEqual([]);
