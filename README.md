@@ -18,21 +18,29 @@ pnpm install
 
 **Run all the other instructions in this README from inside this nix develop, otherwise they won't work**.
 
-## Running 1 agent
+## Running 2 agents
  
 ```bash
 pnpm start
 ```
 
-This will create a network of 1 nodes connected to its UI.
+This will create a network of 2 nodes connected to their UI.
 It will also bring up the Holochain Playground for advanced introspection of the conductors.
+
+## Running another number of agents
+
+```bash
+AGENTS=1 pnpm start
+```
+
+It is possible to create a network with a different number of nodes by changing the AGENTS variable.
 
 ## Running the tests
 
 ```bash
-pnpm test:zomes
+pnpm test
 ```
-This command run the holochain backend tests.
+This command run all the holochain backend tests and the ui tests.
 
 ```bash
 pnpm test:ui
@@ -40,20 +48,14 @@ pnpm test:ui
 This one run the sveltekit ui tests.
 
 ```bash
-pnpm test
+pnpm test:ping
 ```
-And finally, this command run the backend tests then the ui tests.
-
-## Bootstrapping a network
-
-Create a custom network of nodes connected to each other and their respective UIs with:
+This one run the ping test.
 
 ```bash
-AGENTS=3 pnpm run network
+pnpm test:profiles
 ```
-
-Substitute the "3" for the number of nodes that you want to bootstrap in your network.
-This will also bring up the Holochain Playground for advanced introspection of the conductors.
+This one run the profiles zome test.
 
 ## Packaging
 
@@ -76,6 +78,4 @@ This repository is using these tools:
 
 ## License
 
-Copyright (C) 2024, hAppening Community
-
-This program is free software: you can redistribute it and/or modify it under the terms of the license provided in the LICENSE file (CAL-1.0). This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+[Cryptographic Autonomy License version 1.0](LICENSE.md)
