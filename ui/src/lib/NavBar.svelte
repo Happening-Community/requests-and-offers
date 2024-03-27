@@ -1,20 +1,13 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
-  import { page } from '$app/stores';
-
-  // import Bars from '@lib/svg/bars.svelte';
   import { myProfile } from '@stores/profiles.store';
 </script>
 
-<nav class="bg-primary-500 absolute flex h-32 w-full items-center justify-between p-4">
+<nav class="bg-primary-500 absolute flex h-32 w-full items-center justify-between gap-4 p-4">
   <a href="/" class="w-1/3"><img src="/hAppeningsLogoWsun2.webp" alt="" class="w-28" /></a>
 
-  <h1 class="h2 text-center text-white">Requests and Offers hApp</h1>
+  <a class="h2 text-center text-white" href="/">Requests and Offers hApp</a>
 
-  <div class="flex w-1/3 justify-end gap-4">
-    <!-- <button type="button" class="btn variant-filled-secondary group p-4">
-      <Bars svgClass={`fill-[#4720b7] group-hover:fill-white`} />
-    </button> -->
+  <div class="flex w-1/3 flex-col justify-end gap-4 sm:flex-row">
     {#if $myProfile}
       <a href="/profile" class="btn variant-filled-secondary">My profile</a>
     {/if}

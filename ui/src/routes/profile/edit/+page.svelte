@@ -122,9 +122,10 @@
 
 <section class="flex w-1/2 flex-col gap-10">
   {#if !$myProfile}
+    <p class="mb-4 text-center text-xl">It looks like you don't have a profile yet !</p>
     <CreateProfileBtn />
   {:else}
-    <h2 class="h2">Create Profile</h2>
+    <h2 class="h2">Edit Profile</h2>
 
     <form
       class="flex flex-col gap-4"

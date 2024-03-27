@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { ActionHash } from '@holochain/client';
+  import CreateProfileBtn from '@lib/CreateProfileBtn.svelte';
   import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
   import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
   import { getAllProfiles, getAllProfilesLinks, profiles } from '@stores/profiles.store';
@@ -27,13 +28,17 @@
   };
 </script>
 
-<section>
-  <h2 class="h2 mb-10">Profiles</h2>
+<section class="flex flex-col gap-4">
+  <div class="flex gap-4">
+    <h2 class="h2">Profiles</h2>
+    <CreateProfileBtn />
+  </div>
   {#if $profiles && profilesHashes && $profiles.length > 0}
     <table class="table">
       <thead>
         <tr>
           <th>Name</th>
+          <th>Type</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -41,6 +46,7 @@
         {#each $profiles as profile, i}
           <tr>
             <td>{profile.name}</td>
+            <td>{profile.user_type.charAt(0).toUpperCase() + profile.user_type.slice(1)}</td>
             <td>
               <button
                 class="btn variant-filled-primary"

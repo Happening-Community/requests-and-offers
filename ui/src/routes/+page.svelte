@@ -6,6 +6,7 @@
 
 <section class="flex flex-col items-center">
   {#if !$myProfile}
+    <p class="mb-4 text-center text-xl">It looks like you don't have a profile yet !</p>
     <CreateProfileBtn />
   {:else}
     <h2 class="h2 mb-10">Welcome {$myProfile.name} !</h2>
