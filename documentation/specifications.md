@@ -6,7 +6,7 @@ The Requests & Offers - HC/MVP project aims to develop a Holochain application d
 
 ## 2. Objective
 
-The primary objective of this project is to create a simple, open-source Holochain application that enables Creators, Projects, and Developers to reach out to Holochain Advocates with specific requests for support. The application will be built on Holochain, incorporating TimeBanking/LETS design ideas and potentially including a Mutual Credit Currency component.
+The primary objective of this project is to create a simple, open-source Holochain application that enables Creators, Projects, and Developers to reach out to Holochain Advocates with specific requests for support. The application will be built on Holochain, incorporating TimeBanking and Local Exchange Trading System (LETS) design ideas and potentially including a Mutual Credit Currency component in post MVP versions.
 
 ## 3. Targeted Audience
 
