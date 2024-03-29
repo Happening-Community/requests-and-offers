@@ -142,6 +142,14 @@ This detailed specification of the `Profile` entity ensures that all stakeholder
   - **Skeleton UI**: A component library for building user interfaces with SvelteKit and Tailwind. 
 - **hREA**: hREA (Holochain Resource-Event-Agent) is an implementation of the Valueflows specification. It enables a transparent and trusted account of resource and information flows between decentralized and independent agents, across and within ecosystems.
 
-## 8. Conclusion
+## 8. User Interface
+
+Color palette :
+
+![hAppening Community color palette](images/happening-community-theme-1.png)
+
+![hAppening Community color palette](images/happening-community-theme-2.png)
+
+## 9. Conclusion
 
 This specification document outlines the key components and functionalities of the Requests & Offers - HC/MVP project. By adhering to these specifications, developers can ensure the successful creation of a Holochain application that effectively facilitates the exchange of requests and offers within the hAppenings.community.
