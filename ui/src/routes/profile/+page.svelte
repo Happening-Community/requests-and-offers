@@ -25,8 +25,8 @@
       class="border-surface-600 bg-surface-400 flex w-4/5 min-w-96 flex-col items-center gap-5 rounded-xl border-8 p-5 drop-shadow-xl"
     >
       <h3 class="h3"><b>Nickname :</b> {$myProfile.nickname}</h3>
-      <div class="drop-shadow-lg" on:load={() => URL.revokeObjectURL(profilePictureUrl)}>
-        <Avatar src={profilePictureUrl} width="w-64" />
+      <div on:load={() => URL.revokeObjectURL(profilePictureUrl)}>
+        <Avatar src={profilePictureUrl} width="w-64" background="none" />
       </div>
       <p class="text-center">{$myProfile.bio}</p>
       <p><b>Type :</b> {$myProfile.user_type}</p>

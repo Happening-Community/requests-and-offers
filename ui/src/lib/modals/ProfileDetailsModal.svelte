@@ -25,8 +25,8 @@
   {#if profile}
     <h2 class="h2 font-bold">{profile.name}</h2>
     <h3 class="h3"><b>Nickname :</b> {profile.nickname}</h3>
-    <div class="drop-shadow-lg" on:load={() => URL.revokeObjectURL(profilePictureUrl)}>
-      <Avatar src={profilePictureUrl} width="w-64" />
+    <div on:load={() => URL.revokeObjectURL(profilePictureUrl)}>
+      <Avatar src={profilePictureUrl} width="w-64" background="none" />
     </div>
     <p class="text-center">{profile.bio}</p>
     <p><b>Type :</b> {profile.user_type}</p>
