@@ -4,10 +4,18 @@
   import '../app.postcss';
   import hc, { isConnected } from '@services/HolochainClientService';
   import { getMyProfile } from '@stores/profiles.store';
-  import { ConicGradient, Modal, type ConicStop } from '@skeletonlabs/skeleton';
+  import {
+    ConicGradient,
+    Modal,
+    type ConicStop,
+    Drawer,
+    getDrawerStore
+  } from '@skeletonlabs/skeleton';
   import { initializeStores } from '@skeletonlabs/skeleton';
+  import MenuLinks from '@lib/MenuLinks.svelte';
 
   initializeStores();
+  const drawerStore = getDrawerStore();
 
   onMount(async () => {
     await hc.connectClient();
@@ -39,3 +47,10 @@
 </main>
 
 <Modal />
+<Drawer>
+  {#if $drawerStore.id === 'menu-drawer'}
+    <div class="flex h-10 flex-col gap-5 p-2 md:p-5">
+      <MenuLinks />
+    </div>
+  {/if}
+</Drawer>

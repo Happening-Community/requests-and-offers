@@ -4,17 +4,17 @@
 
 <div class="flex flex-col gap-3">
   {#if $myProfile}
-    <a href="/profile" class="btn variant-filled-secondary">My profile</a>
+    <a href="/profile" class="btn variant-filled-secondary rounded-lg">My profile</a>
   {:else}
-    <a href="/profile/create" class="btn variant-filled-secondary">Create profile</a>
+    <a href="/profile/create" class="btn variant-filled-secondary rounded-lg">Create profile</a>
   {/if}
-  <a href="/profiles" class="btn variant-filled-secondary">All profiles</a>
+  <a href="/profiles" class="btn variant-filled-secondary rounded-lg">All profiles</a>
 </div>
 <div class="flex flex-col gap-3">
-  <a href="/projects" class="btn variant-filled-secondary">Projects</a>
-  <a href="/organizations" class="btn variant-filled-secondary">Organizations</a>
+  <a href="/projects" class="btn variant-filled-secondary rounded-lg">Projects</a>
+  <a href="/organizations" class="btn variant-filled-secondary rounded-lg">Organizations</a>
 </div>
 <div class="flex flex-col gap-3">
-  <a href="/requests" class="btn variant-filled-secondary">Requests</a>
-  <a href="/offers" class="btn variant-filled-secondary">Offers</a>
+  <a href="/requests" class="btn variant-filled-secondary rounded-lg">Requests</a>
+  <a href="/offers" class="btn variant-filled-secondary rounded-lg">Offers</a>
 </div>

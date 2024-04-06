@@ -1,13 +1,12 @@
 <script lang="ts">
   import Bars from './svg/bars.svelte';
-  import { getDrawerStore, type DrawerSettings, Drawer } from '@skeletonlabs/skeleton';
+  import { getDrawerStore, type DrawerSettings } from '@skeletonlabs/skeleton';
   import MenuLinks from './MenuLinks.svelte';
 
   const drawerStore = getDrawerStore();
   const drawerSettings: DrawerSettings = {
     id: 'menu-drawer',
-    width: 'w-1/3',
-    height: 'h-full',
+    width: 'w-1/2 sm:w-1/3',
     bgDrawer: 'bg-primary-500'
   };
 
@@ -15,14 +14,6 @@
     drawerStore.open(drawerSettings);
   }
 </script>
-
-<Drawer>
-  {#if $drawerStore.id === 'menu-drawer'}
-    <div class="flex h-10 flex-col gap-5 p-5 text-2xl">
-      <MenuLinks />
-    </div>
-  {/if}
-</Drawer>
 
 <nav class="bg-primary-500 absolute flex h-32 w-full items-center justify-between gap-4 p-4">
   <a href="/" class="w-1/3">
@@ -37,7 +28,7 @@
     </button>
   </div>
 
-  <div class=" hidden w-1/3 flex-col justify-end gap-4 sm:flex-row lg:flex">
+  <div class="hidden w-1/3 flex-col justify-end gap-4 sm:flex-row lg:flex">
     <MenuLinks />
   </div>
 </nav>
