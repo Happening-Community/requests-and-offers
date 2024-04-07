@@ -19,8 +19,8 @@
   <MenuLink href="/profiles">All profiles</MenuLink>
 </div>
 <div class="flex flex-col gap-3">
-  <MenuLink href="/projects">Projects</MenuLink>
   <MenuLink href="/organizations">Organizations</MenuLink>
+  <MenuLink href="/projects">Projects</MenuLink>
 </div>
 <div class="flex flex-col gap-3">
   <MenuLink href="/requests">Requests</MenuLink>
