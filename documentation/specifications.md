@@ -20,55 +20,122 @@ This application is specifically tailored for the participants in the Holochain 
 
 ### 4.1 User Profiles
 
-- **Profile Creation and Retrieval**: Users can create and retrieve their profiles, categorized as "enthusiast" or "developer".
-- **Profile Linking**: Profiles can be linked to organizations, requests, offers, and projects.
-- **Custom Holochain Zome**: A custom zome for managing user profiles within the application.
+- **Profile Creation**: Users can create and retrieve their profiles, categorized as "advocate", "developer" or "creator".
+- **Profile Retrieval**: Users can retrieve their profiles on other devices using credentials.
+- **Profile Linking**: Profiles can be linked to agents, organizations, requests, offers, and projects.
+- **Custom Holochain Zome**: A custom zome is used for managing user profiles within the application.
+- **hREA agents**: Profiles are linked to hREA agents.
 
-### 4.1.1 Profile Entity
+#### 4.1.1 Profile Entry
 
-The `Profile` entity represents the profile of an agent within the hAppenings.community. An agent can be a single user or a device associated with a user, allowing for the sharing of profiles across multiple devices. This entity includes various fields to capture essential information about the agent, facilitating personalized experiences and targeted interactions within the community.
+The `Profile` entry represents the profile and its associated agents within the hAppenings.community. An agent can be a single user or a device associated with a user, allowing for the sharing of profiles across multiple devices. This entry includes various fields to capture essential information about the profile, facilitating personalized experiences and targeted interactions within the community.
 
 ##### 4.1.1.1 Fields
 
-- **name**: The full name of the agent.
+- **name**: The full name of the profile.
   - **Type**: `String`
   - **Validation**: Must not be empty.
-- **nickname**: A shorter version of the agent's name, often used for display purposes.
+- **nickname**: A shorter version of the profile's name, often used for display purposes.
   - **Type**: `String`
   - **Validation**: Must not be empty.
-- **bio**: A brief biography about the agent.
+- **bio**: A brief biography about the profile.
   - **Type**: `String`
   - **Validation**: Optional, but recommended for a richer user experience.
-- **profile_picture**: An optional serialized image representing the agent's profile picture.
+- **profile_picture**: An optional serialized image representing the profile's picture.
   - **Type**: `Option<SerializedBytes>`
   - **Validation**: Optional, but if provided, must be a valid image.
-- **agent_type**: The type of agent, either 'advocate' or 'developer'.
+- **profile_type**: The type of profile, either 'advocate', 'developer' or 'creator'.
   - **Type**: `String`
-  - **Validation**: Must be either 'advocate' or 'developer'.
-- **skills**: A list of skills associated with the agent.
-  - **Type**: `Vec<String>`
+  - **Validation**: Must be either 'advocate', 'developer' pr 'creator'.
+- **skills**: A list of skills EntryHash associated with the profile.
+  - **Type**: `Vec<EntryHash>`
   - **Validation**: Optional, can be initially empty.
-- **email**: The agent's email address.
+- **email**: The profile's email address.
   - **Type**: `String`
   - **Validation**: Must be a valid email address format.
-- **phone**: An optional phone number for the agent.
+- **phone**: An optional phone number for the profile.
   - **Type**: `Option<String>`
   - **Validation**: Optional, but if provided, must be a valid phone number format.
-- **time_zone**: The time zone in which the agent resides.
+- **time_zone**: The time zone in which the profile resides.
   - **Type**: `String`
   - **Validation**: Must be a valid time zone identifier.
-- **location**: The location where the agent is based.
+- **location**: The location where the profile is based.
   - **Type**: `String`
   - **Validation**: Optional, but recommended for community engagement and networking.
+- **is_admin**: A flag indicating whether the profile is an administrator or not.
+  - **Type**: `bool`
+  - **Validation**: Optional, defaults to `false`. A link to an `All_Admins` anchor must be created in the `Admins` zome.
+- **status**: The status of the profile, either 'Pending', 'Accepted', or 'Rejected'.
+  - **Type**: `String`
+  - **Validation**: Must be either 'Pending', 'Accepted', or 'Rejected'.
 
-This detailed specification of the `Profile` entity ensures that all stakeholders have a clear understanding of the data model, its requirements, and the validation rules that govern its use. This clarity is essential for the successful development and implementation of the application.
+##### 4.1.1.2 Links
+
+ <!-- ProfileUpdates,
+    AllProfiles,
+    MyProfile, -->
+
+  - **ProfileUpdates**: A link from the profile create header to the profile update headers.
+  - **AllProfiles**: A link to the `profiles` anchor. It is an index of all the profiles.
+  - **MyProfile**: A link from the current agent to the profile.
 
 ### 4.2 Projects and Organizations
 
 - **Project and Organization Creation**: Users can create projects and organizations, with projects owned by organizations. Projects have specific requirements and status.
 ![Project status](images/project-status.png)
 - **Team Members**: Projects and organizations can include team members, which are agent profiles.
-- **External Repository Linking**: Projects and organizations can be linked to external repositories.
+- **External Repository Linking**: Projects and organizations can be linked to external repositories (e.g. GitHub).
+- **Administrators**: Projects and organizations are managed by administrators. They can have "badges" to indicate their status.
+
+#### 4.2.1 Project Entry
+
+The `Project` entry represents a project and its associated agents, including team members. Projects have specific requirements and status. Projects can be created by organizations or by profiles.
+
+In hREA, projects are organizations `classifiedAs` `Project`.
+
+##### 4.2.1.1 Fields
+
+- **name**: The name of the project.
+  - **Type**: `String`
+  - **Validation**: Must not be empty.
+- **description**: A brief description of the project.
+  - **Type**: `Option<String>`
+  - **Validation**: Optional, but recommended for community engagement and networking.
+  - **Default**: `None`
+
+##### 4.2.1.2 Links
+
+- **AllProjects**: A link to the `projects` anchor.
+- **ProjectAdministrators**: A link from the project's to the a profile. It is an index of all the administrators.
+- **ProjectTeamMembers**: A link from the project's to the a profile. It is an index of all the team members.
+
+#### 4.2.2 Organization Entry
+
+The `Organization` entry represents an organization and its associated profiles and projects. Organizations are created by profiles.
+
+In hREA, organizations are agent classifiedAs `Organization`.
+
+##### 4.2.2.1 Fields
+
+- **name**: The name of the organization.
+  - **Type**: `String`
+  - **Validation**: Must not be empty.
+- **description**: A brief description of the organization.
+  - **Type**: `Option<String>`
+  - **Validation**: Optional, but recommended for community engagement and networking.
+  - **Default**: `None`
+- **status**: The status of the organization, either 'Pending', 'Accepted', or 'Rejected'.
+  - **Type**: `String`
+  - **Validation**: Must be either 'Pending', 'Accepted', or 'Rejected'.
+  - **Default**: `Pending`
+
+
+##### 4.2.2.2 Links
+
+- **AllOrganizations**: A link to the `organizations` anchor.
+- **OrganizationAdministrators**: A link from the organization's to the a profile. It is an index of all the administrators of the organization.
+- **OrganizationProjects**: A link from the organization's to the a project. It is an index of all the projects under the organization.
+
 
 ### 4.3 Requests and Offers
 
@@ -81,20 +148,35 @@ This detailed specification of the `Profile` entity ensures that all stakeholder
 - **Request and Offer Management**: Administrators manage requests and offers.
 - **Project and Organization Management**: Administrators manage projects and organizations.
 - **Agent Profile Management**: Administrators manage agent profiles, including verification processes.
-
+- The first agent that initiate the network should be an administrator.
+- Administrators needs a special access to the `Administration` zome and ui.
+- Utilisation of hREA roles for project management and organization management.
+- Utilisation of [capability-based Holochain security](https://developer.holochain.org/concepts/8_calls_capabilities/#how-to-secure-functions-against-unauthorized-use).
+  
 ### 4.5 Skills and Categories
 
 - **Skills**: Users can create skills, which are used to filter agents profiles, requests and offers.
 - **Categories**: Administrators can create categories, which are used to organize projects, requests and offers.
+
 ![Types of project](images/types-of-projects.png)
+
 ![Types of support requested](images/types-of-support-requested.png)
+
+#### 4.5.1 Skill Entry
+
+The `Skill` entry represents the skills associated with the profiles, projects, requests and offers. This in an anchor that contains a `String`. `Profiles` are linked to `Skills`.
+
+Skills are also linked to hREA Resource Specifications.
 
 ### 4.5 Search Functionality
 
-- **Search by Name**: Users can search for requests, offers, projects, organizations, and agents by name.
-- **Search by Skills**: Users can search for agents profiles, requests and offers by skills.
-- **Search by Project or Organization**: Users can search for requests, offers, projects, organizations and agents associated with specific projects or organizations.
-- **Search by Categories**: Users can search for requests, offers, projects and organizations by categories.
+Each page has a search functionality.
+
+- **Search Profiles**: Users can search profiles by name, skills, categories, location, organizations and projects.
+- **Search Organization**: Users can search organizations by name, categories, projects.
+- **Search Project**: Users can search projects by name, skills, categories and organizations.
+- **Search Requests**: Users can search requests by name, skills, categories, projects, organizations and profiles.
+- **Search Offers**: Users can search offers by name, skills, categories, projects, organizations and profiles.
 
 ## 5. MVP Use Case: Project Collaboration and Skill Matching
 
@@ -102,6 +184,11 @@ This detailed specification of the `Profile` entity ensures that all stakeholder
 
 - **Use Case**: Users can register and create profiles, including their skills and areas of expertise.
 - **Benefit**: Facilitates the creation of a user-centric community, enabling personalized experiences and targeted interactions.
+
+### 5.1.1 Profile Retrieval
+
+- **Use Case**: Users can retrieve their profiles, including their skills and areas of expertise.
+- **Benefit**: Facilitates the creation of a user-centric community, enabling personalized experiences and targeted interactions. It allows the user to link multiple agents/devices to their profile.
 
 ### 5.2 Project Creation
 
@@ -125,14 +212,15 @@ This detailed specification of the `Profile` entity ensures that all stakeholder
 
 ### 5.6 Basic Search Functionality
 
-- **Use Case**: Users can search for requests, offers, projects, organizations, agents by name, skills, projects and categories.
+- **Use Case**: Users can search for requests, offers, projects, organizations, profiles by name, skills, categories, organizations and projects.
 - **Benefit**: Enhances the discoverability of resources within the community, promoting collaboration and innovation.
+
 ## 6. Infrastructure
 
 ### 6.1 Holo Hosting
 
 - **Holo Hosting Overview**: Leverages HoloHosts for robust and scalable infrastructure, contributing to the network's infrastructure and enhancing performance and reliability.
-- **Hosting Requirements**: Requires a distributed network of HoloHosts for high availability and redundancy.
+- **Hosting Requirements**: Requires a distributed network of HoloHosts for high availability and redundancy. The Holo Network can supply multiple HoloHosts for redundancy.
 - **Hosting Benefits**: Fosters a decentralized and resilient infrastructure, aligning with Holochain ecosystem principles.
 
 ## 7. Technologies
