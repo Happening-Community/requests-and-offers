@@ -1,20 +1,28 @@
 <script lang="ts">
+  import { getDrawerStore } from '@skeletonlabs/skeleton';
   import { myProfile } from '@stores/profiles.store';
+  import MenuLink from './MenuLink.svelte';
+
+  const drawerStore = getDrawerStore();
+
+  function closeDrawer() {
+    drawerStore.close();
+  }
 </script>
 
 <div class="flex flex-col gap-3">
   {#if $myProfile}
-    <a href="/profile" class="btn variant-filled-secondary rounded-lg">My profile</a>
+    <MenuLink href="/profile">My profile</MenuLink>
   {:else}
-    <a href="/profile/create" class="btn variant-filled-secondary rounded-lg">Create profile</a>
+    <MenuLink href="/profile/create">Create profile</MenuLink>
   {/if}
-  <a href="/profiles" class="btn variant-filled-secondary rounded-lg">All profiles</a>
+  <MenuLink href="/profiles">All profiles</MenuLink>
 </div>
 <div class="flex flex-col gap-3">
-  <a href="/projects" class="btn variant-filled-secondary rounded-lg">Projects</a>
-  <a href="/organizations" class="btn variant-filled-secondary rounded-lg">Organizations</a>
+  <MenuLink href="/projects">Projects</MenuLink>
+  <MenuLink href="/organizations">Organizations</MenuLink>
 </div>
 <div class="flex flex-col gap-3">
-  <a href="/requests" class="btn variant-filled-secondary rounded-lg">Requests</a>
-  <a href="/offers" class="btn variant-filled-secondary rounded-lg">Offers</a>
+  <MenuLink href="/requests">Requests</MenuLink>
+  <MenuLink href="/offers">Offers</MenuLink>
 </div>
