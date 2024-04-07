@@ -6,6 +6,7 @@
       "tests"
     ],
     "scripts": {
+      "postinstall": "npm run download-hrea-suite",
       "start": "AGENTS=${AGENTS:-2}  BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) npm run network",
       "network": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:happ\" \"holochain-playground\"",
       "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
@@ -19,16 +20,8 @@
       "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
       "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
       "build:zomes": "RUSTFLAGS='' CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown",
-      "download-hrea": "npm run download-facets && npm run download-hrea-obs && npm run download-hrea-specification && npm run download-hrea-agent && npm run download-hrea-planning && npm run download-hrea-plan && npm run download-hrea-agreement",
-        "download-facets": "[ ! -f \"workdir/hc_facets.dna\" ] && curl -L --output workdir/hc_facets.dna https://github.com/Carbon-Farm-Network/holochain-facets/releases/download/0.1.0-beta/hc_facets.dna; exit 0",
-        "download-hrea-obs": "[ ! -f \"workdir/hrea_observation.dna\" ] && curl -L --output workdir/hrea_observation.dna https://github.com/h-REA/hREA/releases/download/happ-0.2.0-beta/hrea_observation.dna; exit 0",
-        "download-hrea-specification": "[ ! -f \"workdir/hrea_specification.dna\" ] && curl -L --output workdir/hrea_specification.dna https://github.com/h-REA/hREA/releases/download/happ-0.2.0-beta/hrea_specification.dna; exit 0",
-        "download-hrea-agent": "[ ! -f \"workdir/hrea_agent.dna\" ] && curl -L --output workdir/hrea_agent.dna https://github.com/h-REA/hREA/releases/download/happ-0.2.0-beta/hrea_agent.dna; exit 0",
-        "download-hrea-planning": "[ ! -f \"workdir/hrea_planning.dna\" ] && curl -L --output workdir/hrea_planning.dna https://github.com/h-REA/hREA/releases/download/happ-0.2.0-beta/hrea_planning.dna; exit 0",
-        "download-hrea-proposal": "[ ! -f \"workdir/hrea_proposal.dna\" ] && curl -L --output workdir/hrea_proposal.dna https://github.com/h-REA/hREA/releases/download/happ-0.2.0-beta/hrea_proposal.dna; exit 0",
-        "download-hrea-plan": "[ ! -f \"workdir/hrea_plan.dna\" ] && curl -L --output workdir/hrea_plan.dna https://github.com/h-REA/hREA/releases/download/happ-0.2.0-beta/hrea_plan.dna; exit 0",
-        "download-hrea-agreement": "[ ! -f \"workdir/hrea_agreement.dna\" ] && curl -L --output workdir/hrea_agreement.dna https://github.com/h-REA/hREA/releases/download/happ-0.2.0-beta/hrea_agreement.dna; exit 0",
-      "clean:hrea-modules": "rimraf workdir/hrea_observation.dna; rimraf workdir/hrea_specification.dna; rimraf workdir/hrea_agent.dna; rimraf workdir/hrea_planning.dna; rimraf workdir/hrea_proposal.dna; rimraf workdir/hrea_plan.dna; rimraf workdir/hrea_agreement.dna"
+      "download-hrea-suite": "[ ! -f \"workdir/hrea_suite.happ\" ] && curl -L --output workdir/hrea_suite.happ https://github.com/h-REA/hREA/releases/download/happ-0.2.0-beta/hrea_suite.happ; exit 0",      
+      "clean:hrea-suite": "rimraf workdir/hrea_suite.happ"
     },
     "devDependencies": {
       "@holochain-playground/cli": "^0.1.1",
