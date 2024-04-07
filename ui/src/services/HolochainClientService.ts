@@ -11,7 +11,9 @@ export const isConnected: Writable<boolean> = writable(false);
  */
 class HolochainClientService {
   static instance: HolochainClientService;
+  appId = 'requests_and_offers';
   client: AppAgentClient | null = null;
+  hreaClient: AppAgentClient | null = null;
   loading = true;
   /**
    * Constructor for the HolochainClientService.
@@ -28,7 +30,7 @@ class HolochainClientService {
    * Connects the client to the Holochain network.
    */
   async connectClient() {
-    this.client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), 'requests_and_offers');
+    this.client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), this.appId);
     isConnected.set(true);
   }
 
@@ -76,6 +78,18 @@ class HolochainClientService {
       payload: payload
     });
     return record;
+  }
+
+  async connectToHreaBackend() {
+    // Replace 'https://hrea-backend-url' with the actual URL of your hREA backend.
+    const hreaBackendUrl = 'https://hrea-backend-url';
+    // Assuming the hREA backend uses a similar connection method as the Holochain client.
+    // You might need to adjust this based on the actual API of the hREA backend.
+    this.hreaClient = await AppAgentWebsocket.connect(new URL(hreaBackendUrl), this.appId);
+    // Assuming there's a way to check if the connection is successful.
+    // This is just a placeholder. You should replace it with actual logic.
+    const isHreaConnected = true;
+    console.log('Connected to hREA backend:', isHreaConnected);
   }
 }
 
