@@ -71,10 +71,6 @@ The `Profile` entry represents the profile and its associated agents within the 
 
 ##### 4.1.1.2 Links
 
- <!-- ProfileUpdates,
-    AllProfiles,
-    MyProfile, -->
-
   - **ProfileUpdates**: A link from the profile create header to the profile update headers.
   - **AllProfiles**: A link to the `profiles` anchor. It is an index of all the profiles.
   - **MyProfile**: A link from the current agent to the profile.
@@ -91,17 +87,17 @@ The `Profile` entry represents the profile and its associated agents within the 
 
 The `Project` entry represents a project and its associated agents, including team members. Projects have specific requirements and status. Projects can be created by organizations or by profiles.
 
-In hREA, projects are organizations `classifiedAs` `Project`.
+In hREA, projects are organizations`classifiedAs` `Project`.
 
 ##### 4.2.1.1 Fields
 
 - **name**: The name of the project.
-  - **Type**: `String`
-  - **Validation**: Must not be empty.
+ - **Type**: `String`
+ - **Validation**: Must not be empty.
 - **description**: A brief description of the project.
-  - **Type**: `Option<String>`
-  - **Validation**: Optional, but recommended for community engagement and networking.
-  - **Default**: `None`
+ - **Type**: `Option<String>`
+ - **Validation**: Optional, but recommended for community engagement and networking.
+ - **Default**: `None`
 
 ##### 4.2.1.2 Links
 
@@ -113,22 +109,19 @@ In hREA, projects are organizations `classifiedAs` `Project`.
 
 The `Organization` entry represents an organization and its associated profiles and projects. Organizations are created by profiles.
 
-In hREA, organizations are agent classifiedAs `Organization`.
-
 ##### 4.2.2.1 Fields
 
 - **name**: The name of the organization.
-  - **Type**: `String`
-  - **Validation**: Must not be empty.
+ - **Type**: `String`
+ - **Validation**: Must not be empty.
 - **description**: A brief description of the organization.
-  - **Type**: `Option<String>`
-  - **Validation**: Optional, but recommended for community engagement and networking.
-  - **Default**: `None`
+ - **Type**: `Option<String>`
+ - **Validation**: Optional, but recommended for community engagement and networking.
+ - **Default**: `None`
 - **status**: The status of the organization, either 'Pending', 'Accepted', or 'Rejected'.
-  - **Type**: `String`
-  - **Validation**: Must be either 'Pending', 'Accepted', or 'Rejected'.
-  - **Default**: `Pending`
-
+ - **Type**: `String`
+ - **Validation**: Must be either 'Pending', 'Accepted', or 'Rejected'.
+ - **Default**: `Pending`
 
 ##### 4.2.2.2 Links
 
@@ -137,22 +130,13 @@ In hREA, organizations are agent classifiedAs `Organization`.
 - **OrganizationProjects**: A link from the organization's to the a project. It is an index of all the projects under the organization.
 
 
+
 ### 4.3 Requests and Offers
 
 - **hREA Integration**: Utilizes hREA for managing economic activities, including tracking resources, facilitating agreements, and matching needs.
 - **Request Creation**: Projects can create requests, linked to specific projects, organizations, skills, and team members.
 - **Offer Creation**: Organizations and agents can create offers, linked to specific requests and projects.
 
-### 4.4 Administrator and Moderation Functionalities
-
-- **Request and Offer Management**: Administrators manage requests and offers.
-- **Project and Organization Management**: Administrators manage projects and organizations.
-- **Agent Profile Management**: Administrators manage agent profiles, including verification processes.
-- The first agent that initiate the network should be an administrator.
-- Administrators needs a special access to the `Administration` zome and ui.
-- Utilisation of hREA roles for project management and organization management.
-- Utilisation of [capability-based Holochain security](https://developer.holochain.org/concepts/8_calls_capabilities/#how-to-secure-functions-against-unauthorized-use).
-  
 ### 4.5 Skills and Categories
 
 - **Skills**: Users can create skills, which are used to filter agents profiles, requests and offers.
@@ -162,13 +146,13 @@ In hREA, organizations are agent classifiedAs `Organization`.
 
 ![Types of support requested](images/types-of-support-requested.png)
 
-#### 4.5.1 Skill Entry
+#### 4.4.1 Skill Entry
 
 The `Skill` entry represents the skills associated with the profiles, projects, requests and offers. This in an anchor that contains a `String`. `Profiles` are linked to `Skills`.
 
 Skills are also linked to hREA Resource Specifications.
 
-### 4.5 Search Functionality
+### 4.6 Search Functionality
 
 Each page has a search functionality.
 
@@ -177,6 +161,17 @@ Each page has a search functionality.
 - **Search Project**: Users can search projects by name, skills, categories and organizations.
 - **Search Requests**: Users can search requests by name, skills, categories, projects, organizations and profiles.
 - **Search Offers**: Users can search offers by name, skills, categories, projects, organizations and profiles.
+
+### 4.7 Administrator and Moderation Functionalities
+
+- **Request and Offer Management**: Administrators manage requests and offers.
+- **Project and Organization Management**: Administrators manage projects and organizations.
+- **Agent Profile Management**: Administrators manage agent profiles, including verification processes.
+- The first agent that initiate the network should be an administrator.
+- Administrators needs a special access to the `Administration` zome and ui.
+- Utilisation of hREA roles for project management and organization management.
+- Utilisation of [capability-based Holochain security](https://developer.holochain.org/concepts/8_calls_capabilities/#how-to-secure-functions-against-unauthorized-use).
+
 
 ## 5. MVP Use Case: Project Collaboration and Skill Matching
 

@@ -112,7 +112,7 @@
   }
 </script>
 
-<section class="flex w-1/2 flex-col gap-10">
+<section class="flex w-4/5 flex-col gap-10 md:w-3/4 lg:w-1/2">
   {#if $myProfile}
     <p class="h2">Profile already created.</p>
   {:else}
