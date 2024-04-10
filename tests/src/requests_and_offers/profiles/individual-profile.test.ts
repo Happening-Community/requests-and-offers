@@ -121,7 +121,7 @@ test("create and read Profile", async () => {
   });
 });
 
-test("create and update Profile", async () => {
+test.only("create and update Profile", async () => {
   await runScenarioWithTwoAgents(async (_scenario, alice, bob) => {
     let sample: Profile;
     let record: Record;
@@ -191,6 +191,21 @@ test("create and update Profile", async () => {
     ).rejects.toThrow();
 
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    // Alice try to change the status of her profile
+    sample = sampleProfile({
+      name: "Alicia",
+      status: "accepted",
+    });
+
+    await expect(
+      updateProfile(
+        alice.cells[0],
+        originalProfileHash,
+        latestProfileRecord.signed_action.hashed.hash,
+        sample
+      )
+    ).rejects.toThrow();
 
     // Alice update here profile again
     sample = sampleProfile({

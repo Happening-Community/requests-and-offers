@@ -14,6 +14,7 @@ import {
 import { decode } from "@msgpack/msgpack";
 
 export type UserType = "advocate" | "developer" | "Non Authorized";
+export type Status = "pending" | "accepted" | "rejected";
 
 export type Profile = {
   name: string;
@@ -26,6 +27,7 @@ export type Profile = {
   phone?: string;
   time_zone: string;
   location: string;
+  status?: Status;
 };
 
 export function decodeOutputs(records: Record[]): unknown[] {
@@ -45,6 +47,7 @@ export function sampleProfile(partialProfile: Partial<Profile>): Profile {
       phone: null,
       time_zone: "EST",
       location: "here",
+      status: null,
     },
     ...partialProfile,
   };

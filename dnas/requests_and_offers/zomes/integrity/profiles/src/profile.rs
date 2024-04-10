@@ -25,13 +25,21 @@ pub struct Profile {
     pub time_zone: String,
     /// The location where the user is based.
     pub location: String,
+    /// The status of the user, either 'pending', 'accepted' or 'rejected'.
+    pub status: Option<String>,
 }
 
 const ALLOWED_TYPES: [&str; 3] = ["advocate", "developer", "creator"];
+const STATUS: [&str; 3] = ["pending", "accepted", "rejected"];
 
 fn is_valid_type(user_type: &str) -> bool {
     let allowed_types_set: HashSet<&str> = ALLOWED_TYPES.iter().cloned().collect();
     !allowed_types_set.contains(user_type)
+}
+
+fn is_valid_status(status: &str) -> bool {
+    let allowed_status_set: HashSet<&str> = STATUS.iter().cloned().collect();
+    !allowed_status_set.contains(status)
 }
 
 fn is_image(bytes: SerializedBytes) -> bool {
@@ -50,6 +58,12 @@ pub fn validate_profile(profile: Profile) -> ExternResult<ValidateCallbackResult
     if is_valid_type(profile.user_type.as_str()) {
         return Ok(ValidateCallbackResult::Invalid(String::from(
             "Individual Type must be 'advocate', 'developer' or 'creator'.",
+        )));
+    };
+
+    if is_valid_status(profile.status.as_ref().unwrap().as_str()) {
+        return Ok(ValidateCallbackResult::Invalid(String::from(
+            "Individual Status must be 'pending', 'accepted' or 'rejected'.",
         )));
     };
 

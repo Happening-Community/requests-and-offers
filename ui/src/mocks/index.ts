@@ -1,27 +1,43 @@
 import type { Organization } from '@stores/organizations.store';
 import type { Profile } from '@stores/profiles.store';
-import { faker } from '@faker-js/faker';
+import { Sex, faker } from '@faker-js/faker';
 
-export const mockedProfile: Profile = {
-  name: faker.person.fullName(),
-  nickname: faker.person.firstName(),
-  bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-  profile_picture: undefined,
-  user_type: 'developer',
-  skills: ['JavaScript', 'Svelte', 'SvelteKit'],
-  email: faker.internet.email(),
-  phone: '123456789',
-  time_zone: 'Europe/Paris',
-  location: 'Paris, France',
-  status: 'pending'
+export const mockedProfiles = (count: number = 1): Profile[] => {
+  let profiles: Profile[] = [];
+
+  for (let i = 0; i < count; i++) {
+    profiles.push({
+      name: faker.person.fullName({ sex: 'female' }),
+      nickname: faker.person.firstName('female'),
+      bio: faker.lorem.paragraphs(2),
+      profile_picture: undefined,
+      user_type: 'developer',
+      skills: ['JavaScript', 'Svelte', 'SvelteKit'],
+      email: faker.internet.email(),
+      phone: '123456789',
+      time_zone: 'Europe/Paris',
+      location: 'Paris, France',
+      status: undefined
+    });
+  }
+
+  return profiles;
 };
 
-export const mockedOrganization: Organization = {
-  name: faker.company.name(),
-  description: faker.company.catchPhrase(),
-  organization_picture: undefined,
-  status: 'pending',
-  members: [],
-  admins: [],
-  projects: []
+export const mockedOrganizations = (count: number = 1): Organization[] => {
+  let organizations: Organization[] = [];
+
+  for (let i = 0; i < count; i++) {
+    organizations.push({
+      name: faker.company.name(),
+      description: faker.company.catchPhrase(),
+      organization_picture: undefined,
+      status: undefined,
+      members: [],
+      admins: [],
+      projects: []
+    });
+  }
+
+  return organizations;
 };

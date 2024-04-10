@@ -5,6 +5,9 @@ use crate::error;
 
 #[hdk_extern]
 pub fn create_profile(profile: Profile) -> ExternResult<Record> {
+    let mut profile = profile;
+    profile.status = Some("pending".to_string());
+
     let record = get_agent_profile(agent_info()?.agent_initial_pubkey)?;
     if !record.is_empty() {
         return Err(error("You already have a Profile"));
@@ -73,10 +76,24 @@ pub struct UpdateProfileInput {
 
 #[hdk_extern]
 pub fn update_profile(input: UpdateProfileInput) -> ExternResult<Record> {
+    let mut input = input;
+
     let record = match get(input.previous_profile_hash.clone(), GetOptions::default())? {
         Some(record) => record,
         None => return Err(error("Could not find the previous Profile")),
     };
+
+    if input.updated_profile.status.is_some() {
+        return Err(error(
+            "Only administrators can update the status of a Profile",
+        ));
+    }
+
+    let record_option: Option<Profile> = record
+        .entry()
+        .to_app_option()
+        .map_err(|_| error("Error while deserializing the previous Profile"))?;
+    input.updated_profile.status = record_option.unwrap().status;
 
     let author = record.action().author().clone();
     if author != agent_info()?.agent_initial_pubkey {
