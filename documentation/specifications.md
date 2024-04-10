@@ -26,11 +26,11 @@ This application is specifically tailored for the participants in the Holochain 
 - **Custom Holochain Zome**: A custom zome is used for managing user profiles within the application.
 - **hREA agents**: Profiles are linked to hREA agents.
 
-#### 4.1.1 Profile Entry
+### 4.2 Profile Entry
 
 The `Profile` entry represents the profile and its associated agents within the hAppenings.community. An agent can be a single user or a device associated with a user, allowing for the sharing of profiles across multiple devices. This entry includes various fields to capture essential information about the profile, facilitating personalized experiences and targeted interactions within the community.
 
-##### 4.1.1.1 Fields
+#### 4.2.1 Fields
 
 - **name**: The full name of the profile.
   - **Type**: `String`
@@ -69,13 +69,13 @@ The `Profile` entry represents the profile and its associated agents within the 
   - **Type**: `String`
   - **Validation**: Must be either 'Pending', 'Accepted', or 'Rejected'.
 
-##### 4.1.1.2 Links
+#### 4.2.2 Links
 
   - **ProfileUpdates**: A link from the profile create header to the profile update headers.
   - **AllProfiles**: A link to the `profiles` anchor. It is an index of all the profiles.
   - **MyProfile**: A link from the current agent to the profile.
 
-### 4.2 Projects and Organizations
+### 4.3 Projects and Organizations
 
 - **Project and Organization Creation**: Users can create projects and organizations, with projects owned by organizations. Projects have specific requirements and status.
 ![Project status](images/project-status.png)
@@ -83,13 +83,13 @@ The `Profile` entry represents the profile and its associated agents within the 
 - **External Repository Linking**: Projects and organizations can be linked to external repositories (e.g. GitHub).
 - **Administrators**: Projects and organizations are managed by administrators. They can have "badges" to indicate their status.
 
-#### 4.2.1 Project Entry
+#### 4.3.1 Project Entry
 
 The `Project` entry represents a project and its associated agents, including team members. Projects have specific requirements and status. Projects can be created by organizations or by profiles.
 
-In hREA, projects are organizations`classifiedAs` `Project`.
+In hREA, projects are organizations `classifiedAs` `Project`.
 
-##### 4.2.1.1 Fields
+##### 4.3.1.1 Fields
 
 - **name**: The name of the project.
  - **Type**: `String`
@@ -98,18 +98,28 @@ In hREA, projects are organizations`classifiedAs` `Project`.
  - **Type**: `Option<String>`
  - **Validation**: Optional, but recommended for community engagement and networking.
  - **Default**: `None`
+- **picture**: An optional serialized image representing the project's picture.
+  - **Type**: `Option<SerializedBytes>`
+  - **Validation**: Optional, but if provided, must be a valid image.
+  - **Default**: `None`
+- **status**: The status of the project, either 'Pending', 'Accepted', or 'Rejected'.
+ - **Type**: `String`
+ - **Validation**: Must be either 'Pending', 'Accepted', or 'Rejected'.
+ - **Default**: `Pending`
 
-##### 4.2.1.2 Links
+##### 4.3.1.2 Links
 
 - **AllProjects**: A link to the `projects` anchor.
-- **ProjectAdministrators**: A link from the project's to the a profile. It is an index of all the administrators.
-- **ProjectTeamMembers**: A link from the project's to the a profile. It is an index of all the team members.
+- **ProjectAdministrators**: A link from the project's to a profile. It is an index of all the administrators.
+- **ProjectTeamMembers**: A link from the project's to a profile. It is an index of all the team members.
 
-#### 4.2.2 Organization Entry
+#### 4.3.2 Organization Entry
 
 The `Organization` entry represents an organization and its associated profiles and projects. Organizations are created by profiles.
 
-##### 4.2.2.1 Fields
+In hREA, are agents `classifiedAs` `Organization`.
+
+##### 4.3.2.1 Fields
 
 - **name**: The name of the organization.
  - **Type**: `String`
@@ -118,20 +128,23 @@ The `Organization` entry represents an organization and its associated profiles 
  - **Type**: `Option<String>`
  - **Validation**: Optional, but recommended for community engagement and networking.
  - **Default**: `None`
+- **picture**: An optional serialized image representing the organization's picture.
+  - **Type**: `Option<SerializedBytes>`
+  - **Validation**: Optional, but if provided, must be a valid image.
+  - **Default**: `None`
 - **status**: The status of the organization, either 'Pending', 'Accepted', or 'Rejected'.
  - **Type**: `String`
  - **Validation**: Must be either 'Pending', 'Accepted', or 'Rejected'.
  - **Default**: `Pending`
 
-##### 4.2.2.2 Links
+##### 4.3.2.2 Links
 
 - **AllOrganizations**: A link to the `organizations` anchor.
-- **OrganizationAdministrators**: A link from the organization's to the a profile. It is an index of all the administrators of the organization.
-- **OrganizationProjects**: A link from the organization's to the a project. It is an index of all the projects under the organization.
+- **OrganizationAdministrators**: A link from the organization's to a profile. It is an index of all the administrators of the organization.
+- **OrganizationMembers**: A link from the organization's to a profile. It is an index of all the members of the organization.
+- **OrganizationProjects**: A link from the organization's to a project. It is an index of all the projects under the organization.
 
-
-
-### 4.3 Requests and Offers
+### 4.4 Requests and Offers
 
 - **hREA Integration**: Utilizes hREA for managing economic activities, including tracking resources, facilitating agreements, and matching needs.
 - **Request Creation**: Projects can create requests, linked to specific projects, organizations, skills, and team members.
@@ -146,7 +159,7 @@ The `Organization` entry represents an organization and its associated profiles 
 
 ![Types of support requested](images/types-of-support-requested.png)
 
-#### 4.4.1 Skill Entry
+#### 4.5.1 Skill Entry
 
 The `Skill` entry represents the skills associated with the profiles, projects, requests and offers. This in an anchor that contains a `String`. `Profiles` are linked to `Skills`.
 
