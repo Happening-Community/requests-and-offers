@@ -27,10 +27,11 @@ pub struct Profile {
     pub location: String,
 }
 
-const ALLOWED_TYPES: [&str; 2] = ["advocate", "developer"];
+const ALLOWED_TYPES: [&str; 3] = ["advocate", "developer", "creator"];
 
 fn is_valid_type(user_type: &str) -> bool {
-    !ALLOWED_TYPES.contains(&user_type)
+    let allowed_types_set: HashSet<&str> = ALLOWED_TYPES.iter().cloned().collect();
+    !allowed_types_set.contains(user_type)
 }
 
 fn is_image(bytes: SerializedBytes) -> bool {
@@ -48,7 +49,7 @@ fn is_image(bytes: SerializedBytes) -> bool {
 pub fn validate_profile(profile: Profile) -> ExternResult<ValidateCallbackResult> {
     if is_valid_type(profile.user_type.as_str()) {
         return Ok(ValidateCallbackResult::Invalid(String::from(
-            "Individual Type must be 'advocate' or 'developer'.",
+            "Individual Type must be 'advocate', 'developer' or 'creator'.",
         )));
     };
 
