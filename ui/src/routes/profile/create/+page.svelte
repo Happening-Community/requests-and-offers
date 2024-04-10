@@ -9,6 +9,7 @@
     getMyProfile
   } from '@stores/profiles.store.js';
   import { goto } from '$app/navigation';
+  import { mockedProfile } from '@mocks';
 
   type FormattedTimezone = {
     name: string;
@@ -67,9 +68,6 @@
   }
 
   async function submitForm(event: SubmitEvent) {
-    event.preventDefault();
-    console.log('event :', event);
-
     const data = new FormData(event.target as HTMLFormElement);
     const profile_picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
 
@@ -86,23 +84,9 @@
       location: data.get('location') as string
     };
 
-    // const mockedProfile: Profile = {
-    //   name: 'John Doe',
-    //   nickname: 'John',
-    //   bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    //   profile_picture: undefined,
-    //   user_type: 'developer',
-    //   skills: ['JavaScript', 'Svelte', 'SvelteKit'],
-    //   email: 'pHjX5@example.com',
-    //   phone: '123456789',
-    //   time_zone: 'Europe/Paris',
-    //   location: 'Paris, France'
-    // };
-
-    console.log('profile :', profile);
-
     try {
-      await createProfile(profile);
+      await createProfile(mockedProfile);
+      // await createProfile(profile);
       await getMyProfile();
 
       goto('/profile');
@@ -120,7 +104,7 @@
     <form
       class="flex flex-col gap-4"
       enctype="multipart/form-data"
-      on:submit={submitForm}
+      on:submit|preventDefault={submitForm}
       bind:this={form}
     >
       <p>*required fields</p>

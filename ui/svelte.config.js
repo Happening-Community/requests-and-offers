@@ -21,7 +21,8 @@ const config = {
       '@lib': './src/lib',
       '@services': './src/services',
       '@stores': './src/stores',
-      '@utils': './src/utils'
+      '@utils': './src/utils',
+      '@mocks': './src/mocks'
     }
   }
 };
