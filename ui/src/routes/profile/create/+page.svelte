@@ -9,7 +9,7 @@
     getMyProfile
   } from '@stores/profiles.store.js';
   import { goto } from '$app/navigation';
-  import { mockedProfile } from '@mocks';
+  import { createMockedProfiles } from '@mocks';
 
   type FormattedTimezone = {
     name: string;
@@ -75,7 +75,7 @@
       name: data.get('name') as string,
       nickname: data.get('nickname') as string,
       bio: data.get('bio') as string,
-      profile_picture: profile_picture.byteLength > 0 ? new Uint8Array(profile_picture) : undefined,
+      picture: profile_picture.byteLength > 0 ? new Uint8Array(profile_picture) : undefined,
       user_type: data.get('user_type') as IndividualType,
       skills: data.getAll('skills') as string[],
       email: data.get('email') as string,
@@ -85,7 +85,7 @@
     };
 
     try {
-      await createProfile(mockedProfile);
+      await createProfile((await createMockedProfiles())[0]);
       // await createProfile(profile);
       await getMyProfile();
 

@@ -12,7 +12,7 @@ pub struct Profile {
     /// A brief biography about the idividual.
     pub bio: String,
     /// An optional serialized image representing the profile picture.
-    pub profile_picture: Option<SerializedBytes>,
+    pub picture: Option<SerializedBytes>,
     /// The type of user, either 'advocate' or 'developer'.
     pub user_type: String,
     /// A list of skills associated with the user.
@@ -67,7 +67,7 @@ pub fn validate_profile(profile: Profile) -> ExternResult<ValidateCallbackResult
         )));
     };
 
-    if let Some(bytes) = profile.profile_picture {
+    if let Some(bytes) = profile.picture {
         if !is_image(bytes) {
             return Ok(ValidateCallbackResult::Invalid(String::from(
                 "Profile picture must be a valid image",

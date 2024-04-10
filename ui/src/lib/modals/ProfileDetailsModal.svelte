@@ -13,8 +13,8 @@
   onMount(async () => {
     profile = await getLatestProfile($modalStore[0].meta.hash);
 
-    profilePictureUrl = profile?.profile_picture
-      ? URL.createObjectURL(new Blob([new Uint8Array(profile.profile_picture)]))
+    profilePictureUrl = profile?.picture
+      ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
       : '/default_avatar.webp';
   });
 </script>

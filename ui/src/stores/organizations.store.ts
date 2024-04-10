@@ -8,10 +8,10 @@ export type OrganizationStatus = 'pending' | 'accepted' | 'rejected';
 export type Organization = {
   name: string;
   description: string;
-  organization_picture?: Uint8Array;
-  status: OrganizationStatus;
-  members:ActionHash[];
-  admins:ActionHash[];
+  picture?: Uint8Array;
+  status?: OrganizationStatus;
+  members: ActionHash[];
+  admins: ActionHash[];
   projects: ActionHash[];
 };
 
@@ -27,4 +27,4 @@ export const myOrganizationHash: Writable<ActionHash | null> = writable(null);
  * Svelte writable store for all organizations.
  * @type {Writable<Organization[]>}
  */
-export const Organizations: Writable<Organization[]> = writable([]);
+export const organizations: Writable<Organization[]> = writable([]);

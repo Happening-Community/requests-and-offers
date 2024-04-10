@@ -10,7 +10,7 @@ export type Profile = {
   name: string;
   nickname: string;
   bio?: string;
-  profile_picture?: Uint8Array;
+  picture?: Uint8Array;
   user_type: IndividualType;
   skills?: string[];
   email: string;

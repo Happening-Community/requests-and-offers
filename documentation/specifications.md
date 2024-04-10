@@ -112,6 +112,9 @@ In hREA, projects are organizations `classifiedAs` `Project`.
 - **AllProjects**: A link to the `projects` anchor.
 - **ProjectAdministrators**: A link from the project's to a profile. It is an index of all the administrators.
 - **ProjectTeamMembers**: A link from the project's to a profile. It is an index of all the team members.
+- **ProjectCategories**: A link from the project's to a category. It is an index of all the categories.
+- **ProjectRequests**: A link from the project's to a request. It is an index of all the requests made by the project.
+- **ProjectOffers**: A link from the project's to an offer. It is an index of all the offers made to the project.
 
 #### 4.3.2 Organization Entry
 
@@ -143,6 +146,9 @@ In hREA, are agents `classifiedAs` `Organization`.
 - **OrganizationAdministrators**: A link from the organization's to a profile. It is an index of all the administrators of the organization.
 - **OrganizationMembers**: A link from the organization's to a profile. It is an index of all the members of the organization.
 - **OrganizationProjects**: A link from the organization's to a project. It is an index of all the projects under the organization.
+- **OrganizationCategories**: A link from the organization's to a category. It is an index of all the categories under the organization.
+- **OrganizationRequests**: A link from the organization's to a request. It is an index of all the requests made by the organization.
+- **OrganizationOffers**: A link from the organization's to an offer. It is an index of all the offers made to the organization.
 
 ### 4.4 Requests and Offers
 

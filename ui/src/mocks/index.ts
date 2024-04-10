@@ -1,8 +1,10 @@
 import type { Organization } from '@stores/organizations.store';
 import type { Profile } from '@stores/profiles.store';
 import { Sex, faker } from '@faker-js/faker';
+import { fetchImageAndConvertToUInt8Array } from '@utils';
+import type { Project } from '@stores/projects.store';
 
-export const mockedProfiles = (count: number = 1): Profile[] => {
+export async function createMockedProfiles(count: number = 1): Promise<Profile[]> {
   let profiles: Profile[] = [];
 
   for (let i = 0; i < count; i++) {
@@ -10,7 +12,7 @@ export const mockedProfiles = (count: number = 1): Profile[] => {
       name: faker.person.fullName({ sex: 'female' }),
       nickname: faker.person.firstName('female'),
       bio: faker.lorem.paragraphs(2),
-      profile_picture: undefined,
+      picture: await fetchImageAndConvertToUInt8Array('https://picsum.photos/200/300'),
       user_type: 'developer',
       skills: ['JavaScript', 'Svelte', 'SvelteKit'],
       email: faker.internet.email(),
@@ -22,16 +24,16 @@ export const mockedProfiles = (count: number = 1): Profile[] => {
   }
 
   return profiles;
-};
+}
 
-export const mockedOrganizations = (count: number = 1): Organization[] => {
+export async function createMockedOrganizations(count: number = 1): Promise<Organization[]> {
   let organizations: Organization[] = [];
 
   for (let i = 0; i < count; i++) {
     organizations.push({
       name: faker.company.name(),
       description: faker.company.catchPhrase(),
-      organization_picture: undefined,
+      picture: await fetchImageAndConvertToUInt8Array('https://picsum.photos/200/300'),
       status: undefined,
       members: [],
       admins: [],
@@ -40,4 +42,21 @@ export const mockedOrganizations = (count: number = 1): Organization[] => {
   }
 
   return organizations;
-};
+}
+
+export async function createMockedProjects(count: number = 1): Promise<Project[]> {
+  let projects: Project[] = [];
+
+  for (let i = 0; i < count; i++) {
+    projects.push({
+      name: faker.company.name(),
+      description: faker.company.catchPhrase(),
+      picture: await fetchImageAndConvertToUInt8Array('https://picsum.photos/200/300'),
+      status: undefined,
+      team_members: [],
+      admins: []
+    });
+  }
+
+  return projects;
+}

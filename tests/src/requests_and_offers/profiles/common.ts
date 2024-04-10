@@ -20,7 +20,7 @@ export type Profile = {
   name: string;
   nickname: string;
   bio: string;
-  profile_picture?: Uint8Array;
+  picture?: Uint8Array;
   user_type: UserType;
   skills: string[];
   email: string;
@@ -40,7 +40,7 @@ export function sampleProfile(partialProfile: Partial<Profile>): Profile {
       name: "User",
       nickname: "NickName",
       bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      profile_picture: null,
+      picture: null,
       user_type: "developer",
       skills: ["html", "css", "typescript", "rust"],
       email: "abc@abc.com",

@@ -3,10 +3,8 @@
   import { myProfile } from '@stores/profiles.store';
   import { Avatar } from '@skeletonlabs/skeleton';
 
-  let profilePictureUrl: string;
-
-  profilePictureUrl = $myProfile?.profile_picture
-    ? URL.createObjectURL(new Blob([new Uint8Array($myProfile.profile_picture)]))
+  $: profilePictureUrl = $myProfile?.picture
+    ? URL.createObjectURL(new Blob([new Uint8Array($myProfile.picture)]))
     : '/default_avatar.webp';
 </script>
 

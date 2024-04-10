@@ -93,7 +93,7 @@ test("create and read Profile", async () => {
     // Bob create an Profile with erroneous profile Picture
     errSample = sampleProfile({
       name: "Bob",
-      profile_picture: new Uint8Array(20),
+      picture: new Uint8Array(20),
     });
     await expect(createProfile(bob.cells[0], errSample)).rejects.toThrow();
 
@@ -108,7 +108,7 @@ test("create and read Profile", async () => {
 
     sample = sampleProfile({
       name: "Bob",
-      profile_picture: new Uint8Array(buffer),
+      picture: new Uint8Array(buffer),
     });
     record = await createProfile(bob.cells[0], sample);
     assert.ok(record);
@@ -121,7 +121,7 @@ test("create and read Profile", async () => {
   });
 });
 
-test.only("create and update Profile", async () => {
+test("create and update Profile", async () => {
   await runScenarioWithTwoAgents(async (_scenario, alice, bob) => {
     let sample: Profile;
     let record: Record;
@@ -139,7 +139,7 @@ test.only("create and update Profile", async () => {
     sample = sampleProfile({
       name: "Alicia",
       nickname: "Alicialia",
-      profile_picture: new Uint8Array(buffer),
+      picture: new Uint8Array(buffer),
     });
 
     await updateProfile(
@@ -164,7 +164,7 @@ test.only("create and update Profile", async () => {
     sample = sampleProfile({
       name: "Alicia",
       nickname: "Alicialia",
-      profile_picture: new Uint8Array(20),
+      picture: new Uint8Array(20),
     });
     await expect(
       updateProfile(
