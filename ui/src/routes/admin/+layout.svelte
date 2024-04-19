@@ -1,0 +1,31 @@
+<script lang="ts">
+  import Navbar from '@lib/NavBar.svelte';
+  import { AppShell } from '@skeletonlabs/skeleton';
+</script>
+
+<AppShell>
+  <svelte:fragment slot="header">
+    <Navbar />
+  </svelte:fragment>
+
+  <svelte:fragment slot="sidebarLeft">
+    <div
+      class="bg-surface-900 mt-32 flex min-h-screen w-52 flex-col gap-3 border-2 border-slate-900 p-4"
+    >
+      <a
+        href="/admin"
+        class="h3 hover:text-secondary-500 hover:border-b-secondary-500 mb-4 border-b-2 border-b-white text-center text-white"
+      >
+        Admin Panel
+      </a>
+      <a class="btn variant-filled-primary" href="/admin/administrators">Administrators</a>
+      <a class="btn variant-filled-primary" href="/admin/profiles">Profiles</a>
+    </div>
+  </svelte:fragment>
+
+  <main
+    class="bg-surface-800 mx-auto flex min-h-screen flex-col items-center justify-center px-5 pb-10 pt-40"
+  >
+    <slot />
+  </main>
+</AppShell>
