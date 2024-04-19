@@ -1,6 +1,12 @@
 <script lang="ts">
   import Navbar from '@lib/NavBar.svelte';
   import { AppShell } from '@skeletonlabs/skeleton';
+  import { onMount } from 'svelte';
+
+  onMount(() => {
+    const htmlElement = document.getElementsByTagName('html')[0];
+    htmlElement.classList.add('dark');
+  });
 </script>
 
 <AppShell>

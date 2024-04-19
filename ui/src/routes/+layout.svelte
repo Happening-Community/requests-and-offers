@@ -1,17 +1,9 @@
 <script lang="ts">
-  import Navbar from '$lib/NavBar.svelte';
   import { onMount } from 'svelte';
   import '../app.postcss';
-  import hc, { isConnected } from '@services/HolochainClientService';
+  import hc from '@services/HolochainClientService';
   import { getMyProfile, myProfileIsAdmin } from '@stores/profiles.store';
-  import {
-    ConicGradient,
-    Modal,
-    type ConicStop,
-    Drawer,
-    getDrawerStore,
-    AppShell
-  } from '@skeletonlabs/skeleton';
+  import { Modal, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
   import { initializeStores } from '@skeletonlabs/skeleton';
   import MenuLinks from '@lib/MenuLinks.svelte';
   import { goto } from '$app/navigation';
@@ -31,7 +23,8 @@
 
   function goToAdminShortcut(event: KeyboardEvent) {
     if ($myProfileIsAdmin && event.altKey && event.key === 'a') {
-      goto('/admin');
+      if (!window.location.pathname.startsWith('/admin')) goto('/admin');
+      else goto('/');
     }
   }
 </script>

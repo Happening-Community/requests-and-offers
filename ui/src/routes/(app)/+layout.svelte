@@ -2,6 +2,12 @@
   import { isConnected } from '@services/HolochainClientService';
   import { AppShell, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
   import Navbar from '@lib/NavBar.svelte';
+  import { onMount } from 'svelte';
+
+  onMount(() => {
+    const htmlElement = document.getElementsByTagName('html')[0];
+    htmlElement.classList.remove('dark');
+  });
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },

@@ -15,20 +15,22 @@
   }
 </script>
 
-<nav class="bg-primary-500 absolute flex h-32 w-full items-center justify-between gap-4 p-4">
-  <a href="/" class="w-1/3">
-    <img src="/hAppeningsLogoWsun2.webp" alt="" class="w-28" />
-  </a>
+<nav class="bg-primary-500 absolute flex h-32 w-full items-center justify-between p-4">
+  <div class="flex w-full items-center justify-between">
+    <a href="/" class="">
+      <img src="/hAppeningsLogoWsun2.webp" alt="" class="w-28" />
+    </a>
 
-  <a class="h2 text-center text-white" href="/">Requests and Offers hApp</a>
+    <a class="h2 text-white" href="/">Requests and Offers hApp</a>
 
-  <div class="flex w-1/3 justify-end gap-4">
-    <button class="btn variant-filled-secondary lg:hidden" on:click={openDrawer}>
-      <Bars svgClass="fill-white h-6 w-6" />
-    </button>
+    <div class="flex justify-end gap-4">
+      <button class="btn variant-filled-secondary lg:hidden" on:click={openDrawer}>
+        <Bars svgClass="fill-white h-6 w-6" />
+      </button>
+    </div>
   </div>
 
-  <div class="hidden w-1/3 flex-col justify-end gap-4 sm:flex-row lg:flex">
+  <div class="hidden flex-col justify-end gap-4 sm:flex-row lg:flex">
     <MenuLinks />
   </div>
 </nav>
