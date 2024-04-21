@@ -1,8 +1,8 @@
-# Requests & Offers - HC/MVP Specification Document
+# Requests & Offers - MVP Specification Document
 
 ## 1. Introduction
 
-The Requests & Offers - HC/MVP project aims to develop a Holochain application designed to facilitate the exchange of requests and offers within the hAppenings.community. This document outlines the specifications and requirements for the development of this application, focusing on its core functionalities, technologies, and user interactions.
+The Requests & Offers - MVP project aims to develop a Holochain application designed to facilitate the exchange of requests and offers within the hAppenings.community. This document outlines the specifications and requirements for the development of this application, focusing on its core functionalities, technologies, and user interactions.
 
 ## 2. Objective
 
@@ -10,7 +10,7 @@ The primary objective of this project is to create a simple, open-source Holocha
 
 ## 3. Targeted Audience
 
-This application is specifically tailored for the participants in the Holochain Ecosystem. At hAppenings.community, we have created our own definitions of the individuals who would be participants in Requests & Offers - HC/MVP. The targeted audience includes:
+This application is specifically tailored for the participants in the Holochain Ecosystem. At hAppenings.community, we have created our own definitions of the individuals who would be participants in Requests & Offers - MVP. The targeted audience includes:
 
 - **Holochain Creators/Projects/Developers**: Individuals or groups actively involved in creating or developing projects within the Holochain ecosystem.
 - **Holochain Advocates**: Individuals passionate about the Holochain technology, looking to support projects within the ecosystem.
@@ -20,7 +20,7 @@ This application is specifically tailored for the participants in the Holochain 
 
 ### 4.1 User Persons
 
-- **Person Creation**: Users can create and retrieve their persons, categorized as "advocate", "developer" or "creator".
+- **Person Creation**: Users can create and retrieve their persons, categorized as "advocate" or "creator".
 - **Person Retrieval**: Users can retrieve their persons on other devices using credentials.
 - **Person Linking**: Persons can be linked to agents, organizations, requests, offers, and projects.
 - **Custom Holochain Zome**: A custom zome is used for managing user persons within the application.
@@ -44,9 +44,9 @@ The `Person` entry represents the person and its associated agents within the hA
 - **picture**: An optional serialized image representing the person's picture.
   - **Type**: `Option<SerializedBytes>`
   - **Validation**: Optional, but if provided, must be a valid image.
-- **type**: The type of person, either 'advocate', 'developer' or 'creator'.
+- **type**: The type of person, either 'advocate' or 'creator'.
   - **Type**: `String`
-  - **Validation**: Must be either 'advocate', 'developer' pr 'creator'.
+  - **Validation**: Must be either 'advocate' or 'creator'.
 - **skills**: A list of skills EntryHash associated with the person.
   - **Type**: `Vec<EntryHash>`
   - **Validation**: Optional, can be initially empty.
@@ -160,12 +160,29 @@ In hREA, are agents `classifiedAs` `Organization`.
 - **OrganizationRequests**: A link from the organization's to a request. It is an index of all the requests made by the organization.
 - **OrganizationOffers**: A link from the organization's to an offer. It is an index of all the offers made to the organization.
 
+#### 4.3.3 Project/Organization administrators
+
+Projects and Organizations administrators are integral to the operation and governance of projects and organizations within the network. They serve as the responsibles for the management and representation of their respective projects or organizations.
+
+##### 4.3.3.1 Onboarding and Approval
+
+- Projects and organizations administrators are individuals or groups designated to represent a project or organization within the network. They are onboarded and approved by the network's administrators to participate in the network, taking on the role of administrators of projects or organizations.
+
+##### 4.3.3.2 Personal Profile
+
+- Projects and organizations administrators can file out their personal profiles, including their skills, location, type, etc. This profile is crucial for matching their expertise with relevant requests and offers within the network and for making offers and requests on behalf of their projects or organizations.
+
+##### 4.3.3.3 Offers and Requests
+
+- Projects and organizations administrators can make offers and requests for themselves and on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
+
 ### 4.4 Requests and Offers
 
 - **hREA Integration**: Utilizes hREA for managing economic activities, including tracking resources, facilitating agreements, and matching needs.
 - **Request Creation**: Users can create requests, linked to specific projects, organizations and skills.
 - **Offer Creation**: Organizations, projects and users can create offers, linked to specific requests and projects.
 - In hREA, requests and offers are `intents` and `proposals`.
+- For each exchange, there needs to be a mechanism for each party to agree that the exchange is complete. This could be integrated into the Request and Offer management sections of the application, allowing users to confirm the completion of an exchange directly within the application. This could be implemented as a confirmation step in the exchange process, ensuring that both parties have the opportunity to confirm the completion before the exchange is finalized.
 
 ### 4.5 Skills and Categories
 
@@ -233,6 +250,49 @@ Key points regarding administrator roles and access include:
 
 - **AdministratorsPerson**: A link from the `administrators` anchor to a person. It is an index of all the administrators of the network.
 
+#### 4.7.2 User Interface
+
+The administrators have access to the Adminstration Dashboard which is a specific part of the UI that includes the pages for managing administrators, persons, projects, organizations, requests and offers.
+
+It also includes the search functionality and special reports.
+
+### 4.8 Roles & Permissions
+
+The Requests & Offers - MVP project is designed with a focus on facilitating collaboration and resource exchange within the hAppenings.community. To ensure a structured and efficient operation, the application defines specific roles and their associated permissions. These roles are crucial for managing the network's operations, ensuring its smooth functioning, and maintaining a healthy and supportive community.
+
+#### 4.8.1 Advocate
+
+- **Onboarded/Approved**: Advocates are individuals passionate about the Holochain technology, looking to support projects within the ecosystem. They are onboarded and approved to participate in the network by the network's administrators.
+- **Personal Profile**: Advocates must file out their personal profiles, including essential information and their areas of expertise.
+- **Offers**: Advocates can offer their skills, talents, or resources to the network. This includes mentorship, brainstorming sessions, or any other form of support they wish to provide.
+- **Reporting**: Advocates have access to reporting features, allowing them to view their exchanges and a general report of total exchanges for the month.
+
+#### 4.8.2 Creator
+
+- **Onboarded/Approved**: Creators are individuals or groups actively involved in creating or developing projects within the Holochain ecosystem. They are onboarded and approved to participate in the network by the network's administrators.
+- **Personal Profile**: Creators can file out their personal profiles, including their skills, location, type, etc.
+- **Offers**: Creators can make offers, including the skills and talents they wish to offer.
+- **Requests**: Creators can make requests for themselves, such as mentoring, brainstorming time, or testing in the early days of their projects.
+- **Reporting**: Creators can access reports on their exchanges and a general report of total exchanges for the month.
+
+#### 4.8.3 Projects and Organizations Administrators
+
+- **Onboarded/Approved**: Projects and organizations administrators are individuals or groups designated to represent a project or organization within the network. They are onboarded and approved to participate in the network.
+- **Personal Profile**: Projects and organizations administrators can file out their personal profiles, including their skills, location, type, etc.
+- **Offers**: Projects and organizations administrators can make offers, including the skills and talents they wish to offer.
+- **Requests**: Projects and organizations administrators can make requests for themselves and on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
+
+#### 4.8.4 Administrator
+
+- **Onboarded/Approved**: Administrators are individuals with special privileges to manage the network's operations. They are onboarded and approved to participate in the network.
+- **Personal Profile**: Administrators can file out their personal profiles, including their skills, location, type, etc.
+- **Offers**: Administrators can make offers, including the skills and talents they wish to offer.
+- **Requests**: Administrators can make requests for the MVP, such as help with moderation or supporting a kind community.
+- **Reports Backend**: Administrators have access to all reports and data, including the ability to pause or delete a member.
+
+#### 4.8.5 Matchmaker (Potential Future Role)
+
+- **Description**: A role that could be added in future versions to facilitate the matching of requests and offers more efficiently.
 
 ## 5. MVP Use Case: Project Collaboration and Skill Matching
 
@@ -296,4 +356,4 @@ Color palette :
 
 ## 9. Conclusion
 
-This specification document outlines the key components and functionalities of the Requests & Offers - HC/MVP project. By adhering to these specifications, developers can ensure the successful creation of a Holochain application that effectively facilitates the exchange of requests and offers within the hAppenings.community.
+This specification document outlines the key components and functionalities of the Requests & Offers - MVP project. By adhering to these specifications, developers can ensure the successful creation of a Holochain application that effectively facilitates the exchange of requests and offers within the hAppenings.community.
