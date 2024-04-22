@@ -21,7 +21,11 @@
     console.log('appInfo :', await hc.getAppInfo());
   });
 
-  function goToAdminShortcut(event: KeyboardEvent) {
+  /**
+   * Toggle between the admin page and the homepage when `Alt + a` is pressed.
+   * @param {KeyboardEvent} event - Keyboard event
+   */
+  function toggleAdminPage(event: KeyboardEvent) {
     if ($myProfileIsAdmin && event.altKey && event.key === 'a') {
       if (!window.location.pathname.startsWith('/admin')) goto('/admin');
       else goto('/');
@@ -29,7 +33,7 @@
   }
 </script>
 
-<svelte:window on:keydown={goToAdminShortcut} />
+<svelte:window on:keydown={toggleAdminPage} />
 
 <slot />
 

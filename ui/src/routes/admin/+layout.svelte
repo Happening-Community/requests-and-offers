@@ -1,7 +1,13 @@
 <script lang="ts">
   import Navbar from '@lib/NavBar.svelte';
-  import { AppShell } from '@skeletonlabs/skeleton';
+  import { isConnected } from '@services/HolochainClientService';
+  import { AppShell, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
   import { onMount } from 'svelte';
+
+  const conicStops: ConicStop[] = [
+    { color: 'transparent', start: 0, end: 0 },
+    { color: 'rgb(var(--color-primary-500))', start: 75, end: 50 }
+  ];
 
   onMount(() => {
     const htmlElement = document.getElementsByTagName('html')[0];
@@ -32,6 +38,11 @@
   <main
     class="bg-surface-800 mx-auto flex min-h-screen flex-col items-center justify-center px-5 pb-10 pt-40"
   >
-    <slot />
+    {#if !$isConnected}
+      <p>Not connected yet.</p>
+      <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
+    {:else}
+      <slot />
+    {/if}
   </main>
 </AppShell>
