@@ -47,9 +47,6 @@ The `Person` entry represents the person and its associated agents within the hA
 - **type**: The type of person, either 'advocate' or 'creator'.
   - **Type**: `String`
   - **Validation**: Must be either 'advocate' or 'creator'.
-- **skills**: A list of skills EntryHash associated with the person.
-  - **Type**: `Vec<EntryHash>`
-  - **Validation**: Optional, can be initially empty.
 - **email**: The person's email address.
   - **Type**: `String`
   - **Validation**: Must be a valid email address format.
@@ -86,6 +83,8 @@ The `Person` entry represents the person and its associated agents within the hA
 
 - **Project and Organization Creation**: Users can create projects and organizations, with projects owned by organizations. Projects have specific requirements and status.
 ![Project status](images/project-stat  - **AdministratorsPerson**: A link from the `administrators` anchor to the person. It is an index of all the administrators of the network.
+
+#### 4.3.1 Project Entry
 
 The `Project` entry represents a project and its associated agents, including team members. Projects have specific requirements and status. Projects can be created by organizations or by persons.
 
@@ -357,3 +356,5 @@ Color palette :
 ## 9. Conclusion
 
 This specification document outlines the key components and functionalities of the Requests & Offers - MVP project. By adhering to these specifications, developers can ensure the successful creation of a Holochain application that effectively facilitates the exchange of requests and offers within the hAppenings.community.
+
+![requests and offers diagram](images/requests-and-offers.drawio.png)
