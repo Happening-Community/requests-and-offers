@@ -1,4 +1,5 @@
 <script lang="ts">
+  import AdminMenuLinks from '@lib/AdminMenuLinks.svelte';
   import Navbar from '@lib/NavBar.svelte';
   import { isConnected } from '@services/HolochainClientService';
   import { AppShell, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
@@ -22,7 +23,7 @@
 
   <svelte:fragment slot="sidebarLeft">
     <div
-      class="bg-surface-900 mt-32 flex min-h-screen w-52 flex-col gap-3 border-2 border-slate-900 p-4"
+      class="bg-surface-900 flex min-h-screen w-52 flex-col gap-5 border-2 border-slate-900 p-4 pt-36"
     >
       <a
         href="/admin"
@@ -30,8 +31,7 @@
       >
         Admin Panel
       </a>
-      <a class="btn variant-filled-primary" href="/admin/administrators">Administrators</a>
-      <a class="btn variant-filled-primary" href="/admin/profiles">Profiles</a>
+      <AdminMenuLinks />
     </div>
   </svelte:fragment>
 

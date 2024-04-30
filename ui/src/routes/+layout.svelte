@@ -35,6 +35,12 @@
 
 <svelte:window on:keydown={toggleAdminPage} />
 
+<!-- <AppShell>
+  <svelte:fragment slot="header">
+    <Navbar />
+  </svelte:fragment>
+</AppShell> -->
+
 <slot />
 
 <Modal />

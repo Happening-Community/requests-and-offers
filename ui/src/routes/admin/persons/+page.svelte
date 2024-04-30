@@ -43,9 +43,9 @@
 </script>
 
 <section class="flex flex-col gap-10 text-white">
-  <h1 class="h1 text-center">Profiles management</h1>
+  <h1 class="h1 text-center">Persons management</h1>
   <div class="flex flex-col gap-4">
-    <h2 class="h3">Pending profiles</h2>
+    <h2 class="h3">Pending persons</h2>
     {#if $profiles && $profiles.length > 0}
       <table class="table-hover table drop-shadow-lg">
         <thead>

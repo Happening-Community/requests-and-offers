@@ -1,7 +1,8 @@
 <script lang="ts">
   import { getDrawerStore } from '@skeletonlabs/skeleton';
 
-  export let href: string;
+  export let href: string,
+    bgColor: string = 'variant-filled-secondary';
 
   const drawerStore = getDrawerStore();
 
@@ -10,6 +11,6 @@
   }
 </script>
 
-<a {href} class="btn variant-filled-secondary rounded-lg" on:click={closeDrawer}>
+<a {href} class="btn {bgColor} rounded-lg" on:click={closeDrawer}>
   <slot />
 </a>
