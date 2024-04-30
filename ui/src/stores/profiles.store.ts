@@ -3,7 +3,7 @@ import hc from '@services/HolochainClientService';
 import { writable, type Writable } from 'svelte/store';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
 
-export type IndividualType = 'creator' | 'advocate';
+export type UserType = 'creator' | 'advocate';
 export type ProfileStatus = 'pending' | 'accepted' | 'rejected';
 
 export type Profile = {
@@ -11,7 +11,7 @@ export type Profile = {
   nickname: string;
   bio?: string;
   picture?: Uint8Array;
-  user_type: IndividualType;
+  user_type: UserType;
   skills?: string[];
   email: string;
   phone?: string;

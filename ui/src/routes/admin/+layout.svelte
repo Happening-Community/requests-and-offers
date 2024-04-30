@@ -7,7 +7,7 @@
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
-    { color: 'rgb(var(--color-primary-500))', start: 75, end: 50 }
+    { color: 'rgb(var(--color-secondary-500))', start: 75, end: 50 }
   ];
 
   onMount(() => {
@@ -27,7 +27,7 @@
     >
       <a
         href="/admin"
-        class="h3 hover:text-secondary-500 hover:border-b-secondary-500 mb-4 border-b-2 border-b-white text-center text-white"
+        class="h3 hover:text-secondary-500 hover:border-b-secondary-500 mb-4 border-b-2 border-b-white text-center text-white transition-colors duration-200 ease-in-out"
       >
         Admin Panel
       </a>

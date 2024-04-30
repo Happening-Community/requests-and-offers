@@ -4,7 +4,7 @@
   import {
     createProfile,
     myProfile,
-    type IndividualType,
+    type UserType,
     type Profile,
     getMyProfile
   } from '@stores/profiles.store.js';
@@ -67,16 +67,27 @@
     }
   }
 
+  async function mockProfiles() {
+    try {
+      await createProfile((await createMockedProfiles())[0]);
+      await getMyProfile();
+
+      goto('/profile');
+    } catch (error) {
+      console.log('error :', error);
+    }
+  }
+
   async function submitForm(event: SubmitEvent) {
     const data = new FormData(event.target as HTMLFormElement);
-    const profile_picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
+    const picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
 
     const profile: Profile = {
       name: data.get('name') as string,
       nickname: data.get('nickname') as string,
       bio: data.get('bio') as string,
-      picture: profile_picture.byteLength > 0 ? new Uint8Array(profile_picture) : undefined,
-      user_type: data.get('user_type') as IndividualType,
+      picture: picture.byteLength > 0 ? new Uint8Array(picture) : undefined,
+      user_type: data.get('user_type') as UserType,
       skills: data.getAll('skills') as string[],
       email: data.get('email') as string,
       phone: data.get('phone') as string,
@@ -85,8 +96,7 @@
     };
 
     try {
-      await createProfile((await createMockedProfiles())[0]);
-      // await createProfile(profile);
+      await createProfile(profile);
       await getMyProfile();
 
       goto('/profile');
@@ -109,12 +119,12 @@
     >
       <p>*required fields</p>
       <label class="label text-lg">
-        Name* :<input type="text" class="input" name="name" />
+        Name* :<input type="text" class="input" name="name" required />
       </label>
 
       <label class="label text-lg">
         Nickname* :
-        <input type="text" class="input" name="nickname" />
+        <input type="text" class="input" name="nickname" required />
       </label>
 
       <label class="label text-lg">
@@ -145,11 +155,7 @@
             Advocate
           </label>
           <label class="label flex items-center gap-2">
-            <input type="radio" name="user_type" value="developer" checked required />
-            Developer
-          </label>
-          <label class="label flex items-center gap-2 text-gray-500">
-            <input type="radio" name="user_type" value="creator" disabled />
+            <input type="radio" name="user_type" value="creator" required />
             Creator
           </label>
         </div>
@@ -168,7 +174,7 @@
 
       <label class="label text-lg">
         Email* :
-        <input type="email" class="input" name="email" />
+        <input type="email" class="input" name="email" required />
       </label>
 
       <label class="label text-lg">
@@ -197,9 +203,19 @@
         <input type="text" class="input" name="location" />
       </label>
 
-      <button type="submit" class="btn variant-filled-primary w-fit self-center">
-        Create Profile
-      </button>
+      <div class="flex justify-around">
+        <button type="submit" class="btn variant-filled-primary w-fit self-center">
+          Create Profile
+        </button>
+
+        <button
+          type="button"
+          class="btn variant-filled-tertiary w-fit self-center"
+          on:click={mockProfiles}
+        >
+          Create Mocked Profile
+        </button>
+      </div>
     </form>
   {/if}
 </section>

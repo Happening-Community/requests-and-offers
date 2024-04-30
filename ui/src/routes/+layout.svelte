@@ -46,7 +46,12 @@
 <Modal />
 <Drawer>
   {#if $drawerStore.id === 'menu-drawer'}
-    <div class="flex h-10 flex-col gap-5 p-2 md:p-5">
+    <div class="h-10 space-y-5 p-2 md:p-5">
+      <div class="flex justify-center">
+        <a href="/" on:click={() => drawerStore.close()}>
+          <img src="/hAppeningsLogoWsun2.webp" alt="" class="w-28" />
+        </a>
+      </div>
       <MenuLinks />
     </div>
   {/if}

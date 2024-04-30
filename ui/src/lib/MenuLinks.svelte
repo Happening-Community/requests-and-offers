@@ -21,6 +21,10 @@
 </div>
 {#if $myProfileIsAdmin}
   <div class="flex flex-col gap-3 lg:hidden">
-    <MenuLink href="/admin">Admin</MenuLink>
+    <MenuLink
+      href="/admin"
+      className="variant-ringed-secondary text-white hover:variant-filled-secondary"
+      >Admin panel</MenuLink
+    >
   </div>
 {/if}

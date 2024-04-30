@@ -1,19 +1,24 @@
 import type { Organization } from '@stores/organizations.store';
-import type { Profile } from '@stores/profiles.store';
-import { Sex, faker } from '@faker-js/faker';
-import { fetchImageAndConvertToUInt8Array } from '@utils';
+import type { UserType, Profile } from '@stores/profiles.store';
+import { SimpleFaker, faker } from '@faker-js/faker';
+import { fetchImageAndConvertToUInt8Array, getRandomNumber } from '@utils';
 import type { Project } from '@stores/projects.store';
 
 export async function createMockedProfiles(count: number = 1): Promise<Profile[]> {
   let profiles: Profile[] = [];
 
+  const fakedUserType = new SimpleFaker().helpers.arrayElements<UserType>(
+    ['creator', 'advocate'],
+    1
+  )[0] as UserType;
+
   for (let i = 0; i < count; i++) {
     profiles.push({
       name: faker.person.fullName({ sex: 'female' }),
       nickname: faker.person.firstName('female'),
-      bio: faker.lorem.paragraphs(2),
+      bio: faker.lorem.paragraphs(getRandomNumber(2, 5)),
       picture: await fetchImageAndConvertToUInt8Array('https://picsum.photos/200/300'),
-      user_type: 'developer',
+      user_type: fakedUserType,
       skills: ['JavaScript', 'Svelte', 'SvelteKit'],
       email: faker.internet.email(),
       phone: '123456789',

@@ -81,7 +81,7 @@ test("create and read Profile", async () => {
     let links = await getAgentProfile(bob.cells[0], bob.agentPubKey);
     assert.equal(links.length, 0);
 
-    // Bob create an Profile with erroneous IndividualType
+    // Bob create an Profile with erroneous UserType
     let errSample: Profile = sampleProfile({
       user_type: "Non Authorized",
     });

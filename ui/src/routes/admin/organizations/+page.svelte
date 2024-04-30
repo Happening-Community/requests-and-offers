@@ -8,7 +8,7 @@
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
-    { color: 'rgb(var(--color-primary-500))', start: 75, end: 50 }
+    { color: 'rgb(var(--color-secondary-500))', start: 75, end: 50 }
   ];
 
   onMount(async () => {

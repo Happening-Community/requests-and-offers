@@ -3,7 +3,7 @@
   import { Avatar, FileDropzone, InputChip } from '@skeletonlabs/skeleton';
   import {
     myProfile,
-    type IndividualType,
+    type UserType,
     type Profile,
     updateProfile,
     getMyProfile
@@ -75,13 +75,13 @@
       if (!profile) return null;
       return {
         ...profile,
-        profile_picture: undefined
+        picture: undefined
       };
     });
   }
 
   onMount(async () => {
-    if ($myProfile?.profile_picture) profilePicture = new Blob([$myProfile?.profile_picture]);
+    if ($myProfile?.picture) profilePicture = new Blob([$myProfile?.picture]);
   });
 
   async function submitForm(event: SubmitEvent) {
@@ -89,7 +89,7 @@
     console.log('event :', event);
 
     const data = new FormData(form);
-    const profile_picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
+    const picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
 
     console.log(data.get('picture'));
 
@@ -97,11 +97,8 @@
       name: data.get('name') as string,
       nickname: data.get('nickname') as string,
       bio: data.get('bio') as string,
-      profile_picture:
-        profile_picture.byteLength > 0
-          ? new Uint8Array(profile_picture)
-          : $myProfile?.profile_picture,
-      user_type: data.get('user_type') as IndividualType,
+      picture: picture.byteLength > 0 ? new Uint8Array(picture) : $myProfile?.picture,
+      user_type: data.get('user_type') as UserType,
       skills: data.getAll('skills') as string[],
       email: data.get('email') as string,
       phone: data.get('phone') as string,
@@ -188,11 +185,11 @@
             <input
               type="radio"
               name="user_type"
-              value="developer"
-              checked={$myProfile.user_type === 'developer'}
+              value="creator"
+              checked={$myProfile.user_type === 'creator'}
               required
             />
-            Developer
+            Creator
           </label>
         </div>
       </div>
