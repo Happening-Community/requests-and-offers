@@ -151,7 +151,7 @@
 
         <div class="flex gap-4">
           <label class="label flex items-center gap-2">
-            <input type="radio" name="user_type" value="advocate" required />
+            <input type="radio" name="user_type" value="advocate" checked required />
             Advocate
           </label>
           <label class="label flex items-center gap-2">
