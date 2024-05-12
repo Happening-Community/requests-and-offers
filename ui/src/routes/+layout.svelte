@@ -5,8 +5,8 @@
   import { getMyProfile, myProfileIsAdmin } from '@stores/profiles.store';
   import { Modal, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
   import { initializeStores } from '@skeletonlabs/skeleton';
-  import MenuLinks from '@lib/MenuLinks.svelte';
   import { goto } from '$app/navigation';
+  import MenuDrawer from '@lib/drawers/MenuDrawer.svelte';
 
   initializeStores();
   const drawerStore = getDrawerStore();
@@ -26,7 +26,7 @@
    * @param {KeyboardEvent} event - Keyboard event
    */
   function toggleAdminPage(event: KeyboardEvent) {
-    if ($myProfileIsAdmin && event.altKey && event.key === 'a') {
+    if ($myProfileIsAdmin && event.altKey && (event.key === 'a' || event.key === 'A')) {
       if (!window.location.pathname.startsWith('/admin')) goto('/admin');
       else goto('/');
     }
@@ -35,24 +35,11 @@
 
 <svelte:window on:keydown={toggleAdminPage} />
 
-<!-- <AppShell>
-  <svelte:fragment slot="header">
-    <Navbar />
-  </svelte:fragment>
-</AppShell> -->
-
 <slot />
 
 <Modal />
 <Drawer>
   {#if $drawerStore.id === 'menu-drawer'}
-    <div class="h-10 space-y-5 p-2 md:p-5">
-      <div class="flex justify-center">
-        <a href="/" on:click={() => drawerStore.close()}>
-          <img src="/hAppeningsLogoWsun2.webp" alt="" class="w-28" />
-        </a>
-      </div>
-      <MenuLinks />
-    </div>
+    <MenuDrawer />
   {/if}
 </Drawer>

@@ -46,7 +46,7 @@
   });
 </script>
 
-<section class="flex flex-col gap-10 text-white">
+<section class="flex flex-col gap-10">
   <h1 class="h1 text-center">Persons management</h1>
   {#if isLoading && $profiles.length === 0}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>

@@ -39,7 +39,7 @@ export async function createMockedOrganizations(count: number = 1): Promise<Orga
       name: faker.company.name(),
       description: faker.company.catchPhrase(),
       picture: await fetchImageAndConvertToUInt8Array('https://picsum.photos/200/300'),
-      status: undefined,
+      status: 'pending',
       members: [],
       admins: [],
       projects: []
@@ -57,7 +57,7 @@ export async function createMockedProjects(count: number = 1): Promise<Project[]
       name: faker.company.name(),
       description: faker.company.catchPhrase(),
       picture: await fetchImageAndConvertToUInt8Array('https://picsum.photos/200/300'),
-      status: undefined,
+      status: 'pending',
       team_members: [],
       admins: []
     });
