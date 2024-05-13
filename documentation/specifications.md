@@ -232,18 +232,17 @@ Each page has a search functionality.
 
 ### 4.7 Administrator and Moderation Functionalities
 
-Administrators play a crucial role in managing the network's operations, ensuring its smooth functioning and security. Their responsibilities encompass:
+Administrators play a pivotal role in the governance and operation of the network, ensuring its integrity, security, and alignment with the community's objectives. Their responsibilities include:
 
-- **Managing Requests and Offers**: Administrators oversee the creation, modification, and resolution of requests and offers within the network.
-- **Project and Organization Management**: They are responsible for the creation, approval, and management of projects and organizations, ensuring they align with the network's standards and objectives.
-- **Agent Management**: This includes the manual verification of persons profiles ensuring their authenticity and compliance with the network's guidelines.
+- **Verification of Persons and Organizations**: Administrators are tasked with verifying the authenticity and compliance of persons and organizations within the network. This process is crucial for maintaining the integrity of the community and ensuring that all participants are legitimate.
+- **Project Creation by Verified Organizations**: Projects within the network can be directly created by verified organizations. This streamlines the project initiation process for organizations that have already been vetted by the network administrators.
+- **Verification of Projects Not Managed by Verified Organizations**: In cases where a person wishes to create a project that is not managed by a verified organization, the project must undergo a verification process by the network administrators. This ensures that all projects, regardless of their management structure, meet the network's standards and objectives.
 
-Key points regarding administrator roles and access include:
+Key aspects of administrator roles and access include:
 
-- **Initial Network Initiator**: The first agent to initiate the network is designated as an administrator, setting the foundation for the network's governance.
-- **Special Access**: Administrators are granted exclusive access to the `Administration` zome and UI, enabling them to perform their duties effectively.
-- **Utilization of hREA Roles**: Administrators leverage hREA roles to manage projects and organizations, ensuring a structured and efficient approach to resource allocation and project coordination.
-- **Capability-Based Security**: The network employs capability-based Holochain security measures, ensuring that only authorized administrators can access and modify critical functions, thereby safeguarding the network against unauthorized use.
+- **Exclusive Access to Administration Zome and UI**: Administrators are granted special access to the `Administration` zome and user interface, enabling them to effectively carry out their duties, including the verification of persons, organizations, and projects.
+- **Utilization of hREA Roles**: Administrators leverage hREA roles to manage and track their relationships with projects and organizations. This structured approach ensures a clear and efficient method for resource allocation and project coordination within the network.
+- **Capability-Based Security Measures**: The network employs capability-based Holochain security measures to ensure that only authorized administrators can access and modify critical functions. This safeguards the network against unauthorized use and maintains the security of the community.
 
 #### 4.7.1 Links
 
@@ -251,9 +250,7 @@ Key points regarding administrator roles and access include:
 
 #### 4.7.2 User Interface
 
-The administrators have access to the Adminstration Dashboard which is a specific part of the UI that includes the pages for managing administrators, persons, projects, organizations, requests and offers.
-
-It also includes the search functionality and special reports.
+Administrators have access to the Administration Dashboard, a specialized part of the user interface that includes pages for managing administrators, persons, projects, organizations, requests, and offers. This dashboard also incorporates search functionality and special reports, providing administrators with comprehensive tools for network management.
 
 ### 4.8 Roles & Permissions
 

@@ -27,6 +27,7 @@
    */
   function toggleAdminPage(event: KeyboardEvent) {
     if ($myProfileIsAdmin && event.altKey && (event.key === 'a' || event.key === 'A')) {
+      event.preventDefault();
       if (!window.location.pathname.startsWith('/admin')) goto('/admin');
       else goto('/');
     }
