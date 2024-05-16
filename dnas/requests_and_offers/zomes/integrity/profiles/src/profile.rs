@@ -1,3 +1,5 @@
+use std::{fmt::Display, str::FromStr};
+
 use hdi::prelude::*;
 use image::io::Reader as ImageReader;
 
@@ -13,7 +15,7 @@ pub struct Profile {
     pub bio: String,
     /// An optional serialized image representing the profile picture.
     pub picture: Option<SerializedBytes>,
-    /// The type of user, either 'advocate' or 'developer'.
+    /// The type of user, either 'advocate' or 'creator'.
     pub user_type: String,
     /// A list of skills associated with the user.
     pub skills: Vec<String>,
@@ -29,17 +31,68 @@ pub struct Profile {
     pub status: Option<String>,
 }
 
-const ALLOWED_TYPES: [&str; 3] = ["advocate", "developer", "creator"];
-const STATUS: [&str; 3] = ["pending", "accepted", "rejected"];
-
-fn is_valid_type(user_type: &str) -> bool {
-    let allowed_types_set: HashSet<&str> = ALLOWED_TYPES.iter().cloned().collect();
-    !allowed_types_set.contains(user_type)
+enum AllowedTypes {
+    Advocate,
+    Creator,
 }
 
-fn is_valid_status(status: &str) -> bool {
-    let allowed_status_set: HashSet<&str> = STATUS.iter().cloned().collect();
-    !allowed_status_set.contains(status)
+impl Display for AllowedTypes {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Advocate => write!(f, "advocate"),
+            Self::Creator => write!(f, "creator"),
+        }
+    }
+}
+
+// impl AllowedTypes {
+//     fn from_str(user_type: &str) -> Option<Self> {
+//         match user_type {
+//             "advocate" => Some(Self::Advocate),
+//             "creator" => Some(Self::Creator),
+//             _ => None,
+//         }
+//     }
+// }
+
+impl FromStr for AllowedTypes {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "advocate" => Ok(Self::Advocate),
+            "creator" => Ok(Self::Creator),
+            _ => Err(()),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+enum Status {
+    Pending,
+    Accepted,
+    Rejected,
+}
+
+impl Display for Status {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Pending => write!(f, "pending"),
+            Self::Accepted => write!(f, "accepted"),
+            Self::Rejected => write!(f, "rejected"),
+        }
+    }
+}
+
+impl Status {
+    fn from_str(status: &str) -> Option<Self> {
+        match status {
+            "pending" => Some(Self::Pending),
+            "accepted" => Some(Self::Accepted),
+            "rejected" => Some(Self::Rejected),
+            _ => None,
+        }
+    }
 }
 
 fn is_image(bytes: SerializedBytes) -> bool {
@@ -55,15 +108,15 @@ fn is_image(bytes: SerializedBytes) -> bool {
 }
 
 pub fn validate_profile(profile: Profile) -> ExternResult<ValidateCallbackResult> {
-    if is_valid_type(profile.user_type.as_str()) {
+    if AllowedTypes::from_str(profile.user_type.as_str()).is_err() {
         return Ok(ValidateCallbackResult::Invalid(String::from(
-            "Individual Type must be 'advocate', 'developer' or 'creator'.",
+            "Person Type must be 'advocate' or 'creator'.",
         )));
     };
 
-    if is_valid_status(profile.status.as_ref().unwrap().as_str()) {
+    if Status::from_str(profile.status.as_ref().unwrap().as_str()).is_none() {
         return Ok(ValidateCallbackResult::Invalid(String::from(
-            "Individual Status must be 'pending', 'accepted' or 'rejected'.",
+            "Person Status must be 'pending', 'accepted' or 'rejected'.",
         )));
     };
 

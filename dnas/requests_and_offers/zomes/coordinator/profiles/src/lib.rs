@@ -137,6 +137,6 @@ fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTy
     )?)
 }
 
-fn error(message: &str) -> WasmError {
+fn wasm_error(message: &str) -> WasmError {
     wasm_error!(WasmErrorInner::Guest(message.to_string()))
 }

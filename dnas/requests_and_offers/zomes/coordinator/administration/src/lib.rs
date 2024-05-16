@@ -1,6 +1,5 @@
 mod administration;
 
-use administration_integrity::*;
 use hdk::prelude::*;
 
 /// Called the first time a zome call is made to the cell containing this zome

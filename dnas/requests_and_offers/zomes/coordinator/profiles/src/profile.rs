@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 use profiles_integrity::*;
 
-use crate::error;
+use crate::wasm_error;
 
 #[hdk_extern]
 pub fn create_profile(profile: Profile) -> ExternResult<Record> {
@@ -10,12 +10,12 @@ pub fn create_profile(profile: Profile) -> ExternResult<Record> {
 
     let record = get_agent_profile(agent_info()?.agent_initial_pubkey)?;
     if !record.is_empty() {
-        return Err(error("You already have a Profile"));
+        return Err(wasm_error("You already have a Profile"));
     }
 
     let profile_hash = create_entry(&EntryTypes::Profile(profile.clone()))?;
     let record = get(profile_hash.clone(), GetOptions::default())?
-        .ok_or(error("Could not find the newly created Profile"))?;
+        .ok_or(wasm_error("Could not find the newly created Profile"))?;
 
     let path = Path::from("all_profiles");
     create_link(
@@ -50,7 +50,7 @@ pub fn get_latest_profile(original_profile_hash: ActionHash) -> ExternResult<Opt
             .target
             .clone()
             .into_action_hash()
-            .ok_or(error("Could not find the latest Profile"))?,
+            .ok_or(wasm_error("Could not find the latest Profile"))?,
         None => original_profile_hash.clone(),
     };
     get(latest_profile_hash, GetOptions::default())
@@ -80,11 +80,11 @@ pub fn update_profile(input: UpdateProfileInput) -> ExternResult<Record> {
 
     let record = match get(input.previous_profile_hash.clone(), GetOptions::default())? {
         Some(record) => record,
-        None => return Err(error("Could not find the previous Profile")),
+        None => return Err(wasm_error("Could not find the previous Profile")),
     };
 
     if input.updated_profile.status.is_some() {
-        return Err(error(
+        return Err(wasm_error(
             "Only administrators can update the status of a Profile",
         ));
     }
@@ -92,12 +92,12 @@ pub fn update_profile(input: UpdateProfileInput) -> ExternResult<Record> {
     let record_option: Option<Profile> = record
         .entry()
         .to_app_option()
-        .map_err(|_| error("Error while deserializing the previous Profile"))?;
+        .map_err(|_| wasm_error("wasm_error while deserializing the previous Profile"))?;
     input.updated_profile.status = record_option.unwrap().status;
 
     let author = record.action().author().clone();
     if author != agent_info()?.agent_initial_pubkey {
-        return Err(error("Only the author of a Profile can update it"));
+        return Err(wasm_error("Only the author of a Profile can update it"));
     }
 
     let updated_profile_hash =
@@ -111,7 +111,7 @@ pub fn update_profile(input: UpdateProfileInput) -> ExternResult<Record> {
     )?;
 
     let record = get(updated_profile_hash.clone(), GetOptions::default())?
-        .ok_or(error("Could not find the newly updated Profile"))?;
+        .ok_or(wasm_error("Could not find the newly updated Profile"))?;
 
     Ok(record)
 }
