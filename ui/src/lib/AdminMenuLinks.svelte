@@ -3,8 +3,9 @@
 </script>
 
 <div class="flex flex-col gap-3">
-  <MenuLink href="/admin/administrators" className="variant-filled-primary">Administrators</MenuLink
-  >
+  <MenuLink href="/admin/administrators" className="variant-filled-primary">
+    Administrators
+  </MenuLink>
   <MenuLink href="/admin/persons" className="variant-filled-primary">Persons</MenuLink>
 </div>
 
