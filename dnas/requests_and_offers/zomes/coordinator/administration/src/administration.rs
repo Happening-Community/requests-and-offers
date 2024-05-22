@@ -1,5 +1,6 @@
 use administration_integrity::LinkTypes;
 use hdk::prelude::*;
+
 #[hdk_extern]
 fn register_administrator(person_profile_hash: ActionHash) -> ExternResult<ValidateCallbackResult> {
     let path = Path::from("administrators");
@@ -11,4 +12,15 @@ fn register_administrator(person_profile_hash: ActionHash) -> ExternResult<Valid
         (),
     )?;
     Ok(ValidateCallbackResult::Valid)
+}
+
+#[hdk_extern]
+fn get_all_administrators_links(_: ()) -> ExternResult<Vec<Link>> {
+    let path = Path::from("administrators");
+    let links = get_links(
+        path.path_entry_hash()?,
+        LinkTypes::AdministratorsPerson,
+        None,
+    )?;
+    Ok(links)
 }

@@ -24,7 +24,7 @@ import {
   getAgentProfile,
   sampleProfile,
 } from "../profiles/common";
-import { registerAdministrator } from "./common";
+import { getAllAdministratorsLinks, registerAdministrator } from "./common";
 
 test("create a Person and make it administrator", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
@@ -41,12 +41,8 @@ test("create a Person and make it administrator", async () => {
       alice.agentPubKey
     );
 
-    assert.ok(aliceProfileLink);
-
-    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-
     // Register Alice as an administrator
-    const response = await registerAdministrator(
+    await registerAdministrator(
       alice.cells[0],
       record.signed_action.hashed.hash
     );
@@ -54,5 +50,12 @@ test("create a Person and make it administrator", async () => {
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Alice the list of the administrators
+    const administrators = await getAllAdministratorsLinks(alice.cells[0]);
+
+    // Verify that the link target is Alice
+    assert.equal(
+      administrators[0].target.toString(),
+      aliceProfileLink[0].target.toString()
+    );
   });
 });
