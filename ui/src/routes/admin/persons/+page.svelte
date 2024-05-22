@@ -16,9 +16,9 @@
 
   $: isLoading = true;
 
-  const pendingProfiles = $profiles.filter((profile) => profile.status === 'pending');
-  const acceptedProfiles = $profiles.filter((profile) => profile.status === 'accepted');
-  const rejectedProfiles = $profiles.filter((profile) => profile.status === 'rejected');
+  $: pendingProfiles = $profiles.filter((profile) => profile.status === 'pending');
+  $: acceptedProfiles = $profiles.filter((profile) => profile.status === 'accepted');
+  $: rejectedProfiles = $profiles.filter((profile) => profile.status === 'rejected');
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
