@@ -9,9 +9,9 @@
     getMyProfile
   } from '@stores/profiles.store.js';
   import { goto } from '$app/navigation';
-  import CreateProfileBtn from '@lib/CreateProfileBtn.svelte';
   import { onMount } from 'svelte';
   import hc from '@services/HolochainClientService';
+  import NavButton from '@lib/NavButton.svelte';
 
   type FormattedTimezone = {
     name: string;
@@ -120,7 +120,7 @@
 <section class="flex w-1/2 flex-col gap-10">
   {#if !$myProfile}
     <p class="mb-4 text-center text-xl">It looks like you don't have a profile yet !</p>
-    <CreateProfileBtn />
+    <NavButton href="/profile/create" text="Create profile" />
   {:else}
     <h2 class="h2">Edit Profile</h2>
 

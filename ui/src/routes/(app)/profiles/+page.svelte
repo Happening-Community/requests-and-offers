@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ActionHash } from '@holochain/client';
-  import CreateProfileBtn from '@lib/CreateProfileBtn.svelte';
+  import NavButton from '@lib/NavButton.svelte';
   import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
   import {
     Avatar,
@@ -46,7 +46,7 @@
 <section class="flex flex-col gap-4">
   <div class="flex gap-4">
     <h2 class="h2">Profiles</h2>
-    <CreateProfileBtn />
+    <NavButton href="/profile/create" text="Create profile" />
   </div>
   {#if $profiles && $profiles.length > 0}
     <table class="table">

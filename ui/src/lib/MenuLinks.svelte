@@ -24,7 +24,8 @@
     <MenuLink
       href="/admin"
       className="variant-ringed-secondary text-white hover:variant-filled-secondary"
-      >Admin panel</MenuLink
     >
+      Admin panel
+    </MenuLink>
   </div>
 {/if}

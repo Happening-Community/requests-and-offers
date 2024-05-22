@@ -1,7 +1,7 @@
 <script lang="ts">
-  import CreateProfileBtn from '$lib/CreateProfileBtn.svelte';
   import { myProfile } from '@stores/profiles.store';
   import { Avatar } from '@skeletonlabs/skeleton';
+  import NavButton from '@lib/NavButton.svelte';
 
   $: profilePictureUrl = $myProfile?.picture
     ? URL.createObjectURL(new Blob([new Uint8Array($myProfile.picture)]))
@@ -11,7 +11,7 @@
 <section class="flex flex-col items-center">
   {#if !$myProfile}
     <p class="mb-4 text-center text-xl">It looks like you don't have a profile yet !</p>
-    <CreateProfileBtn />
+    <NavButton href="/profile/create" text="Create profile" />
   {:else}
     <div class="mb-10 flex flex-col items-center gap-5">
       <h2 class="h2">
