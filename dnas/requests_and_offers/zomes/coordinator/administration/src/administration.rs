@@ -24,3 +24,17 @@ fn get_all_administrators_links(_: ()) -> ExternResult<Vec<Link>> {
     )?;
     Ok(links)
 }
+
+#[hdk_extern]
+fn check_if_administrator(person_profile_hash: ActionHash) -> ExternResult<ValidateCallbackResult> {
+    let links = get_all_administrators_links(())?;
+    if links
+        .iter()
+        .any(|link| link.target == person_profile_hash.clone().into())
+    {
+        return Ok(ValidateCallbackResult::Valid);
+    }
+    Ok(ValidateCallbackResult::Invalid(
+        "Not an administrator".into(),
+    ))
+}

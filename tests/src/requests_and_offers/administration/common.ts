@@ -11,10 +11,12 @@ import {
   Link,
 } from "@holochain/client";
 
+type ValidateCallbackResult = { Valid: null } | { Invalid: string };
+
 export async function registerAdministrator(
   cell: CallableCell,
   profile_hash: ActionHash
-): Promise<Record> {
+): Promise<ValidateCallbackResult> {
   return cell.callZome({
     zome_name: "administration",
     fn_name: "register_administrator",
@@ -28,5 +30,16 @@ export async function getAllAdministratorsLinks(
   return cell.callZome({
     zome_name: "administration",
     fn_name: "get_all_administrators_links",
+  });
+}
+
+export async function checkIfAdministrator(
+  cell: CallableCell,
+  profile_hash: ActionHash
+): Promise<ValidateCallbackResult> {
+  return cell.callZome({
+    zome_name: "administration",
+    fn_name: "check_if_administrator",
+    payload: profile_hash,
   });
 }
