@@ -28,3 +28,7 @@ pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {
 fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
     Ok(())
 }
+
+fn wasm_error(message: &str) -> WasmError {
+    wasm_error!(WasmErrorInner::Guest(message.to_string()))
+}

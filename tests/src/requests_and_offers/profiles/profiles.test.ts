@@ -23,14 +23,13 @@ import {
 import {
   Profile,
   createProfile,
-  decodeOutputs,
   getAllProfiles,
   getAgentProfile,
   getLatestProfile,
   sampleProfile,
   updateProfile,
 } from "./common.js";
-import { runScenarioWithTwoAgents } from "../utils";
+import { decodeOutputs, runScenarioWithTwoAgents } from "../utils";
 
 test("create and read Profile", async () => {
   await runScenarioWithTwoAgents(

@@ -11,7 +11,6 @@ import {
   Link,
   AgentPubKey,
 } from "@holochain/client";
-import { decode } from "@msgpack/msgpack";
 
 export type UserType = "advocate" | "creator" | "Non Authorized";
 export type Status = "pending" | "accepted" | "rejected";
@@ -29,10 +28,6 @@ export type Profile = {
   location: string;
   status?: Status;
 };
-
-export function decodeOutputs(records: Record[]): unknown[] {
-  return records.map((r) => decode((r.entry as any).Present.entry));
-}
 
 export function sampleProfile(partialProfile: Partial<Profile>): Profile {
   return {

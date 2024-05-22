@@ -10,12 +10,11 @@ import {
   fakeDnaHash,
   Link,
 } from "@holochain/client";
-import { ValidateCallbackResult } from "../utils";
 
 export async function registerAdministrator(
   cell: CallableCell,
   profile_hash: ActionHash
-): Promise<ValidateCallbackResult> {
+): Promise<null> {
   return cell.callZome({
     zome_name: "administration",
     fn_name: "register_administrator",
@@ -35,7 +34,7 @@ export async function getAllAdministratorsLinks(
 export async function checkIfAdministrator(
   cell: CallableCell,
   profile_hash: ActionHash
-): Promise<ValidateCallbackResult> {
+): Promise<null> {
   return cell.callZome({
     zome_name: "administration",
     fn_name: "check_if_administrator",

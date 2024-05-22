@@ -17,8 +17,8 @@ import {
   fakeEntryHash,
   Link,
 } from "@holochain/client";
-import { assert, test } from "vitest";
-import { isValideCallbackResult, runScenarioWithTwoAgents } from "../utils";
+import { assert, expect, test } from "vitest";
+import { extractWasmErrorMessage, runScenarioWithTwoAgents } from "../utils";
 import {
   Profile,
   createProfile,
@@ -66,17 +66,13 @@ test("create a Person and make it administrator", async () => {
     );
 
     // Verify that Alice is an administrator
-    assert(
-      isValideCallbackResult(
-        await checkIfAdministrator(alice.cells[0], aliceProfileLink.target)
-      )
+    assert.ok(
+      await checkIfAdministrator(alice.cells[0], aliceProfileLink.target)
     );
 
     // Verify that Bob is not an administrator
-    assert(
-      !isValideCallbackResult(
-        await checkIfAdministrator(bob.cells[0], bobProfileLink.target)
-      )
-    );
+    expect(
+      checkIfAdministrator(bob.cells[0], bobProfileLink.target)
+    ).rejects.toThrow();
   });
 });
