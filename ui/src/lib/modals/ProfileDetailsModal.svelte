@@ -36,7 +36,17 @@
     <p><b>Timezone :</b> {profile.time_zone}</p>
     <p><b>Location :</b> {profile.location}</p>
   {/if}
-  <button class="btn variant-filled-secondary mt-5" on:click={() => modalStore.close()}>
-    Close
-  </button>
+  <div class="mt-5 flex flex-col items-center gap-4">
+    <div class="space-x-4">
+      <button class="btn variant-filled-tertiary" on:click={() => modalStore.close()}>
+        Accept
+      </button>
+      <button class="btn variant-filled-error" on:click={() => modalStore.close()}>
+        Decline
+      </button>
+    </div>
+    <button class="btn variant-filled-secondary w-fit" on:click={() => modalStore.close()}>
+      Close
+    </button>
+  </div>
 </article>

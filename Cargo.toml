@@ -10,7 +10,7 @@ members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
 [workspace.dependencies]
 hdi = "=0.3.6"
 hdk = "=0.2.6"
-image = "0.24"
+image = "0.24" # 0.25 non stable yet
 serde = "=1.0.166"
 
 [workspace.dependencies.administration]
@@ -19,11 +19,11 @@ path = "dnas/requests_and_offers/zomes/coordinator/administration"
 [workspace.dependencies.administration_integrity]
 path = "dnas/requests_and_offers/zomes/integrity/administration"
 
-[workspace.dependencies.ping]
-path = "dnas/requests_and_offers/zomes/coordinator/ping"
-
 [workspace.dependencies.profiles]
 path = "dnas/requests_and_offers/zomes/coordinator/profiles"
 
 [workspace.dependencies.profiles_integrity]
 path = "dnas/requests_and_offers/zomes/integrity/profiles"
+
+[workspace.dependencies.ping]
+path = "dnas/requests_and_offers/zomes/coordinator/ping"

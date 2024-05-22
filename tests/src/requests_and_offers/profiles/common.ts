@@ -13,7 +13,7 @@ import {
 } from "@holochain/client";
 import { decode } from "@msgpack/msgpack";
 
-export type UserType = "advocate" | "developer" | "Non Authorized";
+export type UserType = "advocate" | "creator" | "Non Authorized";
 export type Status = "pending" | "accepted" | "rejected";
 
 export type Profile = {
@@ -41,7 +41,7 @@ export function sampleProfile(partialProfile: Partial<Profile>): Profile {
       nickname: "NickName",
       bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       picture: null,
-      user_type: "developer",
+      user_type: "creator",
       skills: ["html", "css", "typescript", "rust"],
       email: "abc@abc.com",
       phone: null,

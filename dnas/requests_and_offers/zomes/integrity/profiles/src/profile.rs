@@ -45,16 +45,6 @@ impl Display for AllowedTypes {
     }
 }
 
-// impl AllowedTypes {
-//     fn from_str(user_type: &str) -> Option<Self> {
-//         match user_type {
-//             "advocate" => Some(Self::Advocate),
-//             "creator" => Some(Self::Creator),
-//             _ => None,
-//         }
-//     }
-// }
-
 impl FromStr for AllowedTypes {
     type Err = ();
 
@@ -109,15 +99,20 @@ fn is_image(bytes: SerializedBytes) -> bool {
 
 pub fn validate_profile(profile: Profile) -> ExternResult<ValidateCallbackResult> {
     if AllowedTypes::from_str(profile.user_type.as_str()).is_err() {
-        return Ok(ValidateCallbackResult::Invalid(String::from(
-            "Person Type must be 'advocate' or 'creator'.",
-        )));
+        return Ok(ValidateCallbackResult::Invalid(String::from(format!(
+            "Person Type must be '{}' or '{}'.",
+            AllowedTypes::Advocate,
+            AllowedTypes::Creator,
+        ))));
     };
 
     if Status::from_str(profile.status.as_ref().unwrap().as_str()).is_none() {
-        return Ok(ValidateCallbackResult::Invalid(String::from(
-            "Person Status must be 'pending', 'accepted' or 'rejected'.",
-        )));
+        return Ok(ValidateCallbackResult::Invalid(String::from(format!(
+            "Status must be '{}', '{}' or '{}'.",
+            Status::Pending,
+            Status::Accepted,
+            Status::Rejected
+        ))));
     };
 
     if let Some(bytes) = profile.picture {

@@ -46,9 +46,13 @@ test("create a Person and make it administrator", async () => {
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Register Alice as an administrator
-    await registerAdministrator(
+    const response = await registerAdministrator(
       alice.cells[0],
       record.signed_action.hashed.hash
     );
+
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    // Alice the list of the administrators
   });
 });
