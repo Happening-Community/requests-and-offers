@@ -18,7 +18,7 @@ import {
   Link,
 } from "@holochain/client";
 import { assert, test } from "vitest";
-import { runScenarioWithTwoAgents } from "../utils";
+import { isValideCallbackResult, runScenarioWithTwoAgents } from "../utils";
 import {
   Profile,
   createProfile,
@@ -66,17 +66,17 @@ test("create a Person and make it administrator", async () => {
     );
 
     // Verify that Alice is an administrator
-    const aliceIsAdministrator =
-      Object.keys(
+    assert(
+      isValideCallbackResult(
         await checkIfAdministrator(alice.cells[0], aliceProfileLink.target)
-      )[0] === "Valid";
-    assert(aliceIsAdministrator);
+      )
+    );
 
-    // Verify that bob is not an administrator
-    const bobIsAdministrator =
-      Object.keys(
+    // Verify that Bob is not an administrator
+    assert(
+      !isValideCallbackResult(
         await checkIfAdministrator(bob.cells[0], bobProfileLink.target)
-      )[0] === "Valid";
-    assert(!bobIsAdministrator);
+      )
+    );
   });
 });

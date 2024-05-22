@@ -10,8 +10,7 @@ import {
   fakeDnaHash,
   Link,
 } from "@holochain/client";
-
-type ValidateCallbackResult = { Valid: null } | { Invalid: string };
+import { ValidateCallbackResult } from "../utils";
 
 export async function registerAdministrator(
   cell: CallableCell,

@@ -22,3 +22,10 @@ export async function runScenarioWithTwoAgents(
 export function decodeOutputs(records: Record[]): unknown[] {
   return records.map((r) => decode((r.entry as any).Present.entry));
 }
+
+export type ValidateCallbackResult = { Valid: null } | { Invalid: string };
+export function isValideCallbackResult(
+  result: ValidateCallbackResult
+): boolean {
+  return "Valid" in result;
+}
