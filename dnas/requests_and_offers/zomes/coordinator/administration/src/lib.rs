@@ -1,4 +1,5 @@
 mod administration;
+mod person_administration;
 
 use hdk::prelude::*;
 

@@ -6,7 +6,6 @@ use crate::wasm_error;
 #[hdk_extern]
 fn register_administrator(person_profile_hash: ActionHash) -> ExternResult<bool> {
     let path = Path::from("administrators");
-    warn!("LinkTypes: {:?}", LinkTypes::AdministratorsPerson);
     create_link(
         path.path_entry_hash()?,
         person_profile_hash.clone(),
@@ -37,4 +36,10 @@ fn check_if_administrator(person_profile_hash: ActionHash) -> ExternResult<bool>
         return Ok(true);
     }
     Err(wasm_error("Not an administrator".into()))
+}
+
+#[hdk_extern]
+fn remove_administrator(person_profile_hash: ActionHash) -> ExternResult<bool> {
+    delete_link(person_profile_hash.clone())?;
+    Ok(true)
 }

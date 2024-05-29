@@ -55,11 +55,15 @@ test("create and read Profile", async () => {
       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
       // Bob gets the created Profile
-      const createReadOutput: Record = await getLatestProfile(
+      const createdRecord: Record = await getLatestProfile(
         bob.cells[0],
         record.signed_action.hashed.hash
       );
-      assert.containsAllKeys(sample, decodeOutputs([createReadOutput])[0]);
+      const createdProfile = decodeOutputs([createdRecord])[0] as Profile;
+      assert.containsAllKeys(sample, createdProfile);
+
+      // Verify that the profile status is "pending"
+      assert.equal(createdProfile.status, "pending");
 
       // Bob try to get his profile before he create it
       let links = await getAgentProfile(bob.cells[0], bob.agentPubKey);
@@ -179,7 +183,6 @@ test("create and update Profile", async () => {
 
     // Alice try to change the status of her profile
     sample = sampleProfile({
-      name: "Alicia",
       status: "accepted",
     });
 
