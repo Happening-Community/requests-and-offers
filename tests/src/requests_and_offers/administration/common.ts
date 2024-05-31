@@ -9,12 +9,13 @@ import {
   fakeEntryHash,
   fakeDnaHash,
   Link,
+  AgentPubKey,
 } from "@holochain/client";
 
 export async function registerAdministrator(
   cell: CallableCell,
   profile_hash: ActionHash
-): Promise<null> {
+): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
     fn_name: "register_administrator",
@@ -31,13 +32,24 @@ export async function getAllAdministratorsLinks(
   });
 }
 
-export async function checkIfAdministrator(
+export function checkIfPersonIsAdministrator(
   cell: CallableCell,
   profile_hash: ActionHash
-): Promise<null> {
+): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
-    fn_name: "check_if_administrator",
+    fn_name: "check_if_person_is_administrator",
     payload: profile_hash,
+  });
+}
+
+export async function checkIfAgentIsAdministrator(
+  cell: CallableCell,
+  agentPubKey: AgentPubKey
+): Promise<boolean> {
+  return cell.callZome({
+    zome_name: "administration",
+    fn_name: "check_if_agent_is_administrator",
+    payload: agentPubKey,
   });
 }

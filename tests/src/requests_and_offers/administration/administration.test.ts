@@ -26,7 +26,8 @@ import {
   sampleProfile,
 } from "../profiles/common";
 import {
-  checkIfAdministrator,
+  checkIfAgentIsAdministrator,
+  checkIfPersonIsAdministrator,
   getAllAdministratorsLinks,
   registerAdministrator,
 } from "./common";
@@ -67,12 +68,20 @@ test("create a Person and make it administrator", async () => {
 
     // Verify that Alice is an administrator
     assert.ok(
-      await checkIfAdministrator(alice.cells[0], aliceProfileLink.target)
+      await checkIfPersonIsAdministrator(
+        alice.cells[0],
+        aliceProfileLink.target
+      )
     );
 
     // Verify that Bob is not an administrator
     expect(
-      checkIfAdministrator(bob.cells[0], bobProfileLink.target)
+      checkIfPersonIsAdministrator(bob.cells[0], bobProfileLink.target)
     ).rejects.toThrow();
+
+    // Verify that Alice is an administrator with here AgentPubKey
+    assert.ok(
+      await checkIfAgentIsAdministrator(alice.cells[0], alice.agentPubKey)
+    );
   });
 });
