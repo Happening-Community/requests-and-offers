@@ -53,3 +53,22 @@ export async function checkIfAgentIsAdministrator(
     payload: agentPubKey,
   });
 }
+
+
+export async function sampleAdministrator(cell: CallableCell, partialAdministrator = {}) {
+    return {
+        ...{
+	  person: (await fakeActionHash()),
+        },
+        ...partialAdministrator
+    };
+}
+
+export async function createAdministrator(cell: CallableCell, administrator = undefined): Promise<Record> {
+    return cell.callZome({
+      zome_name: "administration",
+      fn_name: "create_administrator",
+      payload: administrator || await sampleAdministrator(cell),
+    });
+}
+
