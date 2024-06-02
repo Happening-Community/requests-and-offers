@@ -415,7 +415,7 @@ dependencies = [
  "cranelift-entity",
  "fxhash",
  "hashbrown 0.12.3",
- "indexmap 1.9.3",
+ "indexmap",
  "log",
  "smallvec",
 ]
@@ -677,12 +677,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "equivalent"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5443807d6dff69373d433ab9ef5378ad8df50ca6298caf15de6e52e24aaf54d5"
-
-[[package]]
 name = "exr"
 version = "1.71.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -901,7 +895,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "22030e2c5a68ec659fde1e949a745124b48e6fa8b045b7ed5bd1fe4ccc5c4e5d"
 dependencies = [
  "fallible-iterator",
- "indexmap 1.9.3",
+ "indexmap",
  "stable_deref_trait",
 ]
 
@@ -1210,16 +1204,6 @@ checksum = "bd070e393353796e801d209ad339e89596eb4c8d430d18ede6a1cced8fafbd99"
 dependencies = [
  "autocfg",
  "hashbrown 0.12.3",
-]
-
-[[package]]
-name = "indexmap"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d530e1a18b1cb4c484e6e34556a0d948706958449fca0cab753d649f2bce3d1f"
-dependencies = [
- "equivalent",
- "hashbrown 0.14.3",
 ]
 
 [[package]]
@@ -1899,7 +1883,7 @@ dependencies = [
  "bytecheck",
  "bytes",
  "hashbrown 0.12.3",
- "indexmap 1.9.3",
+ "indexmap",
  "ptr_meta",
  "rend",
  "rkyv_derive",
@@ -2073,11 +2057,11 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.99"
+version = "1.0.96"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46266871c240a00b8f503b877622fe33430b3c7d963bdc0f2adc511e54a1eae3"
+checksum = "057d394a50403bcac12672b2b18fb387ab6d289d957dab67dd201875391e52f1"
 dependencies = [
- "indexmap 2.1.0",
+ "indexmap",
  "itoa",
  "ryu",
  "serde",
@@ -2580,7 +2564,7 @@ dependencies = [
  "bytes",
  "cfg-if 1.0.0",
  "derivative",
- "indexmap 1.9.3",
+ "indexmap",
  "js-sys",
  "more-asserts",
  "rustc-demangle",
@@ -2666,7 +2650,7 @@ dependencies = [
  "bytecheck",
  "enum-iterator",
  "enumset",
- "indexmap 1.9.3",
+ "indexmap",
  "more-asserts",
  "rkyv",
  "target-lexicon",
@@ -2688,7 +2672,7 @@ dependencies = [
  "derivative",
  "enum-iterator",
  "fnv",
- "indexmap 1.9.3",
+ "indexmap",
  "lazy_static",
  "libc",
  "mach",
@@ -2707,7 +2691,7 @@ version = "0.95.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2ea896273ea99b15132414be1da01ab0d8836415083298ecaffbe308eaac87a"
 dependencies = [
- "indexmap 1.9.3",
+ "indexmap",
  "url",
 ]
 

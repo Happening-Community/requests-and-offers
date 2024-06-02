@@ -4,18 +4,8 @@ pub use administrator::*;
 use hdi::prelude::*;
 
 #[derive(Serialize, Deserialize)]
-#[serde(tag = "type")]
-#[hdk_entry_defs]
-#[unit_enum(UnitEntryTypes)]
-pub enum EntryTypes {
-    Administrator(Administrator),
-}
-
-#[derive(Serialize, Deserialize)]
 #[hdk_link_types]
 pub enum LinkTypes {
-    AdministratorsPerson,
-    AdministratorUpdates,
     AllAdministrators,
 }
 
