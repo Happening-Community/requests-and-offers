@@ -1,15 +1,13 @@
+use crate::*;
 use administration_integrity::*;
 use hdk::prelude::*;
 
 #[hdk_extern]
 pub fn create_administrator(administrator: Administrator) -> ExternResult<Record> {
     let administrator_hash = create_entry(&EntryTypes::Administrator(administrator.clone()))?;
-    let record = get(administrator_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(
-        WasmErrorInner::Guest(String::from(
-            "Could not find the newly created Administrator"
-        ))
-    ))?;
-    let path = Path::from("all_administrators");
+    let record = get(administrator_hash.clone(), GetOptions::default())?
+        .ok_or(wasm_error("Could not find the newly created Administrator"))?;
+    let path = Path::from("administrators");
     create_link(
         path.path_entry_hash()?,
         administrator_hash.clone(),
@@ -32,14 +30,11 @@ pub fn get_latest_administrator(
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
     let latest_administrator_hash = match latest_link {
-        Some(link) => {
-            link.target
-                .clone()
-                .into_action_hash()
-                .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
-                    "No action hash associated with link"
-                ))))?
-        }
+        Some(link) => link
+            .target
+            .clone()
+            .into_action_hash()
+            .ok_or(wasm_error("No action hash associated with link"))?,
         None => original_administrator_hash.clone(),
     };
     get(latest_administrator_hash, GetOptions::default())
@@ -54,9 +49,7 @@ pub fn get_original_administrator(
     };
     match details {
         Details::Record(details) => Ok(Some(details.record)),
-        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Malformed get details response"
-        )))),
+        _ => Err(wasm_error("Malformed get details response")),
     }
 }
 
@@ -79,9 +72,7 @@ pub fn get_all_revisions_for_administrator(
             Ok(GetInput::new(
                 link.target
                     .into_action_hash()
-                    .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
-                        "No action hash associated with link"
-                    ))))?
+                    .ok_or(wasm_error("No action hash associated with link"))?
                     .into(),
                 GetOptions::default(),
             ))
@@ -111,28 +102,20 @@ pub fn update_administrator(input: UpdateAdministratorInput) -> ExternResult<Rec
         LinkTypes::AdministratorUpdates,
         (),
     )?;
-    let record = get(updated_administrator_hash.clone(), GetOptions::default())?.ok_or(
-        wasm_error!(WasmErrorInner::Guest(String::from(
-            "Could not find the newly updated Administrator"
-        ))),
-    )?;
+    let record = get(updated_administrator_hash.clone(), GetOptions::default())?
+        .ok_or(wasm_error("Could not find the newly updated Administrator"))?;
     Ok(record)
 }
 
 #[hdk_extern]
 pub fn delete_administrator(original_administrator_hash: ActionHash) -> ExternResult<ActionHash> {
-    let details = get_details(original_administrator_hash.clone(), GetOptions::default())?.ok_or(
-        wasm_error!(WasmErrorInner::Guest(String::from(
-            "{pascal_entry_def_name} not found"
-        ))),
-    )?;
+    let details = get_details(original_administrator_hash.clone(), GetOptions::default())?
+        .ok_or(wasm_error("{pascal_entry_def_name} not found"))?;
     let record = match details {
         Details::Record(details) => Ok(details.record),
-        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Malformed get details response"
-        )))),
+        _ => Err(wasm_error("Malformed get details response")),
     }?;
-    let path = Path::from("all_administrators");
+    let path = Path::from("administrators");
     let links = get_links(path.path_entry_hash()?, LinkTypes::AllAdministrators, None)?;
     for link in links {
         if let Some(hash) = link.target.into_action_hash() {
@@ -152,9 +135,7 @@ pub fn get_all_deletes_for_administrator(
         return Ok(None);
     };
     match details {
-        Details::Entry(_) => Err(wasm_error!(WasmErrorInner::Guest(
-            "Malformed details".into()
-        ))),
+        Details::Entry(_) => Err(wasm_error("Malformed details")),
         Details::Record(record_details) => Ok(Some(record_details.deletes)),
     }
 }
@@ -177,6 +158,6 @@ pub fn get_oldest_delete_for_administrator(
 
 #[hdk_extern]
 pub fn get_all_administrators(_: ()) -> ExternResult<Vec<Link>> {
-    let path = Path::from("all_administrators");
+    let path = Path::from("administrators");
     get_links(path.path_entry_hash()?, LinkTypes::AllAdministrators, None)
 }
