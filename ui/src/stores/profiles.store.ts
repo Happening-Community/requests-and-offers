@@ -34,6 +34,8 @@ export const myProfileOriginalActionHash: Writable<ActionHash | null> = writable
  */
 export const profiles: Writable<Profile[]> = writable([]);
 
+export const profilesHashes: Writable<ActionHash[]> = writable([]);
+
 /**
  * Creates a new profile in the 'profiles' zome.
  * @async
@@ -113,7 +115,10 @@ export async function getMyProfile(): Promise<void> {
  * @return {Promise<Link[]>} The links to all profiles.
  */
 export async function getAllProfilesLinks(): Promise<Link[]> {
-  return hc.callZome('profiles', 'get_all_profiles', null);
+  const links: Link[] = await hc.callZome('profiles', 'get_all_profiles', null);
+  if (links.length > 0) profilesHashes.set(links.map((l) => l.target));
+
+  return links;
 }
 
 /**

@@ -13,22 +13,28 @@
     getAllAdministratorsLinks,
     administrators
   } from '@stores/administrators.store';
+  import AddAdministratorModal from '@lib/modals/AddAdministratorModal.svelte';
 
   let AdministratorProfilesHashes: ActionHash[];
 
   $: isLoading = true;
 
   const modalStore = getModalStore();
-  const modalComponent: ModalComponent = { ref: ProfileDetailsModal };
-  const modal = (id: number, hash: ActionHash): ModalSettings => {
+  const profileDetailsModalComponent: ModalComponent = { ref: ProfileDetailsModal };
+  const profileDetailsModal = (id: number, hash: ActionHash): ModalSettings => {
     return {
       type: 'component',
-      component: modalComponent,
+      component: profileDetailsModalComponent,
       meta: {
         id,
         hash
       }
     };
+  };
+  const addAdministratorModalComponent: ModalComponent = { ref: AddAdministratorModal };
+  const addAdministratorModal: ModalSettings = {
+    type: 'component',
+    component: addAdministratorModalComponent
   };
 
   onMount(async () => {
@@ -43,6 +49,13 @@
 
 <section class="flex flex-col gap-10">
   <h1 class="h1">Administrators management</h1>
+
+  <div class="flex justify-center">
+    <button
+      class="btn variant-filled-secondary w-fit"
+      on:click={() => modalStore.trigger(addAdministratorModal)}>Add administrator</button
+    >
+  </div>
 
   <div class="flex flex-col gap-4 lg:pr-4">
     <h2 class="h3">Network administrators</h2>
@@ -73,7 +86,8 @@
               <td>
                 <button
                   class="btn variant-filled-secondary"
-                  on:click={() => modalStore.trigger(modal(i, AdministratorProfilesHashes[i]))}
+                  on:click={() =>
+                    modalStore.trigger(profileDetailsModal(i, AdministratorProfilesHashes[i]))}
                 >
                   View
                 </button>
