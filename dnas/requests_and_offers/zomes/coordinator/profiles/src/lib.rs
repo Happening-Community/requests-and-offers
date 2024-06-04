@@ -1,4 +1,6 @@
+pub mod administration;
 pub mod profile;
+
 use hdk::prelude::*;
 use profiles_integrity::*;
 
