@@ -32,7 +32,7 @@
     console.log('appInfo :', await hc.getAppInfo());
   });
 
-  function handleKeyboardEvent(event: KeyboardEvent) {
+  async function handleKeyboardEvent(event: KeyboardEvent) {
     if ($agentIsAdministrator && event.altKey && (event.key === 'a' || event.key === 'A')) {
       event.preventDefault();
       if (!window.location.pathname.startsWith('/admin')) goto('/admin');
@@ -49,9 +49,8 @@
       event.preventDefault();
       let confirmation = confirm('Register Admin ?');
       if (confirmation) {
-        registerAdministrator($myProfileOriginalActionHash!);
-        // const myProfileHash = await getMyProfile();
-        // registerAdministrator($myProfile.);
+        await registerAdministrator($myProfileOriginalActionHash!);
+        await checkIfAgentIsAdministrator((await hc.getAppInfo())?.agent_pub_key!);
       }
     }
   }

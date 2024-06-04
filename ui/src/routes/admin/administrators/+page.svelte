@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { getAllProfiles, getAllProfilesLinks, profiles } from '@stores/profiles.store';
   import {
     Avatar,
     getModalStore,
@@ -9,8 +8,13 @@
   import type { ActionHash } from '@holochain/client';
   import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
   import { onMount } from 'svelte';
+  import {
+    getAllAdministrators,
+    getAllAdministratorsLinks,
+    administrators
+  } from '@stores/administrators.store';
 
-  let profilesHashes: ActionHash[];
+  let AdministratorProfilesHashes: ActionHash[];
 
   $: isLoading = true;
 
@@ -28,10 +32,12 @@
   };
 
   onMount(async () => {
-    await getAllProfiles();
+    await getAllAdministrators();
     isLoading = false;
-    profilesHashes = (await getAllProfilesLinks()).map((profile) => profile.target);
-    console.log('profilesHashes :', profilesHashes);
+    AdministratorProfilesHashes = (await getAllAdministratorsLinks()).map(
+      (profile) => profile.target
+    );
+    console.log('AdministratorProfilesHashes :', AdministratorProfilesHashes);
   });
 </script>
 
@@ -40,7 +46,7 @@
 
   <div class="flex flex-col gap-4 lg:pr-4">
     <h2 class="h3">Network administrators</h2>
-    {#if $profiles && $profiles.length > 0}
+    {#if $administrators && $administrators.length > 0}
       <table class="table-hover table drop-shadow-lg">
         <thead>
           <tr>
@@ -51,7 +57,7 @@
           </tr>
         </thead>
         <tbody>
-          {#each $profiles as profile, i}
+          {#each $administrators as profile, i}
             <tr>
               <td>
                 <Avatar
@@ -67,7 +73,7 @@
               <td>
                 <button
                   class="btn variant-filled-secondary"
-                  on:click={() => modalStore.trigger(modal(i, profilesHashes[i]))}
+                  on:click={() => modalStore.trigger(modal(i, AdministratorProfilesHashes[i]))}
                 >
                   View
                 </button>
@@ -76,8 +82,6 @@
           {/each}
         </tbody>
       </table>
-    {:else}
-      <p>No pending profiles</p>
     {/if}
   </div>
 </section>
