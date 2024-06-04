@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { myProfile, myProfileIsAdmin } from '@stores/profiles.store';
+  import { myProfile } from '@stores/profiles.store';
   import MenuLink from './MenuLink.svelte';
+  import { agentIsAdministrator } from '@stores/administrators.store';
 </script>
 
 <div class="flex flex-col gap-3">
@@ -19,7 +20,7 @@
   <MenuLink href="/requests">Requests</MenuLink>
   <MenuLink href="/offers">Offers</MenuLink>
 </div>
-{#if $myProfileIsAdmin}
+{#if $agentIsAdministrator}
   <div class="flex flex-col gap-3 lg:hidden">
     <MenuLink
       href="/admin"

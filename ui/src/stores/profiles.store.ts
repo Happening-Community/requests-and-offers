@@ -1,6 +1,6 @@
 import { decodeRecords } from '@utils';
 import hc from '@services/HolochainClientService';
-import { writable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
 
 export type UserType = 'creator' | 'advocate';
@@ -26,11 +26,7 @@ export type Profile = {
  */
 export const myProfile: Writable<Profile | null> = writable(null);
 
-/**
- * Svelte Writable store for the admin status of a user profile.
- * @type {import("svelte/store").Writable}
- */
-export const myProfileIsAdmin: Writable<boolean> = writable(true);
+export const myProfileOriginalActionHash: Writable<ActionHash | null> = writable(null);
 
 /**
  * Svelte writable store for all profiles.
@@ -69,6 +65,13 @@ export async function getLatestProfile(original_profile_hash: ActionHash): Promi
   return record ? decodeRecords([record])[0] : null;
 }
 
+async function getAgentProfileLinks(agent: AgentPubKey): Promise<Link[]> {
+  const links = await hc.callZome('profiles', 'get_agent_profile', agent);
+  if (links.length > 0) myProfileOriginalActionHash.set(links[0].target);
+
+  return links;
+}
+
 /**
  * Retrieves an agent profile record for a given agent.
  *
@@ -76,11 +79,9 @@ export async function getLatestProfile(original_profile_hash: ActionHash): Promi
  * @return {Promise<Record | null>} The profile record of the agent, or null if not found.
  */
 async function getAgentProfileRecord(agent: AgentPubKey): Promise<Record | null> {
-  const agentProfileLinks: Link[] = await hc.callZome('profiles', 'get_agent_profile', agent);
-
-  if (agentProfileLinks.length === 0) return null;
-
-  return await getLatestProfileRecord(agentProfileLinks[0].target);
+  const links = await getAgentProfileLinks(agent);
+  if (links.length === 0) return null;
+  return await getLatestProfileRecord(links[0].target);
 }
 
 /**
@@ -154,9 +155,7 @@ export async function getAllProfiles(): Promise<void> {
 export async function updateProfile(agent: AgentPubKey, updated_profile: Profile): Promise<Record> {
   const agentProfileLinks: Link[] = await hc.callZome('profiles', 'get_agent_profile', agent);
 
-  if (agentProfileLinks.length === 0) throw new Error('Agent has no profile');
-
-  const original_profile_hash = agentProfileLinks[0].target;
+  const original_profile_hash = (await getAgentProfileLinks(agent))[0].target;
   const previous_profile_hash = (await getLatestProfileRecord(original_profile_hash))?.signed_action
     .hashed.hash;
 

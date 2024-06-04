@@ -1,5 +1,5 @@
 use crate::{profile::get_agent_profile_hash, wasm_error};
-use hdk::{hash_path::path, prelude::*};
+use hdk::prelude::*;
 use profiles_integrity::{LinkTypes, Profile};
 
 #[hdk_extern]

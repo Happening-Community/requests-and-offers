@@ -2,11 +2,16 @@
   import { onMount } from 'svelte';
   import '../app.postcss';
   import hc from '@services/HolochainClientService';
-  import { getMyProfile, myProfileIsAdmin } from '@stores/profiles.store';
+  import { getMyProfile, myProfile, myProfileOriginalActionHash } from '@stores/profiles.store';
   import { Modal, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
   import { initializeStores } from '@skeletonlabs/skeleton';
   import { goto } from '$app/navigation';
   import MenuDrawer from '@lib/drawers/MenuDrawer.svelte';
+  import {
+    agentIsAdministrator,
+    checkIfAgentIsAdministrator,
+    registerAdministrator
+  } from '@stores/administrators.store';
 
   initializeStores();
   const drawerStore = getDrawerStore();
@@ -17,24 +22,42 @@
 
     await getMyProfile();
 
+    if ($myProfile) {
+      await checkIfAgentIsAdministrator((await hc.getAppInfo())?.agent_pub_key!);
+    }
+
+    console.log('agentIsAdministrator :', $agentIsAdministrator);
+
     console.log('Ping response:', record);
     console.log('appInfo :', await hc.getAppInfo());
   });
 
-  /**
-   * Toggle between the admin page and the homepage when `Alt + a` is pressed.
-   * @param {KeyboardEvent} event - Keyboard event
-   */
-  function toggleAdminPage(event: KeyboardEvent) {
-    if ($myProfileIsAdmin && event.altKey && (event.key === 'a' || event.key === 'A')) {
+  function handleKeyboardEvent(event: KeyboardEvent) {
+    if ($agentIsAdministrator && event.altKey && (event.key === 'a' || event.key === 'A')) {
       event.preventDefault();
       if (!window.location.pathname.startsWith('/admin')) goto('/admin');
       else goto('/');
     }
+
+    if (
+      !$agentIsAdministrator &&
+      $myProfile &&
+      event.ctrlKey &&
+      event.shiftKey &&
+      (event.key === 'a' || event.key === 'A')
+    ) {
+      event.preventDefault();
+      let confirmation = confirm('Register Admin ?');
+      if (confirmation) {
+        registerAdministrator($myProfileOriginalActionHash!);
+        // const myProfileHash = await getMyProfile();
+        // registerAdministrator($myProfile.);
+      }
+    }
   }
 </script>
 
-<svelte:window on:keydown={toggleAdminPage} />
+<svelte:window on:keydown={handleKeyboardEvent} />
 
 <slot />
 
