@@ -51,7 +51,9 @@ export async function createProfile(profile: Profile): Promise<Record> {
  * @param {ActionHash} original_profile_hash - The original profile hash to retrieve the latest record for.
  * @return {Promise<Record | null>} The latest profile record if found, otherwise null.
  */
-async function getLatestProfileRecord(original_profile_hash: ActionHash): Promise<Record | null> {
+export async function getLatestProfileRecord(
+  original_profile_hash: ActionHash
+): Promise<Record | null> {
   return await hc.callZome('profiles', 'get_latest_profile', original_profile_hash);
 }
 
@@ -67,7 +69,7 @@ export async function getLatestProfile(original_profile_hash: ActionHash): Promi
   return record ? decodeRecords([record])[0] : null;
 }
 
-async function getAgentProfileLinks(agent: AgentPubKey): Promise<Link[]> {
+export async function getAgentProfileLinks(agent: AgentPubKey): Promise<Link[]> {
   const links = await hc.callZome('profiles', 'get_agent_profile', agent);
   if (links.length > 0) myProfileOriginalActionHash.set(links[0].target);
 
@@ -158,8 +160,6 @@ export async function getAllProfiles(): Promise<void> {
  * @return {Promise<Record>} The new profile record after the update
  */
 export async function updateProfile(agent: AgentPubKey, updated_profile: Profile): Promise<Record> {
-  const agentProfileLinks: Link[] = await hc.callZome('profiles', 'get_agent_profile', agent);
-
   const original_profile_hash = (await getAgentProfileLinks(agent))[0].target;
   const previous_profile_hash = (await getLatestProfileRecord(original_profile_hash))?.signed_action
     .hashed.hash;

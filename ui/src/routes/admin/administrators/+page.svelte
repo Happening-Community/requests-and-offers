@@ -11,11 +11,10 @@
   import {
     getAllAdministrators,
     getAllAdministratorsLinks,
-    administrators
+    administrators,
+    administratorProfilesHashes
   } from '@stores/administrators.store';
   import AddAdministratorModal from '@lib/modals/AddAdministratorModal.svelte';
-
-  let AdministratorProfilesHashes: ActionHash[];
 
   $: isLoading = true;
 
@@ -40,10 +39,10 @@
   onMount(async () => {
     await getAllAdministrators();
     isLoading = false;
-    AdministratorProfilesHashes = (await getAllAdministratorsLinks()).map(
+    $administratorProfilesHashes = (await getAllAdministratorsLinks()).map(
       (profile) => profile.target
     );
-    console.log('AdministratorProfilesHashes :', AdministratorProfilesHashes);
+    console.log('administratorProfilesHashes :', administratorProfilesHashes);
   });
 </script>
 
@@ -87,7 +86,7 @@
                 <button
                   class="btn variant-filled-secondary"
                   on:click={() =>
-                    modalStore.trigger(profileDetailsModal(i, AdministratorProfilesHashes[i]))}
+                    modalStore.trigger(profileDetailsModal(i, $administratorProfilesHashes[i]))}
                 >
                   View
                 </button>

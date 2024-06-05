@@ -7,7 +7,7 @@
     getNonAdministratorProfilesLinks,
     registerAdministrator
   } from '@stores/administrators.store';
-  import { getAllProfiles, profilesHashes, type Profile } from '@stores/profiles.store';
+  import { profilesHashes, type Profile } from '@stores/profiles.store';
   import { onMount } from 'svelte';
 
   export let parent: any;

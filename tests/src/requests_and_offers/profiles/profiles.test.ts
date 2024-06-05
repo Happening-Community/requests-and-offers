@@ -32,7 +32,7 @@ import {
   checkIfPersonIsAdministrator,
   getAllAdministratorsLinks,
   removeAdministrator,
-  updateStatus,
+  updatePersonStatus,
 } from "./common.js";
 import { decodeOutputs, runScenarioWithTwoAgents } from "../utils";
 
@@ -301,7 +301,7 @@ test("create a profile and make it administrator", async () => {
     );
 
     await expect(
-      updateStatus(
+      updatePersonStatus(
         alice.cells[0],
         aliceOriginalProfileHash,
         aliceLatestProfileRecord.signed_action.hashed.hash,
@@ -311,7 +311,7 @@ test("create a profile and make it administrator", async () => {
 
     // Bob update Alice's status to "accepted"
 
-    record = await updateStatus(
+    record = await updatePersonStatus(
       bob.cells[0],
       aliceOriginalProfileHash,
       aliceLatestProfileRecord.signed_action.hashed.hash,

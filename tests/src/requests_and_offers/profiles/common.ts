@@ -156,7 +156,7 @@ export async function removeAdministrator(
   });
 }
 
-export async function updateStatus(
+export async function updatePersonStatus(
   cell: CallableCell,
   original_profile_hash: ActionHash,
   previous_profile_hash: ActionHash,
@@ -164,7 +164,7 @@ export async function updateStatus(
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "profiles",
-    fn_name: "update_status",
+    fn_name: "update_person_status",
     payload: { original_profile_hash, previous_profile_hash, status },
   });
 }

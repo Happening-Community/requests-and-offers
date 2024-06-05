@@ -67,7 +67,7 @@ pub struct UpdateStatusInput {
 }
 
 #[hdk_extern]
-pub fn update_status(input: UpdateStatusInput) -> ExternResult<Record> {
+pub fn update_person_status(input: UpdateStatusInput) -> ExternResult<Record> {
     if !check_if_agent_is_administrator(agent_info()?.agent_initial_pubkey)? {
         return Err(wasm_error(
             "Only administrators can update the status of a Person",

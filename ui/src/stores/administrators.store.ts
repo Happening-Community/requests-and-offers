@@ -1,10 +1,17 @@
 import { writable, type Writable } from 'svelte/store';
-import { getAllProfilesLinks, getLatestProfile, type Profile } from './profiles.store';
+import {
+  getAgentProfileLinks,
+  getAllProfilesLinks,
+  getLatestProfile,
+  getLatestProfileRecord,
+  type Profile,
+  type ProfileStatus
+} from './profiles.store';
 import type { ActionHash, AgentPubKey, Link } from '@holochain/client';
 import hc from '@services/HolochainClientService';
 
 export const administrators: Writable<Profile[]> = writable([]);
-export const AdministratorProfilesHashes: Writable<ActionHash[]> = writable([]);
+export const administratorProfilesHashes: Writable<ActionHash[]> = writable([]);
 export const agentIsAdministrator: Writable<boolean> = writable(false);
 
 export async function registerAdministrator(original_profile_hash: ActionHash): Promise<boolean> {
@@ -18,7 +25,11 @@ export async function checkIfAgentIsAdministrator(agentPubKey: AgentPubKey): Pro
 }
 
 export async function getAllAdministratorsLinks(): Promise<Link[]> {
-  return await hc.callZome('profiles', 'get_all_administrators_links', null);
+  const links: Link[] = await hc.callZome('profiles', 'get_all_administrators_links', null);
+
+  if (links.length > 0) administratorProfilesHashes.set(links.map((l) => l.target));
+
+  return links;
 }
 
 export async function getAllAdministrators(): Promise<void> {
@@ -54,4 +65,19 @@ export async function getNonAdministratorProfiles(): Promise<Profile[]> {
   console.log('profiles :', profiles);
 
   return profiles.filter((p) => p !== null) as Profile[];
+}
+
+export async function updateProfileStatus(
+  agent: AgentPubKey,
+  status: ProfileStatus
+): Promise<boolean> {
+  const original_profile_hash = (await getAgentProfileLinks(agent))[0].target;
+  const previous_profile_hash = (await getLatestProfileRecord(original_profile_hash))?.signed_action
+    .hashed.hash;
+
+  return await hc.callZome('profiles', 'update_person_status', {
+    original_profile_hash,
+    previous_profile_hash,
+    status
+  });
 }
