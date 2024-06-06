@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import '../app.postcss';
   import hc from '@services/HolochainClientService';
-  import { getMyProfile, myProfile, myProfileOriginalActionHash } from '@stores/profiles.store';
+  import { getMyProfile, myProfile } from '@stores/profiles.store';
   import { Modal, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
   import { initializeStores } from '@skeletonlabs/skeleton';
   import { goto } from '$app/navigation';
@@ -41,7 +41,7 @@
 
     if (
       !$agentIsAdministrator &&
-      $myProfile &&
+      $myProfile.original_action_hash.length &&
       event.ctrlKey &&
       event.shiftKey &&
       (event.key === 'a' || event.key === 'A')
@@ -49,7 +49,7 @@
       event.preventDefault();
       let confirmation = confirm('Register Admin ?');
       if (confirmation) {
-        await registerAdministrator($myProfileOriginalActionHash!);
+        await registerAdministrator($myProfile.original_action_hash);
         await checkIfAgentIsAdministrator((await hc.getAppInfo())?.agent_pub_key!);
       }
     }

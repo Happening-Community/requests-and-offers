@@ -8,11 +8,9 @@
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import { getAllProfiles, getAllProfilesLinks, profiles } from '@stores/profiles.store';
+  import { getAllProfiles, profiles } from '@stores/profiles.store';
   import { onMount } from 'svelte';
   import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
-
-  let profilesHashes: ActionHash[];
 
   $: isLoading = true;
 
@@ -27,22 +25,21 @@
 
   const modalStore = getModalStore();
   const modalComponent: ModalComponent = { ref: ProfileDetailsModal };
-  const modal = (id: number, hash: ActionHash): ModalSettings => {
+  const modal = (id: number, originalProfileHash: ActionHash): ModalSettings => {
     return {
       type: 'component',
       component: modalComponent,
       meta: {
         id,
-        hash
+        originalProfileHash
       }
     };
   };
 
   onMount(async () => {
     await getAllProfiles();
+
     isLoading = false;
-    profilesHashes = (await getAllProfilesLinks()).map((profile) => profile.target);
-    console.log('profilesHashes :', profilesHashes);
   });
 </script>
 
@@ -81,7 +78,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    on:click={() => modalStore.trigger(modal(i, profilesHashes[i]))}
+                    on:click={() => modalStore.trigger(modal(i, profile.original_action_hash))}
                   >
                     View
                   </button>
@@ -123,7 +120,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    on:click={() => modalStore.trigger(modal(i, profilesHashes[i]))}
+                    on:click={() => modalStore.trigger(modal(i, profile.original_action_hash))}
                   >
                     View
                   </button>

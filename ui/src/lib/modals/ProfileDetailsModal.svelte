@@ -2,7 +2,12 @@
   import { page } from '$app/stores';
   import { Avatar, getModalStore } from '@skeletonlabs/skeleton';
   import { updateProfileStatus } from '@stores/administrators.store';
-  import { getLatestProfile, type Profile, type ProfileStatus } from '@stores/profiles.store';
+  import {
+    getAllProfiles,
+    getLatestProfile,
+    type Profile,
+    type ProfileStatus
+  } from '@stores/profiles.store';
   import { onMount } from 'svelte';
 
   const modalStore = getModalStore();
@@ -13,7 +18,7 @@
   let profilePictureUrl: string;
 
   onMount(async () => {
-    profile = await getLatestProfile($modalStore[0].meta.hash);
+    profile = await getLatestProfile($modalStore[0].meta.originalProfileHash);
 
     profilePictureUrl = profile?.picture
       ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
@@ -21,7 +26,11 @@
   });
 
   async function updateStatus(status: ProfileStatus) {
-    const updatedProfile = await updateProfileStatus($modalStore[0].meta.hash, status);
+    if (!profile) return;
+    await updateProfileStatus(profile?.original_action_hash, profile?.previous_action_hash, status);
+    await getAllProfiles();
+
+    modalStore.close();
   }
 </script>
 
@@ -45,16 +54,10 @@
   <div class="mt-5 flex flex-col items-center gap-4">
     {#if $page.url.pathname === '/admin/persons'}
       <div class="space-x-4">
-        <button
-          class="btn variant-filled-tertiary"
-          on:click={() => updateProfileStatus($modalStore[0].meta.hash, 'accepted')}
-        >
+        <button class="btn variant-filled-tertiary" on:click={() => updateStatus('accepted')}>
           Accept
         </button>
-        <button
-          class="btn variant-filled-error"
-          on:click={() => updateProfileStatus($modalStore[0].meta.hash, 'rejected')}
-        >
+        <button class="btn variant-filled-error" on:click={() => updateStatus('rejected')}>
           Reject
         </button>
       </div>

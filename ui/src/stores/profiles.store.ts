@@ -18,23 +18,29 @@ export type Profile = {
   time_zone?: string;
   location?: string;
   status?: ProfileStatus;
+  original_action_hash: ActionHash;
+  previous_action_hash: ActionHash;
 };
 
 /**
  * Svelte writable store for the current user's profile.
  * @type {Writable<Profile | null>}
  */
-export const myProfile: Writable<Profile | null> = writable(null);
-
-export const myProfileOriginalActionHash: Writable<ActionHash | null> = writable(null);
+export const myProfile: Writable<Profile> = writable({
+  name: '',
+  nickname: '',
+  user_type: 'creator',
+  email: '',
+  status: 'pending',
+  original_action_hash: new Uint8Array(),
+  previous_action_hash: new Uint8Array()
+} as Profile);
 
 /**
  * Svelte writable store for all profiles.
  * @type {Writable<Profile[]>}
  */
 export const profiles: Writable<Profile[]> = writable([]);
-
-export const profilesHashes: Writable<ActionHash[]> = writable([]);
 
 /**
  * Creates a new profile in the 'profiles' zome.
@@ -54,7 +60,9 @@ export async function createProfile(profile: Profile): Promise<Record> {
 export async function getLatestProfileRecord(
   original_profile_hash: ActionHash
 ): Promise<Record | null> {
-  return await hc.callZome('profiles', 'get_latest_profile', original_profile_hash);
+  const record = await hc.callZome('profiles', 'get_latest_profile', original_profile_hash);
+
+  return record;
 }
 
 /**
@@ -66,12 +74,17 @@ export async function getLatestProfileRecord(
 export async function getLatestProfile(original_profile_hash: ActionHash): Promise<Profile | null> {
   const record = await getLatestProfileRecord(original_profile_hash);
 
-  return record ? decodeRecords([record])[0] : null;
+  return record
+    ? {
+        ...decodeRecords([record])[0],
+        original_action_hash: original_profile_hash,
+        previous_action_hash: record.signed_action.hashed.hash
+      }
+    : null;
 }
 
 export async function getAgentProfileLinks(agent: AgentPubKey): Promise<Link[]> {
   const links = await hc.callZome('profiles', 'get_agent_profile', agent);
-  if (links.length > 0) myProfileOriginalActionHash.set(links[0].target);
 
   return links;
 }
@@ -85,21 +98,12 @@ export async function getAgentProfileLinks(agent: AgentPubKey): Promise<Link[]> 
 async function getAgentProfileRecord(agent: AgentPubKey): Promise<Record | null> {
   const links = await getAgentProfileLinks(agent);
   if (links.length === 0) return null;
+  myProfile.update((profile) => ({ ...profile, original_action_hash: links[0].target }));
+
   return await getLatestProfileRecord(links[0].target);
 }
 
-/**
- * Retrieves the profile of an agent based on the provided author AgentPubKey.
- *
- * @param {AgentPubKey} author - The AgentPubKey of the agent whose profile is to be retrieved.
- * @return {Promise<Profile | null>} The profile of the agent if found, otherwise null.
- */
-export async function getAgentProfile(author: AgentPubKey): Promise<Profile | null> {
-  const agentProfileRecord = await getAgentProfileRecord(author);
-  return agentProfileRecord ? decodeRecords([agentProfileRecord])[0] : null;
-}
-
-/**
+/**profilesPreviousHashes
  * Retrieves the user's profile information, sets it in the myProfile state, and handles null values.
  *
  * @return {Promise<void>}
@@ -108,7 +112,11 @@ export async function getMyProfile(): Promise<void> {
   const agentPubKey = (await hc.getAppInfo())!.agent_pub_key;
   const agentProfileRecord = await getAgentProfileRecord(agentPubKey);
 
-  myProfile.set(agentProfileRecord ? decodeRecords([agentProfileRecord])[0] : null);
+  if (agentProfileRecord)
+    myProfile.set({
+      ...decodeRecords([agentProfileRecord])[0],
+      previous_action_hash: agentProfileRecord.signed_action.hashed.hash
+    });
 }
 
 /**
@@ -118,7 +126,6 @@ export async function getMyProfile(): Promise<void> {
  */
 export async function getAllProfilesLinks(): Promise<Link[]> {
   const links: Link[] = await hc.callZome('profiles', 'get_all_profiles', null);
-  if (links.length > 0) profilesHashes.set(links.map((l) => l.target));
 
   return links;
 }
@@ -130,15 +137,26 @@ export async function getAllProfilesLinks(): Promise<Link[]> {
  */
 async function getAllProfilesRecords(): Promise<Record[]> {
   const profilesLinks: Link[] = await getAllProfilesLinks();
-
   let profilesRecords: Record[] = [];
 
-  for (const profileLink of profilesLinks) {
-    const record = await getLatestProfileRecord(profileLink.target);
+  for (let link of profilesLinks) {
+    const record = await getLatestProfileRecord(link.target);
     if (record) profilesRecords.push(record);
   }
 
   return profilesRecords;
+}
+
+async function getAgentProfileRecordsAndLinks(): Promise<[Link[], Record[]]> {
+  const profilesLinks: Link[] = await getAllProfilesLinks();
+  let profilesRecords: Record[] = [];
+
+  for (let link of profilesLinks) {
+    const record = await getLatestProfileRecord(link.target);
+    if (record) profilesRecords.push(record);
+  }
+
+  return [profilesLinks, profilesRecords];
 }
 
 /**
@@ -147,9 +165,19 @@ async function getAllProfilesRecords(): Promise<Record[]> {
  * @return {Promise<void>}
  */
 export async function getAllProfiles(): Promise<void> {
-  const profilesRecords: Record[] = await getAllProfilesRecords();
+  const [profilesLinks, profilesRecords] = await getAgentProfileRecordsAndLinks();
 
-  profiles.set(decodeRecords(profilesRecords));
+  let recordsContents: Profile[] = [];
+
+  for (let i = 0; i < profilesRecords.length; i++) {
+    recordsContents.push({
+      ...decodeRecords([profilesRecords[i]])[0],
+      original_action_hash: profilesLinks[i].target,
+      previous_action_hash: profilesRecords[i].signed_action.hashed.hash
+    });
+  }
+
+  profiles.set(recordsContents);
 }
 
 /**

@@ -11,7 +11,7 @@
       Admin zone
     </a>
   {/if}
-  {#if !$myProfile}
+  {#if !$myProfile.original_action_hash.length}
     <p class="mb-4 text-center text-xl">It looks like you don't have a profile yet !</p>
     <NavButton href="/profile/create" text="Create profile" />
   {:else}

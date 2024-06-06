@@ -7,7 +7,7 @@
     getNonAdministratorProfilesLinks,
     registerAdministrator
   } from '@stores/administrators.store';
-  import { profilesHashes, type Profile } from '@stores/profiles.store';
+  import { type Profile } from '@stores/profiles.store';
   import { onMount } from 'svelte';
 
   export let parent: any;
@@ -32,10 +32,10 @@
 
   const modalStore = getModalStore();
 
-  async function addAdministrator(orginalProfileHash: ActionHash, profile: Profile) {
+  async function addAdministrator(profile: Profile) {
     const confirmation = confirm('Do you really want to make this profile an administrator ?');
     if (confirmation) {
-      registerAdministrator(orginalProfileHash);
+      registerAdministrator(profile.original_action_hash);
       administrators.set([...$administrators, profile]);
       modalStore.close();
     }
@@ -101,7 +101,7 @@
             <td>
               <button
                 class="btn variant-filled-secondary"
-                on:click={() => addAdministrator($profilesHashes[i], profile)}
+                on:click={() => addAdministrator(profile)}
               >
                 Make admin
               </button>

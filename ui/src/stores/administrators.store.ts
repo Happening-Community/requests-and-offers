@@ -68,13 +68,10 @@ export async function getNonAdministratorProfiles(): Promise<Profile[]> {
 }
 
 export async function updateProfileStatus(
-  agent: AgentPubKey,
+  original_profile_hash: ActionHash,
+  previous_profile_hash: ActionHash,
   status: ProfileStatus
 ): Promise<boolean> {
-  const original_profile_hash = (await getAgentProfileLinks(agent))[0].target;
-  const previous_profile_hash = (await getLatestProfileRecord(original_profile_hash))?.signed_action
-    .hashed.hash;
-
   return await hc.callZome('profiles', 'update_person_status', {
     original_profile_hash,
     previous_profile_hash,
