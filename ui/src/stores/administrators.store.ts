@@ -14,6 +14,11 @@ import hc from '@services/HolochainClientService';
 export const administrators: Writable<Profile[]> = writable([]);
 
 /**
+ * Svelte writable store for all non-administrators.
+ */
+export const nonAmdinistrators: Writable<Profile[]> = writable([]);
+
+/**
  * Svelte writable store for the current user's profile.
  */
 export const agentIsAdministrator: Writable<boolean> = writable(false);
@@ -34,10 +39,15 @@ export async function registerAdministrator(original_profile_hash: ActionHash): 
  * @param {AgentPubKey} agentPubKey - The public key of the agent to check.
  * @returns {Promise<void>}
  */
-export async function checkIfAgentIsAdministrator(agentPubKey: AgentPubKey): Promise<void> {
-  agentIsAdministrator.set(
-    await hc.callZome('profiles', 'check_if_agent_is_administrator', agentPubKey)
-  );
+export async function checkIfAgentIsAdministrator(agentPubKey: AgentPubKey): Promise<boolean> {
+  const result = await hc.callZome('profiles', 'check_if_agent_is_administrator', agentPubKey);
+  agentIsAdministrator.set(result);
+
+  return result;
+}
+
+export async function checkIfPersonIsAdministrator(profile_hash: ActionHash): Promise<boolean> {
+  return await hc.callZome('profiles', 'check_if_person_is_administrator', profile_hash);
 }
 
 /**
@@ -78,33 +88,24 @@ export async function removeAdministrator(original_profile_hash: ActionHash): Pr
 }
 
 /**
- * Retrieves links for profiles that are not administrators.
- *
- * @returns {Promise<Link[]>} A promise that resolves to an array of links associated with non-administrator profiles.
- */
-export async function getNonAdministratorProfilesLinks(): Promise<Link[]> {
-  const adminlinks: Link[] = await getAllAdministratorsLinks();
-  const links = await getAllProfilesLinks();
-  return links.filter((l) => !adminlinks.includes(l));
-}
-
-/**
  * Retrieves profiles that are not administrators.
  *
  * @returns {Promise<Profile[]>} A promise that resolves to an array of profiles that are not administrators.
  */
 export async function getNonAdministratorProfiles(): Promise<Profile[]> {
-  const adminlinks: Link[] = await getAllAdministratorsLinks();
-
   const links = await getAllProfilesLinks();
+  const nonAmdinistratorsProfiles: Profile[] = [];
 
-  const profiles = await Promise.all(
-    links
-      .filter((l) => !adminlinks.includes(l))
-      .map(async (link) => await getLatestProfile(link.target))
-  );
+  for (const link of links) {
+    if ((await checkIfPersonIsAdministrator(link.target)) === false) {
+      const profile = await getLatestProfile(link.target);
+      profile && nonAmdinistratorsProfiles.push(profile);
+    }
+  }
 
-  return profiles.filter((p) => p !== null) as Profile[];
+  nonAmdinistrators.set(nonAmdinistratorsProfiles);
+
+  return nonAmdinistratorsProfiles;
 }
 
 /**

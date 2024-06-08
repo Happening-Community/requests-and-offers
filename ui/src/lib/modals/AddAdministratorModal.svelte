@@ -3,6 +3,7 @@
   import {
     administrators,
     getNonAdministratorProfiles,
+    nonAmdinistrators,
     registerAdministrator
   } from '@stores/administrators.store';
   import { type Profile } from '@stores/profiles.store';
@@ -10,7 +11,6 @@
 
   export let parent: any;
 
-  let nonAdminProfiles: Profile[] = [];
   let filteredProfiles: Profile[] = [];
   let searchInput = '';
   let isLoading = true;
@@ -21,8 +21,8 @@
   ];
 
   onMount(async () => {
-    nonAdminProfiles = await getNonAdministratorProfiles();
-    filteredProfiles = nonAdminProfiles;
+    await getNonAdministratorProfiles();
+    filteredProfiles = $nonAmdinistrators;
 
     isLoading = false;
   });
@@ -32,20 +32,23 @@
   async function addAdministrator(profile: Profile) {
     const confirmation = confirm('Do you really want to make this profile an administrator ?');
     if (confirmation) {
-      registerAdministrator(profile.original_action_hash!);
-      administrators.set([...$administrators, profile]);
+      try {
+        await registerAdministrator(profile.original_action_hash!);
+        administrators.set([...$administrators, profile]);
+      } catch (error) {}
+
       modalStore.close();
     }
   }
 
   function searchInputHandler(evt: Event) {
     searchInput = (evt.target as HTMLInputElement).value;
-    filteredProfiles = nonAdminProfiles.filter((profile) =>
+    filteredProfiles = $nonAmdinistrators.filter((profile) =>
       profile.name.toLowerCase().includes(searchInput.toLowerCase())
     );
 
     if (filteredProfiles.length === 0 && searchInput === '') {
-      filteredProfiles = nonAdminProfiles;
+      filteredProfiles = $nonAmdinistrators;
     }
   }
 </script>

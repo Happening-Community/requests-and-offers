@@ -4,6 +4,10 @@ use profiles_integrity::{LinkTypes, Profile};
 
 #[hdk_extern]
 pub fn register_administrator(person_profile_hash: ActionHash) -> ExternResult<bool> {
+    if check_if_person_is_administrator(person_profile_hash.clone())? {
+        return Err(wasm_error("Allready an Administrator"));
+    }
+
     let path = Path::from("administrators");
     create_link(
         path.path_entry_hash()?,
