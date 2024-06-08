@@ -1,6 +1,6 @@
 import { decodeRecords } from '@utils';
 import hc from '@services/HolochainClientService';
-import { writable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
 
 export type UserType = 'creator' | 'advocate';
@@ -185,9 +185,8 @@ export async function getAllProfiles(): Promise<void> {
  * @returns {Promise<Record>} A promise that resolves to the new profile record after the update.
  */
 export async function updateProfile(agent: AgentPubKey, updated_profile: Profile): Promise<Record> {
-  const original_profile_hash = (await getAgentProfileLinks(agent))[0].target;
-  const previous_profile_hash = (await getLatestProfileRecord(original_profile_hash))?.signed_action
-    .hashed.hash;
+  const original_profile_hash = get(myProfile)!.original_action_hash;
+  const previous_profile_hash = get(myProfile)!.previous_action_hash;
 
   const newProfileRecord = await hc.callZome('profiles', 'update_profile', {
     original_profile_hash,
