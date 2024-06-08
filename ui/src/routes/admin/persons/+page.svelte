@@ -8,7 +8,7 @@
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import { getAllProfiles, profiles } from '@stores/profiles.store';
+  import { getAllProfiles, profiles, type Profile } from '@stores/profiles.store';
   import { onMount } from 'svelte';
   import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
 
@@ -25,13 +25,12 @@
 
   const modalStore = getModalStore();
   const modalComponent: ModalComponent = { ref: ProfileDetailsModal };
-  const modal = (id: number, originalProfileHash: ActionHash): ModalSettings => {
+  const modal = (profile: Profile): ModalSettings => {
     return {
       type: 'component',
       component: modalComponent,
       meta: {
-        id,
-        originalProfileHash
+        profile
       }
     };
   };
@@ -78,7 +77,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    on:click={() => modalStore.trigger(modal(i, profile.original_action_hash))}
+                    on:click={() => modalStore.trigger(modal(profile))}
                   >
                     View
                   </button>
@@ -120,7 +119,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    on:click={() => modalStore.trigger(modal(i, profile.original_action_hash))}
+                    on:click={() => modalStore.trigger(modal(profile))}
                   >
                     View
                   </button>
@@ -133,5 +132,48 @@
         <p>No accepted profiles</p>
       {/if}
     </div>
+  </div>
+
+  <div class="flex flex-col gap-4 lg:pl-4">
+    <h2 class="h3 text-red-600">Rejected persons</h2>
+    {#if rejectedProfiles && rejectedProfiles.length > 0}
+      <table class="table-hover table drop-shadow-lg">
+        <thead>
+          <tr>
+            <th>Avatar</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each rejectedProfiles as profile, i}
+            <tr>
+              <td>
+                <Avatar
+                  src={profile.picture
+                    ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
+                    : '/default_avatar.webp'}
+                />
+              </td>
+              <td>{profile.name}</td>
+              <td>
+                {profile.user_type.charAt(0).toUpperCase() + profile.user_type.slice(1)}
+              </td>
+              <td>
+                <button
+                  class="btn variant-filled-secondary"
+                  on:click={() => modalStore.trigger(modal(profile))}
+                >
+                  View
+                </button>
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    {:else}
+      <p>No rejected profiles</p>
+    {/if}
   </div>
 </section>

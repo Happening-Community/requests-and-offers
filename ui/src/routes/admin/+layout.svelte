@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
   import AdminMenuLinks from '@lib/AdminMenuLinks.svelte';
   import Navbar from '@lib/NavBar.svelte';
   import { isConnected } from '@services/HolochainClientService';
   import { AppShell, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
+  import { agentIsAdministrator } from '@stores/administrators.store';
   import { onMount } from 'svelte';
 
   const conicStops: ConicStop[] = [
@@ -10,9 +12,11 @@
     { color: 'rgb(var(--color-secondary-500))', start: 75, end: 50 }
   ];
 
-  onMount(() => {
+  onMount(async () => {
     const htmlElement = document.getElementsByTagName('html')[0];
     htmlElement.classList.add('dark');
+
+    if (!$agentIsAdministrator) goto('/');
   });
 </script>
 

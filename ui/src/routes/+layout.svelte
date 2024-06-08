@@ -41,14 +41,14 @@
 
     if (
       !$agentIsAdministrator &&
-      $myProfile.original_action_hash.length &&
+      $myProfile &&
       event.ctrlKey &&
       event.shiftKey &&
       (event.key === 'a' || event.key === 'A')
     ) {
       event.preventDefault();
       let confirmation = confirm('Register Admin ?');
-      if (confirmation) {
+      if (confirmation && $myProfile.original_action_hash) {
         await registerAdministrator($myProfile.original_action_hash);
         await checkIfAgentIsAdministrator((await hc.getAppInfo())?.agent_pub_key!);
       }

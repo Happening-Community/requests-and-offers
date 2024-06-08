@@ -1,6 +1,6 @@
 import { decodeRecords } from '@utils';
 import hc from '@services/HolochainClientService';
-import { get, writable, type Writable } from 'svelte/store';
+import { writable, type Writable } from 'svelte/store';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
 
 export type UserType = 'creator' | 'advocate';
@@ -18,23 +18,15 @@ export type Profile = {
   time_zone?: string;
   location?: string;
   status?: ProfileStatus;
-  original_action_hash: ActionHash;
-  previous_action_hash: ActionHash;
+  original_action_hash?: ActionHash;
+  previous_action_hash?: ActionHash;
 };
 
 /**
  * Svelte writable store for the current user's profile.
  * @type {Writable<Profile | null>}
  */
-export const myProfile: Writable<Profile> = writable({
-  name: '',
-  nickname: '',
-  user_type: 'creator',
-  email: '',
-  status: 'pending',
-  original_action_hash: new Uint8Array(),
-  previous_action_hash: new Uint8Array()
-} as Profile);
+export const myProfile: Writable<Profile | null> = writable(null);
 
 /**
  * Svelte writable store for all profiles.
@@ -95,12 +87,11 @@ export async function getAgentProfileLinks(agent: AgentPubKey): Promise<Link[]> 
  * @param {AgentPubKey} agent - The agent public key for which to retrieve the profile record.
  * @return {Promise<Record | null>} The profile record of the agent, or null if not found.
  */
-async function getAgentProfileRecord(agent: AgentPubKey): Promise<Record | null> {
+async function getAgentProfile(agent: AgentPubKey): Promise<Profile | null> {
   const links = await getAgentProfileLinks(agent);
   if (links.length === 0) return null;
-  myProfile.update((profile) => ({ ...profile, original_action_hash: links[0].target }));
 
-  return await getLatestProfileRecord(links[0].target);
+  return await getLatestProfile(links[0].target);
 }
 
 /**profilesPreviousHashes
@@ -110,13 +101,9 @@ async function getAgentProfileRecord(agent: AgentPubKey): Promise<Record | null>
  */
 export async function getMyProfile(): Promise<void> {
   const agentPubKey = (await hc.getAppInfo())!.agent_pub_key;
-  const agentProfileRecord = await getAgentProfileRecord(agentPubKey);
+  const agentProfile = await getAgentProfile(agentPubKey);
 
-  if (agentProfileRecord)
-    myProfile.set({
-      ...decodeRecords([agentProfileRecord])[0],
-      previous_action_hash: agentProfileRecord.signed_action.hashed.hash
-    });
+  agentProfile && myProfile.set(agentProfile);
 }
 
 /**

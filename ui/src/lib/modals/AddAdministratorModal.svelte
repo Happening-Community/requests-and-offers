@@ -1,10 +1,8 @@
 <script lang="ts">
-  import type { ActionHash } from '@holochain/client';
   import { Avatar, ConicGradient, getModalStore, type ConicStop } from '@skeletonlabs/skeleton';
   import {
     administrators,
     getNonAdministratorProfiles,
-    getNonAdministratorProfilesLinks,
     registerAdministrator
   } from '@stores/administrators.store';
   import { type Profile } from '@stores/profiles.store';
@@ -13,7 +11,6 @@
   export let parent: any;
 
   let nonAdminProfiles: Profile[] = [];
-  let nonAdminProfilesHashes: ActionHash[] = [];
   let filteredProfiles: Profile[] = [];
   let searchInput = '';
   let isLoading = true;
@@ -25,8 +22,8 @@
 
   onMount(async () => {
     nonAdminProfiles = await getNonAdministratorProfiles();
-    nonAdminProfilesHashes = (await getNonAdministratorProfilesLinks()).map((l) => l.target);
     filteredProfiles = nonAdminProfiles;
+
     isLoading = false;
   });
 
@@ -35,7 +32,7 @@
   async function addAdministrator(profile: Profile) {
     const confirmation = confirm('Do you really want to make this profile an administrator ?');
     if (confirmation) {
-      registerAdministrator(profile.original_action_hash);
+      registerAdministrator(profile.original_action_hash!);
       administrators.set([...$administrators, profile]);
       modalStore.close();
     }

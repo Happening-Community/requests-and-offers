@@ -8,25 +8,20 @@
   import type { ActionHash } from '@holochain/client';
   import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
   import { onMount } from 'svelte';
-  import {
-    getAllAdministrators,
-    getAllAdministratorsLinks,
-    administrators,
-    administratorProfilesHashes
-  } from '@stores/administrators.store';
+  import { getAllAdministrators, administrators } from '@stores/administrators.store';
   import AddAdministratorModal from '@lib/modals/AddAdministratorModal.svelte';
+  import type { Profile } from '@stores/profiles.store';
 
   $: isLoading = true;
 
   const modalStore = getModalStore();
   const profileDetailsModalComponent: ModalComponent = { ref: ProfileDetailsModal };
-  const profileDetailsModal = (id: number, hash: ActionHash): ModalSettings => {
+  const profileDetailsModal = (profile: Profile): ModalSettings => {
     return {
       type: 'component',
       component: profileDetailsModalComponent,
       meta: {
-        id,
-        hash
+        profile
       }
     };
   };
@@ -38,11 +33,8 @@
 
   onMount(async () => {
     await getAllAdministrators();
+
     isLoading = false;
-    $administratorProfilesHashes = (await getAllAdministratorsLinks()).map(
-      (profile) => profile.target
-    );
-    console.log('administratorProfilesHashes :', administratorProfilesHashes);
   });
 </script>
 
@@ -85,8 +77,7 @@
               <td>
                 <button
                   class="btn variant-filled-secondary"
-                  on:click={() =>
-                    modalStore.trigger(profileDetailsModal(i, $administratorProfilesHashes[i]))}
+                  on:click={() => modalStore.trigger(profileDetailsModal(profile))}
                 >
                   View
                 </button>

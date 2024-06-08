@@ -9,7 +9,7 @@
 </script>
 
 <section class="flex flex-col items-center">
-  {#if $myProfile.original_action_hash.length < 1}
+  {#if !$myProfile}
     <p class="mb-4 text-center text-xl">It looks like you don't have a profile yet !</p>
     <NavButton href="/profile/create" text="Create profile" />
   {:else}

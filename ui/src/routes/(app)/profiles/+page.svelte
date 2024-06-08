@@ -10,12 +10,11 @@
     type ModalSettings,
     ConicGradient
   } from '@skeletonlabs/skeleton';
-  import { getAllProfiles, getAllProfilesLinks, profiles } from '@stores/profiles.store';
+  import { getAllProfiles, profiles, type Profile } from '@stores/profiles.store';
   import { onMount } from 'svelte';
 
-  let profilesHashes: ActionHash[];
-
   $: isLoading = true;
+  let acceptedProfiles: Profile[] = [];
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -24,20 +23,18 @@
 
   onMount(async () => {
     await getAllProfiles();
+    acceptedProfiles = $profiles.filter((profile) => profile.status === 'accepted');
     isLoading = false;
-    profilesHashes = (await getAllProfilesLinks()).map((profile) => profile.target);
-    console.log('profilesHashes :', profilesHashes);
   });
 
   const modalStore = getModalStore();
   const modalComponent: ModalComponent = { ref: ProfileDetailsModal };
-  const modal = (id: number, hash: ActionHash): ModalSettings => {
+  const modal = (profile: Profile): ModalSettings => {
     return {
       type: 'component',
       component: modalComponent,
       meta: {
-        id,
-        hash
+        profile
       }
     };
   };
@@ -48,7 +45,7 @@
     <h2 class="h2">Profiles</h2>
     <NavButton href="/profile/create" text="Create profile" />
   </div>
-  {#if $profiles && $profiles.length > 0}
+  {#if acceptedProfiles.length}
     <table class="table">
       <thead>
         <tr>
@@ -59,7 +56,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each $profiles as profile, i}
+        {#each acceptedProfiles as profile, i}
           <tr>
             <td>
               <Avatar
@@ -75,7 +72,7 @@
             <td>
               <button
                 class="btn variant-filled-primary"
-                on:click={() => modalStore.trigger(modal(i, profilesHashes[i]))}
+                on:click={() => modalStore.trigger(modal(profile))}
               >
                 View
               </button>
