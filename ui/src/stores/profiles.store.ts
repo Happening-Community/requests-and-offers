@@ -24,20 +24,19 @@ export type Profile = {
 
 /**
  * Svelte writable store for the current user's profile.
- * @type {Writable<Profile | null>}
  */
 export const myProfile: Writable<Profile | null> = writable(null);
 
 /**
  * Svelte writable store for all profiles.
- * @type {Writable<Profile[]>}
  */
 export const profiles: Writable<Profile[]> = writable([]);
 
 /**
  * Creates a new profile in the 'profiles' zome.
- * @async
- * @param {Profile} profile - The profile to be created.
+ *
+ * @param {Profile} profile - The profile object containing the details of the profile to be created.
+ * @returns {Promise<Record>} A promise that resolves to the newly created profile record.
  */
 export async function createProfile(profile: Profile): Promise<Record> {
   return await hc.callZome('profiles', 'create_profile', profile);
@@ -46,8 +45,8 @@ export async function createProfile(profile: Profile): Promise<Record> {
 /**
  * Retrieves the latest profile record based on the original profile hash.
  *
- * @param {ActionHash} original_profile_hash - The original profile hash to retrieve the latest record for.
- * @return {Promise<Record | null>} The latest profile record if found, otherwise null.
+ * @param {ActionHash} original_profile_hash - The hash of the original profile action used to identify the profile.
+ * @returns {Promise<Record | null>} A promise that resolves to the latest profile record if found, otherwise null.
  */
 export async function getLatestProfileRecord(
   original_profile_hash: ActionHash
@@ -60,8 +59,8 @@ export async function getLatestProfileRecord(
 /**
  * Retrieves the latest profile based on the original profile hash.
  *
- * @param {ActionHash} original_profile_hash - The original profile hash to search for.
- * @return {Promise<Profile | null>} The latest profile if found, otherwise null.
+ * @param {ActionHash} original_profile_hash - The hash of the original profile action used to identify the profile.
+ * @returns {Promise<Profile | null>} A promise that resolves to the latest profile if found, otherwise null.
  */
 export async function getLatestProfile(original_profile_hash: ActionHash): Promise<Profile | null> {
   const record = await getLatestProfileRecord(original_profile_hash);
@@ -75,6 +74,12 @@ export async function getLatestProfile(original_profile_hash: ActionHash): Promi
     : null;
 }
 
+/**
+ * Retrieves the links associated with an agent's profile.
+ *
+ * @param {AgentPubKey} agent - The public key of the agent whose profile links are to be retrieved.
+ * @returns {Promise<Link[]>} A promise that resolves to an array of links associated with the agent's profile.
+ */
 export async function getAgentProfileLinks(agent: AgentPubKey): Promise<Link[]> {
   const links = await hc.callZome('profiles', 'get_agent_profile', agent);
 
@@ -85,7 +90,7 @@ export async function getAgentProfileLinks(agent: AgentPubKey): Promise<Link[]> 
  * Retrieves an agent profile record for a given agent.
  *
  * @param {AgentPubKey} agent - The agent public key for which to retrieve the profile record.
- * @return {Promise<Record | null>} The profile record of the agent, or null if not found.
+ * @returns {Promise<Profile | null>} A promise that resolves to the profile record of the agent, or null if not found.
  */
 async function getAgentProfile(agent: AgentPubKey): Promise<Profile | null> {
   const links = await getAgentProfileLinks(agent);
@@ -94,10 +99,10 @@ async function getAgentProfile(agent: AgentPubKey): Promise<Profile | null> {
   return await getLatestProfile(links[0].target);
 }
 
-/**profilesPreviousHashes
+/**
  * Retrieves the user's profile information, sets it in the myProfile state, and handles null values.
  *
- * @return {Promise<void>}
+ * @returns {Promise<void>}
  */
 export async function getMyProfile(): Promise<void> {
   const agentPubKey = (await hc.getAppInfo())!.agent_pub_key;
@@ -109,7 +114,7 @@ export async function getMyProfile(): Promise<void> {
 /**
  * Retrieve all profile links by calling the specified zome function.
  *
- * @return {Promise<Link[]>} The links to all profiles.
+ * @returns {Promise<Link[]>} A promise that resolves to the links to all profiles.
  */
 export async function getAllProfilesLinks(): Promise<Link[]> {
   const links: Link[] = await hc.callZome('profiles', 'get_all_profiles', null);
@@ -120,7 +125,7 @@ export async function getAllProfilesLinks(): Promise<Link[]> {
 /**
  * Retrieves all profile records by fetching the latest record for each profile link.
  *
- * @return {Promise<Record[]>} Array of profile records
+ * @returns {Promise<Record[]>} A promise that resolves to an array of profile records.
  */
 async function getAllProfilesRecords(): Promise<Record[]> {
   const profilesLinks: Link[] = await getAllProfilesLinks();
@@ -134,6 +139,11 @@ async function getAllProfilesRecords(): Promise<Record[]> {
   return profilesRecords;
 }
 
+/**
+ * Retrieves the latest profile records and links for all agent profiles.
+ *
+ * @return {Promise<[Link[], Record[]]>} A promise that resolves to an array containing the profile links and records.
+ */
 async function getAgentProfileRecordsAndLinks(): Promise<[Link[], Record[]]> {
   const profilesLinks: Link[] = await getAllProfilesLinks();
   let profilesRecords: Record[] = [];
@@ -147,9 +157,9 @@ async function getAgentProfileRecordsAndLinks(): Promise<[Link[], Record[]]> {
 }
 
 /**
- * Retrieves all profiles and sets them in the profiles map.
+ * Retrieves all profiles and sets them in the profiles store.
  *
- * @return {Promise<void>}
+ * @returns {Promise<void>}
  */
 export async function getAllProfiles(): Promise<void> {
   const [profilesLinks, profilesRecords] = await getAgentProfileRecordsAndLinks();
@@ -170,9 +180,9 @@ export async function getAllProfiles(): Promise<void> {
 /**
  * Updates the profile of a given agent in the system.
  *
- * @param {AgentPubKey} agent - The agent's public key
- * @param {Profile} updated_profile - The updated profile information
- * @return {Promise<Record>} The new profile record after the update
+ * @param {AgentPubKey} agent - The agent's public key.
+ * @param {Profile} updated_profile - The updated profile information.
+ * @returns {Promise<Record>} A promise that resolves to the new profile record after the update.
  */
 export async function updateProfile(agent: AgentPubKey, updated_profile: Profile): Promise<Record> {
   const original_profile_hash = (await getAgentProfileLinks(agent))[0].target;
