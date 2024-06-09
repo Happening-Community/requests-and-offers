@@ -222,7 +222,7 @@ test("create and update Profile", async () => {
   });
 });
 
-test.only("create a profile and make it administrator", async () => {
+test("create a profile and make it administrator", async () => {
   await runScenarioWithTwoAgents(async (_scenario, alice, bob) => {
     let sample: Profile;
     let record: Record;

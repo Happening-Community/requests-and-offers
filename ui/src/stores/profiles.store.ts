@@ -178,14 +178,18 @@ export async function getAllProfiles(): Promise<void> {
 }
 
 /**
- * Updates the profile of a given agent in the system.
+ * Updates the authenticated user's profile with new data.
  *
- * @param {AgentPubKey} agent - The agent's public key.
- * @param {Profile} updated_profile - The updated profile information.
- * @returns {Promise<Record>} A promise that resolves to the new profile record after the update.
+ * @async
+ * @function updateMyProfile
+ * @param {Profile} updated_profile - The updated profile data to be saved in the DHT.
+ * @returns {Promise<Record>} A promise that resolves to the updated profile record.
+ *
+ * @throws Will throw an error if there is an issue fetching the current profile or updating it.
  */
 export async function updateMyProfile(updated_profile: Profile): Promise<Record> {
   await getMyProfile();
+
   const original_profile_hash = get(myProfile)!.original_action_hash;
   const previous_profile_hash = get(myProfile)!.previous_action_hash;
 
