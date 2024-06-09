@@ -5,12 +5,11 @@
     myProfile,
     type UserType,
     type Profile,
-    updateProfile,
+    updateMyProfile,
     getMyProfile
   } from '@stores/profiles.store.js';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
-  import hc from '@services/HolochainClientService';
   import NavButton from '@lib/NavButton.svelte';
 
   type FormattedTimezone = {
@@ -107,7 +106,7 @@
     };
 
     try {
-      await updateProfile((await hc.getAppInfo())?.agent_pub_key!, profile);
+      await updateMyProfile(profile);
       await getMyProfile();
 
       goto('/profile');

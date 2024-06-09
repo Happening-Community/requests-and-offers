@@ -222,7 +222,7 @@ test("create and update Profile", async () => {
   });
 });
 
-test("create a profile and make it administrator", async () => {
+test.only("create a profile and make it administrator", async () => {
   await runScenarioWithTwoAgents(async (_scenario, alice, bob) => {
     let sample: Profile;
     let record: Record;
@@ -330,6 +330,29 @@ test("create a profile and make it administrator", async () => {
 
     let aliceProfile = decodeOutputs([aliceLatestProfileRecord])[0] as Profile;
 
+    assert.equal(aliceProfile.status, "accepted");
+
+    // Allice update her profile and verify that the status is still "accepted"
+    sample = sampleProfile({
+      name: "Alice",
+      nickname: "Alicia",
+    });
+    record = await updateProfile(
+      alice.cells[0],
+      aliceOriginalProfileHash,
+      aliceLatestProfileRecord.signed_action.hashed.hash,
+      sample
+    );
+    assert.ok(record);
+
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    aliceLatestProfileRecord = await getLatestProfile(
+      alice.cells[0],
+      aliceOriginalProfileHash
+    );
+
+    aliceProfile = decodeOutputs([aliceLatestProfileRecord])[0] as Profile;
     assert.equal(aliceProfile.status, "accepted");
   });
 });

@@ -94,11 +94,8 @@ pub struct UpdateProfileInput {
 #[hdk_extern]
 pub fn update_profile(input: UpdateProfileInput) -> ExternResult<Record> {
     let mut input = input;
-
-    let record = match get(input.previous_profile_hash.clone(), GetOptions::default())? {
-        Some(record) => record,
-        None => return Err(wasm_error("Could not find the previous Profile")),
-    };
+    let last_record = must_get_valid_record(input.previous_profile_hash.clone())?;
+    let original_record = must_get_valid_record(input.original_profile_hash.clone())?;
 
     if input.updated_profile.status.is_some() {
         return Err(wasm_error(
@@ -106,13 +103,14 @@ pub fn update_profile(input: UpdateProfileInput) -> ExternResult<Record> {
         ));
     }
 
-    let record_option: Option<Profile> = record
+    let record_option: Option<Profile> = last_record
         .entry()
         .to_app_option()
         .map_err(|_| wasm_error("wasm_error while deserializing the previous Profile"))?;
+
     input.updated_profile.status = record_option.unwrap().status;
 
-    let author = record.action().author().clone();
+    let author = original_record.action().author().clone();
     if author != agent_info()?.agent_initial_pubkey {
         return Err(wasm_error("Only the author of a Profile can update it"));
     }

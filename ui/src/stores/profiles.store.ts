@@ -184,7 +184,8 @@ export async function getAllProfiles(): Promise<void> {
  * @param {Profile} updated_profile - The updated profile information.
  * @returns {Promise<Record>} A promise that resolves to the new profile record after the update.
  */
-export async function updateProfile(agent: AgentPubKey, updated_profile: Profile): Promise<Record> {
+export async function updateMyProfile(updated_profile: Profile): Promise<Record> {
+  await getMyProfile();
   const original_profile_hash = get(myProfile)!.original_action_hash;
   const previous_profile_hash = get(myProfile)!.previous_action_hash;
 
