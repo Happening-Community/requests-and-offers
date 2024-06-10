@@ -56,11 +56,19 @@
     </div>
     <p class="text-center">{profile.bio}</p>
     <p><b>Type :</b> {profile.user_type}</p>
-    <p><b>Skills :</b> {profile.skills?.join(', ')}</p>
+    {#if profile.skills?.length}
+      <p><b>Skills :</b> {profile.skills?.join(', ')}</p>
+    {/if}
     <p><b>Email :</b> {profile.email}</p>
-    <p><b>Phone number :</b> {profile.phone}</p>
-    <p><b>Timezone :</b> {profile.time_zone}</p>
-    <p><b>Location :</b> {profile.location}</p>
+    {#if profile.phone}
+      <p><b>Phone number :</b> {profile.phone}</p>
+    {/if}
+    {#if profile.time_zone}
+      <p><b>Timezone :</b> {profile.time_zone}</p>
+    {/if}
+    {#if profile.location}
+      <p><b>Location :</b> {profile.location}</p>
+    {/if}
     <div class="mt-5 flex flex-col items-center gap-4">
       {#if $page.url.pathname === '/admin/persons'}
         <div class="space-x-4">

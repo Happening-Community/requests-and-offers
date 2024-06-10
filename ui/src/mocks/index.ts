@@ -19,7 +19,7 @@ export async function createMockedProfiles(count: number = 1): Promise<Profile[]
       bio: faker.lorem.paragraphs(getRandomNumber(2, 5)),
       picture: await fetchImageAndConvertToUInt8Array('https://picsum.photos/200/300'),
       user_type: fakedUserType,
-      skills: ['JavaScript', 'Svelte', 'SvelteKit'],
+      skills: ['JavaScript', 'Svelte', 'SvelteKit', 'Rust', 'WebAssembly'],
       email: faker.internet.email(),
       phone: '123456789',
       time_zone: 'Europe/Paris',

@@ -123,23 +123,6 @@ export async function getAllProfilesLinks(): Promise<Link[]> {
 }
 
 /**
- * Retrieves all profile records by fetching the latest record for each profile link.
- *
- * @returns {Promise<Record[]>} A promise that resolves to an array of profile records.
- */
-async function getAllProfilesRecords(): Promise<Record[]> {
-  const profilesLinks: Link[] = await getAllProfilesLinks();
-  let profilesRecords: Record[] = [];
-
-  for (let link of profilesLinks) {
-    const record = await getLatestProfileRecord(link.target);
-    if (record) profilesRecords.push(record);
-  }
-
-  return profilesRecords;
-}
-
-/**
  * Retrieves the latest profile records and links for all agent profiles.
  *
  * @return {Promise<[Link[], Record[]]>} A promise that resolves to an array containing the profile links and records.
@@ -189,9 +172,14 @@ export async function getAllProfiles(): Promise<void> {
  */
 export async function updateMyProfile(updated_profile: Profile): Promise<Record> {
   await getMyProfile();
+  const myProfileStore = get(myProfile);
 
-  const original_profile_hash = get(myProfile)!.original_action_hash;
-  const previous_profile_hash = get(myProfile)!.previous_action_hash;
+  if (myProfileStore === null) {
+    throw new Error('No profile found');
+  }
+
+  const original_profile_hash = myProfileStore.original_action_hash;
+  const previous_profile_hash = myProfileStore.previous_action_hash;
 
   const newProfileRecord = await hc.callZome('profiles', 'update_profile', {
     original_profile_hash,

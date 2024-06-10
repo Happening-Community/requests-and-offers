@@ -23,16 +23,34 @@
       class="border-surface-600 bg-surface-400 flex w-4/5 min-w-96 flex-col items-center gap-5 rounded-xl border-8 p-5 drop-shadow-xl"
     >
       <h3 class="h3"><b>Nickname :</b> {$myProfile.nickname}</h3>
+      <h3 class="h3">
+        <b>Status :</b>
+        <span
+          class:text-primary-500={$myProfile.status === 'pending'}
+          class:text-error-500={$myProfile.status === 'rejected'}
+          class:text-green-500={$myProfile.status === 'accepted'}
+        >
+          {$myProfile.status}
+        </span>
+      </h3>
       <div on:load={() => URL.revokeObjectURL(profilePictureUrl)}>
         <Avatar src={profilePictureUrl} width="w-64" background="none" />
       </div>
       <p class="text-center">{$myProfile.bio}</p>
       <p><b>Type :</b> {$myProfile.user_type}</p>
-      <p><b>Skills :</b> {$myProfile.skills?.join(', ')}</p>
+      {#if $myProfile.skills?.length}
+        <p><b>Skills :</b> {$myProfile.skills?.join(', ')}</p>
+      {/if}
       <p><b>Email :</b> {$myProfile.email}</p>
-      <p><b>Phone number :</b> {$myProfile.phone}</p>
-      <p><b>Timezone :</b> {$myProfile.time_zone}</p>
-      <p><b>Location :</b> {$myProfile.location}</p>
+      {#if $myProfile.phone}
+        <p><b>Phone number :</b> {$myProfile.phone}</p>
+      {/if}
+      {#if $myProfile.time_zone}
+        <p><b>Timezone :</b> {$myProfile.time_zone}</p>
+      {/if}
+      {#if $myProfile.location}
+        <p><b>Location :</b> {$myProfile.location}</p>
+      {/if}
     </div>
   {/if}
 </section>

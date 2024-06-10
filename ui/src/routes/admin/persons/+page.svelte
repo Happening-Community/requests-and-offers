@@ -49,7 +49,7 @@
   {/if}
   <div class="flex flex-col gap-4 lg:flex-row lg:gap-0 lg:divide-x-2">
     <div class="flex flex-col gap-4 lg:pr-4">
-      <h2 class="h3">Pending persons</h2>
+      <h2 class="h3 text-primary-400">Pending persons</h2>
       {#if pendingProfiles && pendingProfiles.length > 0}
         <table class="table-hover table drop-shadow-lg">
           <thead>
@@ -91,7 +91,7 @@
       {/if}
     </div>
     <div class="flex flex-col gap-4 lg:pl-4">
-      <h2 class="h3">Accepted persons</h2>
+      <h2 class="h3 text-green-600">Accepted persons</h2>
       {#if acceptedProfiles && acceptedProfiles.length > 0}
         <table class="table-hover table drop-shadow-lg">
           <thead>
