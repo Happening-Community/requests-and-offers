@@ -1,11 +1,16 @@
 <script lang="ts">
-  import { myProfile } from '@stores/profiles.store';
+  import { getMyProfile, myProfile } from '@stores/profiles.store';
   import { Avatar } from '@skeletonlabs/skeleton';
   import NavButton from '@lib/NavButton.svelte';
+  import { onMount } from 'svelte';
 
   $: profilePictureUrl = $myProfile?.picture
     ? URL.createObjectURL(new Blob([new Uint8Array($myProfile.picture)]))
     : '/default_avatar.webp';
+
+  onMount(async () => {
+    await getMyProfile();
+  });
 </script>
 
 <section class="flex flex-col items-center">

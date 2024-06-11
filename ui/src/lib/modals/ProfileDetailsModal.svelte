@@ -46,7 +46,7 @@
 </script>
 
 <article
-  class="bg-surface-800 flex max-h-[90vh] w-3/5 flex-col items-center gap-4 overflow-auto p-10 text-white shadow-xl"
+  class="bg-surface-800 flex max-h-[90vh] w-3/5 flex-col items-center gap-4 overflow-auto p-10 text-center text-white shadow-xl"
 >
   {#if profile}
     <h2 class="h2 font-bold">{profile.name}</h2>
@@ -54,7 +54,7 @@
     <div on:load={() => URL.revokeObjectURL(profilePictureUrl)}>
       <Avatar src={profilePictureUrl} width="w-64" background="none" />
     </div>
-    <p class="text-center">{profile.bio}</p>
+    <p>{profile.bio}</p>
     <p><b>Type :</b> {profile.user_type}</p>
     {#if profile.skills?.length}
       <p><b>Skills :</b> {profile.skills?.join(', ')}</p>
