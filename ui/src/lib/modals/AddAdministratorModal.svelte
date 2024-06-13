@@ -59,56 +59,60 @@
   <div class="static mb-8 space-y-4">
     <h2 class="h2">Add an administrator</h2>
 
-    <div>
-      <input
-        class="input"
-        type="text"
-        placeholder="Search by name"
-        bind:value={searchInput}
-        on:input={searchInputHandler}
-      />
-    </div>
-  </div>
+    {#if $nonAmdinistrators.length > 0}
+      <div>
+        <input
+          class="input"
+          type="text"
+          placeholder="Search by name"
+          bind:value={searchInput}
+          on:input={searchInputHandler}
+        />
+      </div>
 
-  {#if isLoading}
-    <div class="flex justify-center">
-      <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
-    </div>
-  {:else}
-    <table class="table-hover table">
-      <thead>
-        <tr>
-          <th>Avatar</th>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each filteredProfiles as profile, i}
-          <tr>
-            <td>
-              <Avatar
-                src={profile.picture
-                  ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
-                  : '/default_avatar.webp'}
-              />
-            </td>
-            <td>{profile.name}</td>
-            <td>
-              {profile.user_type.charAt(0).toUpperCase() + profile.user_type.slice(1)}
-            </td>
-            <td>
-              <button
-                class="btn variant-filled-secondary"
-                on:click={() => addAdministrator(profile)}
-              >
-                Make admin
-              </button>
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  {/if}
+      {#if isLoading}
+        <div class="flex justify-center">
+          <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
+        </div>
+      {:else}
+        <table class="table-hover table">
+          <thead>
+            <tr>
+              <th>Avatar</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each filteredProfiles as profile, i}
+              <tr>
+                <td>
+                  <Avatar
+                    src={profile.picture
+                      ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
+                      : '/default_avatar.webp'}
+                  />
+                </td>
+                <td>{profile.name}</td>
+                <td>
+                  {profile.user_type.charAt(0).toUpperCase() + profile.user_type.slice(1)}
+                </td>
+                <td>
+                  <button
+                    class="btn variant-filled-secondary"
+                    on:click={() => addAdministrator(profile)}
+                  >
+                    Make admin
+                  </button>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      {/if}
+    {:else}
+      <p class="pt-4 text-center">No non administrator profiles found.</p>
+    {/if}
+  </div>
 </article>

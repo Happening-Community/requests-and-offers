@@ -222,7 +222,7 @@ test("create and update Profile", async () => {
   });
 });
 
-test("create a profile and make it administrator", async () => {
+test.only("create a profile and make it administrator", async () => {
   await runScenarioWithTwoAgents(async (_scenario, alice, bob) => {
     let sample: Profile;
     let record: Record;
@@ -307,6 +307,11 @@ test("create a profile and make it administrator", async () => {
         aliceLatestProfileRecord.signed_action.hashed.hash,
         "accepted"
       )
+    ).rejects.toThrow();
+
+    // Bob try to remove himself as an administrator
+    await expect(
+      removeAdministrator(bob.cells[0], bobOriginalProfileHash)
     ).rejects.toThrow();
 
     // Bob update Alice's status to "accepted"

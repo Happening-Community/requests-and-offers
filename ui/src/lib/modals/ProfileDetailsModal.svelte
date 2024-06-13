@@ -3,6 +3,7 @@
   import type { ActionHash } from '@holochain/client';
   import { Avatar, getModalStore } from '@skeletonlabs/skeleton';
   import {
+    administrators,
     getAllAdministrators,
     removeAdministrator,
     updateProfileStatus
@@ -14,8 +15,9 @@
 
   export let parent: any;
 
-  let profile: Profile = $modalStore[0].meta.profile;
   let profilePictureUrl: string;
+  let profile: Profile = $modalStore[0].meta.profile;
+  let isTheOnlyAdmin = $administrators.length === 1;
 
   onMount(async () => {
     profilePictureUrl = profile?.picture
@@ -90,6 +92,8 @@
             class="btn variant-filled-error"
             on:click={() =>
               profile.original_action_hash && handleRemoveAdmin(profile.original_action_hash)}
+            disabled={isTheOnlyAdmin}
+            title={isTheOnlyAdmin ? 'Can not remove last admin' : ''}
           >
             Remove Admin
           </button>

@@ -114,6 +114,14 @@ export async function registerAdministrator(
   });
 }
 
+export function addAdministrator(cell: CallableCell, profile_hash: ActionHash) {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "add_administrator",
+    payload: profile_hash,
+  });
+}
+
 export async function checkIfPersonIsAdministrator(
   cell: CallableCell,
   profile_hash: ActionHash

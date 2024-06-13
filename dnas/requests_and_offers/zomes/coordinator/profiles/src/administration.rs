@@ -2,12 +2,17 @@ use crate::{profile::get_agent_profile_hash, wasm_error};
 use hdk::prelude::*;
 use profiles_integrity::{LinkTypes, Profile};
 
-#[hdk_extern]
-pub fn register_administrator(person_profile_hash: ActionHash) -> ExternResult<bool> {
+pub fn add_administrator(person_profile_hash: ActionHash) -> ExternResult<bool> {
     if check_if_person_is_administrator(person_profile_hash.clone())? {
         return Err(wasm_error("Allready an Administrator"));
     }
 
+    register_administrator(person_profile_hash.clone())?;
+    Ok(true)
+}
+
+#[hdk_extern]
+pub fn register_administrator(person_profile_hash: ActionHash) -> ExternResult<bool> {
     let path = Path::from("administrators");
     create_link(
         path.path_entry_hash()?,
@@ -51,6 +56,11 @@ pub fn check_if_agent_is_administrator(agent_pubkey: AgentPubKey) -> ExternResul
 pub fn remove_administrator(person_profile_hash: ActionHash) -> ExternResult<bool> {
     if !check_if_agent_is_administrator(agent_info()?.agent_initial_pubkey)? {
         return Err(wasm_error("Only administrators can remove administrators"));
+    }
+
+    let administrators_links = get_all_administrators_links(())?;
+    if administrators_links.len() == 1 {
+        return Err(wasm_error("There must be at least one administrator"));
     }
 
     let links = get_all_administrators_links(())?;
