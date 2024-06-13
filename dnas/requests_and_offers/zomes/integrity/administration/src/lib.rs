@@ -1,6 +1,3 @@
-pub mod administrator;
-
-pub use administrator::*;
 use hdi::prelude::*;
 
 #[derive(Serialize, Deserialize)]
