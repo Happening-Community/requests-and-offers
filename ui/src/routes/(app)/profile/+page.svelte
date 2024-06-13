@@ -33,7 +33,7 @@
         <span
           class:text-primary-500={$myProfile.status === 'pending'}
           class:text-error-500={$myProfile.status === 'rejected'}
-          class:text-green-500={$myProfile.status === 'accepted'}
+          class:text-green-400={$myProfile.status === 'accepted'}
         >
           {$myProfile.status}
         </span>
