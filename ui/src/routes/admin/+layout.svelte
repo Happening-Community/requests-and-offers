@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import AdminMenuLinks from '@lib/AdminMenuLinks.svelte';
+  import AdminSideBar from '@lib/AdminSideBar.svelte';
   import Navbar from '@lib/NavBar.svelte';
   import { isConnected } from '@services/HolochainClientService';
   import { AppShell, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
@@ -26,16 +26,8 @@
   </svelte:fragment>
 
   <svelte:fragment slot="sidebarLeft">
-    <div
-      class="bg-surface-900 flex min-h-screen w-52 flex-col gap-5 border-2 border-slate-900 p-4 pt-36"
-    >
-      <a
-        href="/admin"
-        class="h3 hover:text-secondary-500 hover:border-b-secondary-500 mb-4 border-b-2 border-b-white text-center text-white transition-colors duration-200 ease-in-out"
-      >
-        Admin Panel
-      </a>
-      <AdminMenuLinks />
+    <div class="hidden lg:block">
+      <AdminSideBar />
     </div>
   </svelte:fragment>
 

@@ -27,6 +27,11 @@
 
   async function updateStatus(status: ProfileStatus) {
     if (!profile) return;
+    const confirmation = confirm(
+      `Are you sure you want to ${status === 'accepted' ? 'accept' : 'reject'} this profile ?`
+    );
+    if (!confirmation) return;
+
     await updateProfileStatus(
       profile?.original_action_hash!,
       profile?.previous_action_hash!,
@@ -48,7 +53,7 @@
 </script>
 
 <article
-  class="bg-surface-800 flex max-h-[90vh] w-3/5 flex-col items-center gap-4 overflow-auto p-10 text-center text-white shadow-xl"
+  class="bg-surface-800 flex max-h-[90vh] w-11/12 flex-col items-center gap-4 overflow-auto p-10 text-center text-white shadow-xl md:w-4/5"
 >
   {#if profile}
     <h2 class="h2 font-bold">{profile.name}</h2>

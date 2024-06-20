@@ -12,6 +12,8 @@
     checkIfAgentIsAdministrator,
     registerAdministrator
   } from '@stores/administrators.store';
+  import { page } from '$app/stores';
+  import AdminMenuDrawer from '@lib/drawers/AdminMenuDrawer.svelte';
 
   initializeStores();
   const drawerStore = getDrawerStore();
@@ -63,6 +65,10 @@
 <Modal />
 <Drawer>
   {#if $drawerStore.id === 'menu-drawer'}
-    <MenuDrawer />
+    {#if $page.url.pathname.startsWith('/admin')}
+      <AdminMenuDrawer />
+    {:else}
+      <MenuDrawer />
+    {/if}
   {/if}
 </Drawer>

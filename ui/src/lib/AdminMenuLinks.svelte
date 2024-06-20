@@ -3,18 +3,40 @@
 </script>
 
 <div class="flex flex-col gap-3">
-  <MenuLink href="/admin/administrators" className="variant-filled-primary">
+  <MenuLink
+    href="/admin/administrators"
+    className="variant-filled-secondary lg:variant-filled-primary"
+  >
     Administrators
   </MenuLink>
-  <MenuLink href="/admin/persons" className="variant-filled-primary">Persons</MenuLink>
+  <MenuLink href="/admin/persons" className="variant-filled-secondary lg:variant-filled-primary">
+    Persons
+  </MenuLink>
 </div>
 
 <div class="flex flex-col gap-3">
-  <MenuLink href="/admin/organizations" className="variant-filled-primary">Organizations</MenuLink>
-  <MenuLink href="/admin/projects" className="variant-filled-primary">Projects</MenuLink>
+  <MenuLink
+    href="/admin/organizations"
+    className="variant-filled-secondary lg:variant-filled-primary"
+  >
+    Organizations
+  </MenuLink>
+  <MenuLink href="/admin/projects" className="variant-filled-secondary lg:variant-filled-primary">
+    Projects
+  </MenuLink>
 </div>
 
 <div class="flex flex-col gap-3">
-  <MenuLink href="/admin/requests" className="variant-filled-primary">Requests</MenuLink>
-  <MenuLink href="/admin/offers" className="variant-filled-primary">Offers</MenuLink>
+  <MenuLink href="/admin/requests" className="variant-filled-secondary lg:variant-filled-primary">
+    Requests
+  </MenuLink>
+  <MenuLink href="/admin/offers" className="variant-filled-secondary lg:variant-filled-primary">
+    Offers
+  </MenuLink>
+</div>
+
+<div class="flex flex-col gap-3 lg:hidden">
+  <MenuLink href="/" className="variant-ringed-secondary text-white hover:variant-filled-secondary">
+    User front-end
+  </MenuLink>
 </div>
