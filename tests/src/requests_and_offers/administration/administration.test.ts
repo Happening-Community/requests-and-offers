@@ -26,9 +26,11 @@ import {
   sampleProfile,
 } from "../profiles/common";
 import {
+  checkIfAgentIsAdministrator,
   checkIfPersonIsAdministrator,
   getAllAdministratorsLinks,
   registerAdministrator,
+  removeAdministrator,
 } from "./common";
 
 test("create a Person and make it administrator", async () => {
@@ -69,13 +71,31 @@ test("create a Person and make it administrator", async () => {
     );
 
     // Verify that Bob is not an administrator
-    expect(
-      checkIfPersonIsAdministrator(bob.cells[0], bobProfileLink.target)
-    ).rejects.toThrow();
+    assert.notOk(
+      await checkIfPersonIsAdministrator(bob.cells[0], bobProfileLink.target)
+    );
 
     // Verify that Alice is an administrator with here AgentPubKey
-    // assert.ok(
-    //   await checkIfAgentIsAdministrator(alice.cells[0], alice.agentPubKey)
-    // );
+    assert.ok(
+      await checkIfAgentIsAdministrator(alice.cells[0], alice.agentPubKey)
+    );
+
+    // Verify that Bob is not an administrator with here AgentPubKey
+    assert.notOk(
+      await checkIfAgentIsAdministrator(bob.cells[0], bob.agentPubKey)
+    );
+
+    // Add bob as an administrator and then remove him
+    await registerAdministrator(bob.cells[0], bobProfileLink.target);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+    assert.ok(
+      await checkIfPersonIsAdministrator(bob.cells[0], bobProfileLink.target)
+    );
+
+    await removeAdministrator(bob.cells[0], bobProfileLink.target);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+    assert.notOk(
+      await checkIfPersonIsAdministrator(bob.cells[0], bobProfileLink.target)
+    );
   });
 });

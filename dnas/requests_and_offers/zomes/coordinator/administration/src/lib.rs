@@ -1,4 +1,6 @@
 pub mod administration;
+mod external_calls;
+
 use hdk::prelude::*;
 
 #[hdk_extern]
