@@ -30,7 +30,7 @@ export const agentIsAdministrator: Writable<boolean> = writable(false);
  * @returns {Promise<boolean>} A promise that resolves to true if the registration was successful, otherwise false.
  */
 export async function registerAdministrator(original_profile_hash: ActionHash): Promise<boolean> {
-  return await hc.callZome('profiles', 'register_administrator', original_profile_hash);
+  return await hc.callZome('administration', 'register_administrator', original_profile_hash);
 }
 
 /**
@@ -40,14 +40,18 @@ export async function registerAdministrator(original_profile_hash: ActionHash): 
  * @returns {Promise<void>}
  */
 export async function checkIfAgentIsAdministrator(agentPubKey: AgentPubKey): Promise<boolean> {
-  const result = await hc.callZome('profiles', 'check_if_agent_is_administrator', agentPubKey);
+  const result = await hc.callZome(
+    'administration',
+    'check_if_agent_is_administrator',
+    agentPubKey
+  );
   agentIsAdministrator.set(result);
 
   return result;
 }
 
 export async function checkIfPersonIsAdministrator(profile_hash: ActionHash): Promise<boolean> {
-  return await hc.callZome('profiles', 'check_if_person_is_administrator', profile_hash);
+  return await hc.callZome('administration', 'check_if_person_is_administrator', profile_hash);
 }
 
 /**
@@ -56,7 +60,7 @@ export async function checkIfPersonIsAdministrator(profile_hash: ActionHash): Pr
  * @returns {Promise<Link[]>} A promise that resolves to an array of links associated with administrators.
  */
 export async function getAllAdministratorsLinks(): Promise<Link[]> {
-  return (await hc.callZome('profiles', 'get_all_administrators_links', null)) as Link[];
+  return (await hc.callZome('administration', 'get_all_administrators_links', null)) as Link[];
 }
 
 /**
@@ -84,7 +88,7 @@ export async function getAllAdministrators(): Promise<void> {
  * @returns {Promise<boolean>} A promise that resolves to true if the removal was successful, otherwise false.
  */
 export async function removeAdministrator(original_profile_hash: ActionHash): Promise<boolean> {
-  return await hc.callZome('profiles', 'remove_administrator', original_profile_hash);
+  return await hc.callZome('administration', 'remove_administrator', original_profile_hash);
 }
 
 /**
