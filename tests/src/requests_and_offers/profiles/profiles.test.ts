@@ -1,24 +1,8 @@
 import { assert, expect, test, vi } from "vitest";
 import TestProfilePicture from "./assets/Test-Logo-Small-Black-transparent-1.png";
 
-import {
-  runScenario,
-  pause,
-  CallableCell,
-  Scenario,
-  Player,
-  dhtSync,
-} from "@holochain/tryorama";
-import {
-  NewEntryAction,
-  ActionHash,
-  Record,
-  AppBundleSource,
-  fakeDnaHash,
-  fakeActionHash,
-  fakeAgentPubKey,
-  fakeEntryHash,
-} from "@holochain/client";
+import { Scenario, Player, dhtSync } from "@holochain/tryorama";
+import { Record } from "@holochain/client";
 
 import {
   Profile,
@@ -28,11 +12,6 @@ import {
   getLatestProfile,
   sampleProfile,
   updateProfile,
-  registerAdministrator,
-  checkIfPersonIsAdministrator,
-  getAllAdministratorsLinks,
-  removeAdministrator,
-  updatePersonStatus,
 } from "./common.js";
 import { decodeOutputs, runScenarioWithTwoAgents } from "../utils";
 
@@ -219,145 +198,5 @@ test("create and update Profile", async () => {
     );
     aliceProfile = decodeOutputs([latestProfileRecord])[0] as Profile;
     assert.equal(aliceProfile.nickname, sample.nickname);
-  });
-});
-
-test("create a profile and make it administrator", async () => {
-  await runScenarioWithTwoAgents(async (_scenario, alice, bob) => {
-    let sample: Profile;
-    let record: Record;
-
-    sample = sampleProfile({ name: "Alice" });
-    record = await createProfile(alice.cells[0], sample);
-    const aliceOriginalProfileHash = record.signed_action.hashed.hash;
-    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-
-    sample = sampleProfile({ name: "Bob" });
-    record = await createProfile(bob.cells[0], sample);
-    const bobOriginalProfileHash = record.signed_action.hashed.hash;
-    await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
-
-    // Register Alice as an administrator
-    let response = await registerAdministrator(
-      alice.cells[0],
-      aliceOriginalProfileHash
-    );
-
-    assert.ok(response);
-
-    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-
-    response = await checkIfPersonIsAdministrator(
-      alice.cells[0],
-      aliceOriginalProfileHash
-    );
-
-    assert.ok(response);
-
-    // Check if Bob is not an administrator
-    response = await checkIfPersonIsAdministrator(
-      bob.cells[0],
-      bobOriginalProfileHash
-    );
-    assert.notOk(response);
-
-    // Verify get_all_administrators_links returns Alice
-    let administrators = await getAllAdministratorsLinks(alice.cells[0]);
-    assert.equal(
-      administrators[0].target.toString(),
-      aliceOriginalProfileHash.toString()
-    );
-
-    // Make Bob an administrator
-    response = await registerAdministrator(
-      bob.cells[0],
-      bobOriginalProfileHash
-    );
-    assert.ok(response);
-
-    await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
-
-    administrators = await getAllAdministratorsLinks(alice.cells[0]);
-    assert.equal(administrators.length, 2);
-
-    // Remove Alice as an administrator
-
-    response = await removeAdministrator(
-      bob.cells[0],
-      aliceOriginalProfileHash
-    );
-    assert.ok(response);
-
-    await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
-
-    // Verify that Alice is not an administrator anymore
-    administrators = await getAllAdministratorsLinks(alice.cells[0]);
-    assert.equal(administrators.length, 1);
-
-    // Verify that the Alice can not update het status to "accepted"
-    let aliceLatestProfileRecord = await getLatestProfile(
-      alice.cells[0],
-      aliceOriginalProfileHash
-    );
-
-    await expect(
-      updatePersonStatus(
-        alice.cells[0],
-        aliceOriginalProfileHash,
-        aliceLatestProfileRecord.signed_action.hashed.hash,
-        "accepted"
-      )
-    ).rejects.toThrow();
-
-    // Bob try to remove himself as an administrator
-    await expect(
-      removeAdministrator(bob.cells[0], bobOriginalProfileHash)
-    ).rejects.toThrow();
-
-    // Bob update Alice's status to "accepted"
-
-    record = await updatePersonStatus(
-      bob.cells[0],
-      aliceOriginalProfileHash,
-      aliceLatestProfileRecord.signed_action.hashed.hash,
-      "accepted"
-    );
-
-    assert.ok(record);
-
-    await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
-
-    // Verify that the Alice's profile status is "accepted"
-    aliceLatestProfileRecord = await getLatestProfile(
-      alice.cells[0],
-      aliceOriginalProfileHash
-    );
-
-    let aliceProfile = decodeOutputs([aliceLatestProfileRecord])[0] as Profile;
-
-    assert.equal(aliceProfile.status, "accepted");
-
-    // Allice update her profile and verify that the status is still "accepted"
-    sample = sampleProfile({
-      name: "Alice",
-      nickname: "Alicia",
-    });
-    record = await updateProfile(
-      alice.cells[0],
-      aliceOriginalProfileHash,
-      aliceLatestProfileRecord.signed_action.hashed.hash,
-      sample
-    );
-    assert.ok(record);
-
-    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-
-    aliceLatestProfileRecord = await getLatestProfile(
-      alice.cells[0],
-      aliceOriginalProfileHash
-    );
-
-    aliceProfile = decodeOutputs([aliceLatestProfileRecord])[0] as Profile;
-    assert.equal(aliceProfile.status, "accepted");
   });
 });

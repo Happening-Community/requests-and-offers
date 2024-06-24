@@ -1,28 +1,12 @@
-import {
-  runScenario,
-  pause,
-  CallableCell,
-  Scenario,
-  Player,
-  dhtSync,
-} from "@holochain/tryorama";
-import {
-  NewEntryAction,
-  ActionHash,
-  Record,
-  AppBundleSource,
-  fakeDnaHash,
-  fakeActionHash,
-  fakeAgentPubKey,
-  fakeEntryHash,
-  Link,
-} from "@holochain/client";
+import { dhtSync } from "@holochain/tryorama";
+import { Record } from "@holochain/client";
 import { assert, expect, test } from "vitest";
-import { extractWasmErrorMessage, runScenarioWithTwoAgents } from "../utils";
+import { decodeOutputs, runScenarioWithTwoAgents } from "../utils";
 import {
   Profile,
   createProfile,
   getAgentProfile,
+  getLatestProfile,
   sampleProfile,
 } from "../profiles/common";
 import {
@@ -31,6 +15,7 @@ import {
   getAllAdministratorsLinks,
   registerAdministrator,
   removeAdministrator,
+  updatePersonStatus,
 } from "./common";
 
 test("create a Person and make it administrator", async () => {
@@ -97,5 +82,53 @@ test("create a Person and make it administrator", async () => {
     assert.notOk(
       await checkIfPersonIsAdministrator(bob.cells[0], bobProfileLink.target)
     );
+  });
+});
+
+test("update Person status", async () => {
+  await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
+    let sample: Profile;
+    let record: Record;
+    sample = sampleProfile({ name: "Alice" });
+    record = await createProfile(alice.cells[0], sample);
+    sample = sampleProfile({ name: "Bob" });
+    record = await createProfile(bob.cells[0], sample);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+    let aliceProfileLink = (
+      await getAgentProfile(alice.cells[0], alice.agentPubKey)
+    )[0];
+    let bobProfileLink = (
+      await getAgentProfile(bob.cells[0], bob.agentPubKey)
+    )[0];
+    // Register Alice as an administrator
+    await registerAdministrator(alice.cells[0], aliceProfileLink.target);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    // Update Alice's status
+    await updatePersonStatus(
+      alice.cells[0],
+      aliceProfileLink.target,
+      aliceProfileLink.target,
+      "accepted"
+    );
+
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    // Verify that Alice's status is "accepted"
+    let aliceProfile = decodeOutputs([
+      await getLatestProfile(alice.cells[0], aliceProfileLink.target),
+    ])[0] as Profile;
+
+    assert.equal(aliceProfile.status, "accepted");
+
+    // Bob can not update his status
+    await expect(
+      updatePersonStatus(
+        bob.cells[0],
+        bobProfileLink.target,
+        bobProfileLink.target,
+        "accepted"
+      )
+    ).rejects.toThrow();
   });
 });

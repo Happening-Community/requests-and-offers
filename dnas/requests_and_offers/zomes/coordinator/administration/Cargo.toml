@@ -14,4 +14,3 @@ serde = { workspace = true }
 
 administration_integrity = { workspace = true } 
 
-profiles_integrity = { workspace = true }

@@ -1,16 +1,6 @@
 import { CallableCell } from "@holochain/tryorama";
-import {
-  NewEntryAction,
-  ActionHash,
-  Record,
-  AppBundleSource,
-  fakeActionHash,
-  fakeAgentPubKey,
-  fakeEntryHash,
-  fakeDnaHash,
-  Link,
-  AgentPubKey,
-} from "@holochain/client";
+import { ActionHash, Record, Link, AgentPubKey } from "@holochain/client";
+import { Status } from "../profiles/common";
 
 export async function registerAdministrator(
   cell: CallableCell,
@@ -62,5 +52,18 @@ export async function removeAdministrator(
     zome_name: "administration",
     fn_name: "remove_administrator",
     payload: person_profile_hash,
+  });
+}
+
+export async function updatePersonStatus(
+  cell: CallableCell,
+  original_profile_hash: ActionHash,
+  previous_profile_hash: ActionHash,
+  status: Status
+): Promise<Record> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "update_person_status",
+    payload: { original_profile_hash, previous_profile_hash, status },
   });
 }

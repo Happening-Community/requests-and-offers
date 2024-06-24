@@ -72,10 +72,3 @@ pub fn remove_administrator(person_profile_hash: ActionHash) -> ExternResult<boo
     delete_link(link.create_link_hash.clone())?;
     Ok(true)
 }
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UpdateStatusInput {
-    pub original_profile_hash: ActionHash,
-    pub previous_profile_hash: ActionHash,
-    pub status: String,
-}

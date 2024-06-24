@@ -23,7 +23,6 @@ version = "0.0.1"
 dependencies = [
  "administration_integrity",
  "hdk",
- "profiles_integrity",
  "serde",
 ]
 
