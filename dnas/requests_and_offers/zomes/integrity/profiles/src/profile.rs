@@ -74,13 +74,15 @@ impl Display for Status {
     }
 }
 
-impl Status {
-    fn from_str(status: &str) -> Option<Self> {
+impl FromStr for Status {
+    type Err = ();
+
+    fn from_str(status: &str) -> Result<Self, Self::Err> {
         match status {
-            "pending" => Some(Self::Pending),
-            "accepted" => Some(Self::Accepted),
-            "rejected" => Some(Self::Rejected),
-            _ => None,
+            "pending" => Ok(Self::Pending),
+            "accepted" => Ok(Self::Accepted),
+            "rejected" => Ok(Self::Rejected),
+            _ => Err(()),
         }
     }
 }
@@ -99,20 +101,20 @@ fn is_image(bytes: SerializedBytes) -> bool {
 
 pub fn validate_profile(profile: Profile) -> ExternResult<ValidateCallbackResult> {
     if AllowedTypes::from_str(profile.user_type.as_str()).is_err() {
-        return Ok(ValidateCallbackResult::Invalid(String::from(format!(
+        return Ok(ValidateCallbackResult::Invalid(format!(
             "Person Type must be '{}' or '{}'.",
             AllowedTypes::Advocate,
             AllowedTypes::Creator,
-        ))));
+        )));
     };
 
-    if Status::from_str(profile.status.as_ref().unwrap().as_str()).is_none() {
-        return Ok(ValidateCallbackResult::Invalid(String::from(format!(
-            "Status must be '{}', '{}' or '{}'.",
+    if Status::from_str(profile.status.unwrap().as_str()).is_err() {
+        return Ok(ValidateCallbackResult::Invalid(format!(
+            "Status must be '{}' or '{}' or '{}.",
             Status::Pending,
             Status::Accepted,
-            Status::Rejected
-        ))));
+            Status::Rejected,
+        )));
     };
 
     if let Some(bytes) = profile.picture {
