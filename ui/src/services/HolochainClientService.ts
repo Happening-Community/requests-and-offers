@@ -6,25 +6,9 @@ import { writable, type Writable } from 'svelte/store';
  */
 export const isConnected: Writable<boolean> = writable(false);
 
-/**
- * A service class for managing the Holochain client.
- */
 class HolochainClientService {
-  static instance: HolochainClientService;
   appId = 'requests_and_offers';
   client: AppAgentClient | null = null;
-  hreaClient: AppAgentClient | null = null;
-  loading = true;
-  /**
-   * Constructor for the HolochainClientService.
-   * Ensures only one instance of the service is created.
-   */
-  constructor() {
-    if (HolochainClientService.instance) {
-      return HolochainClientService.instance;
-    }
-    HolochainClientService.instance = this;
-  }
 
   /**
    * Connects the client to the Holochain network.
@@ -43,14 +27,6 @@ class HolochainClientService {
       throw new Error('Client not connected');
     }
     return await this.client.appInfo();
-  }
-
-  /**
-   * Returns the current client instance.
-   * @returns {AppAgentClient | null} - The client instance.
-   */
-  getClient(): AppAgentClient | null {
-    return this.client;
   }
 
   /**
@@ -78,18 +54,6 @@ class HolochainClientService {
       payload: payload
     });
     return record;
-  }
-
-  async connectToHreaBackend() {
-    // Replace 'https://hrea-backend-url' with the actual URL of your hREA backend.
-    const hreaBackendUrl = 'https://hrea-backend-url';
-    // Assuming the hREA backend uses a similar connection method as the Holochain client.
-    // You might need to adjust this based on the actual API of the hREA backend.
-    this.hreaClient = await AppAgentWebsocket.connect(new URL(hreaBackendUrl), this.appId);
-    // Assuming there's a way to check if the connection is successful.
-    // This is just a placeholder. You should replace it with actual logic.
-    const isHreaConnected = true;
-    console.log('Connected to hREA backend:', isHreaConnected);
   }
 }
 
