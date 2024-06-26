@@ -355,3 +355,12 @@ Color palette :
 This specification document outlines the key components and functionalities of the Requests & Offers - MVP project. By adhering to these specifications, developers can ensure the successful creation of a Holochain application that effectively facilitates the exchange of requests and offers within the hAppenings.community.
 
 ![requests and offers diagram](images/requests-and-offers.drawio.png)
+
+
+
+## Additional features
+- **Moderator role**: Ability to moderate projects, requests and offers without threatning the network administrators.
+- **Temporary suspension**: Ability to temporarily suspend accounts without losing their offers and requests.
+- **Flag projects, requests and offers**: Flagging projects, requests and offers for review by network administrators.
+- **Messagery**: A messaging system that allows users to communicate with each other. 
+- **Messaging to administrators**: Ability to send messages to the network administrators.
