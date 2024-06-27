@@ -26,11 +26,11 @@ This application is specifically tailored for the participants in the Holochain 
 - **Custom Holochain Zome**: A custom zome is used for managing user persons within the application.
 - **hREA agents**: Persons are linked to hREA agents.
 
-### 4.2 Person Entry
+### 4.1.1 Person Entry
 
 The `Person` entry represents the person and its associated agents within the hAppenings.community. An agent can be a single user or a device associated with a user, allowing for the sharing of persons across multiple devices. This entry includes various fields to capture essential information about the person, facilitating personalized experiences and targeted interactions within the community.
 
-#### 4.2.1 Fields
+#### 4.1.1.1 Fields
 
 - **name**: The full name of the person.
   - **Type**: `String`
@@ -67,7 +67,7 @@ The `Person` entry represents the person and its associated agents within the hA
   - **Type**: `String`
   - **Validation**: Must be either 'pending', 'accepted', or 'rejected'.
 
-#### 4.2.2 Links
+#### 4.1.1.2 Links
 
   - **PersonUpdates**: A link from the person create header to the person update headers.
   - **PersonAgents**: A link from the person to an agent. It is an index of all the agents that have the person.
@@ -79,18 +79,18 @@ The `Person` entry represents the person and its associated agents within the hA
   - **PersonOrganizations**: A link from the person to an organization. It is an index of all the organizations that have the person.
   - **PersonSkills**: A link from the person to a skill. It is an index of all the skills that have the person.
   
-### 4.3 Projects and Organizations
+### 4.2 Projects and Organizations
 
 - **Project and Organization Creation**: Users can create projects and organizations, with projects owned by organizations. Projects have specific requirements and status.
 ![Project status](images/project-stat  - **AdministratorsPerson**: A link from the `administrators` anchor to the person. It is an index of all the administrators of the network.
 
-#### 4.3.1 Project Entry
+#### 4.2.1 Project Entry
 
 The `Project` entry represents a project and its associated agents, including team members. Projects have specific requirements and status. Projects can be created by organizations or by persons.
 
 In hREA, projects are organizations `classifiedAs` `Project`.
 
-##### 4.3.1.1 Fields
+##### 4.2.1.1 Fields
 
 - **name**: The name of the project.
   - **Type**: `String`
@@ -112,7 +112,7 @@ In hREA, projects are organizations `classifiedAs` `Project`.
   - **Validation**: Must be either 'pending', 'accepted', or 'rejected'.
   - **Default**: `pending`
 
-##### 4.3.1.2 Links
+##### 4.2.1.2 Links
 
 - **AllProjects**: A link to the `projects` anchor.
 - **ProjectAdministrators**: A link from the project's to a person. It is an index of all the administrators.
@@ -121,13 +121,13 @@ In hREA, projects are organizations `classifiedAs` `Project`.
 - **ProjectRequests**: A link from the project's to a request. It is an index of all the requests made by the project.
 - **ProjectOffers**: A link from the project's to an offer. It is an index of all the offers made to the project.
 
-#### 4.3.2 Organization Entry
+#### 4.2.2 Organization Entry
 
 The `Organization` entry represents an organization and its associated persons and projects. Organizations are created by persons.
 
 In hREA, are agents `classifiedAs` `Organization`.
 
-##### 4.3.2.1 Fields
+##### 4.2.2.1 Fields
 
 - **name**: The name of the organization.
   - **Type**: `String`
@@ -149,7 +149,7 @@ In hREA, are agents `classifiedAs` `Organization`.
   - **Validation**: Must be either 'pending', 'accepted', or 'rejected'.
   - **Default**: `pending`
 
-##### 4.3.2.2 Links
+##### 4.2.2.2 Links
 
 - **AllOrganizations**: A link to the `organizations` anchor.
 - **OrganizationAdministrators**: A link from the organization's to a person. It is an index of all the administrators of the organization.
@@ -159,23 +159,23 @@ In hREA, are agents `classifiedAs` `Organization`.
 - **OrganizationRequests**: A link from the organization's to a request. It is an index of all the requests made by the organization.
 - **OrganizationOffers**: A link from the organization's to an offer. It is an index of all the offers made to the organization.
 
-#### 4.3.3 Project/Organization administrators
+#### 4.2.3 Project/Organization Facilitators
 
-Projects and Organizations administrators are integral to the operation and governance of projects and organizations within the network. They serve as the responsibles for the management and representation of their respective projects or organizations.
+Projects and Organizations facilitators are integral to the operation and governance of projects and organizations within the network. They serve as the responsibles for the management and representation of their respective projects or organizations.
 
-##### 4.3.3.1 Onboarding and Approval
+##### 4.2.3.1 Onboarding and Approval
 
-- Projects and organizations administrators are individuals or groups designated to represent a project or organization within the network. They are onboarded and approved by the network's administrators to participate in the network, taking on the role of administrators of projects or organizations.
+- Projects and organizations facilitators are individuals or groups designated to represent a project or organization within the network. They are onboarded and approved by the network's administrators to participate in the network, taking on the role of facilitators of projects or organizations.
 
-##### 4.3.3.2 Personal Profile
+##### 4.2.3.2 Project/Organization Profile
 
-- Projects and organizations administrators can file out their personal profiles, including their skills, location, type, etc. This profile is crucial for matching their expertise with relevant requests and offers within the network and for making offers and requests on behalf of their projects or organizations.
+- Projects and organizations facilitators can file out their personal profiles, including their skills, location, type, etc. This profile is crucial for matching their expertise with relevant requests and offers within the network and for making offers and requests on behalf of their projects or organizations.
 
-##### 4.3.3.3 Offers and Requests
+##### 4.2.3.3 Offers and Requests
 
-- Projects and organizations administrators can make offers and requests for themselves and on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
+- Projects and organizations facilitators can make offers and requests for themselves and on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
 
-### 4.4 Requests and Offers
+### 4.3 Requests and Offers
 
 - **hREA Integration**: Utilizes hREA for managing economic activities, including tracking resources, facilitating agreements, and matching needs.
 - **Request Creation**: Users can create requests, linked to specific projects, organizations and skills.
@@ -183,7 +183,7 @@ Projects and Organizations administrators are integral to the operation and gove
 - In hREA, requests and offers are `intents` and `proposals`.
 - For each exchange, there needs to be a mechanism for each party to agree that the exchange is complete. This could be integrated into the Request and Offer management sections of the application, allowing users to confirm the completion of an exchange directly within the application. This could be implemented as a confirmation step in the exchange process, ensuring that both parties have the opportunity to confirm the completion before the exchange is finalized.
 
-### 4.5 Skills and Categories
+### 4.4 Skills and Categories
 
 - **Skills**: Users can create skills, which are used to filter agents persons, requests and offers.
 - **Categories**: Administrators can create categories, which are used to organize projects, requests and offers.
@@ -192,13 +192,13 @@ Projects and Organizations administrators are integral to the operation and gove
 
 ![Types of support requested](images/types-of-support-requested.png)
 
-#### 4.5.1 Skill Entry
+#### 4.4.1 Skill Entry
 
 The `Skill` entry represents the skills associated with the persons, projects, requests and offers. This in an anchor that contains a `String` that is the skill name.
 
 In hREA, skills are Resource Specifications. They can be created only by offers and requests. A user need to create an offer that is the list of its skills to be able to display it in its profile.
 
-#### 4.5.1.1 Links
+#### 4.4.1.1 Links
 
 - **AllSkills**: A link to the `skills` anchor. It is an index of all the skills.
 - **SkillPersons**: A link from the skill to a person. It is an index of all the persons that have the skill.
@@ -206,7 +206,7 @@ In hREA, skills are Resource Specifications. They can be created only by offers 
 - **SkillRequests**: A link from the skill to a request. It is an index of all the requests that have the skill.
 - **SkillOffers**: A link from the skill to an offer. It is an index of all the offers that have the skill.
 
-#### 4.5.2 Category Entry
+#### 4.4.2 Category Entry
 
 The `Category` entry represents the categories associated with projects and offers. This in an anchor that contains a `String` that is the category name. 
 
@@ -214,13 +214,13 @@ The `Category` of an organization is the collection of the `Category` of its pro
 
 In hREA, categories are Resource Specifications `classifiedAs` `{category}`.
 
-#### 4.5.2.1 Links
+#### 4.4.2.1 Links
 
 - **AllCategories**: A link to the `categories` anchor. It is an index of all the categories.
 - **CategoryProjects**: A link from the category to a project. It is an index of all the projects that have the category.
 - **CategoryOffers**: A link from the category to an offer. It is an index of all the offers related to the category.
 
-### 4.6 Search Functionality
+### 4.5 Search Functionality
 
 Each page has a search functionality.
 
@@ -230,13 +230,18 @@ Each page has a search functionality.
 - **Search Requests**: Users can search requests by name, skills, categories, projects, organizations and persons.
 - **Search Offers**: Users can search offers by name, skills, categories, projects, organizations and persons.
 
-### 4.7 Administrator and Moderation Functionalities
+### 4.6 Network Administration and Moderation Functionalities
 
 Administrators play a pivotal role in the governance and operation of the network, ensuring its integrity, security, and alignment with the community's objectives. Their responsibilities include:
 
 - **Verification of Persons and Organizations**: Administrators are tasked with verifying the authenticity and compliance of persons and organizations within the network. This process is crucial for maintaining the integrity of the community and ensuring that all participants are legitimate.
 - **Project Creation by Verified Organizations**: Projects within the network can be directly created by verified organizations. This streamlines the project initiation process for organizations that have already been vetted by the network administrators.
 - **Verification of Projects Not Managed by Verified Organizations**: In cases where a person wishes to create a project that is not managed by a verified organization, the project must undergo a verification process by the network administrators. This ensures that all projects, regardless of their management structure, meet the network's standards and objectives.
+- **Moderator Role**: Administrators can delegate moderator roles to other users. Moderators can perform most administrative tasks except for managing administrators themselves. This includes moderating projects, requests, and offers, ensuring content appropriateness and community guidelines compliance.
+- **Temporary Suspension**: Administrators have the authority to temporarily suspend Person profiles for a specified period. This action can be taken in response to violations of community guidelines or other misconduct.
+- **Flagging System**: Users have the ability to flag organizations, projects, requests, and offers for review by network administrators. This system allows the community to signal potentially inappropriate content or activities, prompting administrative review and action as necessary.
+- **Inbox**: Administrators and moderators have access to an inbox that allows them to address user concerns, inquiries, and reports efficiently using the messaging system.
+
 
 Key aspects of administrator roles and access include:
 
@@ -244,26 +249,29 @@ Key aspects of administrator roles and access include:
 - **Utilization of hREA Roles**: Administrators leverage hREA roles to manage and track their relationships with projects and organizations. This structured approach ensures a clear and efficient method for resource allocation and project coordination within the network.
 - **Capability-Based Security Measures**: The network employs capability-based Holochain security measures to ensure that only authorized administrators can access and modify critical functions. This safeguards the network against unauthorized use and maintains the security of the community.
 
-#### 4.7.1 Links
+#### 4.6.1 Links
 
 - **AdministratorsPerson**: A link from the `administrators` anchor to a person. It is an index of all the administrators of the network.
+- **ModeratorsPerson**: A link from the `moderators` anchor to a person. It is an index of all the moderators of the network.
 
-#### 4.7.2 User Interface
+#### 4.6.2 User Interface
 
 Administrators have access to the Administration Dashboard, a specialized part of the user interface that includes pages for managing administrators, persons, projects, organizations, requests, and offers. This dashboard also incorporates search functionality and special reports, providing administrators with comprehensive tools for network management.
 
-### 4.8 Roles & Permissions
+Moderators have access to the same Administration Dashboard, but without the Administrators mangement page.
+
+### 4.7 Roles & Permissions
 
 The Requests & Offers - MVP project is designed with a focus on facilitating collaboration and resource exchange within the hAppenings.community. To ensure a structured and efficient operation, the application defines specific roles and their associated permissions. These roles are crucial for managing the network's operations, ensuring its smooth functioning, and maintaining a healthy and supportive community.
 
-#### 4.8.1 Advocate
+#### 4.7.1 Advocate
 
 - **Onboarded/Approved**: Advocates are individuals passionate about the Holochain technology, looking to support projects within the ecosystem. They are onboarded and approved to participate in the network by the network's administrators.
 - **Personal Profile**: Advocates must file out their personal profiles, including essential information and their areas of expertise.
 - **Offers**: Advocates can offer their skills, talents, or resources to the network. This includes mentorship, brainstorming sessions, or any other form of support they wish to provide.
 - **Reporting**: Advocates have access to reporting features, allowing them to view their exchanges and a general report of total exchanges for the month.
 
-#### 4.8.2 Creator
+#### 4.7.2 Creator
 
 - **Onboarded/Approved**: Creators are individuals or groups actively involved in creating or developing projects within the Holochain ecosystem. They are onboarded and approved to participate in the network by the network's administrators.
 - **Personal Profile**: Creators can file out their personal profiles, including their skills, location, type, etc.
@@ -271,24 +279,26 @@ The Requests & Offers - MVP project is designed with a focus on facilitating col
 - **Requests**: Creators can make requests for themselves, such as mentoring, brainstorming time, or testing in the early days of their projects.
 - **Reporting**: Creators can access reports on their exchanges and a general report of total exchanges for the month.
 
-#### 4.8.3 Projects and Organizations Administrators
+#### 4.7.3 Projects and Organizations Facilitators
 
-- **Onboarded/Approved**: Projects and organizations administrators are individuals or groups designated to represent a project or organization within the network. They are onboarded and approved to participate in the network.
-- **Personal Profile**: Projects and organizations administrators can file out their personal profiles, including their skills, location, type, etc.
-- **Offers**: Projects and organizations administrators can make offers, including the skills and talents they wish to offer.
-- **Requests**: Projects and organizations administrators can make requests for themselves and on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
+- **Onboarded/Approved**: Projects and organizations facilitators are individuals or groups designated to represent a project or organization within the network. They are onboarded and approved to participate in the network.
+- **Personal Profile**: Projects and organizations facilitators can file out their personal profiles, including their skills, location, type, etc.
+- **Offers**: Projects and organizations facilitators can make offers, including the skills and talents they wish to offer.
+- **Requests**: Projects and organizations facilitators can make requests for themselves and on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
 
-#### 4.8.4 Administrator
 
-- **Onboarded/Approved**: Administrators are individuals with special privileges to manage the network's operations. They are onboarded and approved to participate in the network.
-- **Personal Profile**: Administrators can file out their personal profiles, including their skills, location, type, etc.
-- **Offers**: Administrators can make offers, including the skills and talents they wish to offer.
-- **Requests**: Administrators can make requests for the MVP, such as help with moderation or supporting a kind community.
-- **Reports Backend**: Administrators have access to all reports and data, including the ability to pause or delete a member.
-
-#### 4.8.5 Matchmaker (Potential Future Role)
+#### 4.7.5 Matchmaker (Potential Future Role)
 
 - **Description**: A role that could be added in future versions to facilitate the matching of requests and offers more efficiently.
+
+### 4.8 Communication and Negotiation
+
+To facilitate real-time communication and negotiation among users, the application includes a messaging system. This system enables users to discuss details, negotiate terms, and settle agreements before finalizing exchanges through the acceptance or rejection of offers or requests.
+
+- **User-to-User Messaging**: Allows users to communicate directly with one another, facilitating negotiations and discussions related to requests and offers.
+- **Messaging to Administrators**: Provides a channel for users to send messages to network administrators. This feature is accessible through an inbox within the administration panel, allowing administrators to address user concerns, inquiries, and reports efficiently.
+
+This messaging functionality supports the dynamic interaction between users, enhancing the collaborative environment and ensuring smooth transactions within the Requests & Offers - MVP platform.
 
 ## 5. MVP Use Case: Project Collaboration and Skill Matching
 
@@ -355,12 +365,3 @@ Color palette :
 This specification document outlines the key components and functionalities of the Requests & Offers - MVP project. By adhering to these specifications, developers can ensure the successful creation of a Holochain application that effectively facilitates the exchange of requests and offers within the hAppenings.community.
 
 ![requests and offers diagram](images/requests-and-offers.drawio.png)
-
-
-
-## Additional features
-- **Moderator role**: Ability to moderate projects, requests and offers without threatning the network administrators.
-- **Temporary suspension**: Ability to temporarily suspend accounts without losing their offers and requests.
-- **Flag projects, requests and offers**: Flagging projects, requests and offers for review by network administrators.
-- **Messagery**: A messaging system that allows users to communicate with each other. 
-- **Messaging to administrators**: Ability to send messages to the network administrators.
