@@ -12,8 +12,11 @@ import {
   getLatestProfile,
   sampleProfile,
   updateProfile,
+  DnaProperties,
+  getDnaProperties,
 } from "./common.js";
-import { decodeOutputs, runScenarioWithTwoAgents } from "../utils";
+import { decodeRecords, runScenarioWithTwoAgents } from "../utils";
+import { decode } from "@msgpack/msgpack";
 
 test("create and read Profile", async () => {
   await runScenarioWithTwoAgents(
@@ -43,7 +46,7 @@ test("create and read Profile", async () => {
         bob.cells[0],
         record.signed_action.hashed.hash
       );
-      const createdProfile = decodeOutputs([createdRecord])[0] as Profile;
+      const createdProfile = decodeRecords([createdRecord])[0] as Profile;
       assert.containsAllKeys(sample, createdProfile);
 
       // Verify that the profile status is "pending"
@@ -128,7 +131,7 @@ test("create and update Profile", async () => {
       alice.cells[0],
       originalProfileHash
     );
-    let aliceProfile = decodeOutputs([latestProfileRecord])[0] as Profile;
+    let aliceProfile = decodeRecords([latestProfileRecord])[0] as Profile;
     assert.equal(sample.name, aliceProfile.name);
 
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
@@ -196,7 +199,21 @@ test("create and update Profile", async () => {
       alice.cells[0],
       originalProfileHash
     );
-    aliceProfile = decodeOutputs([latestProfileRecord])[0] as Profile;
+    aliceProfile = decodeRecords([latestProfileRecord])[0] as Profile;
     assert.equal(aliceProfile.nickname, sample.nickname);
+  });
+});
+
+test("get progenitor pubkey", async () => {
+  await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
+    let guestDnaProperties = decode(
+      alice.cells[0].dna_modifiers.properties
+    ) as DnaProperties;
+    let hostDnaProperties = await getDnaProperties(alice.cells[0]);
+
+    assert.equal(
+      guestDnaProperties.progenitor_pubkey,
+      hostDnaProperties.progenitor_pubkey
+    );
   });
 });

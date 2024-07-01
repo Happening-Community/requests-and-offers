@@ -89,3 +89,16 @@ export async function updateProfile(
     payload: { original_profile_hash, previous_profile_hash, updated_profile },
   });
 }
+
+export type DnaProperties = {
+  progenitor_pubkey: AgentPubKey;
+};
+
+export async function getDnaProperties(
+  cell: CallableCell
+): Promise<DnaProperties> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "get_dna_properties",
+  });
+}

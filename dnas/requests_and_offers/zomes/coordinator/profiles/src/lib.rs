@@ -1,6 +1,7 @@
 pub mod administration;
 mod external_calls;
 pub mod profile;
+pub mod progenitor;
 
 use hdk::prelude::*;
 use profiles_integrity::*;

@@ -1,7 +1,7 @@
 import { dhtSync } from "@holochain/tryorama";
 import { Record } from "@holochain/client";
 import { assert, expect, test } from "vitest";
-import { decodeOutputs, runScenarioWithTwoAgents } from "../utils";
+import { decodeRecords, runScenarioWithTwoAgents } from "../utils";
 import {
   Profile,
   createProfile,
@@ -115,7 +115,7 @@ test("update Person status", async () => {
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Verify that Alice's status is "accepted"
-    let aliceProfile = decodeOutputs([
+    let aliceProfile = decodeRecords([
       await getLatestProfile(alice.cells[0], aliceProfileLink.target),
     ])[0] as Profile;
 

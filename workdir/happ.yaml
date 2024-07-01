@@ -12,7 +12,7 @@ roles:
       modifiers:
         network_seed: ~
         properties:
-          developer_address: "address"
+          progenitor_pubkey: "MmTq6x9PoEyPuXo48BWysNB0pAg3tEpBUeFi7LJDgT8"
         origin_time: ~
         quantum_time: ~
       installed_hash: ~
