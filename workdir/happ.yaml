@@ -11,7 +11,8 @@ roles:
       bundled: "../dnas/requests_and_offers/workdir/requests_and_offers.dna"
       modifiers:
         network_seed: ~
-        properties: ~
+        properties:
+          developer_address: "address"
         origin_time: ~
         quantum_time: ~
       installed_hash: ~

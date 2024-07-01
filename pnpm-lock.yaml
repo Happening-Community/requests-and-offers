@@ -41,6 +41,10 @@ importers:
       vitest:
         specifier: ^0.28.4
         version: 0.28.5
+    devDependencies:
+      vite:
+        specifier: ^5.0.3
+        version: 5.1.5(@types/node@20.11.0)
 
   ui:
     devDependencies:
