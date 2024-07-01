@@ -12,10 +12,13 @@ import {
   getLatestProfile,
   sampleProfile,
   updateProfile,
-  DnaProperties,
   getDnaProperties,
 } from "./common.js";
-import { decodeRecords, runScenarioWithTwoAgents } from "../utils";
+import {
+  DnaProperties,
+  decodeRecords,
+  runScenarioWithTwoAgents,
+} from "../utils";
 import { decode } from "@msgpack/msgpack";
 
 test("create and read Profile", async () => {

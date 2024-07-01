@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 use profiles_integrity::*;
-use utils::wasm_error;
+use utils::{progenitor::DnaProperties, wasm_error};
 
 /// Creates a new profile for the agent.
 ///
@@ -40,6 +40,8 @@ pub fn create_profile(profile: Profile) -> ExternResult<Record> {
         LinkTypes::MyProfile,
         (),
     )?;
+
+    // if DnaProperties::get()?.progenitor_pubkey == agent_info()?.agent_initial_pubkey {}
 
     Ok(record)
 }

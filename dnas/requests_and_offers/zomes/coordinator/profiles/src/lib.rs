@@ -1,10 +1,10 @@
 pub mod administration;
 mod external_calls;
 pub mod profile;
-pub mod progenitor;
 
 use hdk::prelude::*;
 use profiles_integrity::*;
+use utils::progenitor::DnaProperties;
 
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
@@ -139,4 +139,9 @@ fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTy
         entry_index.clone(),
         entry,
     )?)
+}
+
+#[hdk_extern]
+pub fn get_dna_properties(_: ()) -> ExternResult<DnaProperties> {
+    DnaProperties::get()
 }

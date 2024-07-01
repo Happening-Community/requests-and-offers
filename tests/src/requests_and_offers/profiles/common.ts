@@ -1,5 +1,6 @@
 import { CallableCell } from "@holochain/tryorama";
 import { ActionHash, Record, Link, AgentPubKey } from "@holochain/client";
+import { DnaProperties } from "../utils";
 
 export type UserType = "advocate" | "creator" | "Non Authorized";
 export type Status = "pending" | "accepted" | "rejected";
@@ -89,10 +90,6 @@ export async function updateProfile(
     payload: { original_profile_hash, previous_profile_hash, updated_profile },
   });
 }
-
-export type DnaProperties = {
-  progenitor_pubkey: AgentPubKey;
-};
 
 export async function getDnaProperties(
   cell: CallableCell

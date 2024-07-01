@@ -5,6 +5,10 @@ import { decode } from "@msgpack/msgpack";
 const hAppPath = process.cwd() + "/../workdir/requests_and_offers.happ";
 const appSource = { appBundleSource: { path: hAppPath } };
 
+export type DnaProperties = {
+  progenitor_pubkey: string;
+};
+
 /**
  * Runs a scenario with two agents (players) using Tryorama.
  *
