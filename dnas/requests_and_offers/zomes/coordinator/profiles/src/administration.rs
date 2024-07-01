@@ -1,6 +1,7 @@
-use crate::{external_calls::check_if_agent_is_administrator, wasm_error};
+use crate::external_calls::check_if_agent_is_administrator;
 use hdk::prelude::*;
 use profiles_integrity::{LinkTypes, Profile};
+use utils::wasm_error;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateStatusInput {

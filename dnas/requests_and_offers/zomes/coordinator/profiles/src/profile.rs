@@ -1,7 +1,6 @@
 use hdk::prelude::*;
 use profiles_integrity::*;
-
-use crate::wasm_error;
+use utils::wasm_error;
 
 /// Creates a new profile for the agent.
 ///

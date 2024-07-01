@@ -24,6 +24,7 @@ dependencies = [
  "administration_integrity",
  "hdk",
  "serde",
+ "utils",
 ]
 
 [[package]]
@@ -1680,6 +1681,7 @@ dependencies = [
  "hdk",
  "profiles_integrity",
  "serde",
+ "utils",
 ]
 
 [[package]]
@@ -2455,6 +2457,14 @@ dependencies = [
  "form_urlencoded",
  "idna",
  "percent-encoding",
+]
+
+[[package]]
+name = "utils"
+version = "0.0.1"
+dependencies = [
+ "hdk",
+ "serde",
 ]
 
 [[package]]

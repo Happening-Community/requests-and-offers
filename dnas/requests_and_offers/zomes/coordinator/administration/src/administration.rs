@@ -1,6 +1,7 @@
-use crate::{external_calls::get_agent_profile_hash, wasm_error};
+use crate::external_calls::get_agent_profile_hash;
 use administration_integrity::*;
 use hdk::prelude::*;
+use utils::wasm_error;
 
 pub fn add_administrator(person_profile_hash: ActionHash) -> ExternResult<bool> {
     if check_if_person_is_administrator(person_profile_hash.clone())? {

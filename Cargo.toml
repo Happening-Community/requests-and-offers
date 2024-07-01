@@ -5,13 +5,16 @@ opt-level = "z"
 opt-level = "z"
 
 [workspace]
-members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
+members = [ "dnas/utils","dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
 
 [workspace.dependencies]
 hdi = "=0.3.6"
 hdk = "=0.2.6"
 image = "0.24" # 0.25 non stable yet
 serde = "=1.0.166"
+
+[workspace.dependencies.utils]
+path = "dnas/utils"
 
 [workspace.dependencies.administration]
 path = "dnas/requests_and_offers/zomes/coordinator/administration"

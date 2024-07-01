@@ -1,5 +1,5 @@
-use crate::wasm_error;
 use hdk::prelude::*;
+use utils::wasm_error;
 
 pub fn check_if_agent_is_administrator(agent_pubkey: AgentPubKey) -> ExternResult<bool> {
     let zome_call_response = call(

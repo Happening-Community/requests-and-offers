@@ -1,5 +1,5 @@
-use crate::wasm_error;
 use hdk::prelude::*;
+use utils::wasm_error;
 
 pub fn get_agent_profile_hash(agent_pubkey: AgentPubKey) -> ExternResult<Option<ActionHash>> {
     let zome_call_response = call(
