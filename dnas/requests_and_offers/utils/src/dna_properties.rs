@@ -1,6 +1,5 @@
 use crate::wasm_error;
 use hdk::prelude::*;
-use holo_hash::error::HoloHashError;
 
 #[derive(Serialize, Deserialize, SerializedBytes, Debug, Clone)]
 pub struct DnaProperties {
@@ -19,12 +18,13 @@ impl DnaProperties {
     pub fn get_progenitor_pubkey() -> ExternResult<AgentPubKey> {
         let progegenitor_pubkey_string = DnaProperties::get()?.progenitor_pubkey;
 
-        let progenitor_pubkey = AgentPubKey::try_from(progegenitor_pubkey_string.clone()).or(
-            Err(wasm_error(&format!(
-                "Error while deserializing the progenitor public key: {}",
-                progegenitor_pubkey_string
-            ))),
-        )?;
+        let progenitor_pubkey =
+            AgentPubKey::try_from(progegenitor_pubkey_string.clone()).map_err(|err| {
+                wasm_error(&format!(
+                    "Error while deserializing the progenitor pubkey: {}",
+                    err
+                ))
+            })?;
 
         Ok(progenitor_pubkey)
     }

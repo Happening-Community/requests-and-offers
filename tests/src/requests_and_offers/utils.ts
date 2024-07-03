@@ -23,9 +23,14 @@ export async function runScenarioWithTwoAgents(
       appSource,
       appSource,
     ]);
+
     await scenario.shareAllAgents();
 
+    console.log("Running scenario with Alice and Bob");
+
     await callback(scenario, alice, bob);
+
+    scenario.cleanUp();
   });
 }
 

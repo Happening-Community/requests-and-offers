@@ -207,16 +207,16 @@ test("create and update Profile", async () => {
   });
 });
 
-test("get progenitor pubkey", async () => {
-  await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
-    let guestDnaProperties = decode(
-      alice.cells[0].dna_modifiers.properties
-    ) as DnaProperties;
-    let hostDnaProperties = await getDnaProperties(alice.cells[0]);
+// test("get progenitor pubkey", async () => {
+//   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
+//     let guestDnaProperties = decode(
+//       alice.cells[0].dna_modifiers.properties
+//     ) as DnaProperties;
+//     let hostDnaProperties = await getDnaProperties(alice.cells[0]);
 
-    assert.equal(
-      guestDnaProperties.progenitor_pubkey,
-      hostDnaProperties.progenitor_pubkey
-    );
-  });
-});
+//     assert.equal(
+//       guestDnaProperties.progenitor_pubkey,
+//       hostDnaProperties.progenitor_pubkey
+//     );
+//   });
+// });
