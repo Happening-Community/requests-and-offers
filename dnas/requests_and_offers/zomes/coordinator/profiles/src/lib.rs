@@ -4,7 +4,7 @@ pub mod profile;
 
 use hdk::prelude::*;
 use profiles_integrity::*;
-use utils::progenitor::DnaProperties;
+use utils::dna_properties::DnaProperties;
 
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
