@@ -45,14 +45,55 @@ export function decodeRecords(records: Record[]): unknown[] {
 }
 
 /**
+ * Represents the type of a WebAssembly error.
+ */
+enum WasmErrorType {
+  PointerMap = "PointerMap",
+  Deserialize = "Deserialize",
+  Serialize = "Serialize",
+  ErrorWhileError = "ErrorWhileError",
+  Memory = "Memory",
+  Guest = "Guest",
+  Host = "Host",
+  HostShortCircuit = "HostShortCircuit",
+  Compile = "Compile",
+  CallError = "CallError",
+  UninitializedSerializedModuleCache = "UninitializedSerializedModuleCache",
+  Unknown = "Unknown",
+}
+
+/**
+ * Represents a WebAssembly error.
+ *
+ * @property {WasmErrorType} type - The type of the WebAssembly error.
+ * @property {string} message - The error message.
+ */
+type WasmError = {
+  type: WasmErrorType;
+  message: string;
+};
+
+/**
  * Extracts a WebAssembly error message encapsulated within a "Guest(...)" string pattern.
  *
  * @param {string} message - The error message string from which to extract the WebAssembly error.
- * @returns {string|null} The extracted error message if found, otherwise null.
+ * @returns {WasmError} The extracted WebAssembly error containing its type and message.
  */
-export function extractWasmErrorMessage(message: string): string | null {
-  const regex = /Guest\("(.+)"\)/;
-  const match = message.match(regex);
+export function extractWasmErrorMessage(message: string): WasmError {
+  const messageRegex = /Guest\("(.+)"\)/;
+  const matchedMessage = message.match(messageRegex);
+  console.log("message : ", matchedMessage);
 
-  return match ? match[1] : null;
+  const wasmErrorTypeRegex = /type: (.+),/; // Todo: fix the regex
+  const matchedWasmErrorType = message.match(wasmErrorTypeRegex);
+  console.log("wasmErrorType : ", matchedWasmErrorType);
+
+  const wasmError: WasmError = {
+    type: matchedWasmErrorType
+      ? (matchedWasmErrorType[1] as WasmErrorType)
+      : WasmErrorType.Unknown,
+    message: matchedMessage ? matchedMessage[1] : "Unknown error",
+  };
+
+  return wasmError;
 }

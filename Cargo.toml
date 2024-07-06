@@ -32,5 +32,5 @@ path = "dnas/requests_and_offers/zomes/coordinator/profiles"
 [workspace.dependencies.profiles_integrity]
 path = "dnas/requests_and_offers/zomes/integrity/profiles"
 
-[workspace.dependencies.ping]
-path = "dnas/requests_and_offers/zomes/coordinator/ping"
+[workspace.dependencies.misc]
+path = "dnas/requests_and_offers/zomes/coordinator/misc"

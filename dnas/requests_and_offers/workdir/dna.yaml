@@ -24,15 +24,15 @@ coordinator:
       dependencies:
         - name: profiles_integrity
       dylib: ~
-    - name: ping
-      hash: ~
-      bundled: "../../../target/wasm32-unknown-unknown/release/ping.wasm"
-      dependencies: []
-      dylib: ~
     - name: administration
       hash: ~
       bundled: "../../../target/wasm32-unknown-unknown/release/administration.wasm"
       dependencies:
         - name: administration_integrity
         - name: profiles_integrity
+      dylib: ~
+    - name: misc
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/misc.wasm"
+      dependencies: []
       dylib: ~
