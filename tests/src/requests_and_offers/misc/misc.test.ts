@@ -1,12 +1,15 @@
 import { assert, expect, test } from "vitest";
 import { Base64 } from "js-base64";
-
 import { AppOptions, runScenario } from "@holochain/tryorama";
 import { decode } from "@msgpack/msgpack";
 
 type DnaProperties = {
   progenitor_pubkey: string;
 };
+
+function decodeDnaProperties(buffer: Uint8Array): DnaProperties {
+  return decode(buffer) as DnaProperties;
+}
 
 const HARDCODED_PROGENITOR_PUBKEY =
   "uhCAkVNjcdnXfoExk87X1hKArKH43bZnAidlsSgqBqeGvFpOPiUCT";
@@ -57,11 +60,9 @@ test.only("install hApp with progenitor property", async () => {
       appOptions
     );
 
-    const installedProgenitorKey = (
-      decode(
-        installedHapp.cell_info["requests_and_offers"][0].provisioned
-          .dna_modifiers.properties
-      ) as DnaProperties
+    const installedProgenitorKey = decodeDnaProperties(
+      installedHapp.cell_info["requests_and_offers"][0].provisioned
+        .dna_modifiers.properties
     ).progenitor_pubkey;
 
     assert.notEqual(installedProgenitorKey, HARDCODED_PROGENITOR_PUBKEY);
