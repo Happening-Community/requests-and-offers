@@ -1,7 +1,15 @@
-import { Player, Scenario, runScenario } from "@holochain/tryorama";
-import { Record } from "@holochain/client";
+import fs from "fs";
+import {
+  CallableCell,
+  Conductor,
+  Player,
+  Scenario,
+  runScenario,
+} from "@holochain/tryorama";
+import { AgentPubKey, AppInfo, Record } from "@holochain/client";
 import { decode } from "@msgpack/msgpack";
 import { Base64 } from "js-base64";
+import { decompressSync } from "fflate";
 
 const hAppPath = process.cwd() + "/../workdir/requests_and_offers.happ";
 const appSource = { appBundleSource: { path: hAppPath } };
@@ -10,15 +18,9 @@ export type DnaProperties = {
   progenitor_pubkey: string;
 };
 
-/**
- * Runs a scenario with two agents (players) using Tryorama.
- *
- * @param {Function} callback - A callback function that takes three arguments: the scenario instance and two player instances representing Alice and Bob.
- * @returns {Promise<void>} A promise that resolves when the scenario completes.
- */
 export async function runScenarioWithTwoAgents(
   callback: (scenario: Scenario, alice: Player, bob: Player) => Promise<void>
-) {
+): Promise<void> {
   await runScenario(async (scenario) => {
     const [alice, bob] = await scenario.addPlayersWithApps([
       appSource,
@@ -37,9 +39,8 @@ export async function runScenarioWithTwoAgents(
 
 /**
  * Decodes a set of records using MessagePack.
- *
- * @param {Record[]} records - An array of Record objects from which to extract and decode the entry data.
- * @returns {unknown[]} An array of decoded entries.
+ * @param records The records to decode.
+ * @returns {unknown[]} The decoded records.
  */
 export function decodeRecords(records: Record[]): unknown[] {
   return records.map((r) => decode((r.entry as any).Present.entry));
@@ -65,9 +66,6 @@ enum WasmErrorType {
 
 /**
  * Represents a WebAssembly error.
- *
- * @property {WasmErrorType} type - The type of the WebAssembly error.
- * @property {string} message - The error message.
  */
 type WasmError = {
   type: WasmErrorType;
@@ -76,9 +74,8 @@ type WasmError = {
 
 /**
  * Extracts a WebAssembly error message encapsulated within a "Guest(...)" string pattern.
- *
- * @param {string} message - The error message string from which to extract the WebAssembly error.
- * @returns {WasmError} The extracted WebAssembly error containing its type and message.
+ * @param message - The error message.
+ * @returns {WasmError} The WebAssembly error.
  */
 export function extractWasmErrorMessage(message: string): WasmError {
   const messageRegex = /Guest\("(.+)"\)/;
@@ -99,10 +96,52 @@ export function extractWasmErrorMessage(message: string): WasmError {
   return wasmError;
 }
 
+/**
+ * Converts a base64 encoded hash to a Uint8Array.
+ * @param hash - The base64 encoded hash
+ * @returns {Uint8Array} The decoded hash
+ */
 export function deserializeHash(hash: string): Uint8Array {
   return Base64.toUint8Array(hash.slice(1));
 }
 
 export function serializeHash(hash: Uint8Array) {
   return `u${Base64.fromUint8Array(hash, true)}`;
+}
+
+export async function installApp(
+  scenario: Scenario
+): Promise<[Conductor, AppInfo]> {
+  const conductor = await scenario.addConductor();
+  const adminWs = conductor.adminWs();
+  const agentPubKey = await adminWs.generateAgentPubKey();
+
+  const appBundleBytes = fs.readFileSync(hAppPath);
+  const appBundle = decode(
+    decompressSync(new Uint8Array(appBundleBytes))
+  ) as any;
+
+  appBundle.manifest.roles.find(
+    (r) => r.name === "requests_and_offers"
+  )!.dna.modifiers = {
+    network_seed: "throwaway",
+    properties: {
+      progenitor_pubkey: serializeHash(agentPubKey),
+    },
+  };
+
+  const agent = await conductor.installApp(
+    { bundle: appBundle },
+    {
+      installedAppId: "requests_and_offers",
+      agentPubKey: agentPubKey,
+    }
+  );
+  const response = await conductor
+    .adminWs()
+    .enableApp({ installed_app_id: "requests_and_offers" });
+
+  console.log("response : ", response);
+
+  return [conductor, agent];
 }
