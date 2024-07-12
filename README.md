@@ -48,14 +48,19 @@ pnpm test:ui
 This one run the sveltekit ui tests.
 
 ```bash
-pnpm test:ping
+pnpm test:misc
 ```
-This one run the ping test.
+This one run the miscellaneous tests.
 
 ```bash
 pnpm test:profiles
 ```
 This one run the profiles zome test.
+
+```bash
+pnpm test:administration
+```
+This one run the administration zome test.
 
 ## Packaging
 
