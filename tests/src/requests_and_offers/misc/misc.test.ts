@@ -1,7 +1,17 @@
+import fs from "fs";
 import { assert, expect, test } from "vitest";
 import { Base64 } from "js-base64";
-import { AppOptions, runScenario } from "@holochain/tryorama";
+import {
+  AgentApp,
+  AppOptions,
+  Conductor,
+  Scenario,
+  runScenario,
+} from "@holochain/tryorama";
 import { decode } from "@msgpack/msgpack";
+import { decompressSync } from "fflate";
+import { AppBundle } from "@holochain/client";
+import { deserializeHash, serializeHash } from "../utils";
 
 type DnaProperties = {
   progenitor_pubkey: string;
@@ -20,7 +30,7 @@ const dnaPath =
 const appSource = { appBundleSource: { path: hAppPath } };
 
 test("ping", async () => {
-  await runScenario(async (scenario) => {
+  await runScenario(async (scenario: Scenario) => {
     const [alice] = await scenario.addPlayersWithApps([appSource]);
 
     const record: String = await alice.cells[0].callZome({
@@ -31,38 +41,40 @@ test("ping", async () => {
   });
 });
 
-function serializeHash(hash: Uint8Array) {
-  return `u${Base64.fromUint8Array(hash, true)}`;
-}
-
 test.only("install hApp with progenitor property", async () => {
   await runScenario(async (scenario) => {
     const aliceConductor = await scenario.addConductor();
     const adminWs = aliceConductor.adminWs();
     const agent_key = await adminWs.generateAgentPubKey();
 
-    const dnaHash = await adminWs.registerDna({
-      path: dnaPath,
-      modifiers: {
-        properties: {
-          progenitor_pubkey: serializeHash(agent_key),
-        },
-      },
-    });
+    const appBundleBytes = fs.readFileSync(hAppPath);
+    const appBundle = decode(
+      decompressSync(new Uint8Array(appBundleBytes))
+    ) as any;
 
-    const appOptions: AppOptions = {
-      agentPubKey: agent_key,
-      installedAppId: "requests_and_offers",
+    appBundle.manifest.roles.find(
+      (r) => r.name === "requests_and_offers"
+    )!.dna.modifiers = {
+      network_seed: "throwaway",
+      properties: {
+        progenitor_pubkey: serializeHash(agent_key),
+      },
     };
 
-    const installedHapp = await aliceConductor.installApp(
-      { path: hAppPath },
-      appOptions
+    const alice = await aliceConductor.installApp(
+      { bundle: appBundle },
+      {
+        installedAppId: "requests_and_offers",
+        agentPubKey: agent_key,
+      }
     );
+    await aliceConductor
+      .adminWs()
+      .enableApp({ installed_app_id: "requests_and_offers" });
 
     const installedProgenitorKey = decodeDnaProperties(
-      installedHapp.cell_info["requests_and_offers"][0].provisioned
-        .dna_modifiers.properties
+      alice.cell_info["requests_and_offers"][0].provisioned.dna_modifiers
+        .properties
     ).progenitor_pubkey;
 
     assert.notEqual(installedProgenitorKey, HARDCODED_PROGENITOR_PUBKEY);

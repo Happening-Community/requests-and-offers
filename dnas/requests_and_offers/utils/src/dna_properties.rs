@@ -10,6 +10,8 @@ pub struct DnaProperties {
 
 impl DnaProperties {
     /// Fetches DNA properties from the network, including the progenitor's public key.
+    ///
+    /// Returns an error if there was an issue deserializing the DNA properties.
     pub fn get() -> ExternResult<Self> {
         dna_info()?
             .modifiers

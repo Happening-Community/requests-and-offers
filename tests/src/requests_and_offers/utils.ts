@@ -1,6 +1,7 @@
 import { Player, Scenario, runScenario } from "@holochain/tryorama";
 import { Record } from "@holochain/client";
 import { decode } from "@msgpack/msgpack";
+import { Base64 } from "js-base64";
 
 const hAppPath = process.cwd() + "/../workdir/requests_and_offers.happ";
 const appSource = { appBundleSource: { path: hAppPath } };
@@ -96,4 +97,12 @@ export function extractWasmErrorMessage(message: string): WasmError {
   };
 
   return wasmError;
+}
+
+export function deserializeHash(hash: string): Uint8Array {
+  return Base64.toUint8Array(hash.slice(1));
+}
+
+export function serializeHash(hash: Uint8Array) {
+  return `u${Base64.fromUint8Array(hash, true)}`;
 }
