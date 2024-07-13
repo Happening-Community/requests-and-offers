@@ -11,7 +11,7 @@ pub struct DnaProperties {
 impl DnaProperties {
     /// Fetches DNA properties from the network, including the progenitor's public key.
     ///
-    /// Returns an error if there was an issue deserializing the DNA properties.
+    /// Returns an error if there was an issue deserializing the DNA properties. The DNA manifest properties deserialized must match the `DnaProperties` struct.
     pub fn get() -> ExternResult<Self> {
         dna_info()?
             .modifiers
@@ -21,6 +21,8 @@ impl DnaProperties {
     }
 
     /// Extracts and deserializes the progenitor's public key.
+    ///
+    /// Returns an error if there was an issue deserializing the public key.
     pub fn get_progenitor_pubkey() -> ExternResult<AgentPubKey> {
         let progenitor_pubkey_string = DnaProperties::get()?.progenitor_pubkey;
 
