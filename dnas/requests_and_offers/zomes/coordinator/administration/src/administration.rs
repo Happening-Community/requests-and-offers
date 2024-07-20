@@ -47,7 +47,7 @@ pub fn check_if_person_is_administrator(person_profile_hash: ActionHash) -> Exte
 pub fn check_if_agent_is_administrator(agent_pubkey: AgentPubKey) -> ExternResult<bool> {
     let agent_person_profile_hash = get_agent_profile_hash(agent_pubkey)?;
     if let Some(agent_person_profile_hash) = agent_person_profile_hash {
-        return Ok(check_if_person_is_administrator(agent_person_profile_hash)?);
+        return check_if_person_is_administrator(agent_person_profile_hash);
     }
 
     Ok(false)
