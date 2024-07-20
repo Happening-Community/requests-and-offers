@@ -20,8 +20,7 @@
 
   onMount(async () => {
     await hc.connectClient();
-    const record = await hc.callZome('ping', 'ping', null);
-
+    const record = await hc.callZome('misc', 'ping', null);
     await getMyProfile();
 
     if ($myProfile) {
