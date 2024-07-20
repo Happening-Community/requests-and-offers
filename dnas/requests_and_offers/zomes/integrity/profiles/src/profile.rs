@@ -85,7 +85,7 @@ pub fn validate_profile(profile: Profile) -> ExternResult<ValidateCallbackResult
             Status::Pending,
             Status::Accepted,
             Status::Rejected,
-            Status::Suspended(Timestamp::now()),
+            Status::Suspended(None),
         )));
     };
 

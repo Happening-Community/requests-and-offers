@@ -8,7 +8,7 @@ pub enum Status {
     Pending,
     Accepted,
     Rejected,
-    Suspended(Timestamp),
+    Suspended(Option<Timestamp>),
 }
 
 impl Display for Status {
@@ -31,9 +31,10 @@ impl FromStr for Status {
             ["pending"] => Ok(Self::Pending),
             ["accepted"] => Ok(Self::Accepted),
             ["rejected"] => Ok(Self::Rejected),
-            ["suspended", timestamp] => Ok(Self::Suspended(
+            ["suspended"] => Ok(Self::Suspended(None)),
+            ["suspended", timestamp] => Ok(Self::Suspended(Some(
                 Timestamp::from_str(timestamp).expect("Invalid timestamp"),
-            )),
+            ))),
             _ => Err(()),
         }
     }
@@ -43,8 +44,9 @@ impl Status {
     pub fn get_suspension_time_remaining(&self) -> Option<Duration> {
         let now = Timestamp::now();
         match self {
-            Status::Suspended(time) => Some(
-                time.checked_difference_signed(&now)
+            Status::Suspended(time) if time.is_some() => Some(
+                time.unwrap()
+                    .checked_difference_signed(&now)
                     .unwrap_or(Duration::zero()),
             ),
             _ => None,
@@ -55,10 +57,12 @@ impl Status {
         let now = Timestamp::now().as_micros();
         let time = time.num_microseconds().unwrap_or(0);
         match self {
-            Self::Suspended(timestamp) => {
-                *self = Status::Suspended(Timestamp::from_micros(timestamp.as_micros() + time))
+            Status::Suspended(timestamp) if timestamp.is_some() => {
+                *self = Status::Suspended(Some(Timestamp::from_micros(
+                    timestamp.unwrap().as_micros() + time,
+                )))
             }
-            _ => *self = Status::Suspended(Timestamp::from_micros(now + time)),
+            _ => *self = Status::Suspended(Some(Timestamp::from_micros(now + time))),
         }
     }
 
