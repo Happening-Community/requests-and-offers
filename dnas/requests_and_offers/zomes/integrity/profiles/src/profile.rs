@@ -1,3 +1,4 @@
+use crate::status::*;
 use std::{fmt::Display, str::FromStr};
 
 use hdi::prelude::*;
@@ -57,36 +58,6 @@ impl FromStr for AllowedTypes {
     }
 }
 
-#[derive(Clone, Debug)]
-enum Status {
-    Pending,
-    Accepted,
-    Rejected,
-}
-
-impl Display for Status {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Pending => write!(f, "pending"),
-            Self::Accepted => write!(f, "accepted"),
-            Self::Rejected => write!(f, "rejected"),
-        }
-    }
-}
-
-impl FromStr for Status {
-    type Err = ();
-
-    fn from_str(status: &str) -> Result<Self, Self::Err> {
-        match status {
-            "pending" => Ok(Self::Pending),
-            "accepted" => Ok(Self::Accepted),
-            "rejected" => Ok(Self::Rejected),
-            _ => Err(()),
-        }
-    }
-}
-
 fn is_image(bytes: SerializedBytes) -> bool {
     let data = bytes.bytes().to_vec();
     if let Ok(_img) = ImageReader::new(std::io::Cursor::new(data))
@@ -110,10 +81,11 @@ pub fn validate_profile(profile: Profile) -> ExternResult<ValidateCallbackResult
 
     if Status::from_str(profile.status.unwrap().as_str()).is_err() {
         return Ok(ValidateCallbackResult::Invalid(format!(
-            "Status must be '{}' or '{}' or '{}.",
+            "Status must be '{}', '{}', '{}' or '{}.",
             Status::Pending,
             Status::Accepted,
             Status::Rejected,
+            Status::Suspended(Timestamp::now()),
         )));
     };
 

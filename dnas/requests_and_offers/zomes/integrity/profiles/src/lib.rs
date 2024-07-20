@@ -1,4 +1,5 @@
 pub mod profile;
+pub mod status;
 use hdi::prelude::*;
 pub use profile::*;
 

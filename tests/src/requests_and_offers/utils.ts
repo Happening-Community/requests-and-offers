@@ -6,7 +6,13 @@ import {
   Scenario,
   runScenario,
 } from "@holochain/tryorama";
-import { AgentPubKey, AppInfo, Record } from "@holochain/client";
+import {
+  AgentPubKey,
+  AppInfo,
+  AppManifest,
+  AppRoleManifest,
+  Record,
+} from "@holochain/client";
 import { decode } from "@msgpack/msgpack";
 import { Base64 } from "js-base64";
 import { decompressSync } from "fflate";
@@ -122,7 +128,7 @@ export async function installApp(
   ) as any;
 
   appBundle.manifest.roles.find(
-    (r) => r.name === "requests_and_offers"
+    (r: AppRoleManifest) => r.name === "requests_and_offers"
   )!.dna.modifiers = {
     network_seed: "throwaway",
     properties: {

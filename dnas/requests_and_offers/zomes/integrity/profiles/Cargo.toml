@@ -12,4 +12,6 @@ hdi = { workspace = true }
 
 serde = { workspace = true }
 
+chrono = { workspace = true }
+
 image = { workspace = true }
