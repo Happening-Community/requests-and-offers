@@ -8,12 +8,11 @@ crate-type = ["cdylib", "rlib"]
 name = "profiles_integrity"
 
 [dependencies]
-# chrono = "0.4"
 
 hdi = { workspace = true }
 
 serde = { workspace = true }
 
-# chrono = { workspace = true }
+chrono = { workspace = true }
 
 image = { workspace = true }

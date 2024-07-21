@@ -16,7 +16,8 @@ hdi = "=0.3.6"
 hdk = "=0.2.6"
 image = "0.24"     # 0.25 non stable for rustc 1.75
 serde = "=1.0.166"
-# chrono = "=0.4"
+chrono = "0.3"     # 0.4 compatibility error with wasm_bindgen  
+
 
 [workspace.dependencies.utils]
 path = "dnas/requests_and_offers/utils"

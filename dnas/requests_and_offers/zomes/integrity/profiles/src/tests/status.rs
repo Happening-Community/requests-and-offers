@@ -2,7 +2,7 @@
 mod tests {
     use std::str::FromStr;
 
-    // use chrono::Duration;
+    use chrono::Duration;
     use hdi::prelude::Timestamp;
 
     use crate::status::*;
@@ -35,20 +35,22 @@ mod tests {
         assert_eq!(status, Status::Pending);
     }
 
-    // #[test]
-    // fn test_7_days_suspension() {
-    //     let mut status = Status::from("Accepted");
-    //     status.suspend(Some(Duration::days(7)));
+    #[test]
+    fn test_7_days_suspension() {
+        let mut status = Status::from("Accepted");
+        status.suspend(Some(Duration::days(7)));
 
-    //     let remaining_time = status.get_suspension_time_remaining();
-    //     assert!(remaining_time.unwrap().num_days() >= Duration::days(6).num_days());
-    // }
-    // #[test]
-    // fn test_indefinitely_suspended() {
-    //     let mut status = Status::from("Accepted");
-    //     status.suspend(None);
-    //     assert_eq!(status, Status::Suspended(None));
-    // }
+        let remaining_time = status.get_suspension_time_remaining();
+        assert!(remaining_time.unwrap().num_days() >= Duration::days(6).num_days());
+    }
+
+    #[test]
+    fn test_indefinitely_suspended() {
+        let mut status = Status::from("Accepted");
+        status.suspend(None);
+        assert_eq!(status, Status::Suspended(None));
+    }
+
     #[test]
     fn test_unsuspend() {
         let mut status = Status::from("Accepted");
@@ -56,13 +58,13 @@ mod tests {
         assert_eq!(status, Status::Accepted);
     }
 
-    // #[test]
-    // fn test_unsuspend_if_time_passed() {
-    //     let timestamp_1_hours_ago = Timestamp::from_micros(
-    //         Timestamp::now().as_micros() - Duration::hours(1).num_microseconds().unwrap_or(0),
-    //     );
-    //     let mut status = Status::from(format!("suspended {}", timestamp_1_hours_ago).as_str());
-    //     status.unsuspend_if_time_passed();
-    //     assert_eq!(status, Status::Accepted);
-    // }
+    #[test]
+    fn test_unsuspend_if_time_passed() {
+        let timestamp_1_hours_ago = Timestamp::from_micros(
+            Timestamp::now().as_micros() - Duration::hours(1).num_microseconds().unwrap_or(0),
+        );
+        let mut status = Status::from(format!("suspended {}", timestamp_1_hours_ago).as_str());
+        status.unsuspend_if_time_passed();
+        assert_eq!(status, Status::Accepted);
+    }
 }
