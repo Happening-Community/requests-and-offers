@@ -67,3 +67,23 @@ export async function updatePersonStatus(
     payload: { original_profile_hash, previous_profile_hash, status },
   });
 }
+
+export async function suspend_person_temporarily(
+  cell: CallableCell,
+  original_profile_hash: ActionHash,
+  previous_profile_hash: ActionHash,
+  duration_in_days: number
+) {}
+
+export async function suspended_person_indefinitely(
+  cell: CallableCell,
+  original_profile_hash: ActionHash,
+  previous_profile_hash: ActionHash
+) {}
+
+export async function unsuspend_person_if_time_passed(
+  cell: CallableCell,
+  original_profile_hash: ActionHash,
+  previous_profile_hash: ActionHash,
+  duration_in_days: number
+) {}

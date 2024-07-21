@@ -10,27 +10,23 @@ import {
   getAllProfiles,
   getAgentProfile,
   getLatestProfile,
-  sampleProfile,
+  sampleProfileInput,
   updateProfile,
-  getDnaProperties,
+  ProfileInput,
 } from "./common.js";
-import {
-  DnaProperties,
-  decodeRecords,
-  runScenarioWithTwoAgents,
-} from "../utils";
-import { decode } from "@msgpack/msgpack";
+import { decodeRecords, runScenarioWithTwoAgents } from "../utils";
 
 test("create and read Profile", async () => {
   await runScenarioWithTwoAgents(
     async (_scenario: Scenario, alice: Player, bob: Player) => {
-      let sample: Profile;
+      let sample: ProfileInput;
       let record: Record;
       let records: Record[];
 
       // Alice creates a Profile
-      sample = sampleProfile({ name: "Alice" });
+      sample = sampleProfileInput({ name: "Alice" });
       record = await createProfile(alice.cells[0], sample);
+      const aliceCreatedProfile = decodeRecords([record])[0] as Profile;
       assert.ok(record);
 
       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
@@ -49,18 +45,19 @@ test("create and read Profile", async () => {
         bob.cells[0],
         record.signed_action.hashed.hash
       );
-      const createdProfile = decodeRecords([createdRecord])[0] as Profile;
-      assert.containsAllKeys(sample, createdProfile);
+      const bobCreatedProfile = decodeRecords([createdRecord])[0] as Profile;
+
+      assert.containsAllKeys(aliceCreatedProfile, bobCreatedProfile);
 
       // Verify that the profile status is "pending"
-      assert.equal(createdProfile.status, "pending");
+      assert.equal(bobCreatedProfile.status, "pending");
 
       // Bob try to get his profile before he create it
       let links = await getAgentProfile(bob.cells[0], bob.agentPubKey);
       assert.equal(links.length, 0);
 
       // Bob create an Profile with erroneous UserType
-      let errSample: Profile = sampleProfile({
+      let errSample: Profile = sampleProfileInput({
         user_type: "Non Authorized",
       });
 
@@ -69,7 +66,7 @@ test("create and read Profile", async () => {
       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
       // Bob create an Profile with erroneous profile Picture
-      errSample = sampleProfile({
+      errSample = sampleProfileInput({
         name: "Bob",
         picture: new Uint8Array(20),
       });
@@ -84,7 +81,7 @@ test("create and read Profile", async () => {
       // TODO: test with local image
       // const buffer = await fs.readFile(TestProfilePicture);
 
-      sample = sampleProfile({
+      sample = sampleProfileInput({
         name: "Bob",
         picture: new Uint8Array(buffer),
       });
@@ -102,10 +99,10 @@ test("create and read Profile", async () => {
 
 test("create and update Profile", async () => {
   await runScenarioWithTwoAgents(async (_scenario, alice, bob) => {
-    let sample: Profile;
+    let sample: ProfileInput;
     let record: Record;
 
-    sample = sampleProfile({ name: "Alice" });
+    sample = sampleProfileInput({ name: "Alice" });
     record = await createProfile(alice.cells[0], sample);
     const originalProfileHash = record.signed_action.hashed.hash;
 
@@ -115,7 +112,7 @@ test("create and update Profile", async () => {
     const buffer = await response.arrayBuffer();
 
     // Alice update her profile with a valid profile picture
-    sample = sampleProfile({
+    sample = sampleProfileInput({
       name: "Alicia",
       nickname: "Alicialia",
       picture: new Uint8Array(buffer),
@@ -140,7 +137,7 @@ test("create and update Profile", async () => {
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Alice update her profile with an invalid profile picture
-    sample = sampleProfile({
+    sample = sampleProfileInput({
       name: "Alicia",
       nickname: "Alicialia",
       picture: new Uint8Array(20),
@@ -157,7 +154,7 @@ test("create and update Profile", async () => {
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Bob try to update Alice's profile
-    sample = sampleProfile({
+    sample = sampleProfileInput({
       name: "Bob",
     });
     await expect(
@@ -171,22 +168,8 @@ test("create and update Profile", async () => {
 
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
-    // Alice try to change the status of her profile
-    sample = sampleProfile({
-      status: "accepted",
-    });
-
-    await expect(
-      updateProfile(
-        alice.cells[0],
-        originalProfileHash,
-        latestProfileRecord.signed_action.hashed.hash,
-        sample
-      )
-    ).rejects.toThrow();
-
     // Alice update here profile again
-    sample = sampleProfile({
+    sample = sampleProfileInput({
       name: "Alice",
       nickname: "Alicia",
     });

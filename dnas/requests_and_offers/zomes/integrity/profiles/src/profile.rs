@@ -4,6 +4,8 @@ use std::{fmt::Display, str::FromStr};
 use hdi::prelude::*;
 use image::io::Reader as ImageReader;
 
+use crate::status::SuspendedStatus::*;
+
 /// Represents a profile Entry with various attributes such as name, nickname, bio, etc.
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
@@ -29,7 +31,7 @@ pub struct Profile {
     /// The location where the user is based.
     pub location: String,
     /// The status of the user, either 'pending', 'accepted' or 'rejected'.
-    pub status: Option<String>,
+    pub status: String,
 }
 
 enum AllowedTypes {
@@ -79,13 +81,13 @@ pub fn validate_profile(profile: Profile) -> ExternResult<ValidateCallbackResult
         )));
     };
 
-    if Status::from_str(profile.status.unwrap().as_str()).is_err() {
+    if Status::from_str(profile.status.as_str()).is_err() {
         return Ok(ValidateCallbackResult::Invalid(format!(
             "Status must be '{}', '{}', '{}' or '{}.",
             Status::Pending,
             Status::Accepted,
             Status::Rejected,
-            Status::Suspended(None),
+            Status::Suspended(Indefinitely),
         )));
     };
 

@@ -7,7 +7,7 @@ import {
   createProfile,
   getAgentProfile,
   getLatestProfile,
-  sampleProfile,
+  sampleProfileInput,
 } from "../profiles/common";
 import {
   checkIfAgentIsAdministrator,
@@ -22,9 +22,9 @@ test("create a Person and make it administrator", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: Profile;
     let record: Record;
-    sample = sampleProfile({ name: "Alice" });
+    sample = sampleProfileInput({ name: "Alice" });
     record = await createProfile(alice.cells[0], sample);
-    sample = sampleProfile({ name: "Bob" });
+    sample = sampleProfileInput({ name: "Bob" });
     record = await createProfile(bob.cells[0], sample);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     let aliceProfileLink = (
@@ -89,9 +89,9 @@ test("update Person status", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: Profile;
     let record: Record;
-    sample = sampleProfile({ name: "Alice" });
+    sample = sampleProfileInput({ name: "Alice" });
     record = await createProfile(alice.cells[0], sample);
-    sample = sampleProfile({ name: "Bob" });
+    sample = sampleProfileInput({ name: "Bob" });
     record = await createProfile(bob.cells[0], sample);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     let aliceProfileLink = (
@@ -131,4 +131,6 @@ test("update Person status", async () => {
       )
     ).rejects.toThrow();
   });
+
+  // Alice supends Bob
 });

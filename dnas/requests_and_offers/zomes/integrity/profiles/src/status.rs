@@ -1,7 +1,34 @@
+use core::panic;
 use std::{fmt::Display, str::FromStr};
 
 use chrono::Duration;
 use hdi::prelude::Timestamp;
+
+use SuspendedStatus::*;
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub enum SuspendedStatus<Timestamp> {
+    Temporarily(Timestamp),
+    #[default]
+    Indefinitely,
+}
+
+impl SuspendedStatus<Timestamp> {
+    pub fn is_temporarily(&self) -> bool {
+        matches!(self, Self::Temporarily(_))
+    }
+
+    pub fn is_indefinitely(&self) -> bool {
+        matches!(self, Self::Indefinitely)
+    }
+
+    pub fn unwrap(&self) -> Timestamp {
+        match self {
+            Self::Temporarily(time) => *time,
+            Self::Indefinitely => panic!("Indefinitely suspended"),
+        }
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Default)]
 pub enum Status {
@@ -9,7 +36,7 @@ pub enum Status {
     Pending,
     Accepted,
     Rejected,
-    Suspended(Option<Timestamp>),
+    Suspended(SuspendedStatus<Timestamp>),
 }
 
 impl Display for Status {
@@ -18,8 +45,10 @@ impl Display for Status {
             Self::Pending => write!(f, "pending"),
             Self::Accepted => write!(f, "accepted"),
             Self::Rejected => write!(f, "rejected"),
-            Self::Suspended(Some(time)) => write!(f, "suspended until {}", time),
-            Self::Suspended(None) => write!(f, "suspended indefinitely"),
+            Self::Suspended(Temporarily(time)) => {
+                write!(f, "suspended until {}", time)
+            }
+            Self::Suspended(Indefinitely) => write!(f, "suspended indefinitely"),
         }
     }
 }
@@ -49,8 +78,8 @@ impl FromStr for Status {
             ["pending"] => Ok(Self::Pending),
             ["accepted"] => Ok(Self::Accepted),
             ["rejected"] => Ok(Self::Rejected),
-            ["suspended"] => Ok(Self::Suspended(None)),
-            ["suspended", timestamp] => Ok(Self::Suspended(Some(
+            ["suspended"] => Ok(Self::Suspended(Indefinitely)),
+            ["suspended", timestamp] => Ok(Self::Suspended(Temporarily(
                 Timestamp::from_str(timestamp).or(Err(StatusParsingError::InvalidTimestamp))?,
             ))),
             _ => Err(StatusParsingError::InvalidStatus),
@@ -68,7 +97,7 @@ impl Status {
     pub fn get_suspension_time_remaining(&self) -> Option<Duration> {
         let now = Timestamp::now();
         match self {
-            Status::Suspended(time) if time.is_some() => Some(Duration::microseconds(
+            Status::Suspended(time) if time.is_temporarily() => Some(Duration::microseconds(
                 time.unwrap()
                     .checked_difference_signed(&now)
                     .unwrap_or_default()
@@ -82,18 +111,18 @@ impl Status {
         let now = Timestamp::now().as_micros();
 
         if time.is_none() {
-            *self = Status::Suspended(None);
+            *self = Status::Suspended(Indefinitely);
             return;
         }
 
         let time = time.unwrap().num_microseconds().unwrap_or(0);
         match self {
-            Status::Suspended(timestamp) if timestamp.is_some() => {
-                *self = Status::Suspended(Some(Timestamp::from_micros(
+            Status::Suspended(timestamp) if timestamp.is_temporarily() => {
+                *self = Status::Suspended(Temporarily(Timestamp::from_micros(
                     timestamp.unwrap().as_micros() + time,
                 )))
             }
-            _ => *self = Status::Suspended(Some(Timestamp::from_micros(now + time))),
+            _ => *self = Status::Suspended(Temporarily(Timestamp::from_micros(now + time))),
         }
     }
 

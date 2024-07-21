@@ -5,6 +5,7 @@ mod tests {
     use chrono::Duration;
     use hdi::prelude::Timestamp;
 
+    use crate::status::SuspendedStatus::*;
     use crate::status::*;
 
     #[test]
@@ -12,10 +13,12 @@ mod tests {
         assert_eq!(Status::from("pending"), Status::Pending);
         assert_eq!(Status::from("accepted"), Status::Accepted);
         assert_eq!(Status::from("rejected"), Status::Rejected);
-        assert_eq!(Status::from("suspended"), Status::Suspended(None));
+        assert_eq!(Status::from("suspended"), Status::Suspended(Indefinitely));
         assert_eq!(
             Status::from("suspended 2022-01-01T00:00:00Z"),
-            Status::Suspended(Some(Timestamp::from_str("2022-01-01T00:00:00Z").unwrap()))
+            Status::Suspended(Temporarily(
+                Timestamp::from_str("2022-01-01T00:00:00Z").unwrap()
+            ))
         );
     }
 
@@ -48,7 +51,7 @@ mod tests {
     fn test_indefinitely_suspended() {
         let mut status = Status::from("Accepted");
         status.suspend(None);
-        assert_eq!(status, Status::Suspended(None));
+        assert_eq!(status, Status::Suspended(Indefinitely));
     }
 
     #[test]
