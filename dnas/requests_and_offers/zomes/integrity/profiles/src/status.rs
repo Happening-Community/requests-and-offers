@@ -1,6 +1,6 @@
 use std::{fmt::Display, str::FromStr};
 
-use chrono::Duration;
+// use chrono::Duration;
 use hdi::prelude::Timestamp;
 
 #[derive(Clone, Debug, PartialEq, Default)]
@@ -65,45 +65,45 @@ impl From<&str> for Status {
 }
 
 impl Status {
-    pub fn get_suspension_time_remaining(&self) -> Option<Duration> {
-        let now = Timestamp::now();
-        match self {
-            Status::Suspended(time) if time.is_some() => Some(
-                time.unwrap()
-                    .checked_difference_signed(&now)
-                    .unwrap_or(Duration::zero()),
-            ),
-            _ => None,
-        }
-    }
+    // pub fn get_suspension_time_remaining(&self) -> Option<Duration> {
+    //     let now = Timestamp::now();
+    //     match self {
+    //         Status::Suspended(time) if time.is_some() => Some(
+    //             time.unwrap()
+    //                 .checked_difference_signed(&now)
+    //                 .unwrap_or(Duration::zero()),
+    //         ),
+    //         _ => None,
+    //     }
+    // }
 
-    pub fn suspend(&mut self, time: Option<Duration>) {
-        let now = Timestamp::now().as_micros();
+    // pub fn suspend(&mut self, time: Option<Duration>) {
+    //     let now = Timestamp::now().as_micros();
 
-        if time.is_none() {
-            *self = Status::Suspended(None);
-            return;
-        }
+    //     if time.is_none() {
+    //         *self = Status::Suspended(None);
+    //         return;
+    //     }
 
-        let time = time.unwrap().num_microseconds().unwrap_or(0);
-        match self {
-            Status::Suspended(timestamp) if timestamp.is_some() => {
-                *self = Status::Suspended(Some(Timestamp::from_micros(
-                    timestamp.unwrap().as_micros() + time,
-                )))
-            }
-            _ => *self = Status::Suspended(Some(Timestamp::from_micros(now + time))),
-        }
-    }
+    //     let time = time.unwrap().num_microseconds().unwrap_or(0);
+    //     match self {
+    //         Status::Suspended(timestamp) if timestamp.is_some() => {
+    //             *self = Status::Suspended(Some(Timestamp::from_micros(
+    //                 timestamp.unwrap().as_micros() + time,
+    //             )))
+    //         }
+    //         _ => *self = Status::Suspended(Some(Timestamp::from_micros(now + time))),
+    //     }
+    // }
 
-    pub fn unsuspend_if_time_passed(&mut self) {
-        if let Some(time) = self.get_suspension_time_remaining() {
-            println!("Time remaining: {:?}", time);
-            if time.is_zero() || time < Duration::hours(1) {
-                *self = Status::Accepted
-            }
-        }
-    }
+    // pub fn unsuspend_if_time_passed(&mut self) {
+    //     if let Some(time) = self.get_suspension_time_remaining() {
+    //         println!("Time remaining: {:?}", time);
+    //         if time.is_zero() || time < Duration::hours(1) {
+    //             *self = Status::Accepted
+    //         }
+    //     }
+    // }
 
     pub fn unsuspend(&mut self) {
         *self = Status::Accepted
