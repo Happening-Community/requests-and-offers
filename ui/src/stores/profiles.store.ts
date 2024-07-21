@@ -51,7 +51,7 @@ export async function createProfile(profile: Profile): Promise<Record> {
 export async function getLatestProfileRecord(
   original_profile_hash: ActionHash
 ): Promise<Record | null> {
-  const record = await hc.callZome('profiles', 'get_latest_profile', original_profile_hash);
+  const record = await hc.callZome('profiles', 'get_latest_profile_record', original_profile_hash);
 
   return record;
 }

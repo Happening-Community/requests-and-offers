@@ -73,7 +73,7 @@ export async function getLatestProfile(
 ): Promise<Record | null> {
   return cell.callZome({
     zome_name: "profiles",
-    fn_name: "get_latest_profile",
+    fn_name: "get_latest_profile_record",
     payload: original_profile_hash,
   });
 }

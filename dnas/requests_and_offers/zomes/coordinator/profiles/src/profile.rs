@@ -89,7 +89,9 @@ pub fn create_profile(profile_input: ProfileInput) -> ExternResult<Record> {
 /// This function returns a result containing an option of the latest profile record on success,
 /// or an error if there was an issue retrieving the profile.
 #[hdk_extern]
-pub fn get_latest_profile(original_profile_hash: ActionHash) -> ExternResult<Option<Record>> {
+pub fn get_latest_profile_record(
+    original_profile_hash: ActionHash,
+) -> ExternResult<Option<Record>> {
     let links = get_links(
         original_profile_hash.clone(),
         LinkTypes::ProfileUpdates,
@@ -107,6 +109,28 @@ pub fn get_latest_profile(original_profile_hash: ActionHash) -> ExternResult<Opt
         None => original_profile_hash.clone(),
     };
     get(latest_profile_hash, GetOptions::default())
+}
+
+/// Retrieves the latest profile for the given original profile hash.
+///
+/// ## Arguments
+///
+/// * `original_profile_hash` - The action hash of the original profile.
+///
+/// ## Returns
+///
+/// This function returns a result containing the latest profile on success,
+/// or an error if there was an issue retrieving the profile.
+#[hdk_extern]
+pub fn get_latest_profile(original_profile_hash: ActionHash) -> ExternResult<Profile> {
+    let latest_profile_record = get_latest_profile_record(original_profile_hash)?;
+    let latest_profile = latest_profile_record
+        .ok_or(wasm_error("Could not find the latest Profile"))?
+        .entry()
+        .to_app_option()
+        .map_err(|_| wasm_error("wasm_error while deserializing the latest Profile"))?
+        .ok_or(wasm_error("Could not find the latest Profile"))?;
+    Ok(latest_profile)
 }
 
 /// Gets the agent profile links for the specified agent public key.
@@ -192,15 +216,10 @@ pub struct UpdateProfileInput {
 #[hdk_extern]
 pub fn update_profile(input: UpdateProfileInput) -> ExternResult<Record> {
     let mut profile = Profile::from(input.updated_profile.clone());
-    let last_record = must_get_valid_record(input.previous_profile_hash.clone())?;
     let original_record = must_get_valid_record(input.original_profile_hash.clone())?;
 
-    let record_option: Option<Profile> = last_record
-        .entry()
-        .to_app_option()
-        .map_err(|_| wasm_error("wasm_error while deserializing the previous Profile"))?;
-
-    profile.status = record_option.unwrap().status;
+    let record_option = get_latest_profile(input.original_profile_hash.clone())?;
+    profile.status = record_option.status;
 
     let author = original_record.action().author().clone();
     if author != agent_info()?.agent_initial_pubkey {

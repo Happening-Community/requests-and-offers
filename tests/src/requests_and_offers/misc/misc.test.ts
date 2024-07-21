@@ -37,7 +37,7 @@ test("install hApp with progenitor property", async () => {
         .properties
     ).progenitor_pubkey;
 
-    console.log(alice.cell_info["requests_and_offers"][0]);
+    // console.log(alice.cell_info["requests_and_offers"][0]);
 
     assert.notEqual(installedProgenitorKey, HARDCODED_PROGENITOR_PUBKEY);
   });

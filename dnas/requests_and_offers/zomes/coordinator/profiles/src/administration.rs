@@ -2,17 +2,19 @@ use std::str::FromStr;
 
 use chrono::Duration;
 use hdk::prelude::*;
-use profiles_integrity::{status::Status, status::SuspendedStatus::*, LinkTypes, Profile};
+use profiles_integrity::{status::Status, status::SuspendedStatus::*, LinkTypes};
 use utils::wasm_error;
 
-use crate::external_calls::check_if_agent_is_administrator;
+use crate::{external_calls::check_if_agent_is_administrator, profile::get_latest_profile};
 
+/// Represents the base input for updating a profile.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateInput {
     pub original_profile_hash: ActionHash,
     pub previous_profile_hash: ActionHash,
 }
 
+/// Represents the input for updating the status of a profile.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateStatusInput {
     pub original_profile_hash: ActionHash,
@@ -20,6 +22,17 @@ pub struct UpdateStatusInput {
     pub status: String,
 }
 
+/// Updates the status of a person.
+///
+/// ## Arguments
+///
+/// * `input` - The input structure containing the hashes of the original and previous profiles,
+///             and the updated status.
+///
+/// ## Returns
+///
+/// This function returns a result containing the updated profile record on success,
+/// or an error if there was an issue updating the status, such as unauthorized access or invalid input
 #[hdk_extern]
 pub fn update_person_status(input: UpdateStatusInput) -> ExternResult<Record> {
     if !check_if_agent_is_administrator(agent_info()?.agent_initial_pubkey)? {
@@ -28,16 +41,7 @@ pub fn update_person_status(input: UpdateStatusInput) -> ExternResult<Record> {
         ));
     }
 
-    let record = match get(input.previous_profile_hash.clone(), GetOptions::default())? {
-        Some(record) => record,
-        None => return Err(wasm_error("Could not find the previous Profile")),
-    };
-
-    let mut profile: Profile = record
-        .entry()
-        .to_app_option()
-        .map_err(|_| wasm_error("wasm_error while deserializing the previous Profile"))?
-        .ok_or(wasm_error("Could not find the previous Profile"))?;
+    let mut profile = get_latest_profile(input.original_profile_hash.clone())?;
     profile.status = input.status;
 
     let profile_hash = update_entry(input.previous_profile_hash.clone(), profile)?;
@@ -54,6 +58,7 @@ pub fn update_person_status(input: UpdateStatusInput) -> ExternResult<Record> {
     Ok(record)
 }
 
+/// The input structure for suspending a person temporarily.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SuspendPersonInput {
     pub original_profile_hash: ActionHash,
@@ -61,6 +66,20 @@ pub struct SuspendPersonInput {
     pub duration_in_days: i64,
 }
 
+/// Suspends a person temporarily.
+///
+/// This function will update the status of a person to `Suspended(Temporarily(Timestamp))` where the `Timestamp` is the current time plus the given duration.
+///
+/// If the person is already suspended, this function will add the duration to the current suspension time.
+///
+/// ## Arguments
+///
+/// * `input` - The input structure containing the hashes of the original and previous profiles, and the duration in days to suspend the person for.
+///
+/// ## Returns
+///
+/// This function returns a result containing a boolean indicating whether the function was successful or not.
+/// If the function was successful, the boolean will be `true`. If the function was not successful, the boolean will be `false`.
 #[hdk_extern]
 pub fn suspend_person_temporarily(input: SuspendPersonInput) -> ExternResult<bool> {
     let duration = Duration::days(input.duration_in_days);
@@ -76,6 +95,18 @@ pub fn suspend_person_temporarily(input: SuspendPersonInput) -> ExternResult<boo
     .is_ok())
 }
 
+/// Suspends a person indefinitely.
+///
+/// This function will update the status of a person to `Suspended::Indefinitely`.
+///
+/// ## Arguments
+///
+/// * `input` - The input structure containing the hashes of the original and previous profiles.
+///
+/// ## Returns
+///
+/// This function returns a result containing a boolean indicating whether the function was successful or not.
+/// If the function was successful, the boolean will be `true`. If the function was not successful, the boolean will be `false`.
 #[hdk_extern]
 pub fn suspended_person_indefinitely(input: UpdateInput) -> ExternResult<bool> {
     let update_status_input = UpdateStatusInput {
@@ -89,16 +120,7 @@ pub fn suspended_person_indefinitely(input: UpdateInput) -> ExternResult<bool> {
 
 #[hdk_extern]
 pub fn unsuspend_person_if_time_passed(input: UpdateInput) -> ExternResult<bool> {
-    let record = match get(input.previous_profile_hash.clone(), GetOptions::default())? {
-        Some(record) => record,
-        None => return Err(wasm_error("Could not find the previous Profile")),
-    };
-
-    let profile: Profile = record
-        .entry()
-        .to_app_option()
-        .map_err(|_| wasm_error("wasm_error while deserializing the previous Profile"))?
-        .ok_or(wasm_error("Could not find the previous Profile"))?;
+    let profile = get_latest_profile(input.original_profile_hash.clone())?;
 
     let mut status =
         Status::from_str(profile.status.as_str()).map_err(|err| wasm_error(&err.to_string()))?;
