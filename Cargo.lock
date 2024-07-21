@@ -1711,6 +1711,7 @@ dependencies = [
 name = "profiles"
 version = "0.0.1"
 dependencies = [
+ "chrono 0.3.0",
  "hdk",
  "profiles_integrity",
  "serde",

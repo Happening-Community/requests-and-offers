@@ -10,8 +10,10 @@ name = "profiles"
 [dependencies]
 hdk = { workspace = true }
 
+profiles_integrity = { workspace = true }
+
 serde = { workspace = true }
 
-profiles_integrity = { workspace = true } 
+chrono = { workspace = true }
 
 utils = { workspace = true }

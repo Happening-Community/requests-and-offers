@@ -1,7 +1,11 @@
-use crate::external_calls::check_if_agent_is_administrator;
+use std::str::FromStr;
+
+use chrono::Duration;
 use hdk::prelude::*;
-use profiles_integrity::{LinkTypes, Profile};
+use profiles_integrity::{status::Status, LinkTypes, Profile};
 use utils::wasm_error;
+
+use crate::external_calls::check_if_agent_is_administrator;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateStatusInput {
@@ -23,23 +27,70 @@ pub fn update_person_status(input: UpdateStatusInput) -> ExternResult<Record> {
         None => return Err(wasm_error("Could not find the previous Profile")),
     };
 
-    let mut updated_profile: Profile = record
+    let mut profile: Profile = record
         .entry()
         .to_app_option()
         .map_err(|_| wasm_error("wasm_error while deserializing the previous Profile"))?
         .ok_or(wasm_error("Could not find the previous Profile"))?;
-    updated_profile.status = Some(input.status);
+    profile.status = Some(input.status);
 
-    let updated_profile_hash = update_entry(input.previous_profile_hash.clone(), updated_profile)?;
+    let profile_hash = update_entry(input.previous_profile_hash.clone(), profile)?;
     create_link(
         input.original_profile_hash.clone(),
-        updated_profile_hash.clone(),
+        profile_hash.clone(),
         LinkTypes::ProfileUpdates,
         (),
     )?;
 
-    let record = get(updated_profile_hash.clone(), GetOptions::default())?
+    let record = get(profile_hash.clone(), GetOptions::default())?
         .ok_or(wasm_error("Could not find the newly updated Profile"))?;
 
     Ok(record)
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SuspendPersonInput {
+    pub original_profile_hash: ActionHash,
+    pub previous_profile_hash: ActionHash,
+    pub duration_in_days: i64,
+}
+
+#[hdk_extern]
+pub fn suspend_person_temporarily(input: SuspendPersonInput) -> ExternResult<bool> {
+    let duration = Duration::days(input.duration_in_days);
+    let suspended_status = Status::Suspended(Some(Timestamp::from_micros(
+        duration.num_microseconds().unwrap_or(0),
+    )));
+
+    Ok(update_person_status(UpdateStatusInput {
+        original_profile_hash: input.original_profile_hash,
+        previous_profile_hash: input.previous_profile_hash,
+        status: suspended_status.to_string(),
+    })
+    .is_ok())
+}
+
+#[hdk_extern]
+pub fn suspended_person_indefinitely(input: UpdateStatusInput) -> ExternResult<bool> {
+    let mut input = input;
+    input.status = "suspended".to_string();
+
+    Ok(update_person_status(input).is_ok())
+}
+
+#[hdk_extern]
+pub fn unsuspend_person_if_time_passed(input: UpdateStatusInput) -> ExternResult<bool> {
+    let mut input = input;
+    let mut status =
+        Status::from_str(input.status.as_str()).map_err(|err| wasm_error(&err.to_string()))?;
+
+    if let Status::Suspended(Some(_)) = status {
+        status.unsuspend_if_time_passed();
+        input.status = status.to_string();
+        update_person_status(input)?;
+
+        return Ok(true);
+    }
+
+    Ok(false)
 }
