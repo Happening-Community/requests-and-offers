@@ -32,6 +32,7 @@ pub fn validate_agent_joining(
 }
 
 /// Validates the provided `Op` to ensure the entry and link types adhere to the defined constraints.
+#[allow(clippy::collapsible_match, clippy::single_match)]
 #[hdk_extern]
 pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
     if let FlatOp::StoreEntry(store_entry) = op.flattened::<EntryTypes, LinkTypes>()? {
@@ -87,9 +88,9 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     }
                 };
                 let original_app_entry = match EntryTypes::deserialize_from_type(
-                    app_entry_type.zome_index.clone(),
-                    app_entry_type.entry_index.clone(),
-                    &entry,
+                    *app_entry_type.zome_index,
+                    app_entry_type.entry_index,
+                    entry,
                 )? {
                     Some(app_entry) => app_entry,
                     None => {

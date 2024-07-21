@@ -10,6 +10,7 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
     Ok(InitCallbackResult::Pass)
 }
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "type")]
 pub enum Signal {
@@ -70,11 +71,9 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
                     }
                     Ok(())
                 }
-                _ => {
-                    return Err(wasm_error!(WasmErrorInner::Guest(
-                        "Create Link should exist".to_string()
-                    )));
-                }
+                _ => Err(wasm_error!(WasmErrorInner::Guest(
+                    "Create Link should exist".to_string()
+                ))),
             }
         }
         Action::Create(_create) => {
@@ -133,9 +132,5 @@ fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTy
             return Ok(None);
         }
     };
-    Ok(EntryTypes::deserialize_from_type(
-        zome_index.clone(),
-        entry_index.clone(),
-        entry,
-    )?)
+    EntryTypes::deserialize_from_type(*zome_index, *entry_index, entry)
 }
