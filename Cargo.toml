@@ -5,16 +5,16 @@ opt-level = "z"
 opt-level = "z"
 
 [workspace]
-members = [ 
+members = [
   "dnas/requests_and_offers/utils",
-	"dnas/*/zomes/coordinator/*",
-  "dnas/*/zomes/integrity/*"
- ]
+  "dnas/*/zomes/coordinator/*",
+  "dnas/*/zomes/integrity/*",
+]
 
 [workspace.dependencies]
 hdi = "=0.3.6"
 hdk = "=0.2.6"
-image = "0.24" # 0.25 non stable yet
+image = "0.24"     # 0.25 non stable for rustc 1.75
 serde = "=1.0.166"
 chrono = "=0.4"
 
