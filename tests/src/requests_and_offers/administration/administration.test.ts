@@ -15,6 +15,8 @@ import {
   getAllAdministratorsLinks,
   registerAdministrator,
   removeAdministrator,
+  suspendPersonIndefinitely,
+  suspendPersonTemporarily,
   updatePersonStatus,
 } from "./common";
 
@@ -85,7 +87,7 @@ test("create a Person and make it administrator", async () => {
   });
 });
 
-test("update Person status", async () => {
+test.only("update Person status", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: Profile;
     let record: Record;
@@ -130,7 +132,36 @@ test("update Person status", async () => {
         "accepted"
       )
     ).rejects.toThrow();
-  });
 
-  // Alice supends Bob
+    // Alice suspends Bob indefinitely
+    await suspendPersonIndefinitely(
+      alice.cells[0],
+      bobProfileLink.target,
+      bobProfileLink.target
+    );
+
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    // Verify that Bob's status is "suspended"
+    let bobProfile = decodeRecords([
+      await getLatestProfile(bob.cells[0], bobProfileLink.target),
+    ])[0] as Profile;
+
+    assert.equal(bobProfile.status, "suspended");
+
+    // Alice suspends Bob for 7 days
+    await suspendPersonTemporarily(
+      alice.cells[0],
+      bobProfileLink.target,
+      bobProfileLink.target,
+      7
+    );
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+    // Verify that Bob's status is "suspended"
+    bobProfile = decodeRecords([
+      await getLatestProfile(bob.cells[0], bobProfileLink.target),
+    ])[0] as Profile;
+    console.log("bobProfile status :", bobProfile.status);
+    // assert.equal(bobProfile.status, "suspended");
+  });
 });

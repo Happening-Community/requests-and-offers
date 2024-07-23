@@ -1,5 +1,5 @@
 use core::panic;
-use std::{fmt::Display, str::FromStr};
+use std::{error::Error, fmt::Display, str::FromStr};
 
 use chrono::Duration;
 use hdi::prelude::Timestamp;
@@ -46,28 +46,26 @@ impl Display for Status {
             Self::Accepted => write!(f, "accepted"),
             Self::Rejected => write!(f, "rejected"),
             Self::Suspended(Temporarily(time)) => {
-                write!(f, "suspended until {}", time)
+                write!(f, "suspended {}", time)
             }
             Self::Suspended(Indefinitely) => write!(f, "suspended indefinitely"),
         }
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub enum StatusParsingError {
-    #[default]
     InvalidStatus,
     InvalidTimestamp,
 }
 
 impl Display for StatusParsingError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::InvalidStatus => write!(f, "Invalid status"),
-            Self::InvalidTimestamp => write!(f, "Invalid timestamp"),
-        }
+        write!(f, "{:?}", self)
     }
 }
+
+impl Error for StatusParsingError {}
 
 impl FromStr for Status {
     type Err = StatusParsingError;
@@ -116,6 +114,7 @@ impl Status {
         }
 
         let time = time.unwrap().num_microseconds().unwrap_or(0);
+
         match self {
             Status::Suspended(timestamp) if timestamp.is_temporarily() => {
                 *self = Status::Suspended(Temporarily(Timestamp::from_micros(

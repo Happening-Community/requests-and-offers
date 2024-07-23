@@ -83,11 +83,10 @@ pub fn validate_profile(profile: Profile) -> ExternResult<ValidateCallbackResult
 
     if Status::from_str(profile.status.as_str()).is_err() {
         return Ok(ValidateCallbackResult::Invalid(format!(
-            "Status must be '{}', '{}', '{}' or '{}.",
+            "Status must be '{}', '{}', '{}' or suspended (with a timestamp or not).",
             Status::Pending,
             Status::Accepted,
             Status::Rejected,
-            Status::Suspended(Indefinitely),
         )));
     };
 

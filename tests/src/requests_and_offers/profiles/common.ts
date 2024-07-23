@@ -4,20 +4,12 @@ import { DnaProperties } from "../utils";
 
 export type UserType = "advocate" | "creator" | "Non Authorized";
 
-export type BasicStatus = "pending" | "accepted" | "rejected";
-
-export interface SuspendedStatus {
-  status: "suspended";
-  timestamp?: string;
-}
-
-export function suspendedStatusToString(status: SuspendedStatus): string {
-  return status.timestamp
-    ? `${status.status} ${status.timestamp}`
-    : status.status;
-}
-
-export type Status = BasicStatus | SuspendedStatus;
+export type Status =
+  | "pending"
+  | "accepted"
+  | "rejected"
+  | "suspended"
+  | `suspended ${string}`;
 
 export type ProfileInput = {
   name: string;

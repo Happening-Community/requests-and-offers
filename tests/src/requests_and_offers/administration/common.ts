@@ -68,22 +68,51 @@ export async function updatePersonStatus(
   });
 }
 
-export async function suspend_person_temporarily(
+export async function suspendPersonTemporarily(
   cell: CallableCell,
   original_profile_hash: ActionHash,
   previous_profile_hash: ActionHash,
   duration_in_days: number
-) {}
+): Promise<boolean> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "suspend_person_temporarily",
+    payload: {
+      original_profile_hash,
+      previous_profile_hash,
+      duration_in_days,
+    },
+  });
+}
 
-export async function suspended_person_indefinitely(
+export async function suspendPersonIndefinitely(
   cell: CallableCell,
   original_profile_hash: ActionHash,
   previous_profile_hash: ActionHash
-) {}
+): Promise<boolean> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "suspend_person_indefinitely",
+    payload: {
+      original_profile_hash,
+      previous_profile_hash,
+    },
+  });
+}
 
-export async function unsuspend_person_if_time_passed(
+export async function unsuspendPersonIfTimePassed(
   cell: CallableCell,
   original_profile_hash: ActionHash,
   previous_profile_hash: ActionHash,
   duration_in_days: number
-) {}
+): Promise<boolean> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "unsuspend_person_if_time_passed",
+    payload: {
+      original_profile_hash,
+      previous_profile_hash,
+      duration_in_days,
+    },
+  });
+}

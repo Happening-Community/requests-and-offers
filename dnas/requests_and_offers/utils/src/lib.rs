@@ -3,7 +3,7 @@ use hdk::prelude::*;
 /// Module for handling DNA properties related to the progenitor in a Holochain application.
 pub mod dna_properties;
 
-use dna_properties::DnaProperties;
+pub use dna_properties::DnaProperties;
 
 /// Generates a custom error message for use within WebAssembly (Wasm) environments.
 ///

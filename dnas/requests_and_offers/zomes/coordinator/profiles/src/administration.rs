@@ -83,9 +83,10 @@ pub struct SuspendPersonInput {
 #[hdk_extern]
 pub fn suspend_person_temporarily(input: SuspendPersonInput) -> ExternResult<bool> {
     let duration = Duration::days(input.duration_in_days);
-    let suspended_status = Status::Suspended(Temporarily(Timestamp::from_micros(
-        duration.num_microseconds().unwrap_or(0),
-    )));
+    let mut suspended_status = Status::default();
+    suspended_status.suspend(Some(duration));
+
+    warn!("Status: {:?}", suspended_status.to_string());
 
     Ok(update_person_status(UpdateStatusInput {
         original_profile_hash: input.original_profile_hash,
@@ -108,7 +109,7 @@ pub fn suspend_person_temporarily(input: SuspendPersonInput) -> ExternResult<boo
 /// This function returns a result containing a boolean indicating whether the function was successful or not.
 /// If the function was successful, the boolean will be `true`. If the function was not successful, the boolean will be `false`.
 #[hdk_extern]
-pub fn suspended_person_indefinitely(input: UpdateInput) -> ExternResult<bool> {
+pub fn suspend_person_indefinitely(input: UpdateInput) -> ExternResult<bool> {
     let update_status_input = UpdateStatusInput {
         original_profile_hash: input.original_profile_hash,
         previous_profile_hash: input.previous_profile_hash,
