@@ -17,6 +17,8 @@ import {
   removeAdministrator,
   suspendPersonIndefinitely,
   suspendPersonTemporarily,
+  unsuspendPerson,
+  unsuspendPersonIfTimePassed,
   updatePersonStatus,
 } from "./common";
 
@@ -143,11 +145,28 @@ test.only("update Person status", async () => {
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Verify that Bob's status is "suspended"
-    let bobProfile = decodeRecords([
-      await getLatestProfile(bob.cells[0], bobProfileLink.target),
-    ])[0] as Profile;
+    let bobProfileRecord = await getLatestProfile(
+      bob.cells[0],
+      bobProfileLink.target
+    );
+    let bobProfile = decodeRecords([bobProfileRecord])[0] as Profile;
 
     assert.equal(bobProfile.status, "suspended");
+
+    // Alice unsuspends Bob
+    await unsuspendPerson(
+      alice.cells[0],
+      bobProfileLink.target,
+      bobProfileRecord.signed_action.hashed.hash
+    );
+
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    // Verify that Bob's status is "accepted"
+    bobProfile = decodeRecords([
+      await getLatestProfile(bob.cells[0], bobProfileLink.target),
+    ])[0] as Profile;
+    assert.equal(bobProfile.status, "accepted");
 
     // Alice suspends Bob for 7 days
     await suspendPersonTemporarily(
@@ -157,11 +176,27 @@ test.only("update Person status", async () => {
       7
     );
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-    // Verify that Bob's status is "suspended"
-    bobProfile = decodeRecords([
-      await getLatestProfile(bob.cells[0], bobProfileLink.target),
-    ])[0] as Profile;
-    console.log("bobProfile status :", bobProfile.status);
-    // assert.equal(bobProfile.status, "suspended");
+    // Verify that Bob's status is suspended for 7 days
+    bobProfileRecord = await getLatestProfile(
+      bob.cells[0],
+      bobProfileLink.target
+    );
+    bobProfile = decodeRecords([bobProfileRecord])[0] as Profile;
+    const suspensionTime = new Date(bobProfile.status.split(" ")[1]);
+    const now = new Date();
+    const diffInDays = Math.round(
+      (suspensionTime.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    assert.equal(diffInDays, 7);
+
+    // Alice try to unsuspends Bob with the unsuspendPersonIfTimePassed function
+    const isUnsuspended = await unsuspendPersonIfTimePassed(
+      alice.cells[0],
+      bobProfileLink.target,
+      bobProfileRecord.signed_action.hashed.hash
+    );
+
+    assert.equal(isUnsuspended, false);
   });
 });

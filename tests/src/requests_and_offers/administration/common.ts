@@ -100,11 +100,25 @@ export async function suspendPersonIndefinitely(
   });
 }
 
+export async function unsuspendPerson(
+  cell: CallableCell,
+  original_profile_hash: ActionHash,
+  previous_profile_hash: ActionHash
+): Promise<boolean> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "unsuspend_person",
+    payload: {
+      original_profile_hash,
+      previous_profile_hash,
+    },
+  });
+}
+
 export async function unsuspendPersonIfTimePassed(
   cell: CallableCell,
   original_profile_hash: ActionHash,
-  previous_profile_hash: ActionHash,
-  duration_in_days: number
+  previous_profile_hash: ActionHash
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "profiles",
@@ -112,7 +126,6 @@ export async function unsuspendPersonIfTimePassed(
     payload: {
       original_profile_hash,
       previous_profile_hash,
-      duration_in_days,
     },
   });
 }

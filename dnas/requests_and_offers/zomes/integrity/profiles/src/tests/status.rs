@@ -40,10 +40,13 @@ mod tests {
 
     #[test]
     fn test_7_days_suspension() {
+        let now = Timestamp::now();
         let mut status = Status::from("Accepted");
-        status.suspend(Some(Duration::days(7))).unwrap();
+        status
+            .suspend(Some((Duration::days(7), &Timestamp::now())))
+            .unwrap();
 
-        let remaining_time = status.get_suspension_time_remaining();
+        let remaining_time = status.get_suspension_time_remaining(&now);
         assert!(remaining_time.unwrap().num_days() >= Duration::days(6).num_days());
     }
 
@@ -63,11 +66,12 @@ mod tests {
 
     #[test]
     fn test_unsuspend_if_time_passed() {
+        let now = Timestamp::now();
         let timestamp_1_hours_ago = Timestamp::from_micros(
             Timestamp::now().as_micros() - Duration::hours(1).num_microseconds().unwrap_or(0),
         );
         let mut status = Status::from(format!("suspended {}", timestamp_1_hours_ago).as_str());
-        status.unsuspend_if_time_passed();
+        status.unsuspend_if_time_passed(&now);
         assert_eq!(status, Status::Accepted);
     }
 }

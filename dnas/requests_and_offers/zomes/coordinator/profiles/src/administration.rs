@@ -84,10 +84,8 @@ pub struct SuspendPersonInput {
 pub fn suspend_person_temporarily(input: SuspendPersonInput) -> ExternResult<bool> {
     let duration = Duration::days(input.duration_in_days);
     let mut suspended_status = Status::default();
-    let now = sys_time()?;
+    let now = &sys_time()?;
     suspended_status.suspend(Some((duration, now)))?;
-
-    warn!("Status: {:?}", suspended_status);
 
     let update_status_input = UpdateStatusInput {
         original_profile_hash: input.original_profile_hash,
@@ -129,7 +127,12 @@ pub fn unsuspend_person_if_time_passed(input: UpdateInput) -> ExternResult<bool>
         Status::from_str(profile.status.as_str()).map_err(|err| wasm_error(&err.to_string()))?;
 
     if let Status::Suspended(Temporarily(_)) = status {
-        status.unsuspend_if_time_passed();
+        let now = sys_time()?;
+        let is_unsuspended = status.unsuspend_if_time_passed(&now);
+
+        if !is_unsuspended {
+            return Ok(false);
+        }
 
         let update_status_input = UpdateStatusInput {
             original_profile_hash: input.original_profile_hash,
@@ -143,4 +146,15 @@ pub fn unsuspend_person_if_time_passed(input: UpdateInput) -> ExternResult<bool>
     }
 
     Ok(false)
+}
+
+#[hdk_extern]
+pub fn unsuspend_person(input: UpdateInput) -> ExternResult<bool> {
+    let update_status_input = UpdateStatusInput {
+        original_profile_hash: input.original_profile_hash,
+        previous_profile_hash: input.previous_profile_hash,
+        status: "accepted".to_string(),
+    };
+
+    Ok(update_person_status(update_status_input).is_ok())
 }
