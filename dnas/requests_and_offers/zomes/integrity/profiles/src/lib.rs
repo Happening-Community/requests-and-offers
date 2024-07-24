@@ -18,6 +18,7 @@ pub enum LinkTypes {
     AllProfiles,
     MyProfile,
     AllAdministrators,
+    AcceptedProfiles,
 }
 
 #[hdk_extern]

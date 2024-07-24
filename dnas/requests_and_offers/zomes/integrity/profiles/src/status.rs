@@ -1,9 +1,10 @@
 use core::panic;
-use std::{error::Error, fmt::Display, str::FromStr};
+use std::{error::Error, fmt::Display, str::FromStr, time::SystemTime};
 
-use chrono::Duration;
-use hdi::prelude::Timestamp;
+use chrono::{Duration, UTC};
+use hdi::prelude::*;
 
+use utils::wasm_error;
 use SuspendedStatus::*;
 
 #[derive(Clone, Debug, PartialEq, Default)]
@@ -105,36 +106,37 @@ impl Status {
         }
     }
 
-    pub fn suspend(&mut self, time: Option<Duration>) {
-        let now = Timestamp::now().as_micros();
-
+    pub fn suspend(&mut self, time: Option<(Duration, Timestamp)>) -> ExternResult<()> {
         if time.is_none() {
             *self = Status::Suspended(Indefinitely);
-            return;
+            return Ok(());
         }
 
-        let time = time.unwrap().num_microseconds().unwrap_or(0);
+        let duration = time.unwrap().0.num_microseconds().unwrap_or(0);
+        let now = time.unwrap().1.as_micros();
 
         match self {
             Status::Suspended(timestamp) if timestamp.is_temporarily() => {
                 *self = Status::Suspended(Temporarily(Timestamp::from_micros(
-                    timestamp.unwrap().as_micros() + time,
+                    timestamp.unwrap().as_micros() + duration,
                 )))
             }
-            _ => *self = Status::Suspended(Temporarily(Timestamp::from_micros(now + time))),
+            _ => *self = Status::Suspended(Temporarily(Timestamp::from_micros(now + duration))),
         }
+
+        Ok(())
+    }
+
+    pub fn unsuspend(&mut self) {
+        *self = Status::Accepted
     }
 
     pub fn unsuspend_if_time_passed(&mut self) {
         if let Some(time) = self.get_suspension_time_remaining() {
             println!("Time remaining: {:?}", time);
             if time.is_zero() || time < Duration::hours(1) {
-                *self = Status::Accepted
+                self.unsuspend();
             }
         }
-    }
-
-    pub fn unsuspend(&mut self) {
-        *self = Status::Accepted
     }
 }

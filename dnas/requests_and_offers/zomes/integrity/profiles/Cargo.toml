@@ -16,3 +16,5 @@ serde = { workspace = true }
 chrono = { workspace = true }
 
 image = { workspace = true }
+
+utils = { workspace = true }

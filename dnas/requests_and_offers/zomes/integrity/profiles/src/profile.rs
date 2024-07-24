@@ -4,8 +4,6 @@ use std::{fmt::Display, str::FromStr};
 use hdi::prelude::*;
 use image::io::Reader as ImageReader;
 
-use crate::status::SuspendedStatus::*;
-
 /// Represents a profile Entry with various attributes such as name, nickname, bio, etc.
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]

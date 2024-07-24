@@ -84,16 +84,18 @@ pub struct SuspendPersonInput {
 pub fn suspend_person_temporarily(input: SuspendPersonInput) -> ExternResult<bool> {
     let duration = Duration::days(input.duration_in_days);
     let mut suspended_status = Status::default();
-    suspended_status.suspend(Some(duration));
+    let now = sys_time()?;
+    suspended_status.suspend(Some((duration, now)))?;
 
-    warn!("Status: {:?}", suspended_status.to_string());
+    warn!("Status: {:?}", suspended_status);
 
-    Ok(update_person_status(UpdateStatusInput {
+    let update_status_input = UpdateStatusInput {
         original_profile_hash: input.original_profile_hash,
         previous_profile_hash: input.previous_profile_hash,
         status: suspended_status.to_string(),
-    })
-    .is_ok())
+    };
+
+    Ok(update_person_status(update_status_input).is_ok())
 }
 
 /// Suspends a person indefinitely.

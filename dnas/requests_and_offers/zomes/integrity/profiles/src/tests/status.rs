@@ -41,7 +41,7 @@ mod tests {
     #[test]
     fn test_7_days_suspension() {
         let mut status = Status::from("Accepted");
-        status.suspend(Some(Duration::days(7)));
+        status.suspend(Some(Duration::days(7))).unwrap();
 
         let remaining_time = status.get_suspension_time_remaining();
         assert!(remaining_time.unwrap().num_days() >= Duration::days(6).num_days());
@@ -50,7 +50,7 @@ mod tests {
     #[test]
     fn test_indefinitely_suspended() {
         let mut status = Status::from("Accepted");
-        status.suspend(None);
+        status.suspend(None).unwrap();
         assert_eq!(status, Status::Suspended(Indefinitely));
     }
 
