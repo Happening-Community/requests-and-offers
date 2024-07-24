@@ -28,8 +28,6 @@
   let search = '';
   let isChanged = false;
 
-  $: console.log('isChanged :', isChanged);
-
   function formatTimezones(timezones: string[]): FormattedTimezone[] {
     return timezones.map((timezone) => {
       const offset = moment.tz(timezone).utcOffset();
@@ -85,12 +83,9 @@
 
   async function submitForm(event: SubmitEvent) {
     event.preventDefault();
-    console.log('event :', event);
 
     const data = new FormData(form);
     const picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
-
-    console.log(data.get('picture'));
 
     const profile: Profile = {
       name: data.get('name') as string,
@@ -111,7 +106,7 @@
 
       goto('/profile');
     } catch (error) {
-      console.log('error :', error);
+      console.error('error :', error);
     }
   }
 </script>

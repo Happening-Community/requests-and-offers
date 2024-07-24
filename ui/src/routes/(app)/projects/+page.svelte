@@ -17,7 +17,6 @@
       projects.set(mockedProjects);
     }
     isLoading = false;
-    console.log('projects :', $projects);
   });
 </script>
 

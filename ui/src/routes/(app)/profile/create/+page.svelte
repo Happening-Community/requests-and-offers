@@ -10,6 +10,7 @@
   } from '@stores/profiles.store.js';
   import { goto } from '$app/navigation';
   import { createMockedProfiles } from '@mocks';
+  import { onMount } from 'svelte';
 
   type FormattedTimezone = {
     name: string;
@@ -74,7 +75,7 @@
 
       goto('/profile');
     } catch (error) {
-      console.log('error :', error);
+      console.error('error :', error);
     }
   }
 
@@ -101,123 +102,121 @@
 
       goto('/profile');
     } catch (error) {
-      console.log('error :', error);
+      console.error('error :', error);
     }
   }
 
-  $: console.log($myProfile);
+  onMount(async () => {
+    if ($myProfile) {
+      goto('/profile');
+    }
+  });
 </script>
 
 <section class="flex w-4/5 flex-col gap-10 md:w-3/4 lg:w-1/2">
-  {#if $myProfile}
-    <p class="h2">Profile already created.</p>
-  {:else}
-    <h2 class="h2">Create Profile</h2>
-    <form
-      class="flex flex-col gap-4"
-      enctype="multipart/form-data"
-      on:submit|preventDefault={submitForm}
-      bind:this={form}
-    >
-      <p>*required fields</p>
-      <label class="label text-lg">
-        Name* :<input type="text" class="input" name="name" required />
-      </label>
+  <h2 class="h2">Create Profile</h2>
+  <form
+    class="flex flex-col gap-4"
+    enctype="multipart/form-data"
+    on:submit|preventDefault={submitForm}
+    bind:this={form}
+  >
+    <p>*required fields</p>
+    <label class="label text-lg">
+      Name* :<input type="text" class="input" name="name" required />
+    </label>
 
-      <label class="label text-lg">
-        Nickname* :
-        <input type="text" class="input" name="nickname" required />
-      </label>
+    <label class="label text-lg">
+      Nickname* :
+      <input type="text" class="input" name="nickname" required />
+    </label>
 
-      <label class="label text-lg">
-        Bio :
-        <textarea class="textarea" name="bio" />
-      </label>
+    <label class="label text-lg">
+      Bio :
+      <textarea class="textarea" name="bio" />
+    </label>
 
-      <p class="label text-lg">Profile picture :</p>
-      <FileDropzone name="picture" bind:files on:change={onPictureFileChange} accept="image/*" />
-      <div class="flex items-center justify-between">
-        <p class="italic" bind:this={fileMessage} />
-        {#if files && profilePicture}
-          <div>
-            <Avatar src={URL.createObjectURL(profilePicture)} />
-            <button class="cursor-pointer underline" on:click={RemoveProfilePicture}>
-              Remove
-            </button>
-          </div>
-        {/if}
-      </div>
-
-      <div class="flex flex-col gap-2 lg:flex-row lg:gap-6">
-        <p class="label text-lg">Type* :</p>
-
-        <div class="flex gap-4">
-          <label class="label flex items-center gap-2">
-            <input type="radio" name="user_type" value="advocate" checked required />
-            Advocate
-          </label>
-          <label class="label flex items-center gap-2">
-            <input type="radio" name="user_type" value="creator" required />
-            Creator
-          </label>
+    <p class="label text-lg">Profile picture :</p>
+    <FileDropzone name="picture" bind:files on:change={onPictureFileChange} accept="image/*" />
+    <div class="flex items-center justify-between">
+      <p class="italic" bind:this={fileMessage} />
+      {#if files && profilePicture}
+        <div>
+          <Avatar src={URL.createObjectURL(profilePicture)} />
+          <button class="cursor-pointer underline" on:click={RemoveProfilePicture}> Remove </button>
         </div>
+      {/if}
+    </div>
+
+    <div class="flex flex-col gap-2 lg:flex-row lg:gap-6">
+      <p class="label text-lg">Type* :</p>
+
+      <div class="flex gap-4">
+        <label class="label flex items-center gap-2">
+          <input type="radio" name="user_type" value="advocate" checked required />
+          Advocate
+        </label>
+        <label class="label flex items-center gap-2">
+          <input type="radio" name="user_type" value="creator" required />
+          Creator
+        </label>
       </div>
+    </div>
 
-      <div class="flex flex-col gap-2 lg:flex-row lg:gap-6">
-        <p class="label w-16 text-lg">Skills :</p>
-        <!-- TODO:When skills indexation done, use Autocomplete Input Chip Skeleton component for skills selection -->
-        <InputChip
-          id="skills"
-          name="skills"
-          placeholder="Write a skill and press enter"
-          chips="variant-filled-secondary"
-        />
-      </div>
+    <div class="flex flex-col gap-2 lg:flex-row lg:gap-6">
+      <p class="label w-16 text-lg">Skills :</p>
+      <!-- TODO:When skills indexation done, use Autocomplete Input Chip Skeleton component for skills selection -->
+      <InputChip
+        id="skills"
+        name="skills"
+        placeholder="Write a skill and press enter"
+        chips="variant-filled-secondary"
+      />
+    </div>
 
-      <label class="label text-lg">
-        Email* :
-        <input type="email" class="input" name="email" required />
-      </label>
+    <label class="label text-lg">
+      Email* :
+      <input type="email" class="input" name="email" required />
+    </label>
 
-      <label class="label text-lg">
-        Phone number :
-        <input type="text" class="input" name="phone" />
-      </label>
+    <label class="label text-lg">
+      Phone number :
+      <input type="text" class="input" name="phone" />
+    </label>
 
-      <label class="label text-lg">
-        Time Zone :
-        <!-- TODO: Use Autocomplete Skeleton compunent for timezone selection -->
-        <input
-          type="text"
-          placeholder="Search timezones..."
-          class="input w-1/2"
-          on:input={filterTimezones}
-        />
-        <select name="timezone" id="timezone" class="select">
-          {#each formattedTimezones as tz}
-            <option class="" value={tz.name}>{tz.formatted}</option>
-          {/each}
-        </select>
-      </label>
+    <label class="label text-lg">
+      Time Zone :
+      <!-- TODO: Use Autocomplete Skeleton compunent for timezone selection -->
+      <input
+        type="text"
+        placeholder="Search timezones..."
+        class="input w-1/2"
+        on:input={filterTimezones}
+      />
+      <select name="timezone" id="timezone" class="select">
+        {#each formattedTimezones as tz}
+          <option class="" value={tz.name}>{tz.formatted}</option>
+        {/each}
+      </select>
+    </label>
 
-      <label class="label text-lg">
-        Location :
-        <input type="text" class="input" name="location" />
-      </label>
+    <label class="label text-lg">
+      Location :
+      <input type="text" class="input" name="location" />
+    </label>
 
-      <div class="flex justify-around">
-        <button type="submit" class="btn variant-filled-primary w-fit self-center">
-          Create Profile
-        </button>
+    <div class="flex justify-around">
+      <button type="submit" class="btn variant-filled-primary w-fit self-center">
+        Create Profile
+      </button>
 
-        <button
-          type="button"
-          class="btn variant-filled-tertiary w-fit self-center"
-          on:click={mockProfiles}
-        >
-          Create Mocked Profile
-        </button>
-      </div>
-    </form>
-  {/if}
+      <button
+        type="button"
+        class="btn variant-filled-tertiary w-fit self-center"
+        on:click={mockProfiles}
+      >
+        Create Mocked Profile
+      </button>
+    </div>
+  </form>
 </section>

@@ -96,7 +96,7 @@ impl Status {
         match self {
             Status::Suspended(time) if time.is_temporarily() => Some(Duration::microseconds(
                 time.unwrap()
-                    .checked_difference_signed(&now)
+                    .checked_difference_signed(now)
                     .unwrap_or_default()
                     .num_microseconds()?,
             )),

@@ -55,7 +55,6 @@
     );
 
     isLoading = false;
-    console.log('organizations :', $organizations);
   });
 </script>
 

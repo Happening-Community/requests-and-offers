@@ -41,8 +41,8 @@
     }
 
     if (
-      !$agentIsAdministrator &&
       $myProfile &&
+      !$agentIsAdministrator &&
       event.ctrlKey &&
       event.shiftKey &&
       (event.key === 'a' || event.key === 'A')

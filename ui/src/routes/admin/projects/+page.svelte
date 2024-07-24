@@ -49,7 +49,6 @@
     rejectedprojects = $projects.filter((Project) => Project.status === 'rejected');
 
     isLoading = false;
-    console.log('projects :', $projects);
   });
 </script>
 

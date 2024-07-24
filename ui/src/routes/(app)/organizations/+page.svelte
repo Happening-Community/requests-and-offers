@@ -17,7 +17,6 @@
       organizations.set(mockedOrganizations);
     }
     isLoading = false;
-    console.log('organizations :', $organizations);
   });
 </script>
 

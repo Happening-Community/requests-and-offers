@@ -42,6 +42,14 @@
     modalStore.close();
   }
 
+  async function suspendPersonIndefinitely() {
+    if (!profile) return;
+  }
+
+  async function suspendPersonTemporarily() {
+    if (!profile) return;
+  }
+
   async function handleRemoveAdmin(original_action_hash: ActionHash) {
     const confirmation = confirm('Are you sure you want to remove this administrator ?');
     if (!confirmation) return;
@@ -78,18 +86,30 @@
     {/if}
     <div class="mt-5 flex flex-col items-center gap-4">
       {#if $page.url.pathname === '/admin/persons'}
-        <div class="space-x-4">
-          {#if profile?.status !== 'accepted'}
+        {#if profile?.status === 'pending'}
+          <div class="space-x-4">
             <button class="btn variant-filled-tertiary" on:click={() => updateStatus('accepted')}>
               Accept
             </button>
-          {/if}
-          {#if profile?.status !== 'rejected'}
             <button class="btn variant-filled-error" on:click={() => updateStatus('rejected')}>
               Reject
             </button>
-          {/if}
-        </div>
+          </div>
+        {:else if profile?.status === 'rejected'}
+          <button class="btn variant-filled-tertiary" on:click={() => updateStatus('accepted')}>
+            Accept
+          </button>
+        {:else if profile?.status === 'accepted'}
+          <div class="border-error-600 space-4 border-2 p-4">
+            <h2 class="h3 text-error-600">Suspend</h2>
+            <button class="btn variant-filled-error" on:click={suspendPersonTemporarily}>
+              Temporarily
+            </button>
+            <button class="btn variant-filled-error" on:click={suspendPersonIndefinitely}>
+              Indefinitely
+            </button>
+          </div>
+        {/if}
       {/if}
       {#if $page.url.pathname === '/admin/administrators'}
         <div class="space-x-4">

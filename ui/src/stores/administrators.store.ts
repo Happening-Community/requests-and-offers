@@ -131,3 +131,45 @@ export async function updateProfileStatus(
     status
   });
 }
+
+export async function suspendPersonIndefinitely(
+  original_profile_hash: ActionHash,
+  previous_profile_hash: ActionHash
+): Promise<boolean> {
+  return await hc.callZome('profiles', 'suspend_person_indefinitely', {
+    original_profile_hash,
+    previous_profile_hash
+  });
+}
+
+export async function suspendPersonTemporarily(
+  original_profile_hash: ActionHash,
+  previous_profile_hash: ActionHash,
+  duration_in_days: number
+): Promise<boolean> {
+  return await hc.callZome('profiles', 'suspend_person_temporarily', {
+    original_profile_hash,
+    previous_profile_hash,
+    duration_in_days
+  });
+}
+
+export async function unsuspendPerson(
+  original_profile_hash: ActionHash,
+  previous_profile_hash: ActionHash
+): Promise<boolean> {
+  return await hc.callZome('profiles', 'unsuspend_person', {
+    original_profile_hash,
+    previous_profile_hash
+  });
+}
+
+export async function unsuspendPersonIfTimePassed(
+  original_profile_hash: ActionHash,
+  previous_profile_hash: ActionHash
+): Promise<boolean> {
+  return await hc.callZome('profiles', 'unsuspend_person_if_time_passed', {
+    original_profile_hash,
+    previous_profile_hash
+  });
+}
