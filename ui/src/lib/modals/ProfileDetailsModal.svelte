@@ -7,6 +7,7 @@
     getAllAdministrators,
     removeAdministrator,
     suspendPersonIndefinitely,
+    suspendPersonTemporarily,
     updateProfileStatus
   } from '@stores/administrators.store';
   import { getAllProfiles, type Profile, type ProfileStatus } from '@stores/profiles.store';
@@ -19,6 +20,7 @@
   let profilePictureUrl: string;
   let profile: Profile = $modalStore[0].meta.profile;
   let isTheOnlyAdmin = $administrators.length === 1;
+  let suspendedDays = 0;
 
   onMount(async () => {
     profilePictureUrl = profile?.picture
@@ -57,11 +59,25 @@
   const popupSuspendTemporarily: PopupSettings = {
     event: 'click',
     target: 'popupSuspendTemporarily',
-    placement: 'bottom',
-    state: (e) => {
-      console.log(e);
-    }
+    placement: 'top'
   };
+
+  async function handleSuspendTemporarily() {
+    if (!profile) return;
+    const confirmation = confirm(
+      'Are you sure you want to suspend this person for ' + suspendedDays + ' days ?'
+    );
+    suspendedDays = 0;
+    if (!confirmation) return;
+
+    await suspendPersonTemporarily(
+      profile?.original_action_hash!,
+      profile?.previous_action_hash!,
+      suspendedDays
+    );
+    await getAllProfiles();
+    modalStore.close();
+  }
 
   async function handleRemoveAdmin(original_action_hash: ActionHash) {
     const confirmation = confirm('Are you sure you want to remove this administrator ?');
@@ -72,6 +88,25 @@
     modalStore.close();
   }
 </script>
+
+<div class="card variant-filled-tertiary w-72 p-4" data-popup="popupSuspendTemporarily">
+  <div class="flex flex-col items-center gap-4">
+    <p>How many days do you want to suspend this person ?</p>
+    <div class="flex justify-around">
+      <input
+        type="number"
+        min="1"
+        max="365"
+        class="input no-arrows w-2/5"
+        bind:value={suspendedDays}
+      />
+      <button class="btn variant-filled-secondary" on:click={handleSuspendTemporarily}>
+        Suspend
+      </button>
+    </div>
+  </div>
+  <div class="arrow variant-filled-tertiary" />
+</div>
 
 <article
   class="bg-surface-800 flex max-h-[90vh] w-11/12 flex-col items-center gap-4 overflow-auto p-10 text-center text-white shadow-xl md:w-4/5"
@@ -147,8 +182,3 @@
     </div>
   {/if}
 </article>
-
-<div class="card variant-filled-primary p-4" data-popup="popupSuspendTemporarily">
-  <p>Click Content</p>
-  <div class="arrow variant-filled-primary" />
-</div>

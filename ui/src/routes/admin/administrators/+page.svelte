@@ -39,7 +39,7 @@
 </script>
 
 <section class="flex flex-col gap-10">
-  <h1 class="h1">Administrators management</h1>
+  <h1 class="h1 text-center">Administrators management</h1>
 
   <div class="flex flex-col gap-4 lg:pr-4">
     <div class="flex justify-around">

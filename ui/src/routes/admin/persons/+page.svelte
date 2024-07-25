@@ -51,7 +51,7 @@
   {#if isLoading && $profiles.length === 0}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {/if}
-  <div class="flex flex-col gap-4 lg:flex-row lg:gap-0 lg:divide-x-2">
+  <div class="flex flex-col gap-4 lg:flex-row lg:justify-center lg:gap-0 lg:divide-x-2">
     <div class="flex flex-col gap-4 lg:pr-4">
       <h2 class="h3 text-primary-400">Pending persons</h2>
       {#if pendingProfiles && pendingProfiles.length > 0}
@@ -138,17 +138,18 @@
     </div>
   </div>
 
-  <div class="flex flex-col gap-4">
-    <details>
-      <summary class="mb-4 flex cursor-pointer gap-2 text-red-600">
-        <h2 class="h3">Suspended persons</h2>
-        <span>
-          ({temporarilySuspendedProfiles?.length + indefinitelySuspendedProfiles?.length}) ⮟
-        </span>
-      </summary>
+  <details open class="flex flex-col gap-4">
+    <summary class="mb-4 flex cursor-pointer gap-2 text-red-600">
+      <h2 class="h3">Suspended persons</h2>
+      <span>
+        ({temporarilySuspendedProfiles?.length + indefinitelySuspendedProfiles?.length}) ⮟
+      </span>
+    </summary>
+    <div class="flex flex-col gap-4 lg:flex-row lg:gap-0 lg:divide-x-2">
       {#if temporarilySuspendedProfiles && temporarilySuspendedProfiles.length > 0}
-        <div class="flex flex-col gap-4 lg:flex-row lg:divide-x-2">
+        <div class="space-y-2 lg:pr-4">
           <h2 class="h3">Temporarily suspended</h2>
+
           <table class="table-hover table drop-shadow-lg">
             <thead>
               <tr>
@@ -185,56 +186,60 @@
             </tbody>
           </table>
         </div>
-      {:else if indefinitelySuspendedProfiles && indefinitelySuspendedProfiles.length > 0}
-        <h2 class="h3">Indefinitely suspended</h2>
+      {/if}
+      {#if indefinitelySuspendedProfiles && indefinitelySuspendedProfiles.length > 0}
+        <div class="space-y-2 lg:pl-4">
+          <h2 class="h3">Indefinitely suspended</h2>
 
-        <table class="table-hover table drop-shadow-lg">
-          <thead>
-            <tr>
-              <th>Avatar</th>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each indefinitelySuspendedProfiles as profile, i}
+          <table class="table-hover table drop-shadow-lg">
+            <thead>
               <tr>
-                <td>
-                  <Avatar
-                    src={profile.picture
-                      ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
-                      : '/default_avatar.webp'}
-                  />
-                </td>
-                <td>{profile.name}</td>
-                <td>
-                  {profile.user_type.charAt(0).toUpperCase() + profile.user_type.slice(1)}
-                </td>
-                <td>
-                  <button
-                    class="btn variant-filled-secondary"
-                    on:click={() => modalStore.trigger(modal(profile))}
-                  >
-                    View
-                  </button>
-                </td>
+                <th>Avatar</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Actions</th>
               </tr>
-            {/each}
-          </tbody>
-        </table>
-      {:else}
+            </thead>
+            <tbody>
+              {#each indefinitelySuspendedProfiles as profile, i}
+                <tr>
+                  <td>
+                    <Avatar
+                      src={profile.picture
+                        ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
+                        : '/default_avatar.webp'}
+                    />
+                  </td>
+                  <td>{profile.name}</td>
+                  <td>
+                    {profile.user_type.charAt(0).toUpperCase() + profile.user_type.slice(1)}
+                  </td>
+                  <td>
+                    <button
+                      class="btn variant-filled-secondary"
+                      on:click={() => modalStore.trigger(modal(profile))}
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/if}
+      {#if !temporarilySuspendedProfiles && !indefinitelySuspendedProfiles}
         <p>No suspended profiles</p>
       {/if}
-    </details>
-  </div>
+    </div>
+  </details>
 
-  <div class="flex flex-col gap-4">
-    <details>
-      <summary class="mb-4 flex cursor-pointer gap-2 text-red-600">
-        <h2 class="h3">Rejected persons</h2>
-        <span>({rejectedProfiles?.length}) ⮟</span>
-      </summary>
+  <details>
+    <summary class="mb-4 flex cursor-pointer gap-2 text-red-600">
+      <h2 class="h3">Rejected persons</h2>
+      <span>({rejectedProfiles?.length}) ⮟</span>
+    </summary>
+    <div class="flex flex-col gap-4">
       {#if rejectedProfiles && rejectedProfiles.length > 0}
         <table class="table-hover table drop-shadow-lg">
           <thead>
@@ -274,6 +279,6 @@
       {:else}
         <p>No rejected profiles</p>
       {/if}
-    </details>
-  </div>
+    </div>
+  </details>
 </section>

@@ -56,6 +56,7 @@
       if (confirmation && $myProfile.original_action_hash) {
         await registerAdministrator($myProfile.original_action_hash);
         await checkIfAgentIsAdministrator((await hc.getAppInfo())?.agent_pub_key!);
+        goto('/admin');
       }
     }
   }

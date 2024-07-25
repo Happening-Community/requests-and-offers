@@ -8,8 +8,16 @@
     ? URL.createObjectURL(new Blob([new Uint8Array($myProfile.picture)]))
     : '/default_avatar.webp';
 
+  let suspensionDate: string;
+
   onMount(async () => {
     await getMyProfile();
+
+    if ($myProfile) {
+      if ($myProfile.status!.split(' ')[1]) {
+        suspensionDate = new Date($myProfile.status!.split(' ')[1]).toLocaleString();
+      }
+    }
   });
 </script>
 
@@ -28,7 +36,7 @@
       class="border-surface-600 bg-surface-400 flex w-4/5 min-w-96 flex-col items-center gap-5 rounded-xl border-8 p-5 drop-shadow-xl"
     >
       <h3 class="h3"><b>Nickname :</b> {$myProfile.nickname}</h3>
-      <h3 class="h3">
+      <h3 class="h3 text-center">
         <b>Status :</b>
         <span
           class:text-primary-500={$myProfile.status === 'pending'}
@@ -38,7 +46,11 @@
           class:text-warning-500={$myProfile.status ===
             `suspended ${$myProfile.status?.split(' ')[1]}`}
         >
-          {$myProfile.status}
+          {#if !suspensionDate}
+            {$myProfile.status}
+          {:else}
+            suspended until <br /> {suspensionDate}
+          {/if}
         </span>
       </h3>
       <div on:load={() => URL.revokeObjectURL(profilePictureUrl)}>

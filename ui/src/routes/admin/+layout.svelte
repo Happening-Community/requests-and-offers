@@ -26,7 +26,7 @@
   </svelte:fragment>
 
   <svelte:fragment slot="sidebarLeft">
-    <div class="hidden lg:block">
+    <div class="hidden sm:block">
       <AdminSideBar />
     </div>
   </svelte:fragment>

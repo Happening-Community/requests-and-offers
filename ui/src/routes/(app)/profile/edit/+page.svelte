@@ -137,7 +137,7 @@
 
       <label class="label text-lg">
         Bio :
-        <textarea class="textarea" name="bio" value={$myProfile.bio} />
+        <textarea class="textarea h-52" name="bio" value={$myProfile.bio} />
       </label>
 
       <p class="label text-lg">Profile picture :</p>
