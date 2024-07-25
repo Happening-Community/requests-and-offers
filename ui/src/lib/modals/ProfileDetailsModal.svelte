@@ -1,11 +1,12 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import type { ActionHash } from '@holochain/client';
-  import { Avatar, getModalStore } from '@skeletonlabs/skeleton';
+  import { Avatar, getModalStore, popup, type PopupSettings } from '@skeletonlabs/skeleton';
   import {
     administrators,
     getAllAdministrators,
     removeAdministrator,
+    suspendPersonIndefinitely,
     updateProfileStatus
   } from '@stores/administrators.store';
   import { getAllProfiles, type Profile, type ProfileStatus } from '@stores/profiles.store';
@@ -42,13 +43,25 @@
     modalStore.close();
   }
 
-  async function suspendPersonIndefinitely() {
+  async function handleSuspendIndefinitely() {
     if (!profile) return;
+    const confirmation = confirm('Are you sure you want to suspend this person indefinitely ?');
+    if (!confirmation) return;
+
+    await suspendPersonIndefinitely(profile?.original_action_hash!, profile?.previous_action_hash!);
+
+    await getAllProfiles();
+    modalStore.close();
   }
 
-  async function suspendPersonTemporarily() {
-    if (!profile) return;
-  }
+  const popupSuspendTemporarily: PopupSettings = {
+    event: 'click',
+    target: 'popupSuspendTemporarily',
+    placement: 'bottom',
+    state: (e) => {
+      console.log(e);
+    }
+  };
 
   async function handleRemoveAdmin(original_action_hash: ActionHash) {
     const confirmation = confirm('Are you sure you want to remove this administrator ?');
@@ -100,15 +113,19 @@
             Accept
           </button>
         {:else if profile?.status === 'accepted'}
-          <div class="border-error-600 space-4 border-2 p-4">
+          <div class="border-error-600 space-x-4 space-y-4 border-2 p-4">
             <h2 class="h3 text-error-600">Suspend</h2>
-            <button class="btn variant-filled-error" on:click={suspendPersonTemporarily}>
+            <button class="btn variant-filled-error" use:popup={popupSuspendTemporarily}>
               Temporarily
             </button>
-            <button class="btn variant-filled-error" on:click={suspendPersonIndefinitely}>
+            <button class="btn variant-filled-error" on:click={handleSuspendIndefinitely}>
               Indefinitely
             </button>
           </div>
+        {:else if profile?.status?.startsWith('suspended')}
+          <button class="btn variant-filled-tertiary" on:click={() => updateStatus('accepted')}>
+            Unsuspend
+          </button>
         {/if}
       {/if}
       {#if $page.url.pathname === '/admin/administrators'}
@@ -130,3 +147,8 @@
     </div>
   {/if}
 </article>
+
+<div class="card variant-filled-primary p-4" data-popup="popupSuspendTemporarily">
+  <p>Click Content</p>
+  <div class="arrow variant-filled-primary" />
+</div>

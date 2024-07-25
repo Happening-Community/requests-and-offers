@@ -17,6 +17,10 @@
   $: pendingProfiles = $profiles.filter((profile) => profile.status === 'pending');
   $: acceptedProfiles = $profiles.filter((profile) => profile.status === 'accepted');
   $: rejectedProfiles = $profiles.filter((profile) => profile.status === 'rejected');
+  $: temporarilySuspendedProfiles = $profiles.filter(
+    (profile) => profile.status!.split(' ').length > 1
+  );
+  $: indefinitelySuspendedProfiles = $profiles.filter((profile) => profile.status === 'suspended');
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -132,6 +136,97 @@
         <p>No accepted profiles</p>
       {/if}
     </div>
+  </div>
+
+  <div class="flex flex-col gap-4">
+    <details>
+      <summary class="mb-4 flex cursor-pointer gap-2 text-red-600">
+        <h2 class="h3">Suspended persons</h2>
+        <span>
+          ({temporarilySuspendedProfiles?.length + indefinitelySuspendedProfiles?.length}) ⮟
+        </span>
+      </summary>
+      {#if temporarilySuspendedProfiles && temporarilySuspendedProfiles.length > 0}
+        <div class="flex flex-col gap-4 lg:flex-row lg:divide-x-2">
+          <h2 class="h3">Temporarily suspended</h2>
+          <table class="table-hover table drop-shadow-lg">
+            <thead>
+              <tr>
+                <th>Avatar</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each temporarilySuspendedProfiles as profile, i}
+                <tr>
+                  <td>
+                    <Avatar
+                      src={profile.picture
+                        ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
+                        : '/default_avatar.webp'}
+                    />
+                  </td>
+                  <td>{profile.name}</td>
+                  <td>
+                    {profile.user_type.charAt(0).toUpperCase() + profile.user_type.slice(1)}
+                  </td>
+                  <td>
+                    <button
+                      class="btn variant-filled-secondary"
+                      on:click={() => modalStore.trigger(modal(profile))}
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {:else if indefinitelySuspendedProfiles && indefinitelySuspendedProfiles.length > 0}
+        <h2 class="h3">Indefinitely suspended</h2>
+
+        <table class="table-hover table drop-shadow-lg">
+          <thead>
+            <tr>
+              <th>Avatar</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each indefinitelySuspendedProfiles as profile, i}
+              <tr>
+                <td>
+                  <Avatar
+                    src={profile.picture
+                      ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
+                      : '/default_avatar.webp'}
+                  />
+                </td>
+                <td>{profile.name}</td>
+                <td>
+                  {profile.user_type.charAt(0).toUpperCase() + profile.user_type.slice(1)}
+                </td>
+                <td>
+                  <button
+                    class="btn variant-filled-secondary"
+                    on:click={() => modalStore.trigger(modal(profile))}
+                  >
+                    View
+                  </button>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      {:else}
+        <p>No suspended profiles</p>
+      {/if}
+    </details>
   </div>
 
   <div class="flex flex-col gap-4">

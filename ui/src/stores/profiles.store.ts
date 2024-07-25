@@ -4,7 +4,12 @@ import { get, writable, type Writable } from 'svelte/store';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
 
 export type UserType = 'creator' | 'advocate';
-export type ProfileStatus = 'pending' | 'accepted' | 'rejected';
+export type ProfileStatus =
+  | 'pending'
+  | 'accepted'
+  | 'rejected'
+  | 'suspended'
+  | `suspended ${string}`;
 
 export type Profile = {
   name: string;

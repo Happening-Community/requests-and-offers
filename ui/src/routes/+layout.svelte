@@ -14,6 +14,10 @@
   } from '@stores/administrators.store';
   import { page } from '$app/stores';
   import AdminMenuDrawer from '@lib/drawers/AdminMenuDrawer.svelte';
+  import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
+  import { storePopup } from '@skeletonlabs/skeleton';
+
+  storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
   initializeStores();
   const drawerStore = getDrawerStore();

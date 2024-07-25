@@ -32,8 +32,11 @@
         <b>Status :</b>
         <span
           class:text-primary-500={$myProfile.status === 'pending'}
-          class:text-error-500={$myProfile.status === 'rejected'}
+          class:text-error-500={$myProfile.status === 'rejected' ||
+            $myProfile.status === 'suspended'}
           class:text-green-400={$myProfile.status === 'accepted'}
+          class:text-warning-500={$myProfile.status ===
+            `suspended ${$myProfile.status?.split(' ')[1]}`}
         >
           {$myProfile.status}
         </span>
