@@ -10,7 +10,7 @@
     type ModalSettings,
     ConicGradient
   } from '@skeletonlabs/skeleton';
-  import { getAllProfiles, profiles, type Profile } from '@stores/profiles.store';
+  import { getAllProfiles, myProfile, profiles, type Profile } from '@stores/profiles.store';
   import { onMount } from 'svelte';
 
   $: isLoading = true;
@@ -43,7 +43,9 @@
 <section class="flex flex-col gap-4">
   <div class="flex gap-4">
     <h2 class="h2">Profiles</h2>
-    <NavButton href="/profile/create" text="Create profile" />
+    {#if !$myProfile}
+      <NavButton href="/profile/create" text="Create profile" />
+    {/if}
   </div>
   {#if acceptedProfiles.length}
     <table class="table">
