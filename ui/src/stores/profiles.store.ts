@@ -12,7 +12,7 @@ export type ProfileStatus =
   | 'suspended'
   | `suspended ${string}`;
 
-export type Profile = {
+type ProfileInDHT = {
   name: string;
   nickname: string;
   bio?: string;
@@ -24,10 +24,15 @@ export type Profile = {
   time_zone?: string;
   location?: string;
   status?: ProfileStatus;
+};
+
+type ProfileAdditionalFields = {
   remaining_time?: number;
   original_action_hash?: ActionHash;
   previous_action_hash?: ActionHash;
 };
+
+export type Profile = ProfileInDHT & ProfileAdditionalFields;
 
 /**
  * Svelte writable store for the current user's profile.
