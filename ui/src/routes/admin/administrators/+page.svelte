@@ -42,7 +42,7 @@
   <h1 class="h1 text-center">Administrators management</h1>
 
   <div class="flex flex-col gap-4 lg:pr-4">
-    <div class="flex justify-around">
+    <div class="flex flex-col items-center justify-center sm:flex-row sm:justify-around">
       <h2 class="h3">Network administrators</h2>
       <button
         class="btn variant-filled-secondary w-fit"

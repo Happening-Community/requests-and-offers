@@ -21,11 +21,18 @@
   let profile: Profile = $modalStore[0].meta.profile;
   let isTheOnlyAdmin = $administrators.length === 1;
   let suspendedDays = 0;
+  let suspensionDate: string;
 
   onMount(async () => {
     profilePictureUrl = profile?.picture
       ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
       : '/default_avatar.webp';
+
+    if (profile) {
+      if (profile.status!.split(' ')[1]) {
+        suspensionDate = new Date(profile.status!.split(' ')[1]).toLocaleString();
+      }
+    }
   });
 
   async function updateStatus(status: ProfileStatus) {
@@ -67,7 +74,6 @@
     const confirmation = confirm(
       'Are you sure you want to suspend this person for ' + suspendedDays + ' days ?'
     );
-    suspendedDays = 0;
     if (!confirmation) return;
 
     await suspendPersonTemporarily(
@@ -76,6 +82,8 @@
       suspendedDays
     );
     await getAllProfiles();
+    suspensionDate = new Date(profile?.status!.split(' ')[1]).toLocaleString();
+    suspendedDays = 0;
     modalStore.close();
   }
 
@@ -114,6 +122,16 @@
   {#if profile}
     <h2 class="h2 font-bold">{profile.name}</h2>
     <h3 class="h3"><b>Nickname :</b> {profile.nickname}</h3>
+    {#if $page.url.pathname.startsWith('/admin')}
+      <p>
+        <b>Status :</b>
+        {#if !suspensionDate}
+          {profile.status}
+        {:else}
+          suspended until <br /> {suspensionDate}
+        {/if}
+      </p>
+    {/if}
     <div on:load={() => URL.revokeObjectURL(profilePictureUrl)}>
       <Avatar src={profilePictureUrl} width="w-64" background="none" />
     </div>
@@ -148,7 +166,7 @@
             Accept
           </button>
         {:else if profile?.status === 'accepted'}
-          <div class="border-error-600 space-x-4 space-y-4 border-2 p-4">
+          <div class="border-error-600 space-y-4 border-2 p-4">
             <h2 class="h3 text-error-600">Suspend</h2>
             <button class="btn variant-filled-error" use:popup={popupSuspendTemporarily}>
               Temporarily
@@ -158,9 +176,14 @@
             </button>
           </div>
         {:else if profile?.status?.startsWith('suspended')}
-          <button class="btn variant-filled-tertiary" on:click={() => updateStatus('accepted')}>
-            Unsuspend
-          </button>
+          <div class="space-x-4">
+            <button class="btn variant-filled-tertiary" on:click={() => updateStatus('accepted')}>
+              Unsuspend
+            </button>
+            <button class="btn variant-filled-error" use:popup={popupSuspendTemporarily}>
+              Suspend more
+            </button>
+          </div>
         {/if}
       {/if}
       {#if $page.url.pathname === '/admin/administrators'}
