@@ -113,14 +113,7 @@ impl Status {
         let duration = time.unwrap().0.num_microseconds().unwrap_or(0);
         let now = time.unwrap().1.as_micros();
 
-        match self {
-            Status::Suspended(timestamp) if timestamp.is_temporarily() => {
-                *self = Status::Suspended(Temporarily(Timestamp::from_micros(
-                    timestamp.unwrap().as_micros() + duration,
-                )))
-            }
-            _ => *self = Status::Suspended(Temporarily(Timestamp::from_micros(now + duration))),
-        }
+        *self = Status::Suspended(Temporarily(Timestamp::from_micros(now + duration)));
 
         Ok(())
     }

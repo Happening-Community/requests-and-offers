@@ -20,7 +20,7 @@
   let profilePictureUrl: string;
   let profile: Profile = $modalStore[0].meta.profile;
   let isTheOnlyAdmin = $administrators.length === 1;
-  let suspendedDays = 0;
+  let suspendedDays = 1;
   let suspensionDate: string;
 
   onMount(async () => {
@@ -66,7 +66,11 @@
   const popupSuspendTemporarily: PopupSettings = {
     event: 'click',
     target: 'popupSuspendTemporarily',
-    placement: 'top'
+    placement: 'top',
+    state(event) {
+      if (!event.state) return;
+      suspendedDays = 1;
+    }
   };
 
   async function handleSuspendTemporarily() {
@@ -100,7 +104,7 @@
 <div class="card variant-filled-tertiary w-72 p-4" data-popup="popupSuspendTemporarily">
   <div class="flex flex-col items-center gap-4">
     <p>How many days do you want to suspend this person ?</p>
-    <div class="flex justify-around">
+    <form class="flex justify-around">
       <input
         type="number"
         min="1"
@@ -111,7 +115,7 @@
       <button class="btn variant-filled-secondary" on:click={handleSuspendTemporarily}>
         Suspend
       </button>
-    </div>
+    </form>
   </div>
   <div class="arrow variant-filled-tertiary" />
 </div>
@@ -168,21 +172,40 @@
         {:else if profile?.status === 'accepted'}
           <div class="border-error-600 space-y-4 border-2 p-4">
             <h2 class="h3 text-error-600">Suspend</h2>
-            <button class="btn variant-filled-error" use:popup={popupSuspendTemporarily}>
-              Temporarily
-            </button>
-            <button class="btn variant-filled-error" on:click={handleSuspendIndefinitely}>
-              Indefinitely
-            </button>
+            <div class="space-x-2">
+              <button class="btn variant-filled-error" use:popup={popupSuspendTemporarily}>
+                Temporarily
+              </button>
+              <button class="btn variant-filled-error" on:click={handleSuspendIndefinitely}>
+                Indefinitely
+              </button>
+            </div>
           </div>
         {:else if profile?.status?.startsWith('suspended')}
-          <div class="space-x-4">
+          <div class="space-y-4" class:space-x-4={!profile.status?.split(' ')[1]}>
             <button class="btn variant-filled-tertiary" on:click={() => updateStatus('accepted')}>
               Unsuspend
             </button>
-            <button class="btn variant-filled-error" use:popup={popupSuspendTemporarily}>
-              Suspend more
-            </button>
+            {#if profile.status?.split(' ')[1]}
+              <div class="space-x-2">
+                <button
+                  class="btn variant-filled-error text-sm"
+                  use:popup={popupSuspendTemporarily}
+                >
+                  Change suspension
+                </button>
+                <button
+                  class="btn variant-filled-error text-sm"
+                  on:click={handleSuspendIndefinitely}
+                >
+                  Suspend Indefinitely
+                </button>
+              </div>
+            {:else}
+              <button class="btn variant-filled-error text-sm" use:popup={popupSuspendTemporarily}>
+                Suspend for a period
+              </button>
+            {/if}
           </div>
         {/if}
       {/if}

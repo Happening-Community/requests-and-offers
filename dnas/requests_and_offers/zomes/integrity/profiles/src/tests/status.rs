@@ -47,7 +47,7 @@ mod tests {
             .unwrap();
 
         let remaining_time = status.get_suspension_time_remaining(&now);
-        assert!(remaining_time.unwrap().num_days() >= Duration::days(6).num_days());
+        assert_eq!(remaining_time.unwrap().num_days(), 7);
     }
 
     #[test]

@@ -2,6 +2,7 @@ import { decodeRecords } from '@utils';
 import hc from '@services/HolochainClientService';
 import { get, writable, type Writable } from 'svelte/store';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
+import { getRemainingSuspensionTime } from './administrators.store';
 
 export type UserType = 'creator' | 'advocate';
 export type ProfileStatus =
@@ -23,6 +24,7 @@ export type Profile = {
   time_zone?: string;
   location?: string;
   status?: ProfileStatus;
+  remaining_time?: number;
   original_action_hash?: ActionHash;
   previous_action_hash?: ActionHash;
 };
@@ -155,8 +157,10 @@ export async function getAllProfiles(): Promise<void> {
   let recordsContents: Profile[] = [];
 
   for (let i = 0; i < profilesRecords.length; i++) {
+    let profile = decodeRecords([profilesRecords[i]])[0];
     recordsContents.push({
-      ...decodeRecords([profilesRecords[i]])[0],
+      ...profile,
+      remaining_time: getRemainingSuspensionTime(profile.status),
       original_action_hash: profilesLinks[i].target,
       previous_action_hash: profilesRecords[i].signed_action.hashed.hash
     });

@@ -173,3 +173,12 @@ export async function unsuspendPersonIfTimePassed(
     previous_profile_hash
   });
 }
+
+export function getRemainingSuspensionTime(status: ProfileStatus): number | null {
+  const suspensionDate = new Date(status.split(' ')[1]);
+  const now = new Date();
+
+  if (!suspensionDate) return null;
+
+  return suspensionDate.getTime() - now.getTime();
+}

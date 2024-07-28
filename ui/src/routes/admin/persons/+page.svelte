@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { ActionHash } from '@holochain/client';
   import {
     Avatar,
     ConicGradient,
@@ -17,9 +16,10 @@
   $: pendingProfiles = $profiles.filter((profile) => profile.status === 'pending');
   $: acceptedProfiles = $profiles.filter((profile) => profile.status === 'accepted');
   $: rejectedProfiles = $profiles.filter((profile) => profile.status === 'rejected');
-  $: temporarilySuspendedProfiles = $profiles.filter(
-    (profile) => profile.status!.split(' ').length > 1
-  );
+  $: temporarilySuspendedProfiles = $profiles
+    .filter((profile) => profile.status!.split(' ').length > 1)
+    .filter((profile) => profile.remaining_time)
+    .sort((a, b) => a.remaining_time! - b.remaining_time!);
   $: indefinitelySuspendedProfiles = $profiles.filter((profile) => profile.status === 'suspended');
 
   const conicStops: ConicStop[] = [
@@ -44,6 +44,13 @@
 
     isLoading = false;
   });
+
+  function formatRemainingTimeInDays(remainingTime: number): string {
+    const days = Math.floor(remainingTime / 1000 / 60 / 60 / 24);
+    const hours = Math.floor((remainingTime / 1000 / 60 / 60) % 24);
+
+    return `${days}d ${hours}h`;
+  }
 </script>
 
 <section class="flex flex-col gap-10">
@@ -156,6 +163,7 @@
                 <th>Avatar</th>
                 <th>Name</th>
                 <th>Type</th>
+                <th>Remaining time</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -172,6 +180,15 @@
                   <td>{profile.name}</td>
                   <td>
                     {profile.user_type.charAt(0).toUpperCase() + profile.user_type.slice(1)}
+                  </td>
+                  <td class="text-center">
+                    {#if profile.remaining_time}
+                      {#if profile.remaining_time <= 0}
+                        <span class="font-bold text-red-600">expired</span>
+                      {:else}
+                        {formatRemainingTimeInDays(profile.remaining_time)}
+                      {/if}
+                    {/if}
                   </td>
                   <td>
                     <button
