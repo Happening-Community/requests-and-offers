@@ -125,9 +125,9 @@ pub fn get_agent_profile_hash(agent_pubkey: AgentPubKey) -> ExternResult<Option<
 }
 
 #[hdk_extern]
-pub fn get_all_profiles(_: ()) -> ExternResult<Vec<Link>> {
-    let path = Path::from("all_profiles");
-    get_links(path.path_entry_hash()?, LinkTypes::AllProfiles, None)
+pub fn get_accepted_profiles(_: ()) -> ExternResult<Vec<Link>> {
+    let path = Path::from("accepted_profiles");
+    get_links(path.path_entry_hash()?, LinkTypes::AcceptedProfiles, None)
 }
 
 #[derive(Serialize, Deserialize, Debug)]

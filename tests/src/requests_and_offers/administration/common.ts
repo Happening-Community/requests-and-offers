@@ -2,6 +2,13 @@ import { CallableCell } from "@holochain/tryorama";
 import { ActionHash, Record, Link, AgentPubKey } from "@holochain/client";
 import { Status } from "../profiles/common";
 
+export async function getAllProfiles(cell: CallableCell): Promise<Link[]> {
+  return cell.callZome({
+    zome_name: "profiles",
+    fn_name: "get_all_profiles",
+  });
+}
+
 export async function registerAdministrator(
   cell: CallableCell,
   profile_hash: ActionHash

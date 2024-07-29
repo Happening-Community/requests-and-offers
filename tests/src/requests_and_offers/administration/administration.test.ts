@@ -5,6 +5,7 @@ import { decodeRecords, runScenarioWithTwoAgents } from "../utils";
 import {
   Profile,
   createProfile,
+  getAcceptedProfiles,
   getAgentProfile,
   getLatestProfile,
   sampleProfileInput,
@@ -13,6 +14,7 @@ import {
   checkIfAgentIsAdministrator,
   checkIfPersonIsAdministrator,
   getAllAdministratorsLinks,
+  getAllProfiles,
   registerAdministrator,
   removeAdministrator,
   suspendPersonIndefinitely,
@@ -124,6 +126,14 @@ test.only("update Person status", async () => {
     ])[0] as Profile;
 
     assert.equal(aliceProfile.status, "accepted");
+
+    // Verify the all_profiles list
+    let allProfiles = await getAllProfiles(alice.cells[0]);
+    assert.equal(allProfiles.length, 2);
+
+    // Verify the accepted_profiles list
+    let acceptedProfiles = await getAcceptedProfiles(alice.cells[0]);
+    assert.equal(acceptedProfiles.length, 1);
 
     // Bob can not update his status
     await expect(

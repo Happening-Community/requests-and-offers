@@ -7,12 +7,12 @@ import { Record } from "@holochain/client";
 import {
   Profile,
   createProfile,
-  getAllProfiles,
   getAgentProfile,
   getLatestProfile,
   sampleProfileInput,
   updateProfile,
   ProfileInput,
+  getAcceptedProfiles,
 } from "./common.js";
 import {
   decodeRecords,
@@ -92,9 +92,12 @@ test("create and read Profile", async () => {
 
       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
-      // Alice get all the individual profiles
-      links = await getAllProfiles(alice.cells[0]);
-      assert.equal(links.length, 2);
+      // Alice get the created Profile
+      record = await getLatestProfile(
+        alice.cells[0],
+        record.signed_action.hashed.hash
+      );
+      assert.ok(record);
     }
   );
 });

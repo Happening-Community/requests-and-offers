@@ -81,10 +81,10 @@ export async function getAgentProfile(
   });
 }
 
-export async function getAllProfiles(cell: CallableCell): Promise<Link[]> {
+export async function getAcceptedProfiles(cell: CallableCell): Promise<Link[]> {
   return cell.callZome({
     zome_name: "profiles",
-    fn_name: "get_all_profiles",
+    fn_name: "get_accepted_profiles",
   });
 }
 
