@@ -18,3 +18,5 @@ chrono = { workspace = true }
 image = { workspace = true }
 
 utils = { workspace = true }
+
+email_address = "0.2.7"

@@ -1,6 +1,7 @@
 use crate::status::*;
-use std::{fmt::Display, str::FromStr};
+use std::{fmt::Display, io::Cursor, str::FromStr};
 
+use email_address::EmailAddress;
 use hdi::prelude::*;
 use image::io::Reader as ImageReader;
 
@@ -60,14 +61,12 @@ impl FromStr for AllowedTypes {
 
 fn is_image(bytes: SerializedBytes) -> bool {
     let data = bytes.bytes().to_vec();
-    if let Ok(_img) = ImageReader::new(std::io::Cursor::new(data))
-        .with_guessed_format()
-        .unwrap()
-        .decode()
-    {
-        return true;
-    }
-    false
+    let reader = match ImageReader::new(Cursor::new(data)).with_guessed_format() {
+        Ok(reader) => reader,
+        Err(_) => return false,
+    };
+
+    reader.decode().is_ok()
 }
 
 pub fn validate_profile(profile: Profile) -> ExternResult<ValidateCallbackResult> {
@@ -96,7 +95,11 @@ pub fn validate_profile(profile: Profile) -> ExternResult<ValidateCallbackResult
         }
     }
 
-    // TODO: Validate the email and the time zone
+    if !EmailAddress::is_valid(&profile.email) {
+        return Ok(ValidateCallbackResult::Invalid(String::from(
+            "Email is not valid",
+        )));
+    }
 
     Ok(ValidateCallbackResult::Valid)
 }
