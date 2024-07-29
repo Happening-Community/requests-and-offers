@@ -1,18 +1,6 @@
 import fs from "fs";
-import {
-  CallableCell,
-  Conductor,
-  Player,
-  Scenario,
-  runScenario,
-} from "@holochain/tryorama";
-import {
-  AgentPubKey,
-  AppInfo,
-  AppManifest,
-  AppRoleManifest,
-  Record,
-} from "@holochain/client";
+import { Conductor, Player, Scenario, runScenario } from "@holochain/tryorama";
+import { AppInfo, AppRoleManifest, Record } from "@holochain/client";
 import { decode } from "@msgpack/msgpack";
 import { Base64 } from "js-base64";
 import { decompressSync } from "fflate";
@@ -150,4 +138,22 @@ export async function installApp(
   console.log("response : ", response);
 
   return [conductor, agent];
+}
+
+export function imagePathToArrayBuffer(
+  imagePath: string
+): Promise<ArrayBuffer> {
+  return new Promise((resolve, reject) => {
+    fs.readFile(imagePath, (err, buffer) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      // Convert Buffer to ArrayBuffer
+      const arrayBuffer = Uint8Array.from(buffer).buffer;
+
+      resolve(arrayBuffer);
+    });
+  });
 }
