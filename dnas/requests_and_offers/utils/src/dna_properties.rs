@@ -1,17 +1,12 @@
 use crate::wasm_error;
 use hdk::prelude::*;
 
-/// Struct for DNA properties in a distributed network as declared in the DNA manifest.
 #[derive(Serialize, Deserialize, SerializedBytes, Debug, Clone)]
 pub struct DnaProperties {
-    /// Agent public key of the progenitor node.
     pub progenitor_pubkey: String,
 }
 
 impl DnaProperties {
-    /// Fetches DNA properties from the network, including the progenitor's public key.
-    ///
-    /// Returns an error if there was an issue deserializing the DNA properties. The DNA manifest properties deserialized must match the `DnaProperties` struct.
     pub fn get() -> ExternResult<Self> {
         dna_info()?
             .modifiers
@@ -20,9 +15,6 @@ impl DnaProperties {
             .map_err(|err: SerializedBytesError| wasm_error(&err.to_string()))
     }
 
-    /// Extracts and deserializes the progenitor's public key.
-    ///
-    /// Returns an error if there was an issue deserializing the public key.
     pub fn get_progenitor_pubkey() -> ExternResult<AgentPubKey> {
         let progenitor_pubkey_string = DnaProperties::get()?.progenitor_pubkey;
 

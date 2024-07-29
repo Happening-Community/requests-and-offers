@@ -2,7 +2,6 @@ use hdk::prelude::*;
 use profiles_integrity::*;
 use utils::wasm_error;
 
-/// Represents the input for creating a new profile.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProfileInput {
     pub name: String,
@@ -35,16 +34,6 @@ impl From<ProfileInput> for Profile {
     }
 }
 
-/// Creates a new profile for the agent.
-///
-/// ## Arguments
-///
-/// * `profile_input` - The profile data to be stored.
-///
-/// # Returns
-///
-/// This function returns a result containing the created profile record on success,
-/// or an error if the agent already has a profile or if there was an issue creating the profile.
 #[hdk_extern]
 pub fn create_profile(profile_input: ProfileInput) -> ExternResult<Record> {
     let profile = Profile::from(profile_input);
@@ -78,16 +67,6 @@ pub fn create_profile(profile_input: ProfileInput) -> ExternResult<Record> {
     Ok(record)
 }
 
-/// Retrieves the latest profile for the given original profile hash.
-///
-/// ## Arguments
-///
-/// * `original_profile_hash` - The action hash of the original profile.
-///
-/// ## Returns
-///
-/// This function returns a result containing an option of the latest profile record on success,
-/// or an error if there was an issue retrieving the profile.
 #[hdk_extern]
 pub fn get_latest_profile_record(
     original_profile_hash: ActionHash,
@@ -111,16 +90,6 @@ pub fn get_latest_profile_record(
     get(latest_profile_hash, GetOptions::default())
 }
 
-/// Retrieves the latest profile for the given original profile hash.
-///
-/// ## Arguments
-///
-/// * `original_profile_hash` - The action hash of the original profile.
-///
-/// ## Returns
-///
-/// This function returns a result containing the latest profile on success,
-/// or an error if there was an issue retrieving the profile.
 #[hdk_extern]
 pub fn get_latest_profile(original_profile_hash: ActionHash) -> ExternResult<Profile> {
     let latest_profile_record = get_latest_profile_record(original_profile_hash)?;
@@ -133,31 +102,11 @@ pub fn get_latest_profile(original_profile_hash: ActionHash) -> ExternResult<Pro
     Ok(latest_profile)
 }
 
-/// Gets the agent profile links for the specified agent public key.
-///
-/// ## Arguments
-///
-/// * `author` - The agent's public key.
-///
-/// ## Returns
-///
-/// This function returns a result containing a vector of links to the agent's profile records on success,
-/// or an error if there was an issue retrieving the links.
 #[hdk_extern]
 pub fn get_agent_profile(author: AgentPubKey) -> ExternResult<Vec<Link>> {
     get_links(author, LinkTypes::MyProfile, None)
 }
 
-/// Retrieves the action hash of the agent's profile for the given agent public key.
-///
-/// ## Arguments
-///
-/// * `agent_pubkey` - The agent's public key.
-///
-/// ## Returns
-///
-/// This function returns a result containing an option of the action hash of the agent's profile on success,
-/// or an error if there was an issue retrieving the hash.
 #[hdk_extern]
 pub fn get_agent_profile_hash(agent_pubkey: AgentPubKey) -> ExternResult<Option<ActionHash>> {
     let agent_profile_links = get_agent_profile(agent_pubkey)?;
@@ -175,44 +124,19 @@ pub fn get_agent_profile_hash(agent_pubkey: AgentPubKey) -> ExternResult<Option<
     }
 }
 
-/// Retrieves all profiles linked under the "all_profiles" path.
-///
-/// ## Arguments
-///
-/// * `_` - Unused parameter, required for consistency with HDK extern signature.
-///
-/// ## Returns
-///
-/// This function returns a result containing a vector of links to all profiles on success,
-/// or an error if there was an issue retrieving the links.
 #[hdk_extern]
 pub fn get_all_profiles(_: ()) -> ExternResult<Vec<Link>> {
     let path = Path::from("all_profiles");
     get_links(path.path_entry_hash()?, LinkTypes::AllProfiles, None)
 }
 
-/// Input structure for updating a profile.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateProfileInput {
-    /// The action hash of the original profile.
     pub original_profile_hash: ActionHash,
-    /// The action hash of the previously updated profile.
     pub previous_profile_hash: ActionHash,
-    /// The updated profile data.
     pub updated_profile: ProfileInput,
 }
 
-/// Updates an existing profile with new data.
-///
-/// # Arguments
-///
-/// * `input` - The input structure containing the hashes of the original and previous profiles,
-///             and the updated profile data.
-///
-/// # Returns
-///
-/// This function returns a result containing the updated profile record on success,
-/// or an error if there was an issue updating the profile, such as unauthorized access or invalid input
 #[hdk_extern]
 pub fn update_profile(input: UpdateProfileInput) -> ExternResult<Record> {
     let mut profile = Profile::from(input.updated_profile.clone());

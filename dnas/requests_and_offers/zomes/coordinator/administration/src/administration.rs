@@ -3,6 +3,7 @@ use administration_integrity::*;
 use hdk::prelude::*;
 use utils::wasm_error;
 
+#[hdk_extern]
 pub fn add_administrator(person_profile_hash: ActionHash) -> ExternResult<bool> {
     if check_if_person_is_administrator(person_profile_hash.clone())? {
         return Err(wasm_error("Allready an Administrator"));
