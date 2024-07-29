@@ -46,7 +46,14 @@ mod tests {
             .suspend(Some((Duration::days(7), &Timestamp::now())))
             .unwrap();
 
-        let remaining_time = status.get_suspension_time_remaining(&now);
+        let remaining_time = match status {
+            Status::Suspended(suspended_status) => {
+                Some(suspended_status.get_suspension_time_remaining(&now))
+            }
+            _ => None,
+        }
+        .unwrap();
+
         assert_eq!(remaining_time.unwrap().num_days(), 7);
     }
 

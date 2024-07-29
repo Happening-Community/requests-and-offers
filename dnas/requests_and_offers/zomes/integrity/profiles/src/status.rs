@@ -28,6 +28,17 @@ impl SuspendedStatus<Timestamp> {
             Self::Indefinitely => panic!("Indefinitely suspended"),
         }
     }
+
+    pub fn get_suspension_time_remaining(&self, now: &Timestamp) -> Option<Duration> {
+        match self {
+            Self::Temporarily(time) => Some(Duration::microseconds(
+                time.checked_difference_signed(now)
+                    .unwrap_or_default()
+                    .num_microseconds()?,
+            )),
+            Self::Indefinitely => None,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Default)]
@@ -92,18 +103,6 @@ impl From<&str> for Status {
 }
 
 impl Status {
-    pub fn get_suspension_time_remaining(&self, now: &Timestamp) -> Option<Duration> {
-        match self {
-            Status::Suspended(time) if time.is_temporarily() => Some(Duration::microseconds(
-                time.unwrap()
-                    .checked_difference_signed(now)
-                    .unwrap_or_default()
-                    .num_microseconds()?,
-            )),
-            _ => None,
-        }
-    }
-
     pub fn suspend(&mut self, time: Option<(Duration, &Timestamp)>) -> ExternResult<()> {
         if time.is_none() {
             *self = Status::Suspended(Indefinitely);
@@ -123,14 +122,17 @@ impl Status {
     }
 
     pub fn unsuspend_if_time_passed(&mut self, now: &Timestamp) -> bool {
-        if let Some(time) = self.get_suspension_time_remaining(now) {
-            println!("Time remaining: {:?}", time);
-            if time.is_zero() || time < Duration::hours(1) {
-                self.unsuspend();
-                return true;
+        match self {
+            Self::Suspended(time) if time.is_temporarily() => {
+                match time.get_suspension_time_remaining(now) {
+                    Some(time) if time.is_zero() || time < Duration::hours(1) => {
+                        self.unsuspend();
+                        true
+                    }
+                    _ => false,
+                }
             }
+            _ => false,
         }
-
-        false
     }
 }

@@ -186,7 +186,7 @@
 
     <label class="label text-lg">
       Time Zone :
-      <!-- TODO: Use Autocomplete Skeleton compunent for timezone selection -->
+      <!-- TODO: Use Autocomplete Skeleton component for timezone selection -->
       <input
         type="text"
         placeholder="Search timezones..."
