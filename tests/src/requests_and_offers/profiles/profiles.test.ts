@@ -1,5 +1,5 @@
-import { assert, expect, test, vi } from "vitest";
-import TestProfilePicture from "./assets/Test-Logo-Small-Black-transparent-1.png";
+import { assert, expect, test } from "vitest";
+import TestProfilePicture from "./assets/favicon.png";
 
 import { Scenario, Player, dhtSync } from "@holochain/tryorama";
 import { Record } from "@holochain/client";
@@ -14,7 +14,11 @@ import {
   updateProfile,
   ProfileInput,
 } from "./common.js";
-import { decodeRecords, runScenarioWithTwoAgents } from "../utils";
+import {
+  decodeRecords,
+  imagePathToArrayBuffer,
+  runScenarioWithTwoAgents,
+} from "../utils";
 
 test("create and read Profile", async () => {
   await runScenarioWithTwoAgents(
@@ -75,11 +79,9 @@ test("create and read Profile", async () => {
       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
       // Bob creates a Profile with a real image file
-      const response = await fetch("https://picsum.photos/200/300");
-      const buffer = await response.arrayBuffer();
-
-      // TODO: test with local image
-      // const buffer = await fs.readFile(TestProfilePicture);
+      const buffer = await imagePathToArrayBuffer(
+        process.cwd() + TestProfilePicture
+      );
 
       sample = sampleProfileInput({
         name: "Bob",
@@ -108,8 +110,9 @@ test("create and update Profile", async () => {
 
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
-    const response = await fetch("https://picsum.photos/200/300");
-    const buffer = await response.arrayBuffer();
+    const buffer = await imagePathToArrayBuffer(
+      process.cwd() + TestProfilePicture
+    );
 
     // Alice update her profile with a valid profile picture
     sample = sampleProfileInput({
