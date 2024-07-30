@@ -4,21 +4,21 @@ use hdk::prelude::*;
 use utils::wasm_error;
 
 #[hdk_extern]
-pub fn add_administrator(person_profile_hash: ActionHash) -> ExternResult<bool> {
-    if check_if_person_is_administrator(person_profile_hash.clone())? {
+pub fn add_administrator(person_action_hash: ActionHash) -> ExternResult<bool> {
+    if check_if_person_is_administrator(person_action_hash.clone())? {
         return Err(wasm_error("Allready an Administrator"));
     }
 
-    register_administrator(person_profile_hash.clone())?;
+    register_administrator(person_action_hash.clone())?;
     Ok(true)
 }
 
 #[hdk_extern]
-pub fn register_administrator(person_profile_hash: ActionHash) -> ExternResult<bool> {
+pub fn register_administrator(person_action_hash: ActionHash) -> ExternResult<bool> {
     let path = Path::from("administrators");
     create_link(
         path.path_entry_hash()?,
-        person_profile_hash.clone(),
+        person_action_hash.clone(),
         LinkTypes::AllAdministrators,
         (),
     )?;
@@ -33,11 +33,11 @@ pub fn get_all_administrators_links(_: ()) -> ExternResult<Vec<Link>> {
 }
 
 #[hdk_extern]
-pub fn check_if_person_is_administrator(person_profile_hash: ActionHash) -> ExternResult<bool> {
+pub fn check_if_person_is_administrator(person_action_hash: ActionHash) -> ExternResult<bool> {
     let links = get_all_administrators_links(())?;
     if links
         .iter()
-        .any(|link| link.target == person_profile_hash.clone().into())
+        .any(|link| link.target == person_action_hash.clone().into())
     {
         return Ok(true);
     }
@@ -46,16 +46,16 @@ pub fn check_if_person_is_administrator(person_profile_hash: ActionHash) -> Exte
 
 #[hdk_extern]
 pub fn check_if_agent_is_administrator(agent_pubkey: AgentPubKey) -> ExternResult<bool> {
-    let agent_person_profile_hash = get_agent_profile_hash(agent_pubkey)?;
-    if let Some(agent_person_profile_hash) = agent_person_profile_hash {
-        return check_if_person_is_administrator(agent_person_profile_hash);
+    let agent_person_action_hash = get_agent_profile_hash(agent_pubkey)?;
+    if let Some(agent_person_action_hash) = agent_person_action_hash {
+        return check_if_person_is_administrator(agent_person_action_hash);
     }
 
     Ok(false)
 }
 
 #[hdk_extern]
-pub fn remove_administrator(person_profile_hash: ActionHash) -> ExternResult<bool> {
+pub fn remove_administrator(person_action_hash: ActionHash) -> ExternResult<bool> {
     if !check_if_agent_is_administrator(agent_info()?.agent_initial_pubkey)? {
         return Err(wasm_error("Only administrators can remove administrators"));
     }
@@ -68,7 +68,7 @@ pub fn remove_administrator(person_profile_hash: ActionHash) -> ExternResult<boo
     let links = get_all_administrators_links(())?;
     let link = links
         .iter()
-        .find(|link| link.target == person_profile_hash.clone().into())
+        .find(|link| link.target == person_action_hash.clone().into())
         .ok_or(wasm_error("Could not find the administrator link"))?;
 
     delete_link(link.create_link_hash.clone())?;

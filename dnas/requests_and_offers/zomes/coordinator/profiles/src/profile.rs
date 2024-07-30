@@ -51,7 +51,7 @@ pub fn create_profile(profile_input: ProfileInput) -> ExternResult<Record> {
     create_link(
         path.path_entry_hash()?,
         profile_hash.clone(),
-        LinkTypes::AllProfiles,
+        LinkTypes::AllPersons,
         (),
     )?;
 
@@ -62,20 +62,12 @@ pub fn create_profile(profile_input: ProfileInput) -> ExternResult<Record> {
         (),
     )?;
 
-    // if DnaProperties::get()?.progenitor_pubkey == agent_info()?.agent_initial_pubkey {}
-
     Ok(record)
 }
 
 #[hdk_extern]
-pub fn get_latest_profile_record(
-    original_profile_hash: ActionHash,
-) -> ExternResult<Option<Record>> {
-    let links = get_links(
-        original_profile_hash.clone(),
-        LinkTypes::ProfileUpdates,
-        None,
-    )?;
+pub fn get_latest_profile_record(original_action_hash: ActionHash) -> ExternResult<Option<Record>> {
+    let links = get_links(original_action_hash.clone(), LinkTypes::PersonUpdates, None)?;
     let latest_link = links
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
@@ -85,14 +77,14 @@ pub fn get_latest_profile_record(
             .clone()
             .into_action_hash()
             .ok_or(wasm_error("Could not find the latest Profile"))?,
-        None => original_profile_hash.clone(),
+        None => original_action_hash.clone(),
     };
     get(latest_profile_hash, GetOptions::default())
 }
 
 #[hdk_extern]
-pub fn get_latest_profile(original_profile_hash: ActionHash) -> ExternResult<Profile> {
-    let latest_profile_record = get_latest_profile_record(original_profile_hash)?;
+pub fn get_latest_profile(original_action_hash: ActionHash) -> ExternResult<Profile> {
+    let latest_profile_record = get_latest_profile_record(original_action_hash)?;
     let latest_profile = latest_profile_record
         .ok_or(wasm_error("Could not find the latest Profile"))?
         .entry()
@@ -125,24 +117,24 @@ pub fn get_agent_profile_hash(agent_pubkey: AgentPubKey) -> ExternResult<Option<
 }
 
 #[hdk_extern]
-pub fn get_accepted_profiles(_: ()) -> ExternResult<Vec<Link>> {
-    let path = Path::from("accepted_profiles");
-    get_links(path.path_entry_hash()?, LinkTypes::AcceptedProfiles, None)
+pub fn get_accepted_persons(_: ()) -> ExternResult<Vec<Link>> {
+    let path = Path::from("accepted_persons");
+    get_links(path.path_entry_hash()?, LinkTypes::AcceptedPersons, None)
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateProfileInput {
-    pub original_profile_hash: ActionHash,
-    pub previous_profile_hash: ActionHash,
+    pub original_action_hash: ActionHash,
+    pub previous_action_hash: ActionHash,
     pub updated_profile: ProfileInput,
 }
 
 #[hdk_extern]
 pub fn update_profile(input: UpdateProfileInput) -> ExternResult<Record> {
     let mut profile = Profile::from(input.updated_profile.clone());
-    let original_record = must_get_valid_record(input.original_profile_hash.clone())?;
+    let original_record = must_get_valid_record(input.original_action_hash.clone())?;
 
-    let record_option = get_latest_profile(input.original_profile_hash.clone())?;
+    let record_option = get_latest_profile(input.original_action_hash.clone())?;
     profile.status = record_option.status;
 
     let author = original_record.action().author().clone();
@@ -150,12 +142,12 @@ pub fn update_profile(input: UpdateProfileInput) -> ExternResult<Record> {
         return Err(wasm_error("Only the author of a Profile can update it"));
     }
 
-    let updated_profile_hash = update_entry(input.previous_profile_hash.clone(), &profile)?;
+    let updated_profile_hash = update_entry(input.previous_action_hash.clone(), &profile)?;
 
     create_link(
-        input.original_profile_hash.clone(),
+        input.original_action_hash.clone(),
         updated_profile_hash.clone(),
-        LinkTypes::ProfileUpdates,
+        LinkTypes::PersonUpdates,
         (),
     )?;
 

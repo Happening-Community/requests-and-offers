@@ -61,12 +61,12 @@ export async function createProfile(
 
 export async function getLatestProfile(
   cell: CallableCell,
-  original_profile_hash: ActionHash
+  original_action_hash: ActionHash
 ): Promise<Record | null> {
   return cell.callZome({
     zome_name: "profiles",
     fn_name: "get_latest_profile_record",
-    payload: original_profile_hash,
+    payload: original_action_hash,
   });
 }
 
@@ -84,19 +84,19 @@ export async function getAgentProfile(
 export async function getAcceptedProfiles(cell: CallableCell): Promise<Link[]> {
   return cell.callZome({
     zome_name: "profiles",
-    fn_name: "get_accepted_profiles",
+    fn_name: "get_accepted_persons",
   });
 }
 
 export async function updateProfile(
   cell: CallableCell,
-  original_profile_hash: ActionHash,
-  previous_profile_hash: ActionHash,
+  original_action_hash: ActionHash,
+  previous_action_hash: ActionHash,
   updated_profile: ProfileInput
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "profiles",
     fn_name: "update_profile",
-    payload: { original_profile_hash, previous_profile_hash, updated_profile },
+    payload: { original_action_hash, previous_action_hash, updated_profile },
   });
 }

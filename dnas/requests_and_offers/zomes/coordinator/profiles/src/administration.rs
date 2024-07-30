@@ -14,7 +14,7 @@ pub fn get_all_profiles(_: ()) -> ExternResult<Vec<Link>> {
     }
 
     let path = Path::from("all_profiles");
-    get_links(path.path_entry_hash()?, LinkTypes::AllProfiles, None)
+    get_links(path.path_entry_hash()?, LinkTypes::AllPersons, None)
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -45,14 +45,14 @@ pub fn update_person_status(input: UpdateStatusInput) -> ExternResult<Record> {
     create_link(
         input.original_action_hash.clone(),
         action_hash.clone(),
-        LinkTypes::ProfileUpdates,
+        LinkTypes::PersonUpdates,
         (),
     )?;
 
     let status = Status::from_str(&profile.status).map_err(|err| wasm_error(&err.to_string()))?;
 
     let path = Path::from("accepted_persons");
-    let links = get_links(path.path_entry_hash()?, LinkTypes::AcceptedProfiles, None)?;
+    let links = get_links(path.path_entry_hash()?, LinkTypes::AcceptedPersons, None)?;
     let link = links
         .iter()
         .find(|link| link.target == input.original_action_hash.clone().into());
@@ -65,7 +65,7 @@ pub fn update_person_status(input: UpdateStatusInput) -> ExternResult<Record> {
         create_link(
             path.path_entry_hash()?,
             input.original_action_hash,
-            LinkTypes::AcceptedProfiles,
+            LinkTypes::AcceptedPersons,
             (),
         )?;
     }
