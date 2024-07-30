@@ -5,12 +5,13 @@
   import {
     administrators,
     getAllAdministrators,
+    getAllProfiles,
     removeAdministrator,
     suspendPersonIndefinitely,
     suspendPersonTemporarily,
     updateProfileStatus
   } from '@stores/administrators.store';
-  import { getAllProfiles, type Profile, type ProfileStatus } from '@stores/profiles.store';
+  import { type Profile, type ProfileStatus } from '@stores/profiles.store';
   import { onMount } from 'svelte';
 
   const modalStore = getModalStore();

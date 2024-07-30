@@ -1,10 +1,9 @@
 <script>
-  import { administrators } from '@stores/administrators.store';
+  import { administrators, allProfiles } from '@stores/administrators.store';
   import { organizations } from '@stores/organizations.store';
-  import { profiles } from '@stores/profiles.store';
   import { projects } from '@stores/projects.store';
 
-  $: pendingPersons = $profiles.filter((p) => p.status === 'pending');
+  $: pendingPersons = $allProfiles.filter((p) => p.status === 'pending');
   $: pendingprojects = $projects.filter((p) => p.status === 'pending');
   $: pendingOrganizations = $organizations.filter((o) => o.status === 'pending');
 </script>

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { ActionHash } from '@holochain/client';
   import NavButton from '@lib/NavButton.svelte';
   import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
   import {
@@ -10,11 +9,15 @@
     type ModalSettings,
     ConicGradient
   } from '@skeletonlabs/skeleton';
-  import { getAllProfiles, myProfile, profiles, type Profile } from '@stores/profiles.store';
+  import {
+    getAcceptedProfiles,
+    myProfile,
+    acceptedProfiles,
+    type Profile
+  } from '@stores/profiles.store';
   import { onMount } from 'svelte';
 
   $: isLoading = true;
-  let acceptedProfiles: Profile[] = [];
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -22,8 +25,7 @@
   ];
 
   onMount(async () => {
-    await getAllProfiles();
-    acceptedProfiles = $profiles.filter((profile) => profile.status === 'accepted');
+    await getAcceptedProfiles();
     isLoading = false;
   });
 
@@ -47,7 +49,7 @@
       <NavButton href="/profile/create" text="Create profile" />
     {/if}
   </div>
-  {#if acceptedProfiles.length}
+  {#if $acceptedProfiles.length}
     <table class="table">
       <thead>
         <tr>
@@ -58,7 +60,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each acceptedProfiles as profile, i}
+        {#each $acceptedProfiles as profile, i}
           <tr>
             <td>
               <Avatar
@@ -86,7 +88,7 @@
   {:else}
     <p class="h3 text-error-500">No profiles found.</p>
   {/if}
-  {#if isLoading && $profiles.length === 0}
+  {#if isLoading && $acceptedProfiles.length === 0}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {/if}
 </section>

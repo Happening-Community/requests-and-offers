@@ -7,20 +7,23 @@
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import { getAllProfiles, profiles, type Profile } from '@stores/profiles.store';
+  import { type Profile } from '@stores/profiles.store';
+  import { allProfiles, getAllProfiles } from '@stores/administrators.store';
   import { onMount } from 'svelte';
   import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
 
   $: isLoading = true;
 
-  $: pendingProfiles = $profiles.filter((profile) => profile.status === 'pending');
-  $: acceptedProfiles = $profiles.filter((profile) => profile.status === 'accepted');
-  $: rejectedProfiles = $profiles.filter((profile) => profile.status === 'rejected');
-  $: temporarilySuspendedProfiles = $profiles
+  $: pendingProfiles = $allProfiles.filter((profile) => profile.status === 'pending');
+  $: acceptedProfiles = $allProfiles.filter((profile) => profile.status === 'accepted');
+  $: rejectedProfiles = $allProfiles.filter((profile) => profile.status === 'rejected');
+  $: temporarilySuspendedProfiles = $allProfiles
     .filter((profile) => profile.status!.split(' ').length > 1)
     .filter((profile) => profile.remaining_time)
     .sort((a, b) => a.remaining_time! - b.remaining_time!);
-  $: indefinitelySuspendedProfiles = $profiles.filter((profile) => profile.status === 'suspended');
+  $: indefinitelySuspendedProfiles = $allProfiles.filter(
+    (profile) => profile.status === 'suspended'
+  );
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -55,7 +58,7 @@
 
 <section class="flex flex-col gap-10">
   <h1 class="h1 text-center">Persons management</h1>
-  {#if isLoading && $profiles.length === 0}
+  {#if isLoading && $allProfiles.length === 0}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {/if}
   <div class="flex flex-col gap-4 lg:flex-row lg:justify-center lg:gap-0 lg:divide-x-2">
