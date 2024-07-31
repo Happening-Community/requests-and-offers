@@ -91,7 +91,7 @@ test("create a Person and make it administrator", async () => {
   });
 });
 
-test.only("update Person status", async () => {
+test("update Person status", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: Profile;
     let record: Record;

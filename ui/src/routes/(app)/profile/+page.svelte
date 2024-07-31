@@ -9,13 +9,20 @@
     : '/default_avatar.webp';
 
   let suspensionDate: string;
+  let isExpired: boolean;
 
   onMount(async () => {
     await getMyProfile();
 
     if ($myProfile) {
       if ($myProfile.status!.split(' ')[1]) {
-        suspensionDate = new Date($myProfile.status!.split(' ')[1]).toLocaleString();
+        const date = new Date($myProfile.status!.split(' ')[1]);
+        const dateString = date.toString();
+        const now = new Date();
+
+        isExpired = date < now;
+
+        suspensionDate = dateString.substring(0, dateString.indexOf(' ', 15));
       }
     }
   });
@@ -36,7 +43,7 @@
       class="border-surface-600 bg-surface-400 flex w-4/5 min-w-96 flex-col items-center gap-5 rounded-xl border-8 p-5 drop-shadow-xl"
     >
       <h3 class="h3"><b>Nickname :</b> {$myProfile.nickname}</h3>
-      <h3 class="h3 text-center">
+      <h3 class="h3 text-wrap text-center">
         <b>Status :</b>
         <span
           class:text-primary-500={$myProfile.status === 'pending'}
@@ -49,7 +56,7 @@
           {#if !suspensionDate}
             {$myProfile.status}
           {:else}
-            suspended until <br /> {suspensionDate}
+            {isExpired ? 'In review' : `suspended until ${suspensionDate}.`}
           {/if}
         </span>
       </h3>
