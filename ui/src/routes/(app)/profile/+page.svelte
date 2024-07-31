@@ -66,7 +66,7 @@
       <p class="text-center">{$myProfile.bio}</p>
       <p><b>Type :</b> {$myProfile.user_type}</p>
       {#if $myProfile.skills?.length}
-        <p><b>Skills :</b> {$myProfile.skills?.join(', ')}</p>
+        <p class="text-center"><b>Skills :</b> {$myProfile.skills?.join(', ')}</p>
       {/if}
       <p><b>Email :</b> {$myProfile.email}</p>
       {#if $myProfile.phone}
