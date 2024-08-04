@@ -1,4 +1,4 @@
-import type { Organization } from '@stores/organizations.store';
+import type { Organization } from '@stores/organizations.svelte';
 import type { UserType, Profile } from '@stores/profiles.store';
 import { SimpleFaker, faker } from '@faker-js/faker';
 import { fetchImageAndConvertToUInt8Array, getRandomNumber } from '@utils';

@@ -9,16 +9,18 @@
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import { organizations, type Organization } from '@stores/organizations.store';
+  import organizationsStore, { type Organization } from '@stores/organizations.svelte';
   import { onMount } from 'svelte';
   import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
 
-  $: isLoading = true;
-  let organizationsHashes: ActionHash[];
+  const { organizations } = $derived(organizationsStore);
 
-  let pendingOrganizations: Organization[] = [];
-  let acceptedOrganizations: Organization[] = [];
-  let rejectedOrganizations: Organization[] = [];
+  let isLoading = $state(true);
+  let organizationsHashes: ActionHash[] = $state([]);
+
+  let pendingOrganizations: Organization[] = $state([]);
+  let acceptedOrganizations: Organization[] = $state([]);
+  let rejectedOrganizations: Organization[] = $state([]);
 
   const modalStore = getModalStore();
   const modalComponent: ModalComponent = { ref: ProfileDetailsModal };
@@ -39,18 +41,18 @@
   ];
 
   onMount(async () => {
-    if ($organizations.length === 0) {
+    if (organizations.length === 0) {
       const mockedOrganizations = await createMockedOrganizations(3);
-      organizations.set(mockedOrganizations);
+      organizationsStore.organizations = mockedOrganizations;
     }
 
-    pendingOrganizations = $organizations.filter(
+    pendingOrganizations = organizations.filter(
       (organization) => organization.status === 'pending'
     );
-    acceptedOrganizations = $organizations.filter(
+    acceptedOrganizations = organizations.filter(
       (organization) => organization.status === 'accepted'
     );
-    rejectedOrganizations = $organizations.filter(
+    rejectedOrganizations = organizations.filter(
       (organization) => organization.status === 'rejected'
     );
 
@@ -60,7 +62,7 @@
 
 <section class="flex flex-col gap-10">
   <h1 class="h1 text-center">Organizations management</h1>
-  {#if isLoading && $organizations.length === 0}
+  {#if isLoading && organizations.length === 0}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {/if}
   <div class="flex flex-col gap-4 lg:flex-row lg:gap-0 lg:divide-x-2">
@@ -90,7 +92,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    on:click={() => modalStore.trigger(modal(i, organizationsHashes[i]))}
+                    onclick={() => modalStore.trigger(modal(i, organizationsHashes[i]))}
                   >
                     View
                   </button>
@@ -128,7 +130,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    on:click={() => modalStore.trigger(modal(i, organizationsHashes[i]))}
+                    onclick={() => modalStore.trigger(modal(i, organizationsHashes[i]))}
                   >
                     View
                   </button>

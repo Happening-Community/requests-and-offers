@@ -1,11 +1,15 @@
 <script>
   import { administrators, allProfiles } from '@stores/administrators.store';
-  import { organizations } from '@stores/organizations.store';
+  // import type Organization from '@stores/organizations.svelte';
+  import organizationsStore from '@stores/organizations.svelte';
+  ('@stores/organizations.svelte');
   import { projects } from '@stores/projects.store';
+
+  const { organizations } = organizationsStore;
 
   $: pendingPersons = $allProfiles.filter((p) => p.status === 'pending');
   $: pendingprojects = $projects.filter((p) => p.status === 'pending');
-  $: pendingOrganizations = $organizations.filter((o) => o.status === 'pending');
+  $: pendingOrganizations = organizations.filter((o) => o.status === 'pending');
 </script>
 
 <section class="space-y-8">
