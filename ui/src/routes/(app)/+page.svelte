@@ -7,9 +7,19 @@
 
 <section class="flex flex-col items-center">
   {#if $agentIsAdministrator}
-    <a class="btn absolute left-10 top-40 bg-red-600 text-white hover:text-black" href="/admin">
-      Admin zone
-    </a>
+    <div class="absolute left-10 top-40 flex flex-col items-center gap-2">
+      <a class="btn bg-red-600 text-white hover:text-black" href="/admin"> Admin zone </a>
+      <span><kbd class="kbd bg-red-300">Alt</kbd> + <kbd class="kbd bg-red-300">A</kbd></span>
+    </div>
+  {/if}
+  {#if $myProfile && !$agentIsAdministrator}
+    <div class="absolute left-10 top-40 flex flex-col items-center gap-2">
+      <p>
+        Register as administrator : <kbd class="kbd">Ctrl</kbd> + <kbd class="kbd">Shift</kbd> +
+        <kbd class="kbd">A</kbd>
+      </p>
+    </div>
+    <!--  -->
   {/if}
   {#if !$myProfile}
     <p class="mb-4 text-center text-xl">It looks like you don't have a profile yet !</p>
