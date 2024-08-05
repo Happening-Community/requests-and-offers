@@ -20,7 +20,7 @@
 
   let form: HTMLFormElement;
   let files: FileList;
-  let fileMessage: HTMLParagraphElement;
+  let fileMessage: string;
   let profilePicture: Blob | undefined;
   let timezones = moment.tz.names();
   let filteredTimezones: string[] = [];
@@ -55,14 +55,14 @@
   }
 
   async function onPictureFileChange() {
-    fileMessage.innerHTML = `${files[0].name}`;
+    fileMessage = `${files[0].name}`;
     profilePicture = new Blob([new Uint8Array(await files[0].arrayBuffer())]);
   }
 
   function RemoveProfilePicture() {
     isChanged = true;
     profilePicture = undefined;
-    fileMessage.innerHTML = '';
+    fileMessage = '';
     const pictureInput = form.querySelector('input[name="picture"]') as HTMLInputElement;
     if (pictureInput) {
       pictureInput.value = '';
@@ -114,7 +114,7 @@
 <section class="flex w-1/2 flex-col gap-10">
   {#if !$myProfile}
     <p class="mb-4 text-center text-xl">It looks like you don't have a profile yet !</p>
-    <NavButton href="/profile/create" text="Create profile" />
+    <NavButton href="/profile/create">Create profile</NavButton>
   {:else}
     <h2 class="h2">Edit Profile</h2>
 
@@ -137,13 +137,13 @@
 
       <label class="label text-lg">
         Bio :
-        <textarea class="textarea h-52" name="bio" value={$myProfile.bio} />
+        <textarea class="textarea h-52" name="bio">{$myProfile.bio}</textarea>
       </label>
 
       <p class="label text-lg">Profile picture :</p>
       <FileDropzone name="picture" bind:files on:change={onPictureFileChange} accept="image/*" />
       <div class="flex items-center justify-between">
-        <p class="italic" bind:this={fileMessage} />
+        <p class="italic">{fileMessage}</p>
         {#if files && profilePicture}
           <div>
             <Avatar src={URL.createObjectURL(profilePicture)} />

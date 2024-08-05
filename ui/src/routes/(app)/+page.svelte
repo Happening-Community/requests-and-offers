@@ -23,7 +23,7 @@
   {/if}
   {#if !$myProfile}
     <p class="mb-4 text-center text-xl">It looks like you don't have a profile yet !</p>
-    <NavButton href="/profile/create" text="Create profile" />
+    <NavButton href="/profile/create">Create profile</NavButton>
   {:else}
     <h2 class="h2 mb-10">Welcome {$myProfile.name} !</h2>
     <a href="/profile" class="btn variant-filled-primary w-fit text-white">View profile</a>

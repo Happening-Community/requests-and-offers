@@ -106,19 +106,13 @@
   <div class="flex flex-col items-center gap-4">
     <p>How many days do you want to suspend this person ?</p>
     <form class="flex justify-around">
-      <input
-        type="number"
-        min="1"
-        max="365"
-        class="input no-arrows w-2/5"
-        bind:value={suspendedDays}
-      />
+      <input type="number" min="1" max="365" class="input w-2/5" bind:value={suspendedDays} />
       <button class="btn variant-filled-secondary" on:click={handleSuspendTemporarily}>
         Suspend
       </button>
     </form>
   </div>
-  <div class="arrow variant-filled-tertiary" />
+  <div class="arrow variant-filled-tertiary"></div>
 </div>
 
 <article

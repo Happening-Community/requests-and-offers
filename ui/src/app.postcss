@@ -13,22 +13,9 @@
 }
 
 td {
-  vertical-align: middle !important;
+  @apply !align-middle;
 }
 
-/* Normalize the appearance */
-.no-arrows {
-  -moz-appearance: textfield;
-}
-
-/* Hide the spin buttons for WebKit browsers like Chrome and Safari */
-.no-arrows::-webkit-inner-spin-button,
-.no-arrows::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Hide the spin buttons for Mozilla Firefox */
-.no-arrows input[type='number'] {
-  -moz-appearance: textfield;
+center {
+  @apply grid place-content-center;
 }

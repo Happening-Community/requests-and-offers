@@ -5,14 +5,13 @@
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import type { ActionHash } from '@holochain/client';
   import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
   import { onMount } from 'svelte';
   import { getAllAdministrators, administrators } from '@stores/administrators.store';
   import AddAdministratorModal from '@lib/modals/AddAdministratorModal.svelte';
   import type { Profile } from '@stores/profiles.store';
 
-  $: isLoading = true;
+  let isLoading = $state(true);
 
   const modalStore = getModalStore();
   const profileDetailsModalComponent: ModalComponent = { ref: ProfileDetailsModal };
@@ -46,7 +45,7 @@
       <h2 class="h3">Network administrators</h2>
       <button
         class="btn variant-filled-secondary w-fit"
-        on:click={() => modalStore.trigger(addAdministratorModal)}>Add administrator</button
+        onclick={() => modalStore.trigger(addAdministratorModal)}>Add administrator</button
       >
     </div>
 
@@ -77,7 +76,7 @@
               <td>
                 <button
                   class="btn variant-filled-secondary"
-                  on:click={() => modalStore.trigger(profileDetailsModal(profile))}
+                  onclick={() => modalStore.trigger(profileDetailsModal(profile))}
                 >
                   View
                 </button>

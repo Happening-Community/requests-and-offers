@@ -17,6 +17,12 @@
   import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
   import { storePopup } from '@skeletonlabs/skeleton';
 
+  type Props = {
+    children: any;
+  };
+
+  let { children } = $props() as Props;
+
   storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
   initializeStores();
@@ -63,7 +69,7 @@
 
 <svelte:window on:keydown={handleKeyboardEvent} />
 
-<slot />
+{@render children()}
 
 <Modal />
 <Drawer>

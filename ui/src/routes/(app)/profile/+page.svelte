@@ -31,7 +31,7 @@
 <section class="flex flex-col items-center">
   {#if !$myProfile}
     <p class="mb-4 text-center text-xl">It looks like you don't have a profile yet !</p>
-    <NavButton href="/profile/create" text="Create profile" />
+    <NavButton href="/profile/create">Create profile</NavButton>
   {:else}
     <div class="mb-10 flex flex-col items-center gap-5">
       <h2 class="h2">

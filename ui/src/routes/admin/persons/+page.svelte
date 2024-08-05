@@ -12,17 +12,19 @@
   import { onMount } from 'svelte';
   import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
 
-  $: isLoading = true;
+  let isLoading = $state(true);
 
-  $: pendingProfiles = $allProfiles.filter((profile) => profile.status === 'pending');
-  $: acceptedProfiles = $allProfiles.filter((profile) => profile.status === 'accepted');
-  $: rejectedProfiles = $allProfiles.filter((profile) => profile.status === 'rejected');
-  $: temporarilySuspendedProfiles = $allProfiles
-    .filter((profile) => profile.status!.split(' ').length > 1)
-    .filter((profile) => profile.remaining_time)
-    .sort((a, b) => a.remaining_time! - b.remaining_time!);
-  $: indefinitelySuspendedProfiles = $allProfiles.filter(
-    (profile) => profile.status === 'suspended'
+  let pendingProfiles = $derived($allProfiles.filter((profile) => profile.status === 'pending'));
+  let acceptedProfiles = $derived($allProfiles.filter((profile) => profile.status === 'accepted'));
+  let rejectedProfiles = $derived($allProfiles.filter((profile) => profile.status === 'rejected'));
+  let temporarilySuspendedProfiles = $derived(
+    $allProfiles
+      .filter((profile) => profile.status!.split(' ').length > 1)
+      .filter((profile) => profile.remaining_time)
+      .sort((a, b) => a.remaining_time! - b.remaining_time!)
+  );
+  let indefinitelySuspendedProfiles = $derived(
+    $allProfiles.filter((profile) => profile.status === 'suspended')
   );
 
   const conicStops: ConicStop[] = [
@@ -91,7 +93,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    on:click={() => modalStore.trigger(modal(profile))}
+                    onclick={() => modalStore.trigger(modal(profile))}
                   >
                     View
                   </button>
@@ -133,7 +135,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    on:click={() => modalStore.trigger(modal(profile))}
+                    onclick={() => modalStore.trigger(modal(profile))}
                   >
                     View
                   </button>
@@ -196,7 +198,7 @@
                   <td>
                     <button
                       class="btn variant-filled-secondary"
-                      on:click={() => modalStore.trigger(modal(profile))}
+                      onclick={() => modalStore.trigger(modal(profile))}
                     >
                       View
                     </button>
@@ -237,7 +239,7 @@
                   <td>
                     <button
                       class="btn variant-filled-secondary"
-                      on:click={() => modalStore.trigger(modal(profile))}
+                      onclick={() => modalStore.trigger(modal(profile))}
                     >
                       View
                     </button>
@@ -287,7 +289,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    on:click={() => modalStore.trigger(modal(profile))}
+                    onclick={() => modalStore.trigger(modal(profile))}
                   >
                     View
                   </button>

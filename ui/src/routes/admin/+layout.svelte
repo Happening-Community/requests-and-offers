@@ -7,6 +7,12 @@
   import { agentIsAdministrator } from '@stores/administrators.store';
   import { onMount } from 'svelte';
 
+  type Props = {
+    children: any;
+  };
+
+  let { children }: Props = $props();
+
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
     { color: 'rgb(var(--color-secondary-500))', start: 75, end: 50 }
@@ -38,7 +44,7 @@
       <p>Not connected yet.</p>
       <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
     {:else}
-      <slot />
+      {@render children()}
     {/if}
   </main>
 </AppShell>

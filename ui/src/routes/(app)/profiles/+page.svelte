@@ -17,7 +17,7 @@
   } from '@stores/profiles.store';
   import { onMount } from 'svelte';
 
-  $: isLoading = true;
+  let isLoading = $state(true);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -46,7 +46,7 @@
   <div class="flex gap-4">
     <h2 class="h2">Profiles</h2>
     {#if !$myProfile}
-      <NavButton href="/profile/create" text="Create profile" />
+      <NavButton href="/profile/create">Create profile</NavButton>
     {/if}
   </div>
   {#if $acceptedProfiles.length}
@@ -76,7 +76,7 @@
             <td>
               <button
                 class="btn variant-filled-primary"
-                on:click={() => modalStore.trigger(modal(profile))}
+                onclick={() => modalStore.trigger(modal(profile))}
               >
                 View
               </button>

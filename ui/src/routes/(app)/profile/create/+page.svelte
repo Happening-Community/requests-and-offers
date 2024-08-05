@@ -20,7 +20,7 @@
 
   let form: HTMLFormElement;
   let files: FileList;
-  let fileMessage: HTMLParagraphElement;
+  let fileMessage: string;
   let timezones = moment.tz.names();
   let filteredTimezones: string[] = [];
   let formattedTimezones: FormattedTimezone[] = [];
@@ -55,13 +55,13 @@
   let profilePicture: Blob | undefined;
 
   async function onPictureFileChange() {
-    fileMessage.innerHTML = `${files[0].name}`;
+    fileMessage = `${files[0].name}`;
     profilePicture = new Blob([new Uint8Array(await files[0].arrayBuffer())]);
   }
 
   function RemoveProfilePicture() {
     profilePicture = undefined;
-    fileMessage.innerHTML = '';
+    fileMessage = '';
     const pictureInput = form.querySelector('input[name="picture"]') as HTMLInputElement;
     if (pictureInput) {
       pictureInput.value = '';
@@ -133,13 +133,13 @@
 
     <label class="label text-lg">
       Bio :
-      <textarea class="textarea" name="bio" />
+      <textarea class="textarea" name="bio"></textarea>
     </label>
 
     <p class="label text-lg">Profile picture :</p>
     <FileDropzone name="picture" bind:files on:change={onPictureFileChange} accept="image/*" />
     <div class="flex items-center justify-between">
-      <p class="italic" bind:this={fileMessage} />
+      <p class="italic">{fileMessage}</p>
       {#if files && profilePicture}
         <div>
           <Avatar src={URL.createObjectURL(profilePicture)} />

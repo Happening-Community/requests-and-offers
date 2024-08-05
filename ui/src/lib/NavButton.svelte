@@ -1,9 +1,15 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
 
-  export let className: string = 'variant-filled-primary w-fit',
-    href: string,
-    text: string;
+  type Props = {
+    className?: string;
+    href: string;
+    children: any;
+  };
+
+  let { className, href, children }: Props = $props();
 </script>
 
-<button class="btn {className}" on:click={() => goto(href)}>{text}</button>
+<button class="btn {className ? className : 'variant-filled-primary'} " onclick={() => goto(href)}>
+  {@render children()}
+</button>

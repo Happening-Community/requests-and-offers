@@ -2,7 +2,7 @@ import type { Organization } from '@stores/organizations.svelte';
 import type { UserType, Profile } from '@stores/profiles.store';
 import { SimpleFaker, faker } from '@faker-js/faker';
 import { fetchImageAndConvertToUInt8Array, getRandomNumber } from '@utils';
-import type { Project } from '@stores/projects.store';
+import type { Project } from '@stores/projects.svelte';
 
 export async function createMockedProfiles(count: number = 1): Promise<Profile[]> {
   let profiles: Profile[] = [];

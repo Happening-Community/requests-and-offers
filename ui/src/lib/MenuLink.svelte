@@ -1,12 +1,21 @@
 <script lang="ts">
   import { getDrawerStore } from '@skeletonlabs/skeleton';
 
-  export let href: string,
-    className: string = 'variant-filled-secondary';
+  type Props = {
+    href: string;
+    className?: string;
+    children: any;
+  };
+
+  let { href, className, children }: Props = $props();
 
   const drawerStore = getDrawerStore();
 </script>
 
-<a {href} class="btn {className} rounded-lg" on:click={() => drawerStore.close()}>
-  <slot />
+<a
+  {href}
+  class="btn {className ? className : 'variant-filled-secondary'} rounded-lg"
+  onclick={() => drawerStore.close()}
+>
+  {@render children()}
 </a>

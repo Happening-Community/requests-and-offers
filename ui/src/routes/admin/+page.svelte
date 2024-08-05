@@ -3,13 +3,14 @@
   // import type Organization from '@stores/organizations.svelte';
   import organizationsStore from '@stores/organizations.svelte';
   ('@stores/organizations.svelte');
-  import { projects } from '@stores/projects.store';
+  import projectsStore from '@stores/projects.svelte';
 
   const { organizations } = organizationsStore;
+  const { projects } = projectsStore;
 
-  $: pendingPersons = $allProfiles.filter((p) => p.status === 'pending');
-  $: pendingprojects = $projects.filter((p) => p.status === 'pending');
-  $: pendingOrganizations = organizations.filter((o) => o.status === 'pending');
+  let pendingPersons = $state($allProfiles.filter((p) => p.status === 'pending'));
+  let pendingprojects = $state(projects.filter((p) => p.status === 'pending'));
+  let pendingOrganizations = $state(organizations.filter((o) => o.status === 'pending'));
 </script>
 
 <section class="space-y-8">

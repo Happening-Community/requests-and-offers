@@ -4,6 +4,12 @@
   import Navbar from '@lib/NavBar.svelte';
   import { onMount } from 'svelte';
 
+  type Props = {
+    children: any;
+  };
+
+  let { children }: Props = $props();
+
   onMount(() => {
     const htmlElement = document.getElementsByTagName('html')[0];
     htmlElement.classList.remove('dark');
@@ -27,7 +33,7 @@
       <p>Not connected yet.</p>
       <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
     {:else}
-      <slot />
+      {@render children()}
     {/if}
   </main>
 </AppShell>
