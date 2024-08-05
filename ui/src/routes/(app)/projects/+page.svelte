@@ -1,10 +1,12 @@
 <script lang="ts">
   import { createMockedProjects } from '@mocks';
   import { Avatar, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
-  import { projects } from '@stores/projects.store';
+  import projectsStore from '@stores/projects.svelte';
   import { onMount } from 'svelte';
 
-  $: isLoading = true;
+  let isLoading = $state(true);
+
+  const { projects } = $derived(projectsStore);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -12,9 +14,9 @@
   ];
 
   onMount(async () => {
-    if ($projects.length === 0) {
+    if (projects.length === 0) {
       const mockedProjects = await createMockedProjects(3);
-      projects.set(mockedProjects);
+      projectsStore.projects = mockedProjects;
     }
     isLoading = false;
   });
@@ -36,7 +38,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each $projects as project}
+        {#each projects as project}
           <tr>
             <td class="text-center">
               <Avatar

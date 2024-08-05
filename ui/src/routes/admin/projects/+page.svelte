@@ -9,17 +9,18 @@
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import { projects, type Project } from '@stores/projects.store';
+  import projectsStore, { type Project } from '@stores/projects.svelte';
   import { onMount } from 'svelte';
   import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
 
-  $: isLoading = true;
-  let projectsHashes: ActionHash[];
+  let isLoading = $state(true);
+  let projectsHashes: ActionHash[] = $state([]);
 
-  let pendingprojects: Project[] = [];
-  let acceptedprojects: Project[] = [];
-  let rejectedprojects: Project[] = [];
+  let pendingprojects: Project[] = $state([]);
+  let acceptedprojects: Project[] = $state([]);
+  let rejectedprojects: Project[] = $state([]);
 
+  const { projects } = $derived(projectsStore);
   const modalStore = getModalStore();
   const modalComponent: ModalComponent = { ref: ProfileDetailsModal };
   const modal = (id: number, hash: ActionHash): ModalSettings => {
@@ -39,14 +40,14 @@
   ];
 
   onMount(async () => {
-    if ($projects.length === 0) {
+    if (projects.length === 0) {
       const mockedprojects = await createMockedProjects(3);
-      projects.set(mockedprojects);
+      projectsStore.projects = mockedprojects;
     }
 
-    pendingprojects = $projects.filter((Project) => Project.status === 'pending');
-    acceptedprojects = $projects.filter((Project) => Project.status === 'accepted');
-    rejectedprojects = $projects.filter((Project) => Project.status === 'rejected');
+    pendingprojects = projects.filter((Project) => Project.status === 'pending');
+    acceptedprojects = projects.filter((Project) => Project.status === 'accepted');
+    rejectedprojects = projects.filter((Project) => Project.status === 'rejected');
 
     isLoading = false;
   });
@@ -54,7 +55,7 @@
 
 <section class="flex flex-col gap-10">
   <h1 class="h1 text-center">Projects management</h1>
-  {#if isLoading && $projects.length === 0}
+  {#if isLoading && projects.length === 0}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {/if}
   <div class="flex flex-col gap-4 lg:flex-row lg:gap-0 lg:divide-x-2">
@@ -84,7 +85,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    on:click={() => modalStore.trigger(modal(i, projectsHashes[i]))}
+                    onclick={() => modalStore.trigger(modal(i, projectsHashes[i]))}
                   >
                     View
                   </button>
@@ -122,7 +123,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    on:click={() => modalStore.trigger(modal(i, projectsHashes[i]))}
+                    onclick={() => modalStore.trigger(modal(i, projectsHashes[i]))}
                   >
                     View
                   </button>
