@@ -7,25 +7,12 @@
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import { type User } from '@stores/users.store';
-  import { allUsers, getAllUsers } from '@stores/administrators.store';
+  import { type User } from '@stores/users.svelte';
+  import administratorsStore from '@stores/administrators.svelte';
   import { onMount } from 'svelte';
   import UserDetailsModal from '@lib/modals/UserDetailsModal.svelte';
 
-  let isLoading = $state(true);
-
-  let pendingUsers = $derived($allUsers.filter((user) => user.status === 'pending'));
-  let acceptedUsers = $derived($allUsers.filter((user) => user.status === 'accepted'));
-  let rejectedUsers = $derived($allUsers.filter((user) => user.status === 'rejected'));
-  let temporarilySuspendedUsers = $derived(
-    $allUsers
-      .filter((user) => user.status!.split(' ').length > 1)
-      .filter((user) => user.remaining_time)
-      .sort((a, b) => a.remaining_time! - b.remaining_time!)
-  );
-  let indefinitelySuspendedUsers = $derived(
-    $allUsers.filter((user) => user.status === 'suspended')
-  );
+  const { allUsers, getAllUsers } = $derived(administratorsStore);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -44,6 +31,19 @@
     };
   };
 
+  let isLoading = $state(true);
+
+  let pendingUsers = $derived(allUsers.filter((user) => user.status === 'pending'));
+  let acceptedUsers = $derived(allUsers.filter((user) => user.status === 'accepted'));
+  let rejectedUsers = $derived(allUsers.filter((user) => user.status === 'rejected'));
+  let temporarilySuspendedUsers = $derived(
+    allUsers
+      .filter((user) => user.status!.split(' ').length > 1)
+      .filter((user) => user.remaining_time)
+      .sort((a, b) => a.remaining_time! - b.remaining_time!)
+  );
+  let indefinitelySuspendedUsers = $derived(allUsers.filter((user) => user.status === 'suspended'));
+
   onMount(async () => {
     await getAllUsers();
 
@@ -60,7 +60,7 @@
 
 <section class="flex flex-col gap-10">
   <h1 class="h1 text-center">Users management</h1>
-  {#if isLoading && $allUsers.length === 0}
+  {#if isLoading && allUsers.length === 0}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {/if}
   <div class="flex flex-col gap-4 lg:flex-row lg:justify-center lg:gap-0 lg:divide-x-2">

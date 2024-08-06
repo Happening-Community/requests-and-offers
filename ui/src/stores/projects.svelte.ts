@@ -1,4 +1,3 @@
-import { writable, type Writable } from 'svelte/store';
 import type { ActionHash } from '@holochain/client';
 
 export type ProjectStatus = 'pending' | 'accepted' | 'rejected';

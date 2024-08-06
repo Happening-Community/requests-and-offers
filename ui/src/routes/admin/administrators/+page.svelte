@@ -7,11 +7,11 @@
   } from '@skeletonlabs/skeleton';
   import UserDetailsModal from '@lib/modals/UserDetailsModal.svelte';
   import { onMount } from 'svelte';
-  import { getAllAdministrators, administrators } from '@stores/administrators.store';
+  import administratorsStore from '@stores/administrators.svelte';
   import AddAdministratorModal from '@lib/modals/AddAdministratorModal.svelte';
-  import type { User } from '@stores/users.store';
+  import type { User } from '@stores/users.svelte';
 
-  let isLoading = $state(true);
+  const { administrators, getAllAdministrators } = $derived(administratorsStore);
 
   const modalStore = getModalStore();
   const userDetailsModalComponent: ModalComponent = { ref: UserDetailsModal };
@@ -29,6 +29,8 @@
     type: 'component',
     component: addAdministratorModalComponent
   };
+
+  let isLoading = $state(true);
 
   onMount(async () => {
     await getAllAdministrators();
@@ -49,7 +51,7 @@
       >
     </div>
 
-    {#if $administrators && $administrators.length > 0}
+    {#if administrators && administrators.length > 0}
       <table class="table-hover table drop-shadow-lg">
         <thead>
           <tr>
@@ -60,7 +62,7 @@
           </tr>
         </thead>
         <tbody>
-          {#each $administrators as user, i}
+          {#each administrators as user, i}
             <tr>
               <td>
                 <Avatar

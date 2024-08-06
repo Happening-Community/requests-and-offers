@@ -1,7 +1,7 @@
 <script lang="ts">
   import moment from 'moment-timezone';
   import { FileDropzone, InputChip, Avatar } from '@skeletonlabs/skeleton';
-  import { createUser, myUser, type UserType, type User, getMyUser } from '@stores/users.store.js';
+  import usersStore, { type User, type UserType } from '@stores/users.svelte';
   import { goto } from '$app/navigation';
   import { createMockedUsers } from '@mocks';
   import { onMount } from 'svelte';
@@ -11,6 +11,8 @@
     formatted: string;
     offset: number;
   };
+
+  const { myProfile, getMyProfile, createUser } = usersStore;
 
   let form: HTMLFormElement;
   let files: FileList;
@@ -65,7 +67,7 @@
   async function mockUsers() {
     try {
       await createUser((await createMockedUsers())[0]);
-      await getMyUser();
+      await getMyProfile();
 
       goto('/user');
     } catch (error) {
@@ -93,7 +95,7 @@
 
     try {
       await createUser(user);
-      await getMyUser();
+      await getMyProfile();
 
       goto('/user');
     } catch (error) {
@@ -102,7 +104,7 @@
   }
 
   onMount(async () => {
-    if ($myUser) {
+    if (myProfile) {
       goto('/user');
     }
   });

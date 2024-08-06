@@ -4,14 +4,16 @@
   import Navbar from '@lib/NavBar.svelte';
   import { isConnected } from '@services/HolochainClientService';
   import { AppShell, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
-  import { agentIsAdministrator } from '@stores/administrators.store';
+  import administratorsStore from '@stores/administrators.svelte';
   import { onMount } from 'svelte';
 
   type Props = {
     children: any;
   };
 
-  let { children }: Props = $props();
+  const { children }: Props = $props();
+
+  const { agentIsAdministrator } = $derived(administratorsStore);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -22,7 +24,7 @@
     const htmlElement = document.getElementsByTagName('html')[0];
     htmlElement.classList.add('dark');
 
-    if (!$agentIsAdministrator) goto('/');
+    if (!agentIsAdministrator) goto('/');
   });
 </script>
 

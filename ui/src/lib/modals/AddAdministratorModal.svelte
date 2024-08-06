@@ -1,19 +1,15 @@
 <script lang="ts">
   import { Avatar, ConicGradient, getModalStore, type ConicStop } from '@skeletonlabs/skeleton';
-  import {
-    administrators,
-    getNonAdministratorUsers,
-    nonAmdinistrators,
-    registerAdministrator
-  } from '@stores/administrators.store';
-  import { type User } from '@stores/users.store';
+  import administratorsStore from '@stores/administrators.svelte';
+  import { type User } from '@stores/users.svelte';
   import { onMount } from 'svelte';
 
-  export let parent: any;
+  const { administrators, getNonAdministratorUsers, nonAdministrators, registerAdministrator } =
+    $derived(administratorsStore);
 
-  let filteredUsers: User[] = [];
-  let searchInput = '';
-  let isLoading = true;
+  let filteredUsers: User[] = $state([]);
+  let searchInput = $state('');
+  let isLoading = $state(true);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -22,7 +18,7 @@
 
   onMount(async () => {
     await getNonAdministratorUsers();
-    filteredUsers = $nonAmdinistrators;
+    filteredUsers = nonAdministrators;
 
     isLoading = false;
   });
@@ -34,7 +30,7 @@
     if (confirmation) {
       try {
         await registerAdministrator(user.original_action_hash!);
-        administrators.set([...$administrators, user]);
+        administratorsStore.administrators = [...administrators, user];
       } catch (error) {}
 
       modalStore.close();
@@ -43,12 +39,12 @@
 
   function searchInputHandler(evt: Event) {
     searchInput = (evt.target as HTMLInputElement).value;
-    filteredUsers = $nonAmdinistrators.filter((user) =>
+    filteredUsers = nonAdministrators.filter((user) =>
       user.name.toLowerCase().includes(searchInput.toLowerCase())
     );
 
     if (filteredUsers.length === 0 && searchInput === '') {
-      filteredUsers = $nonAmdinistrators;
+      filteredUsers = nonAdministrators;
     }
   }
 </script>
@@ -59,7 +55,7 @@
   <div class="static mb-8 space-y-4">
     <h2 class="h2 text-center">Add an administrator</h2>
 
-    {#if $nonAmdinistrators.length > 0}
+    {#if nonAdministrators.length > 0}
       <div>
         <input
           class="input"

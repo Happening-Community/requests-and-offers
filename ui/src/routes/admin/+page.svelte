@@ -1,14 +1,14 @@
 <script>
-  import { administrators, allUsers } from '@stores/administrators.store';
-  // import type Organization from '@stores/organizations.svelte';
+  import administratorsStore from '@stores/administrators.svelte';
   import organizationsStore from '@stores/organizations.svelte';
   ('@stores/organizations.svelte');
   import projectsStore from '@stores/projects.svelte';
 
+  const { allUsers, administrators } = $derived(administratorsStore);
   const { organizations } = organizationsStore;
   const { projects } = projectsStore;
 
-  let pendingUsers = $state($allUsers.filter((p) => p.status === 'pending'));
+  let pendingUsers = $derived(allUsers.filter((p) => p.status === 'pending'));
   let pendingprojects = $state(projects.filter((p) => p.status === 'pending'));
   let pendingOrganizations = $state(organizations.filter((o) => o.status === 'pending'));
 </script>
@@ -25,7 +25,7 @@
   <h1 class="h1">Admin Dashboard</h1>
 
   <div class="bg-surface-900 space-y-2 border-2 border-slate-900 p-4">
-    <p># of administrators : {$administrators.length}</p>
+    <p># of administrators : {administrators.length}</p>
     <p># of pending Users : {pendingUsers.length}</p>
     <p># of pending Projects : {pendingprojects.length}</p>
     <p># of pending Organizations : {pendingOrganizations.length}</p>

@@ -1,5 +1,5 @@
 import type { Organization } from '@stores/organizations.svelte';
-import type { UserType, User } from '@stores/users.store';
+import type { UserType, User } from '@stores/users.svelte';
 import { SimpleFaker, faker } from '@faker-js/faker';
 import { fetchImageAndConvertToUInt8Array, getRandomNumber } from '@utils';
 import type { Project } from '@stores/projects.svelte';

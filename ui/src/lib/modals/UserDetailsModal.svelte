@@ -2,7 +2,11 @@
   import { page } from '$app/stores';
   import type { ActionHash } from '@holochain/client';
   import { Avatar, getModalStore, popup, type PopupSettings } from '@skeletonlabs/skeleton';
-  import {
+  import administratorsStore from '@stores/administrators.svelte';
+  import { type User, type UserStatus } from '@stores/users.svelte';
+  import { onMount } from 'svelte';
+
+  const {
     administrators,
     getAllAdministrators,
     getAllUsers,
@@ -10,20 +14,15 @@
     suspendUserIndefinitely,
     suspendUserTemporarily,
     updateUserStatus
-  } from '@stores/administrators.store';
-  import { type User, type UserStatus } from '@stores/users.store';
-  import { onMount } from 'svelte';
-
+  } = $derived(administratorsStore);
   const modalStore = getModalStore();
 
-  export let parent: any;
-
-  let userPictureUrl: string;
+  let userPictureUrl = $state('');
   let user: User = $modalStore[0].meta.user;
-  let isTheOnlyAdmin = $administrators.length === 1;
-  let suspendedDays = 1;
-  let suspensionDate: string;
-  let isSuspendedTemporarily = false;
+  let isTheOnlyAdmin = $derived(administrators.length === 1);
+  let suspendedDays = $state(1);
+  let suspensionDate = $state('');
+  let isSuspendedTemporarily = $state(false);
 
   onMount(async () => {
     userPictureUrl = user?.picture

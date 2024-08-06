@@ -9,15 +9,17 @@
     type ModalSettings,
     ConicGradient
   } from '@skeletonlabs/skeleton';
-  import { getAcceptedUsers, myUser, acceptedUsers, type User } from '@stores/users.store';
+  import usersStore, { type User } from '@stores/users.svelte';
   import { onMount } from 'svelte';
 
-  let isLoading = $state(true);
+  const { getAcceptedUsers, myProfile, acceptedUsers } = usersStore;
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
     { color: 'rgb(var(--color-primary-500))', start: 75, end: 50 }
   ];
+
+  let isLoading = $state(true);
 
   onMount(async () => {
     await getAcceptedUsers();
@@ -40,11 +42,11 @@
 <section class="flex flex-col gap-4">
   <div class="flex gap-4">
     <h2 class="h2">Users</h2>
-    {#if !$myUser}
+    {#if !myProfile}
       <NavButton href="/user/create">Create Profile</NavButton>
     {/if}
   </div>
-  {#if $acceptedUsers.length}
+  {#if acceptedUsers.length}
     <table class="table">
       <thead>
         <tr>
@@ -55,7 +57,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each $acceptedUsers as user, i}
+        {#each acceptedUsers as user, i}
           <tr>
             <td>
               <Avatar
@@ -83,7 +85,7 @@
   {:else}
     <p class="h3 text-error-500">No users found.</p>
   {/if}
-  {#if isLoading && $acceptedUsers.length === 0}
+  {#if isLoading && acceptedUsers.length === 0}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {/if}
 </section>
