@@ -1,19 +1,22 @@
 [package]
-name = "profiles"
+name = "users_integrity"
 version = "0.0.1"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-name = "profiles"
+name = "users_integrity"
 
 [dependencies]
-hdk = { workspace = true }
 
-profiles_integrity = { workspace = true }
+hdi = { workspace = true }
 
 serde = { workspace = true }
 
 chrono = { workspace = true }
 
+image = { workspace = true }
+
 utils = { workspace = true }
+
+email_address = "0.2.7"

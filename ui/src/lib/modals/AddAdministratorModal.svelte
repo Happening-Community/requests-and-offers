@@ -2,16 +2,16 @@
   import { Avatar, ConicGradient, getModalStore, type ConicStop } from '@skeletonlabs/skeleton';
   import {
     administrators,
-    getNonAdministratorProfiles,
+    getNonAdministratorUsers,
     nonAmdinistrators,
     registerAdministrator
   } from '@stores/administrators.store';
-  import { type Profile } from '@stores/profiles.store';
+  import { type User } from '@stores/users.store';
   import { onMount } from 'svelte';
 
   export let parent: any;
 
-  let filteredProfiles: Profile[] = [];
+  let filteredUsers: User[] = [];
   let searchInput = '';
   let isLoading = true;
 
@@ -21,20 +21,20 @@
   ];
 
   onMount(async () => {
-    await getNonAdministratorProfiles();
-    filteredProfiles = $nonAmdinistrators;
+    await getNonAdministratorUsers();
+    filteredUsers = $nonAmdinistrators;
 
     isLoading = false;
   });
 
   const modalStore = getModalStore();
 
-  async function addAdministrator(profile: Profile) {
-    const confirmation = confirm('Do you really want to make this profile an administrator ?');
+  async function addAdministrator(user: User) {
+    const confirmation = confirm('Do you really want to make this user an administrator ?');
     if (confirmation) {
       try {
-        await registerAdministrator(profile.original_action_hash!);
-        administrators.set([...$administrators, profile]);
+        await registerAdministrator(user.original_action_hash!);
+        administrators.set([...$administrators, user]);
       } catch (error) {}
 
       modalStore.close();
@@ -43,12 +43,12 @@
 
   function searchInputHandler(evt: Event) {
     searchInput = (evt.target as HTMLInputElement).value;
-    filteredProfiles = $nonAmdinistrators.filter((profile) =>
-      profile.name.toLowerCase().includes(searchInput.toLowerCase())
+    filteredUsers = $nonAmdinistrators.filter((user) =>
+      user.name.toLowerCase().includes(searchInput.toLowerCase())
     );
 
-    if (filteredProfiles.length === 0 && searchInput === '') {
-      filteredProfiles = $nonAmdinistrators;
+    if (filteredUsers.length === 0 && searchInput === '') {
+      filteredUsers = $nonAmdinistrators;
     }
   }
 </script>
@@ -66,7 +66,7 @@
           type="text"
           placeholder="Search by name"
           bind:value={searchInput}
-          on:input={searchInputHandler}
+          oninput={searchInputHandler}
         />
       </div>
 
@@ -85,23 +85,23 @@
             </tr>
           </thead>
           <tbody>
-            {#each filteredProfiles as profile, i}
+            {#each filteredUsers as user, i}
               <tr>
                 <td>
                   <Avatar
-                    src={profile.picture
-                      ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
+                    src={user.picture
+                      ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
                       : '/default_avatar.webp'}
                   />
                 </td>
-                <td>{profile.name}</td>
+                <td>{user.name}</td>
                 <td>
-                  {profile.user_type.charAt(0).toUpperCase() + profile.user_type.slice(1)}
+                  {user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1)}
                 </td>
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    on:click={() => addAdministrator(profile)}
+                    onclick={() => addAdministrator(user)}
                   >
                     Make admin
                   </button>
@@ -112,7 +112,7 @@
         </table>
       {/if}
     {:else}
-      <p class="pt-4 text-center">No non administrator profiles found.</p>
+      <p class="pt-4 text-center">No non administrator users found.</p>
     {/if}
   </div>
 </article>

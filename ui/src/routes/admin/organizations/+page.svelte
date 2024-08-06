@@ -11,7 +11,7 @@
   } from '@skeletonlabs/skeleton';
   import organizationsStore, { type Organization } from '@stores/organizations.svelte';
   import { onMount } from 'svelte';
-  import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
+  import UserDetailsModal from '@lib/modals/UserDetailsModal.svelte';
 
   const { organizations } = $derived(organizationsStore);
 
@@ -23,7 +23,7 @@
   let rejectedOrganizations: Organization[] = $state([]);
 
   const modalStore = getModalStore();
-  const modalComponent: ModalComponent = { ref: ProfileDetailsModal };
+  const modalComponent: ModalComponent = { ref: UserDetailsModal };
   const modal = (id: number, hash: ActionHash): ModalSettings => {
     return {
       type: 'component',
@@ -78,16 +78,16 @@
             </tr>
           </thead>
           <tbody>
-            {#each pendingOrganizations as profile, i}
+            {#each pendingOrganizations as user, i}
               <tr>
                 <td>
                   <Avatar
-                    src={profile.picture
-                      ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
+                    src={user.picture
+                      ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
                       : '/default_avatar.webp'}
                   />
                 </td>
-                <td>{profile.name}</td>
+                <td>{user.name}</td>
 
                 <td>
                   <button
@@ -117,16 +117,16 @@
             </tr>
           </thead>
           <tbody>
-            {#each acceptedOrganizations as profile, i}
+            {#each acceptedOrganizations as user, i}
               <tr>
                 <td>
                   <Avatar
-                    src={profile.picture
-                      ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
+                    src={user.picture
+                      ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
                       : '/default_avatar.webp'}
                   />
                 </td>
-                <td>{profile.name}</td>
+                <td>{user.name}</td>
                 <td>
                   <button
                     class="btn variant-filled-secondary"

@@ -24,7 +24,7 @@
     <a class="h2 text-white" href="/">Requests and Offers hApp</a>
 
     <div class="flex justify-end gap-4">
-      <button class="btn variant-filled-secondary lg:hidden" on:click={openDrawer}>
+      <button class="btn variant-filled-secondary lg:hidden" onclick={openDrawer}>
         <Bars svgClass="fill-white h-6 w-6" />
       </button>
     </div>

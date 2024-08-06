@@ -1,5 +1,5 @@
 <script>
-  import { administrators, allProfiles } from '@stores/administrators.store';
+  import { administrators, allUsers } from '@stores/administrators.store';
   // import type Organization from '@stores/organizations.svelte';
   import organizationsStore from '@stores/organizations.svelte';
   ('@stores/organizations.svelte');
@@ -8,7 +8,7 @@
   const { organizations } = organizationsStore;
   const { projects } = projectsStore;
 
-  let pendingPersons = $state($allProfiles.filter((p) => p.status === 'pending'));
+  let pendingUsers = $state($allUsers.filter((p) => p.status === 'pending'));
   let pendingprojects = $state(projects.filter((p) => p.status === 'pending'));
   let pendingOrganizations = $state(organizations.filter((o) => o.status === 'pending'));
 </script>
@@ -26,7 +26,7 @@
 
   <div class="bg-surface-900 space-y-2 border-2 border-slate-900 p-4">
     <p># of administrators : {$administrators.length}</p>
-    <p># of pending Persons : {pendingPersons.length}</p>
+    <p># of pending Users : {pendingUsers.length}</p>
     <p># of pending Projects : {pendingprojects.length}</p>
     <p># of pending Organizations : {pendingOrganizations.length}</p>
   </div>

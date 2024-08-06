@@ -1,11 +1,11 @@
 use hdk::prelude::*;
 use utils::wasm_error;
 
-pub fn get_agent_user_hash(agent_pubkey: AgentPubKey) -> ExternResult<Option<ActionHash>> {
+pub fn check_if_agent_is_administrator(agent_pubkey: AgentPubKey) -> ExternResult<bool> {
   let zome_call_response = call(
     CallTargetCell::Local,
-    ZomeName("users".into()),
-    FunctionName("get_agent_user_hash".into()),
+    ZomeName("administration".into()),
+    FunctionName("check_if_agent_is_administrator".into()),
     None,
     agent_pubkey.clone(),
   )?;
@@ -14,7 +14,7 @@ pub fn get_agent_user_hash(agent_pubkey: AgentPubKey) -> ExternResult<Option<Act
     Ok(response.decode().unwrap())
   } else {
     Err(wasm_error(
-      "Error while calling the get_agent_user_hash function of the users zome",
+      "Error while calling the check_if_agent_is_administrator function of the administration zome",
     ))
   }
 }

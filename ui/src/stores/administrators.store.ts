@@ -1,85 +1,80 @@
 import { writable, type Writable } from 'svelte/store';
-import {
-  getLatestProfile,
-  getLatestProfileRecord,
-  type Profile,
-  type ProfileStatus
-} from './profiles.store';
+import { getLatestUser, getLatestUserRecord, type User, type UserStatus } from './users.store';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
 import hc from '@services/HolochainClientService';
 import { decodeRecords } from '@utils';
 
 /**
- * Svelte writable store for all profiles.
+ * Svelte writable store for all users.
  */
-export const allProfiles: Writable<Profile[]> = writable([]);
+export const allUsers: Writable<User[]> = writable([]);
 
 /**
  * Svelte writable store for all administrators.
  */
-export const administrators: Writable<Profile[]> = writable([]);
+export const administrators: Writable<User[]> = writable([]);
 
 /**
  * Svelte writable store for all non-administrators.
  */
-export const nonAmdinistrators: Writable<Profile[]> = writable([]);
+export const nonAmdinistrators: Writable<User[]> = writable([]);
 
 /**
- * Svelte writable store for the current user's profile.
+ * Svelte writable store for the current user's user.
  */
 export const agentIsAdministrator: Writable<boolean> = writable(false);
 
 /**
- * Retrieve all profile links by calling the specified zome function.
+ * Retrieve all user links by calling the specified zome function.
  *
- * @returns {Promise<Link[]>} A promise that resolves to the links to all profiles.
+ * @returns {Promise<Link[]>} A promise that resolves to the links to all users.
  */
-export async function getAllProfilesLinks(): Promise<Link[]> {
-  const links: Link[] = await hc.callZome('profiles', 'get_all_profiles', null);
+export async function getAllUsersLinks(): Promise<Link[]> {
+  const links: Link[] = await hc.callZome('users', 'get_all_users', null);
 
   return links;
 }
 
 /**
- * Retrieves the latest profile records and links for all agent profiles.
+ * Retrieves the latest user records and links for all agent users.
  */
-async function getAllProfileRecordsAndLinks(): Promise<[Link[], Record[]]> {
-  const profilesLinks: Link[] = await getAllProfilesLinks();
-  let profilesRecords: Record[] = [];
+async function getAllUserRecordsAndLinks(): Promise<[Link[], Record[]]> {
+  const usersLinks: Link[] = await getAllUsersLinks();
+  let usersRecords: Record[] = [];
 
-  for (let link of profilesLinks) {
-    const record = await getLatestProfileRecord(link.target);
-    if (record) profilesRecords.push(record);
+  for (let link of usersLinks) {
+    const record = await getLatestUserRecord(link.target);
+    if (record) usersRecords.push(record);
   }
 
-  return [profilesLinks, profilesRecords];
+  return [usersLinks, usersRecords];
 }
 
 /**
- * Retrieves all profiles and saves them in the profiles store.
+ * Retrieves all users and saves them in the users store.
  */
-export async function getAllProfiles(): Promise<Profile[]> {
-  const [profilesLinks, profilesRecords] = await getAllProfileRecordsAndLinks();
+export async function getAllUsers(): Promise<User[]> {
+  const [usersLinks, usersRecords] = await getAllUserRecordsAndLinks();
 
-  let recordsContents: Profile[] = [];
+  let recordsContents: User[] = [];
 
-  for (let i = 0; i < profilesRecords.length; i++) {
-    let profile = decodeRecords([profilesRecords[i]])[0];
+  for (let i = 0; i < usersRecords.length; i++) {
+    let user = decodeRecords([usersRecords[i]])[0];
     recordsContents.push({
-      ...profile,
-      remaining_time: getRemainingSuspensionTime(profile.status),
-      original_action_hash: profilesLinks[i].target,
-      previous_action_hash: profilesRecords[i].signed_action.hashed.hash
+      ...user,
+      remaining_time: getRemainingSuspensionTime(user.status),
+      original_action_hash: usersLinks[i].target,
+      previous_action_hash: usersRecords[i].signed_action.hashed.hash
     });
   }
 
-  allProfiles.set(recordsContents);
+  allUsers.set(recordsContents);
 
   return recordsContents;
 }
 
 /**
- * Registers an administrator by their original profile hash.
+ * Registers an administrator by their original user hash.
  */
 export async function registerAdministrator(original_action_hash: ActionHash): Promise<boolean> {
   return await hc.callZome('administration', 'register_administrator', original_action_hash);
@@ -99,8 +94,8 @@ export async function checkIfAgentIsAdministrator(agentPubKey: AgentPubKey): Pro
   return result;
 }
 
-export async function checkIfPersonIsAdministrator(action_hash: ActionHash): Promise<boolean> {
-  return await hc.callZome('administration', 'check_if_person_is_administrator', action_hash);
+export async function checkIfUserIsAdministrator(action_hash: ActionHash): Promise<boolean> {
+  return await hc.callZome('administration', 'check_if_user_is_administrator', action_hash);
 }
 
 /**
@@ -113,105 +108,103 @@ export async function getAllAdministratorsLinks(): Promise<Link[]> {
 /**
  * Retrieves all administrators and updates the administrators store.
  */
-export async function getAllAdministrators(): Promise<Profile[]> {
+export async function getAllAdministrators(): Promise<User[]> {
   const links = await getAllAdministratorsLinks();
-  let administratorProfilesPromises = links.map(
-    async (link) => await getLatestProfile(link.target)
-  );
+  let administratorUsersPromises = links.map(async (link) => await getLatestUser(link.target));
 
-  const administratorProfiles = (await Promise.all(administratorProfilesPromises)).filter(
+  const administratorUsers = (await Promise.all(administratorUsersPromises)).filter(
     (p) => p !== null
-  ) as Profile[];
+  ) as User[];
 
-  administrators.set(administratorProfiles);
+  administrators.set(administratorUsers);
 
-  return administratorProfiles;
+  return administratorUsers;
 }
 
 /**
- * Removes an administrator by their original profile hash.d
+ * Removes an administrator by their original user hash.d
  */
 export async function removeAdministrator(original_action_hash: ActionHash): Promise<boolean> {
   return await hc.callZome('administration', 'remove_administrator', original_action_hash);
 }
 
 /**
- * Retrieves profiles that are not administrators.
+ * Retrieves users that are not administrators.
  */
-export async function getNonAdministratorProfiles(): Promise<Profile[]> {
-  const links = await getAllProfilesLinks();
-  const nonAmdinistratorsProfiles: Profile[] = [];
+export async function getNonAdministratorUsers(): Promise<User[]> {
+  const links = await getAllUsersLinks();
+  const nonAmdinistratorsUsers: User[] = [];
 
   for (const link of links) {
-    if ((await checkIfPersonIsAdministrator(link.target)) === false) {
-      const profile = await getLatestProfile(link.target);
-      profile && nonAmdinistratorsProfiles.push(profile);
+    if ((await checkIfUserIsAdministrator(link.target)) === false) {
+      const user = await getLatestUser(link.target);
+      user && nonAmdinistratorsUsers.push(user);
     }
   }
 
-  nonAmdinistrators.set(nonAmdinistratorsProfiles);
+  nonAmdinistrators.set(nonAmdinistratorsUsers);
 
-  return nonAmdinistratorsProfiles;
+  return nonAmdinistratorsUsers;
 }
 
 /**
- * Updates the status of a person's profile by their original profile hash, their previous profile hash, and their new status.
+ * Updates the status of a user's user by their original user hash, their previous user hash, and their new status.
  */
-export async function updateProfileStatus(
+export async function updateUserStatus(
   original_action_hash: ActionHash,
   previous_action_hash: ActionHash,
-  status: ProfileStatus
+  status: UserStatus
 ): Promise<boolean> {
-  return await hc.callZome('profiles', 'update_person_status', {
+  return await hc.callZome('users', 'update_user_status', {
     original_action_hash,
     previous_action_hash,
     status
   });
 }
 
-export async function suspendPersonIndefinitely(
+export async function suspendUserIndefinitely(
   original_action_hash: ActionHash,
   previous_action_hash: ActionHash
 ): Promise<boolean> {
-  return await hc.callZome('profiles', 'suspend_person_indefinitely', {
+  return await hc.callZome('users', 'suspend_user_indefinitely', {
     original_action_hash,
     previous_action_hash
   });
 }
 
-export async function suspendPersonTemporarily(
+export async function suspendUserTemporarily(
   original_action_hash: ActionHash,
   previous_action_hash: ActionHash,
   duration_in_days: number
 ): Promise<boolean> {
-  return await hc.callZome('profiles', 'suspend_person_temporarily', {
+  return await hc.callZome('users', 'suspend_user_temporarily', {
     original_action_hash,
     previous_action_hash,
     duration_in_days
   });
 }
 
-export async function unsuspendPerson(
+export async function unsuspendUser(
   original_action_hash: ActionHash,
   previous_action_hash: ActionHash
 ): Promise<boolean> {
-  return await hc.callZome('profiles', 'unsuspend_person', {
+  return await hc.callZome('users', 'unsuspend_user', {
     original_action_hash,
     previous_action_hash
   });
 }
 
-export async function unsuspendPersonIfTimePassed(
+export async function unsuspendUserIfTimePassed(
   original_action_hash: ActionHash,
   previous_action_hash: ActionHash
 ): Promise<boolean> {
-  return await hc.callZome('profiles', 'unsuspend_person_if_time_passed', {
+  return await hc.callZome('users', 'unsuspend_user_if_time_passed', {
     original_action_hash,
     previous_action_hash
   });
 }
 
-export function getRemainingSuspensionTime(status: ProfileStatus): number | null {
+export function getRemainingSuspensionTime(status: UserStatus): number | null {
   const suspensionDate = new Date(status.split(' ')[1]);
   const now = new Date();
 

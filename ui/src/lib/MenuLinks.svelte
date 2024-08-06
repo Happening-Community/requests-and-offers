@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { myProfile } from '@stores/profiles.store';
+  import { myUser } from '@stores/users.store';
   import MenuLink from './MenuLink.svelte';
   import { agentIsAdministrator } from '@stores/administrators.store';
 </script>
 
 <div class="flex flex-col gap-3">
-  {#if $myProfile}
-    <MenuLink href="/profile">My profile</MenuLink>
+  {#if $myUser}
+    <MenuLink href="/user">My profile</MenuLink>
   {:else}
-    <MenuLink href="/profile/create">Create profile</MenuLink>
+    <MenuLink href="/user/create">Create Profile</MenuLink>
   {/if}
-  <MenuLink href="/profiles">All profiles</MenuLink>
+  <MenuLink href="/users">All Users</MenuLink>
 </div>
 <div class="flex flex-col gap-3">
   <MenuLink href="/organizations">Organizations</MenuLink>

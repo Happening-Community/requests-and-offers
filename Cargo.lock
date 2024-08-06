@@ -1717,29 +1717,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "profiles"
-version = "0.0.1"
-dependencies = [
- "chrono 0.3.0",
- "hdk",
- "profiles_integrity",
- "serde",
- "utils",
-]
-
-[[package]]
-name = "profiles_integrity"
-version = "0.0.1"
-dependencies = [
- "chrono 0.3.0",
- "email_address",
- "hdi",
- "image",
- "serde",
- "utils",
-]
-
-[[package]]
 name = "ptr_meta"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2514,6 +2491,29 @@ dependencies = [
  "form_urlencoded",
  "idna",
  "percent-encoding",
+]
+
+[[package]]
+name = "users"
+version = "0.0.1"
+dependencies = [
+ "chrono 0.3.0",
+ "hdk",
+ "serde",
+ "users_integrity",
+ "utils",
+]
+
+[[package]]
+name = "users_integrity"
+version = "0.0.1"
+dependencies = [
+ "chrono 0.3.0",
+ "email_address",
+ "hdi",
+ "image",
+ "serde",
+ "utils",
 ]
 
 [[package]]

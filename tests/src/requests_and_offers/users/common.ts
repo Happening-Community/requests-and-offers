@@ -11,7 +11,7 @@ export type Status =
   | "suspended"
   | `suspended ${string}`;
 
-export type ProfileInput = {
+export type UserInput = {
   name: string;
   nickname: string;
   bio: string;
@@ -24,13 +24,11 @@ export type ProfileInput = {
   location: string;
 };
 
-export type Profile = ProfileInput & {
+export type User = UserInput & {
   status?: Status;
 };
 
-export function sampleProfileInput(
-  partialProfile: Partial<ProfileInput>
-): ProfileInput {
+export function sampleUserInput(partialUser: Partial<UserInput>): UserInput {
   return {
     ...{
       name: "User",
@@ -44,59 +42,59 @@ export function sampleProfileInput(
       time_zone: "EST",
       location: "here",
     },
-    ...partialProfile,
+    ...partialUser,
   };
 }
 
-export async function createProfile(
+export async function createUser(
   cell: CallableCell,
-  Profile: ProfileInput
+  User: UserInput
 ): Promise<Record> {
   return cell.callZome({
-    zome_name: "profiles",
-    fn_name: "create_profile",
-    payload: Profile,
+    zome_name: "users",
+    fn_name: "create_user",
+    payload: User,
   });
 }
 
-export async function getLatestProfile(
+export async function getLatestUser(
   cell: CallableCell,
   original_action_hash: ActionHash
 ): Promise<Record | null> {
   return cell.callZome({
-    zome_name: "profiles",
-    fn_name: "get_latest_profile_record",
+    zome_name: "users",
+    fn_name: "get_latest_user_record",
     payload: original_action_hash,
   });
 }
 
-export async function getAgentProfile(
+export async function getAgentUser(
   cell: CallableCell,
   author: AgentPubKey
 ): Promise<Link[]> {
   return cell.callZome({
-    zome_name: "profiles",
-    fn_name: "get_agent_profile",
+    zome_name: "users",
+    fn_name: "get_agent_user",
     payload: author,
   });
 }
 
-export async function getAcceptedProfiles(cell: CallableCell): Promise<Link[]> {
+export async function getAcceptedUsers(cell: CallableCell): Promise<Link[]> {
   return cell.callZome({
-    zome_name: "profiles",
-    fn_name: "get_accepted_persons",
+    zome_name: "users",
+    fn_name: "get_accepted_users",
   });
 }
 
-export async function updateProfile(
+export async function updateUser(
   cell: CallableCell,
   original_action_hash: ActionHash,
   previous_action_hash: ActionHash,
-  updated_profile: ProfileInput
+  updated_user: UserInput
 ): Promise<Record> {
   return cell.callZome({
-    zome_name: "profiles",
-    fn_name: "update_profile",
-    payload: { original_action_hash, previous_action_hash, updated_profile },
+    zome_name: "users",
+    fn_name: "update_user",
+    payload: { original_action_hash, previous_action_hash, updated_user },
   });
 }

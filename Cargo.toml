@@ -28,11 +28,11 @@ path = "dnas/requests_and_offers/zomes/coordinator/administration"
 [workspace.dependencies.administration_integrity]
 path = "dnas/requests_and_offers/zomes/integrity/administration"
 
-[workspace.dependencies.profiles]
-path = "dnas/requests_and_offers/zomes/coordinator/profiles"
+[workspace.dependencies.users]
+path = "dnas/requests_and_offers/zomes/coordinator/users"
 
-[workspace.dependencies.profiles_integrity]
-path = "dnas/requests_and_offers/zomes/integrity/profiles"
+[workspace.dependencies.users_integrity]
+path = "dnas/requests_and_offers/zomes/integrity/users"
 
 [workspace.dependencies.misc]
 path = "dnas/requests_and_offers/zomes/coordinator/misc"

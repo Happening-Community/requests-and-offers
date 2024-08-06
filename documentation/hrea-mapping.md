@@ -18,7 +18,7 @@ This structured approach ensures efficient management of economic activities fro
 
 ## Core Features Mapping
 
-### User Profiles
+### User Users
 
 - **hREA Concept**: Person agents
 - **Mapping**: User profiles map to Person agents in hREA. Agent relationships, including linking profiles to organizations, requests, offers, and projects, are managed by a custom zome within the application. This zome supports profile retrieval and facilitates agent relationship tracking, laying the groundwork for hREA integration.

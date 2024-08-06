@@ -11,7 +11,7 @@
   } from '@skeletonlabs/skeleton';
   import projectsStore, { type Project } from '@stores/projects.svelte';
   import { onMount } from 'svelte';
-  import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
+  import UserDetailsModal from '@lib/modals/UserDetailsModal.svelte';
 
   let isLoading = $state(true);
   let projectsHashes: ActionHash[] = $state([]);
@@ -22,7 +22,7 @@
 
   const { projects } = $derived(projectsStore);
   const modalStore = getModalStore();
-  const modalComponent: ModalComponent = { ref: ProfileDetailsModal };
+  const modalComponent: ModalComponent = { ref: UserDetailsModal };
   const modal = (id: number, hash: ActionHash): ModalSettings => {
     return {
       type: 'component',
@@ -71,16 +71,16 @@
             </tr>
           </thead>
           <tbody>
-            {#each pendingprojects as profile, i}
+            {#each pendingprojects as project, i}
               <tr>
                 <td>
                   <Avatar
-                    src={profile.picture
-                      ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
+                    src={project.picture
+                      ? URL.createObjectURL(new Blob([new Uint8Array(project.picture)]))
                       : '/default_avatar.webp'}
                   />
                 </td>
-                <td>{profile.name}</td>
+                <td>{project.name}</td>
 
                 <td>
                   <button
@@ -110,16 +110,16 @@
             </tr>
           </thead>
           <tbody>
-            {#each acceptedprojects as profile, i}
+            {#each acceptedprojects as project, i}
               <tr>
                 <td>
                   <Avatar
-                    src={profile.picture
-                      ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
+                    src={project.picture
+                      ? URL.createObjectURL(new Blob([new Uint8Array(project.picture)]))
                       : '/default_avatar.webp'}
                   />
                 </td>
-                <td>{profile.name}</td>
+                <td>{project.name}</td>
                 <td>
                   <button
                     class="btn variant-filled-secondary"

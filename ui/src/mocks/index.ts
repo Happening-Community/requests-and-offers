@@ -1,11 +1,11 @@
 import type { Organization } from '@stores/organizations.svelte';
-import type { UserType, Profile } from '@stores/profiles.store';
+import type { UserType, User } from '@stores/users.store';
 import { SimpleFaker, faker } from '@faker-js/faker';
 import { fetchImageAndConvertToUInt8Array, getRandomNumber } from '@utils';
 import type { Project } from '@stores/projects.svelte';
 
-export async function createMockedProfiles(count: number = 1): Promise<Profile[]> {
-  let profiles: Profile[] = [];
+export async function createMockedUsers(count: number = 1): Promise<User[]> {
+  let users: User[] = [];
 
   const fakedUserType = new SimpleFaker().helpers.arrayElements<UserType>(
     ['creator', 'advocate'],
@@ -13,7 +13,7 @@ export async function createMockedProfiles(count: number = 1): Promise<Profile[]
   )[0] as UserType;
 
   for (let i = 0; i < count; i++) {
-    profiles.push({
+    users.push({
       name: faker.person.fullName({ sex: 'female' }),
       nickname: faker.person.firstName('female'),
       bio: faker.lorem.paragraphs(getRandomNumber(2, 5)),
@@ -28,7 +28,7 @@ export async function createMockedProfiles(count: number = 1): Promise<Profile[]
     });
   }
 
-  return profiles;
+  return users;
 }
 
 export async function createMockedOrganizations(count: number = 1): Promise<Organization[]> {

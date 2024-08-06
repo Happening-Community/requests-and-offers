@@ -1,15 +1,9 @@
 <script lang="ts">
   import moment from 'moment-timezone';
   import { FileDropzone, InputChip, Avatar } from '@skeletonlabs/skeleton';
-  import {
-    createProfile,
-    myProfile,
-    type UserType,
-    type Profile,
-    getMyProfile
-  } from '@stores/profiles.store.js';
+  import { createUser, myUser, type UserType, type User, getMyUser } from '@stores/users.store.js';
   import { goto } from '$app/navigation';
-  import { createMockedProfiles } from '@mocks';
+  import { createMockedUsers } from '@mocks';
   import { onMount } from 'svelte';
 
   type FormattedTimezone = {
@@ -52,15 +46,15 @@
     filteredTimezones = timezones.filter((tz) => tz.toLowerCase().includes(search.toLowerCase()));
   }
 
-  let profilePicture: Blob | undefined;
+  let userPicture: Blob | undefined;
 
   async function onPictureFileChange() {
     fileMessage = `${files[0].name}`;
-    profilePicture = new Blob([new Uint8Array(await files[0].arrayBuffer())]);
+    userPicture = new Blob([new Uint8Array(await files[0].arrayBuffer())]);
   }
 
-  function RemoveProfilePicture() {
-    profilePicture = undefined;
+  function RemoveUserPicture() {
+    userPicture = undefined;
     fileMessage = '';
     const pictureInput = form.querySelector('input[name="picture"]') as HTMLInputElement;
     if (pictureInput) {
@@ -68,22 +62,23 @@
     }
   }
 
-  async function mockProfiles() {
+  async function mockUsers() {
     try {
-      await createProfile((await createMockedProfiles())[0]);
-      await getMyProfile();
+      await createUser((await createMockedUsers())[0]);
+      await getMyUser();
 
-      goto('/profile');
+      goto('/user');
     } catch (error) {
       console.error('error :', error);
     }
   }
 
   async function submitForm(event: SubmitEvent) {
+    event.preventDefault();
     const data = new FormData(event.target as HTMLFormElement);
     const picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
 
-    const profile: Profile = {
+    const user: User = {
       name: data.get('name') as string,
       nickname: data.get('nickname') as string,
       bio: data.get('bio') as string,
@@ -97,28 +92,28 @@
     };
 
     try {
-      await createProfile(profile);
-      await getMyProfile();
+      await createUser(user);
+      await getMyUser();
 
-      goto('/profile');
+      goto('/user');
     } catch (error) {
       console.error('error :', error);
     }
   }
 
   onMount(async () => {
-    if ($myProfile) {
-      goto('/profile');
+    if ($myUser) {
+      goto('/user');
     }
   });
 </script>
 
 <section class="flex w-4/5 flex-col gap-10 md:w-3/4 lg:w-1/2">
-  <h2 class="h2">Create Profile</h2>
+  <h2 class="h2">Create User Profile</h2>
   <form
     class="flex flex-col gap-4"
     enctype="multipart/form-data"
-    on:submit|preventDefault={submitForm}
+    onsubmit={submitForm}
     bind:this={form}
   >
     <p>*required fields</p>
@@ -136,14 +131,14 @@
       <textarea class="textarea" name="bio"></textarea>
     </label>
 
-    <p class="label text-lg">Profile picture :</p>
-    <FileDropzone name="picture" bind:files on:change={onPictureFileChange} accept="image/*" />
+    <p class="label text-lg">User picture :</p>
+    <FileDropzone name="picture" bind:files onchange={onPictureFileChange} accept="image/*" />
     <div class="flex items-center justify-between">
       <p class="italic">{fileMessage}</p>
-      {#if files && profilePicture}
+      {#if files && userPicture}
         <div>
-          <Avatar src={URL.createObjectURL(profilePicture)} />
-          <button class="cursor-pointer underline" on:click={RemoveProfilePicture}> Remove </button>
+          <Avatar src={URL.createObjectURL(userPicture)} />
+          <button class="cursor-pointer underline" onclick={RemoveUserPicture}> Remove </button>
         </div>
       {/if}
     </div>
@@ -191,7 +186,7 @@
         type="text"
         placeholder="Search timezones..."
         class="input w-1/2"
-        on:input={filterTimezones}
+        oninput={filterTimezones}
       />
       <select name="timezone" id="timezone" class="select">
         {#each formattedTimezones as tz}
@@ -213,9 +208,9 @@
       <button
         type="button"
         class="btn variant-filled-tertiary w-fit self-center"
-        on:click={mockProfiles}
+        onclick={mockUsers}
       >
-        Create Mocked Profile
+        Create Mocked User
       </button>
     </div>
   </form>

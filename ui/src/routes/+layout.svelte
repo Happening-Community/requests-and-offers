@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import '../app.postcss';
   import hc from '@services/HolochainClientService';
-  import { getMyProfile, myProfile } from '@stores/profiles.store';
+  import { getMyUser, myUser } from '@stores/users.store';
   import { Modal, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
   import { initializeStores } from '@skeletonlabs/skeleton';
   import { goto } from '$app/navigation';
@@ -31,9 +31,9 @@
   onMount(async () => {
     await hc.connectClient();
     const record = await hc.callZome('misc', 'ping', null);
-    await getMyProfile();
+    await getMyUser();
 
-    if ($myProfile) {
+    if ($myUser) {
       await checkIfAgentIsAdministrator((await hc.getAppInfo())?.agent_pub_key!);
     }
 
@@ -51,7 +51,7 @@
     }
 
     if (
-      $myProfile &&
+      $myUser &&
       !$agentIsAdministrator &&
       event.ctrlKey &&
       event.shiftKey &&
@@ -59,15 +59,15 @@
     ) {
       event.preventDefault();
       let confirmation = confirm('Register Admin ?');
-      if (confirmation && $myProfile.original_action_hash) {
-        await registerAdministrator($myProfile.original_action_hash);
+      if (confirmation && $myUser.original_action_hash) {
+        await registerAdministrator($myUser.original_action_hash);
         await checkIfAgentIsAdministrator((await hc.getAppInfo())?.agent_pub_key!);
       }
     }
   }
 </script>
 
-<svelte:window on:keydown={handleKeyboardEvent} />
+<svelte:window onkeydown={handleKeyboardEvent} />
 
 {@render children()}
 

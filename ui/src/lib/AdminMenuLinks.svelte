@@ -9,8 +9,8 @@
   >
     Administrators
   </MenuLink>
-  <MenuLink href="/admin/persons" className="variant-filled-secondary sm:variant-filled-primary">
-    Persons
+  <MenuLink href="/admin/users" className="variant-filled-secondary sm:variant-filled-primary">
+    Users
   </MenuLink>
 </div>
 

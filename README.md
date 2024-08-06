@@ -53,9 +53,9 @@ pnpm test:misc
 This one run the miscellaneous tests.
 
 ```bash
-pnpm test:profiles
+pnpm test:users
 ```
-This one run the profiles zome test.
+This one run the users zome test.
 
 ```bash
 pnpm test:administration

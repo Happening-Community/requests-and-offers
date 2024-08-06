@@ -1,6 +1,6 @@
 <script lang="ts">
   import NavButton from '@lib/NavButton.svelte';
-  import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
+  import UserDetailsModal from '@lib/modals/UserDetailsModal.svelte';
   import {
     Avatar,
     getModalStore,
@@ -9,12 +9,7 @@
     type ModalSettings,
     ConicGradient
   } from '@skeletonlabs/skeleton';
-  import {
-    getAcceptedProfiles,
-    myProfile,
-    acceptedProfiles,
-    type Profile
-  } from '@stores/profiles.store';
+  import { getAcceptedUsers, myUser, acceptedUsers, type User } from '@stores/users.store';
   import { onMount } from 'svelte';
 
   let isLoading = $state(true);
@@ -25,18 +20,18 @@
   ];
 
   onMount(async () => {
-    await getAcceptedProfiles();
+    await getAcceptedUsers();
     isLoading = false;
   });
 
   const modalStore = getModalStore();
-  const modalComponent: ModalComponent = { ref: ProfileDetailsModal };
-  const modal = (profile: Profile): ModalSettings => {
+  const modalComponent: ModalComponent = { ref: UserDetailsModal };
+  const modal = (user: User): ModalSettings => {
     return {
       type: 'component',
       component: modalComponent,
       meta: {
-        profile
+        user
       }
     };
   };
@@ -44,12 +39,12 @@
 
 <section class="flex flex-col gap-4">
   <div class="flex gap-4">
-    <h2 class="h2">Profiles</h2>
-    {#if !$myProfile}
-      <NavButton href="/profile/create">Create profile</NavButton>
+    <h2 class="h2">Users</h2>
+    {#if !$myUser}
+      <NavButton href="/user/create">Create Profile</NavButton>
     {/if}
   </div>
-  {#if $acceptedProfiles.length}
+  {#if $acceptedUsers.length}
     <table class="table">
       <thead>
         <tr>
@@ -60,23 +55,23 @@
         </tr>
       </thead>
       <tbody>
-        {#each $acceptedProfiles as profile, i}
+        {#each $acceptedUsers as user, i}
           <tr>
             <td>
               <Avatar
-                src={profile.picture
-                  ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
+                src={user.picture
+                  ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
                   : '/default_avatar.webp'}
               />
             </td>
-            <td>{profile.name}</td>
+            <td>{user.name}</td>
             <td>
-              {profile.user_type.charAt(0).toUpperCase() + profile.user_type.slice(1)}
+              {user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1)}
             </td>
             <td>
               <button
                 class="btn variant-filled-primary"
-                onclick={() => modalStore.trigger(modal(profile))}
+                onclick={() => modalStore.trigger(modal(user))}
               >
                 View
               </button>
@@ -86,9 +81,9 @@
       </tbody>
     </table>
   {:else}
-    <p class="h3 text-error-500">No profiles found.</p>
+    <p class="h3 text-error-500">No users found.</p>
   {/if}
-  {#if isLoading && $acceptedProfiles.length === 0}
+  {#if isLoading && $acceptedUsers.length === 0}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {/if}
 </section>

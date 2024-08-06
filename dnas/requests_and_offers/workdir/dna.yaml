@@ -6,9 +6,9 @@ integrity:
   properties: ~
   origin_time: 1702951068502589
   zomes:
-    - name: profiles_integrity
+    - name: users_integrity
       hash: ~
-      bundled: "../../../target/wasm32-unknown-unknown/release/profiles_integrity.wasm"
+      bundled: "../../../target/wasm32-unknown-unknown/release/users_integrity.wasm"
       dependencies: ~
       dylib: ~
     - name: administration_integrity
@@ -18,18 +18,18 @@ integrity:
       dylib: ~
 coordinator:
   zomes:
-    - name: profiles
+    - name: users
       hash: ~
-      bundled: "../../../target/wasm32-unknown-unknown/release/profiles.wasm"
+      bundled: "../../../target/wasm32-unknown-unknown/release/users.wasm"
       dependencies:
-        - name: profiles_integrity
+        - name: users_integrity
       dylib: ~
     - name: administration
       hash: ~
       bundled: "../../../target/wasm32-unknown-unknown/release/administration.wasm"
       dependencies:
         - name: administration_integrity
-        - name: profiles_integrity
+        - name: users_integrity
       dylib: ~
     - name: misc
       hash: ~

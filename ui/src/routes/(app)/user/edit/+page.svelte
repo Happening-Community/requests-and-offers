@@ -2,12 +2,12 @@
   import moment from 'moment-timezone';
   import { Avatar, FileDropzone, InputChip } from '@skeletonlabs/skeleton';
   import {
-    myProfile,
+    myUser,
     type UserType,
-    type Profile,
-    updateMyProfile,
-    getMyProfile
-  } from '@stores/profiles.store.js';
+    type User,
+    updateMyUser,
+    getMyUser
+  } from '@stores/users.store.js';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import NavButton from '@lib/NavButton.svelte';
@@ -21,7 +21,7 @@
   let form: HTMLFormElement;
   let files: FileList;
   let fileMessage: string;
-  let profilePicture: Blob | undefined;
+  let userPicture: Blob | undefined;
   let timezones = moment.tz.names();
   let filteredTimezones: string[] = [];
   let formattedTimezones: FormattedTimezone[] = [];
@@ -56,29 +56,29 @@
 
   async function onPictureFileChange() {
     fileMessage = `${files[0].name}`;
-    profilePicture = new Blob([new Uint8Array(await files[0].arrayBuffer())]);
+    userPicture = new Blob([new Uint8Array(await files[0].arrayBuffer())]);
   }
 
-  function RemoveProfilePicture() {
+  function RemoveUserPicture() {
     isChanged = true;
-    profilePicture = undefined;
+    userPicture = undefined;
     fileMessage = '';
     const pictureInput = form.querySelector('input[name="picture"]') as HTMLInputElement;
     if (pictureInput) {
       pictureInput.value = '';
     }
 
-    myProfile.update((profile) => {
-      if (!profile) return null;
+    myUser.update((user) => {
+      if (!user) return null;
       return {
-        ...profile,
+        ...user,
         picture: undefined
       };
     });
   }
 
   onMount(async () => {
-    if ($myProfile?.picture) profilePicture = new Blob([$myProfile?.picture]);
+    if ($myUser?.picture) userPicture = new Blob([$myUser?.picture]);
   });
 
   async function submitForm(event: SubmitEvent) {
@@ -87,11 +87,11 @@
     const data = new FormData(form);
     const picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
 
-    const profile: Profile = {
+    const user: User = {
       name: data.get('name') as string,
       nickname: data.get('nickname') as string,
       bio: data.get('bio') as string,
-      picture: picture.byteLength > 0 ? new Uint8Array(picture) : $myProfile?.picture,
+      picture: picture.byteLength > 0 ? new Uint8Array(picture) : $myUser?.picture,
       user_type: data.get('user_type') as UserType,
       skills: data.getAll('skills') as string[],
       email: data.get('email') as string,
@@ -101,10 +101,10 @@
     };
 
     try {
-      await updateMyProfile(profile);
-      await getMyProfile();
+      await updateMyUser(user);
+      await getMyUser();
 
-      goto('/profile');
+      goto('/user');
     } catch (error) {
       console.error('error :', error);
     }
@@ -112,52 +112,50 @@
 </script>
 
 <section class="flex w-1/2 flex-col gap-10">
-  {#if !$myProfile}
+  {#if !$myUser}
     <p class="mb-4 text-center text-xl">It looks like you don't have a profile yet !</p>
-    <NavButton href="/profile/create">Create profile</NavButton>
+    <NavButton href="/user/create">Create Profile</NavButton>
   {:else}
-    <h2 class="h2">Edit Profile</h2>
+    <h2 class="h2">Edit User</h2>
 
     <form
       class="flex flex-col gap-4"
       enctype="multipart/form-data"
       bind:this={form}
-      on:submit={submitForm}
-      on:input={() => (isChanged = true)}
+      onsubmit={submitForm}
+      oninput={() => (isChanged = true)}
     >
       <p>*required fields</p>
       <label class="label text-lg">
-        Name* :<input type="text" class="input" name="name" value={$myProfile.name} required />
+        Name* :<input type="text" class="input" name="name" value={$myUser.name} required />
       </label>
 
       <label class="label text-lg">
         Nickname* :
-        <input type="text" class="input" name="nickname" value={$myProfile.nickname} required />
+        <input type="text" class="input" name="nickname" value={$myUser.nickname} required />
       </label>
 
       <label class="label text-lg">
         Bio :
-        <textarea class="textarea h-52" name="bio">{$myProfile.bio}</textarea>
+        <textarea class="textarea h-52" name="bio">{$myUser.bio}</textarea>
       </label>
 
-      <p class="label text-lg">Profile picture :</p>
-      <FileDropzone name="picture" bind:files on:change={onPictureFileChange} accept="image/*" />
+      <p class="label text-lg">User picture :</p>
+      <FileDropzone name="picture" bind:files onchange={onPictureFileChange} accept="image/*" />
       <div class="flex items-center justify-between">
         <p class="italic">{fileMessage}</p>
-        {#if files && profilePicture}
+        {#if files && userPicture}
           <div>
-            <Avatar src={URL.createObjectURL(profilePicture)} />
-            <button class="cursor-pointer underline" on:click={RemoveProfilePicture}>
-              Remove
-            </button>
+            <Avatar src={URL.createObjectURL(userPicture)} />
+            <button class="cursor-pointer underline" onclick={RemoveUserPicture}> Remove </button>
           </div>
         {/if}
       </div>
 
-      {#if profilePicture && !files}
+      {#if userPicture && !files}
         <div class="flex items-center gap-2">
-          <Avatar src={URL.createObjectURL(profilePicture)} />
-          <button class="cursor-pointer underline" on:click={RemoveProfilePicture}> Remove </button>
+          <Avatar src={URL.createObjectURL(userPicture)} />
+          <button class="cursor-pointer underline" onclick={RemoveUserPicture}> Remove </button>
         </div>
       {/if}
 
@@ -170,7 +168,7 @@
               type="radio"
               name="user_type"
               value="advocate"
-              checked={$myProfile.user_type === 'advocate'}
+              checked={$myUser.user_type === 'advocate'}
               required
             />
             Advocate
@@ -180,7 +178,7 @@
               type="radio"
               name="user_type"
               value="creator"
-              checked={$myProfile.user_type === 'creator'}
+              checked={$myUser.user_type === 'creator'}
               required
             />
             Creator
@@ -193,7 +191,7 @@
         <!-- TODO:When skills indexation done, use Autocomplete Input Chip Skeleton component for skills selection -->
         <InputChip
           id="skills"
-          value={$myProfile.skills}
+          value={$myUser.skills}
           name="skills"
           placeholder="Write a skill and press enter"
           chips="variant-filled-secondary"
@@ -202,12 +200,12 @@
 
       <label class="label text-lg">
         Email* :
-        <input type="email" class="input" name="email" value={$myProfile.email} required />
+        <input type="email" class="input" name="email" value={$myUser.email} required />
       </label>
 
       <label class="label text-lg">
         Phone number :
-        <input type="text" class="input" name="phone" value={$myProfile.phone} />
+        <input type="text" class="input" name="phone" value={$myUser.phone} />
       </label>
 
       <label class="label text-lg">
@@ -217,11 +215,11 @@
           type="text"
           placeholder="Search timezones..."
           class="input w-1/2"
-          on:input={filterTimezones}
+          oninput={filterTimezones}
         />
         <select name="timezone" id="timezone" class="select">
           {#each formattedTimezones as tz}
-            <option class="" value={tz.name} selected={tz.name === $myProfile.time_zone}>
+            <option class="" value={tz.name} selected={tz.name === $myUser.time_zone}>
               {tz.formatted}
             </option>
           {/each}
@@ -230,7 +228,7 @@
 
       <label class="label text-lg">
         Location :
-        <input type="text" class="input" name="location" value={$myProfile.location} />
+        <input type="text" class="input" name="location" value={$myUser.location} />
       </label>
 
       <button

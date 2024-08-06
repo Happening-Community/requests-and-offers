@@ -5,22 +5,22 @@
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import ProfileDetailsModal from '@lib/modals/ProfileDetailsModal.svelte';
+  import UserDetailsModal from '@lib/modals/UserDetailsModal.svelte';
   import { onMount } from 'svelte';
   import { getAllAdministrators, administrators } from '@stores/administrators.store';
   import AddAdministratorModal from '@lib/modals/AddAdministratorModal.svelte';
-  import type { Profile } from '@stores/profiles.store';
+  import type { User } from '@stores/users.store';
 
   let isLoading = $state(true);
 
   const modalStore = getModalStore();
-  const profileDetailsModalComponent: ModalComponent = { ref: ProfileDetailsModal };
-  const profileDetailsModal = (profile: Profile): ModalSettings => {
+  const userDetailsModalComponent: ModalComponent = { ref: UserDetailsModal };
+  const userDetailsModal = (user: User): ModalSettings => {
     return {
       type: 'component',
-      component: profileDetailsModalComponent,
+      component: userDetailsModalComponent,
       meta: {
-        profile
+        user
       }
     };
   };
@@ -60,23 +60,23 @@
           </tr>
         </thead>
         <tbody>
-          {#each $administrators as profile, i}
+          {#each $administrators as user, i}
             <tr>
               <td>
                 <Avatar
-                  src={profile.picture
-                    ? URL.createObjectURL(new Blob([new Uint8Array(profile.picture)]))
+                  src={user.picture
+                    ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
                     : '/default_avatar.webp'}
                 />
               </td>
-              <td>{profile.name}</td>
+              <td>{user.name}</td>
               <td>
-                {profile.user_type.charAt(0).toUpperCase() + profile.user_type.slice(1)}
+                {user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1)}
               </td>
               <td>
                 <button
                   class="btn variant-filled-secondary"
-                  onclick={() => modalStore.trigger(profileDetailsModal(profile))}
+                  onclick={() => modalStore.trigger(userDetailsModal(user))}
                 >
                   View
                 </button>

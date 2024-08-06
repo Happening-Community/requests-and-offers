@@ -7,7 +7,7 @@
 
 <div class="h-10 space-y-5 p-2 md:p-5">
   <div class="flex justify-center">
-    <a href="/" on:click={() => drawerStore.close()}>
+    <a href="/" onclick={() => drawerStore.close()}>
       <img src="/hAppeningsLogoWsun2.webp" alt="" class="w-28" />
     </a>
   </div>
