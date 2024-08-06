@@ -238,16 +238,22 @@ Administrators play a pivotal role in the governance and operation of the networ
 - **Project Creation by Verified Organizations**: Projects within the network can be directly created by verified organizations. This streamlines the project initiation process for organizations that have already been vetted by the network administrators.
 - **Verification of Projects Not Managed by Verified Organizations**: In cases where a person wishes to create a project that is not managed by a verified organization, the project must undergo a verification process by the network administrators. This ensures that all projects, regardless of their management structure, meet the network's standards and objectives.
 - **Moderator Role**: Administrators can delegate moderator roles to other users. Moderators can perform most administrative tasks except for managing administrators themselves. This includes moderating projects, requests, and offers, ensuring content appropriateness and community guidelines compliance.
-- **Temporary Suspension**: Administrators have the authority to temporarily suspend Person profiles for a specified period. This action can be taken in response to violations of community guidelines or other misconduct.
+- **Suspension**: Administrators have the authority to temporarily or permanently suspend User profiles. This action can be taken in response to violations of community guidelines or other misconduct.
+  - **Temporary Suspension**: Administrators have the authority to temporarily suspend Person profiles for a specified period. 
+  - **Indefinitive Suspension**: Administrators have the authority to permanently suspend Person profiles.
+  - **Unsuspension**: Administrators have the authority to unsuspend suspended Person profiles.
+  - **Suspension reason**: Administrators can indicate the reason for a Person's suspension. The user will be notified of the reason.
+  - **Suspension history**: Administrators can view the history of all the suspensions or for a specific user.
 - **Flagging System**: Users have the ability to flag organizations, projects, requests, and offers for review by network administrators. This system allows the community to signal potentially inappropriate content or activities, prompting administrative review and action as necessary.
 - **Inbox**: Administrators and moderators have access to an inbox that allows them to address user concerns, inquiries, and reports efficiently using the messaging system.
 
 
-Key aspects of administrator roles and access include:
+Key aspects of administrator and moderator roles and access include:
 
-- **Exclusive Access to Administration Zome and UI**: Administrators are granted special access to the `Administration` zome and user interface, enabling them to effectively carry out their duties, including the verification of persons, organizations, and projects.
-- **Utilization of hREA Roles**: Administrators leverage hREA roles to manage and track their relationships with projects and organizations. This structured approach ensures a clear and efficient method for resource allocation and project coordination within the network.
-- **Capability-Based Security Measures**: The network employs capability-based Holochain security measures to ensure that only authorized administrators can access and modify critical functions. This safeguards the network against unauthorized use and maintains the security of the community.
+- **Exclusive Access to Administration Zome and UI**: Administrators and moderators are granted special access to the `Administration` zome and user interface, enabling them to effectively carry out their duties, including the verification of persons, organizations, and projects.
+- **Administrators anchor**: The `administrators` anchor is an index of all the administrators of the network. It's what allows the recognition of the administrators.
+- **Moderators anchor**: The `moderators` anchor is an index of all the moderators of the network. It's what allows the recognition of the moderators.
+- **Progenitor pattern to recognize the first agent**: The first agent in the network is designated as the progenitor. When the progenitorcreate his user profile, the agent becomes the first administrator.
 
 #### 4.6.1 Links
 
@@ -299,6 +305,9 @@ To facilitate real-time communication and negotiation among users, the applicati
 - **Messaging to Administrators**: Provides a channel for users to send messages to network administrators. This feature is accessible through an inbox within the administration panel, allowing administrators to address user concerns, inquiries, and reports efficiently.
 
 This messaging functionality supports the dynamic interaction between users, enhancing the collaborative environment and ensuring smooth transactions within the Requests & Offers - MVP platform.
+
+#### 4.8.1 Suspension Notifications
+**Notification System**: Implement a notification system to inform users when they have been suspended and why. This system should also notify the user once the suspension period ends.
 
 ## 5. MVP Use Case: Project Collaboration and Skill Matching
 
@@ -363,5 +372,3 @@ Color palette :
 ## 9. Conclusion
 
 This specification document outlines the key components and functionalities of the Requests & Offers - MVP project. By adhering to these specifications, developers can ensure the successful creation of a Holochain application that effectively facilitates the exchange of requests and offers within the hAppenings.community.
-
-![requests and offers diagram](images/requests-and-offers.drawio.png)
