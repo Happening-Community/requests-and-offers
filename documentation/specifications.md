@@ -18,75 +18,75 @@ This application is specifically tailored for the participants in the Holochain 
 
 ## 4. Core Features
 
-### 4.1 User Persons
+### 4.1 User Profile
 
-- **Person Creation**: Users can create and retrieve their persons, categorized as "advocate" or "creator".
-- **Person Retrieval**: Users can retrieve their persons on other devices using credentials.
-- **Person Linking**: Persons can be linked to agents, organizations, requests, offers, and projects.
-- **Custom Holochain Zome**: A custom zome is used for managing user persons within the application.
-- **hREA agents**: Persons are linked to hREA agents.
+- **User Creation**: Users can create and retrieve their profile, categorized as "advocate" or "creator".
+- **User Retrieval**: Users can retrieve their profile on other devices using credentials.
+- **User Linking**: Users can be linked to agents, organizations, requests, offers, and projects.
+- **Custom Holochain Zome**: A custom zome is used for managing user profiles within the application.
+- **hREA agents**: User profiles are linked to hREA agents.
 
-### 4.1.1 Person Entry
+### 4.1.1 User Entry
 
-The `Person` entry represents the person and its associated agents within the hAppenings.community. An agent can be a single user or a device associated with a user, allowing for the sharing of persons across multiple devices. This entry includes various fields to capture essential information about the person, facilitating personalized experiences and targeted interactions within the community.
+The `User` entry represents the user profile and its associated agents within the hAppenings.community. An agent can be a single user or a device associated with a user, allowing for the sharing of profiles across multiple devices. This entry includes various fields to capture essential information about the user, facilitating personalized experiences and targeted interactions within the community.
 
 #### 4.1.1.1 Fields
 
-- **name**: The full name of the person.
+- **name**: The full name of the user.
   - **Type**: `String`
   - **Validation**: Must not be empty.
-- **nickname**: A shorter version of the person's name, often used for display purposes.
+- **nickname**: A shorter version of the user's name, often used for display purposes.
   - **Type**: `String`
   - **Validation**: Must not be empty.
-- **bio**: A brief biography about the person.
+- **bio**: A brief biography about the user.
   - **Type**: `String`
   - **Validation**: Optional, but recommended for a richer user experience.
-- **picture**: An optional serialized image representing the person's picture.
+- **picture**: An optional serialized image representing the user's picture.
   - **Type**: `Option<SerializedBytes>`
   - **Validation**: Optional, but if provided, must be a valid image.
-- **type**: The type of person, either 'advocate' or 'creator'.
+- **type**: The type of user, either 'advocate' or 'creator'.
   - **Type**: `String`
   - **Validation**: Must be either 'advocate' or 'creator'.
-- **email**: The person's email address.
+- **email**: The user's email address.
   - **Type**: `String`
   - **Validation**: Must be a valid email address format.
-- **urls**: A list of URLs associated with the person.
+- **urls**: A list of URLs associated with the user.
   - **Type**: `Vec<String>`
   - **Validation**: Optional, but recommended for community engagement and networking.
   - **Default**: Empty
-- **phone**: An optional phone number for the person.
+- **phone**: An optional phone number for the user.
   - **Type**: `Option<String>`
   - **Validation**: Optional, but if provided, must be a valid phone number format.
-- **time_zone**: The time zone in which the person resides.
+- **time_zone**: The time zone in which the user resides.
   - **Type**: `String`
   - **Validation**: Must be a valid time zone identifier.
-- **location**: The location where the person is based.
+- **location**: The location where the user is based.
   - **Type**: `String`
   - **Validation**: Optional, but recommended for community engagement and networking.
-- **status**: The status of the person, either 'pending', 'accepted', or 'rejected'.
+- **status**: The status of the user, either 'pending', 'accepted', or 'rejected'.
   - **Type**: `String`
   - **Validation**: Must be either 'pending', 'accepted', or 'rejected'.
 
 #### 4.1.1.2 Links
 
-  - **PersonUpdates**: A link from the person create header to the person update headers.
-  - **PersonAgents**: A link from the person to an agent. It is an index of all the agents that have the person.
-  - **AllPersons**: A link to the `persons` anchor. It is an index of all the persons.
-  - **MyPerson**: A link from the current agent to the person.
-  - **PersonRequests**: A link from the person to a request. It is an index of all the requests that have the person.
-  - **PersonOffers**: A link from the person to an offer. It is an index of all the offers that have the person.
-  - **PersonProjects**: A link from the person to a project. It is an index of all the projects that have the person.
-  - **PersonOrganizations**: A link from the person to an organization. It is an index of all the organizations that have the person.
-  - **PersonSkills**: A link from the person to a skill. It is an index of all the skills that have the person.
+  - **UserUpdates**: A link from the user create header to the user update headers.
+  - **UserAgents**: A link from the user to an agent. It is an index of all the agents that have the user.
+  - **AllUsers**: A link to the `users` anchor. It is an index of all the users.
+  - **MyUser**: A link from the current agent to the user.
+  - **UserRequests**: A link from the user to a request. It is an index of all the requests that the user made.
+  - **UserOffers**: A link from the user to an offer. It is an index of all the offers that the user made.
+  - **UserProjects**: A link from the user to a project. It is an index of all the projects the user participates in.
+  - **UserOrganizations**: A link from the user to an organization. It is an index of all the organizations that the user participates in.
+  - **UserSkills**: A link from the user to a skill. It is an index of all the skills that have the user.
   
 ### 4.2 Projects and Organizations
 
 - **Project and Organization Creation**: Users can create projects and organizations, with projects owned by organizations. Projects have specific requirements and status.
-![Project status](images/project-stat  - **AdministratorsPerson**: A link from the `administrators` anchor to the person. It is an index of all the administrators of the network.
+![Project status](images/project-stat  - **AdministratorsUser**: A link from the `administrators` anchor to the user. It is an index of all the administrators of the network.
 
 #### 4.2.1 Project Entry
 
-The `Project` entry represents a project and its associated agents, including team members. Projects have specific requirements and status. Projects can be created by organizations or by persons.
+The `Project` entry represents a project and its associated agents, including team members. Projects have specific requirements and status. Projects can be created by organizations or by users.
 
 In hREA, projects are organizations `classifiedAs` `Project`.
 
@@ -115,15 +115,15 @@ In hREA, projects are organizations `classifiedAs` `Project`.
 ##### 4.2.1.2 Links
 
 - **AllProjects**: A link to the `projects` anchor.
-- **ProjectAdministrators**: A link from the project's to a person. It is an index of all the administrators.
-- **ProjectTeamMembers**: A link from the project's to a person. It is an index of all the team members.
+- **ProjectAdministrators**: A link from the project's to a user. It is an index of all the administrators.
+- **ProjectTeamMembers**: A link from the project's to a user. It is an index of all the team members.
 - **ProjectCategories**: A link from the project's to a category. It is an index of all the categories.
 - **ProjectRequests**: A link from the project's to a request. It is an index of all the requests made by the project.
 - **ProjectOffers**: A link from the project's to an offer. It is an index of all the offers made to the project.
 
 #### 4.2.2 Organization Entry
 
-The `Organization` entry represents an organization and its associated persons and projects. Organizations are created by persons.
+The `Organization` entry represents an organization and its associated users and projects. Organizations are created by users.
 
 In hREA, are agents `classifiedAs` `Organization`.
 
@@ -152,8 +152,8 @@ In hREA, are agents `classifiedAs` `Organization`.
 ##### 4.2.2.2 Links
 
 - **AllOrganizations**: A link to the `organizations` anchor.
-- **OrganizationAdministrators**: A link from the organization's to a person. It is an index of all the administrators of the organization.
-- **OrganizationMembers**: A link from the organization's to a person. It is an index of all the members of the organization.
+- **OrganizationAdministrators**: A link from the organization's to a user. It is an index of all the administrators of the organization.
+- **OrganizationMembers**: A link from the organization's to a user. It is an index of all the members of the organization.
 - **OrganizationProjects**: A link from the organization's to a project. It is an index of all the projects under the organization.
 - **OrganizationCategories**: A link from the organization's to a category. It is an index of all the categories under the organization.
 - **OrganizationRequests**: A link from the organization's to a request. It is an index of all the requests made by the organization.
@@ -169,7 +169,7 @@ Projects and Organizations facilitators are integral to the operation and govern
 
 ##### 4.2.3.2 Project/Organization Profile
 
-- Projects and organizations facilitators can file out their personal profiles, including their skills, location, type, etc. This profile is crucial for matching their expertise with relevant requests and offers within the network and for making offers and requests on behalf of their projects or organizations.
+- Projects and organizations facilitators can file out their user profiles, including their skills, location, type, etc. This profile is crucial for matching their expertise with relevant requests and offers within the network and for making offers and requests on behalf of their projects or organizations.
 
 ##### 4.2.3.3 Offers and Requests
 
@@ -185,7 +185,7 @@ Projects and Organizations facilitators are integral to the operation and govern
 
 ### 4.4 Skills and Categories
 
-- **Skills**: Users can create skills, which are used to filter agents persons, requests and offers.
+- **Skills**: Users can create skills, which are used to filter users, requests and offers.
 - **Categories**: Administrators can create categories, which are used to organize projects, requests and offers.
 
 ![Types of project](images/types-of-projects.png)
@@ -194,14 +194,14 @@ Projects and Organizations facilitators are integral to the operation and govern
 
 #### 4.4.1 Skill Entry
 
-The `Skill` entry represents the skills associated with the persons, projects, requests and offers. This in an anchor that contains a `String` that is the skill name.
+The `Skill` entry represents the skills associated with the users, projects, requests and offers. This in an anchor that contains a `String` that is the skill name.
 
 In hREA, skills are Resource Specifications. They can be created only by offers and requests. A user need to create an offer that is the list of its skills to be able to display it in its profile.
 
 #### 4.4.1.1 Links
 
 - **AllSkills**: A link to the `skills` anchor. It is an index of all the skills.
-- **SkillPersons**: A link from the skill to a person. It is an index of all the persons that have the skill.
+- **SkillUsers**: A link from the skill to a user. It is an index of all the users that have the skill.
 - **SkillProjects**: A link from the skill to a project. It is an index of all the projects that have the skill.
 - **SkillRequests**: A link from the skill to a request. It is an index of all the requests that have the skill.
 - **SkillOffers**: A link from the skill to an offer. It is an index of all the offers that have the skill.
@@ -224,25 +224,25 @@ In hREA, categories are Resource Specifications `classifiedAs` `{category}`.
 
 Each page has a search functionality.
 
-- **Search Persons**: Users can search persons by name, skills, categories, location, organizations and projects.
+- **Search Users**: Users can search users by name, skills, categories, location, organizations and projects.
 - **Search Organizations**: Users can search organizations by name, categories, projects.
 - **Search Projects**: Users can search projects by name, skills, categories and organizations.
-- **Search Requests**: Users can search requests by name, skills, categories, projects, organizations and persons.
-- **Search Offers**: Users can search offers by name, skills, categories, projects, organizations and persons.
+- **Search Requests**: Users can search requests by name, skills, categories, projects, organizations and users.
+- **Search Offers**: Users can search offers by name, skills, categories, projects, organizations and users.
 
 ### 4.6 Network Administration and Moderation Functionalities
 
 Administrators play a pivotal role in the governance and operation of the network, ensuring its integrity, security, and alignment with the community's objectives. Their responsibilities include:
 
-- **Verification of Persons and Organizations**: Administrators are tasked with verifying the authenticity and compliance of persons and organizations within the network. This process is crucial for maintaining the integrity of the community and ensuring that all participants are legitimate.
+- **Verification of Users and Organizations**: Administrators are tasked with verifying the authenticity and compliance of users and organizations within the network. This process is crucial for maintaining the integrity of the community and ensuring that all participants are legitimate.
 - **Project Creation by Verified Organizations**: Projects within the network can be directly created by verified organizations. This streamlines the project initiation process for organizations that have already been vetted by the network administrators.
-- **Verification of Projects Not Managed by Verified Organizations**: In cases where a person wishes to create a project that is not managed by a verified organization, the project must undergo a verification process by the network administrators. This ensures that all projects, regardless of their management structure, meet the network's standards and objectives.
+- **Verification of Projects Not Managed by Verified Organizations**: In cases where a user wishes to create a project that is not managed by a verified organization, the project must undergo a verification process by the network administrators. This ensures that all projects, regardless of their management structure, meet the network's standards and objectives.
 - **Moderator Role**: Administrators can delegate moderator roles to other users. Moderators can perform most administrative tasks except for managing administrators themselves. This includes moderating projects, requests, and offers, ensuring content appropriateness and community guidelines compliance.
 - **Suspension**: Administrators have the authority to temporarily or permanently suspend User profiles. This action can be taken in response to violations of community guidelines or other misconduct.
-  - **Temporary Suspension**: Administrators have the authority to temporarily suspend Person profiles for a specified period. 
-  - **Indefinitive Suspension**: Administrators have the authority to permanently suspend Person profiles.
-  - **Unsuspension**: Administrators have the authority to unsuspend suspended Person profiles.
-  - **Suspension reason**: Administrators can indicate the reason for a Person's suspension. The user will be notified of the reason.
+  - **Temporary Suspension**: Administrators have the authority to temporarily suspend user profiles for a specified period. 
+  - **Indefinitive Suspension**: Administrators have the authority to permanently suspend user profiles.
+  - **Unsuspension**: Administrators have the authority to unsuspend suspended user profiles.
+  - **Suspension reason**: Administrators can indicate the reason for a user's suspension. The user will be notified of the reason.
   - **Suspension history**: Administrators can view the history of all the suspensions or for a specific user.
 - **Flagging System**: Users have the ability to flag organizations, projects, requests, and offers for review by network administrators. This system allows the community to signal potentially inappropriate content or activities, prompting administrative review and action as necessary.
 - **Inbox**: Administrators and moderators have access to an inbox that allows them to address user concerns, inquiries, and reports efficiently using the messaging system.
@@ -250,19 +250,19 @@ Administrators play a pivotal role in the governance and operation of the networ
 
 Key aspects of administrator and moderator roles and access include:
 
-- **Exclusive Access to Administration Zome and UI**: Administrators and moderators are granted special access to the `Administration` zome and user interface, enabling them to effectively carry out their duties, including the verification of persons, organizations, and projects.
+- **Exclusive Access to Administration Zome and UI**: Administrators and moderators are granted special access to the `Administration` zome and user interface, enabling them to effectively carry out their duties, including the verification of users, organizations, and projects.
 - **Administrators anchor**: The `administrators` anchor is an index of all the administrators of the network. It's what allows the recognition of the administrators.
 - **Moderators anchor**: The `moderators` anchor is an index of all the moderators of the network. It's what allows the recognition of the moderators.
 - **Progenitor pattern to recognize the first agent**: The first agent in the network is designated as the progenitor. When the progenitorcreate his user profile, the agent becomes the first administrator.
 
 #### 4.6.1 Links
 
-- **AdministratorsPerson**: A link from the `administrators` anchor to a person. It is an index of all the administrators of the network.
-- **ModeratorsPerson**: A link from the `moderators` anchor to a person. It is an index of all the moderators of the network.
+- **AdministratorsUser**: A link from the `administrators` anchor to a user. It is an index of all the administrators of the network.
+- **ModeratorsUser**: A link from the `moderators` anchor to a user. It is an index of all the moderators of the network.
 
 #### 4.6.2 User Interface
 
-Administrators have access to the Administration Dashboard, a specialized part of the user interface that includes pages for managing administrators, persons, projects, organizations, requests, and offers. This dashboard also incorporates search functionality and special reports, providing administrators with comprehensive tools for network management.
+Administrators have access to the Administration Dashboard, a specialized part of the user interface that includes pages for managing administrators, users, projects, organizations, requests, and offers. This dashboard also incorporates search functionality and special reports, providing administrators with comprehensive tools for network management.
 
 Moderators have access to the same Administration Dashboard, but without the Administrators mangement page.
 
@@ -273,14 +273,14 @@ The Requests & Offers - MVP project is designed with a focus on facilitating col
 #### 4.7.1 Advocate
 
 - **Onboarded/Approved**: Advocates are individuals passionate about the Holochain technology, looking to support projects within the ecosystem. They are onboarded and approved to participate in the network by the network's administrators.
-- **Personal Profile**: Advocates must file out their personal profiles, including essential information and their areas of expertise.
+- **User Profile**: Advocates must file out their user profiles, including essential information and their areas of expertise.
 - **Offers**: Advocates can offer their skills, talents, or resources to the network. This includes mentorship, brainstorming sessions, or any other form of support they wish to provide.
 - **Reporting**: Advocates have access to reporting features, allowing them to view their exchanges and a general report of total exchanges for the month.
 
 #### 4.7.2 Creator
 
 - **Onboarded/Approved**: Creators are individuals or groups actively involved in creating or developing projects within the Holochain ecosystem. They are onboarded and approved to participate in the network by the network's administrators.
-- **Personal Profile**: Creators can file out their personal profiles, including their skills, location, type, etc.
+- **User Profile**: Creators can file out their user profiles, including their skills, location, type, etc.
 - **Offers**: Creators can make offers, including the skills and talents they wish to offer.
 - **Requests**: Creators can make requests for themselves, such as mentoring, brainstorming time, or testing in the early days of their projects.
 - **Reporting**: Creators can access reports on their exchanges and a general report of total exchanges for the month.
@@ -288,7 +288,7 @@ The Requests & Offers - MVP project is designed with a focus on facilitating col
 #### 4.7.3 Projects and Organizations Facilitators
 
 - **Onboarded/Approved**: Projects and organizations facilitators are individuals or groups designated to represent a project or organization within the network. They are onboarded and approved to participate in the network.
-- **Personal Profile**: Projects and organizations facilitators can file out their personal profiles, including their skills, location, type, etc.
+- **Project Profile**: Projects and organizations facilitators can file out the project profile, including the skills involved, location, type, etc.
 - **Offers**: Projects and organizations facilitators can make offers, including the skills and talents they wish to offer.
 - **Requests**: Projects and organizations facilitators can make requests for themselves and on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
 
@@ -311,15 +311,15 @@ This messaging functionality supports the dynamic interaction between users, enh
 
 ## 5. MVP Use Case: Project Collaboration and Skill Matching
 
-### 5.1 User Registration and Person profile
+### 5.1 User Registration and User profile
 
-- **Use Case**: Users can register and create person profile.
+- **Use Case**: Users can register and create user profile.
 - **Benefit**: Facilitates the creation of a user-centric community, enabling personalized experiences and targeted interactions.
 
-### 5.1.1 Person Retrieval
+### 5.1.1 User Recovery
 
-- **Use Case**: Users can retrieve their person profile, including their skills, projects, organizations, requests and offers.
-- **Benefit**: Facilitates the creation of a user-centric community, enabling personalized experiences and targeted interactions. It allows the user to link multiple agents/devices to their person profile.
+- **Use Case**: Users can recover their user profile, including their skills, projects, organizations, requests and offers.
+- **Benefit**: Facilitates the creation of a user-centric community, enabling personalized experiences and targeted interactions. It allows the user to link multiple agents/devices to their user profile.
 
 ### 5.2 Project Creation
 
@@ -343,7 +343,7 @@ This messaging functionality supports the dynamic interaction between users, enh
 
 ### 5.6 Basic Search Functionality
 
-- **Use Case**: Users can search for requests, offers, projects, organizations, persons by name, skills, categories, organizations and projects.
+- **Use Case**: Users can search for requests, offers, projects, organizations, users by name, skills, categories, organizations and projects.
 - **Benefit**: Enhances the discoverability of resources within the community, promoting collaboration and innovation.
 
 ## 6. Infrastructure
