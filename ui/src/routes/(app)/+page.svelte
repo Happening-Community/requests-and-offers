@@ -4,7 +4,7 @@
   import NavButton from '@lib/NavButton.svelte';
   import administratorsStore from '@stores/administrators.svelte';
 
-  const { myProfile } = usersStore;
+  const { myProfile } = $derived(usersStore);
   const { agentIsAdministrator } = $derived(administratorsStore);
 </script>
 

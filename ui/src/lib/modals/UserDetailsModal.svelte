@@ -6,15 +6,7 @@
   import { type User, type UserStatus } from '@stores/users.svelte';
   import { onMount } from 'svelte';
 
-  const {
-    administrators,
-    getAllAdministrators,
-    getAllUsers,
-    removeAdministrator,
-    suspendUserIndefinitely,
-    suspendUserTemporarily,
-    updateUserStatus
-  } = $derived(administratorsStore);
+  const { administrators } = $derived(administratorsStore);
   const modalStore = getModalStore();
 
   let userPictureUrl = $state('');
@@ -56,8 +48,12 @@
     const confirmation = confirm(confirmMessage);
     if (!confirmation) return;
 
-    await updateUserStatus(user?.original_action_hash!, user?.previous_action_hash!, status);
-    await getAllUsers();
+    await administratorsStore.updateUserStatus(
+      user?.original_action_hash!,
+      user?.previous_action_hash!,
+      status
+    );
+    await administratorsStore.getAllUsers();
 
     modalStore.close();
   }
@@ -67,9 +63,12 @@
     const confirmation = confirm('Are you sure you want to suspend this user indefinitely ?');
     if (!confirmation) return;
 
-    await suspendUserIndefinitely(user?.original_action_hash!, user?.previous_action_hash!);
+    await administratorsStore.suspendUserIndefinitely(
+      user?.original_action_hash!,
+      user?.previous_action_hash!
+    );
 
-    await getAllUsers();
+    await administratorsStore.getAllUsers();
     modalStore.close();
   }
 
@@ -90,12 +89,12 @@
     );
     if (!confirmation) return;
 
-    await suspendUserTemporarily(
+    await administratorsStore.suspendUserTemporarily(
       user?.original_action_hash!,
       user?.previous_action_hash!,
       suspendedDays
     );
-    await getAllUsers();
+    await administratorsStore.getAllUsers();
     suspensionDate = new Date(user?.status!.split(' ')[1]).toLocaleString();
     suspendedDays = 0;
     modalStore.close();
@@ -105,8 +104,8 @@
     const confirmation = confirm('Are you sure you want to remove this administrator ?');
     if (!confirmation) return;
 
-    await removeAdministrator(original_action_hash);
-    await getAllAdministrators();
+    await administratorsStore.removeAdministrator(original_action_hash);
+    await administratorsStore.getAllAdministrators();
     modalStore.close();
   }
 </script>

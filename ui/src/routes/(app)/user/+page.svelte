@@ -4,7 +4,7 @@
   import { onMount } from 'svelte';
   import usersStore from '@stores/users.svelte';
 
-  const { getMyProfile, myProfile } = usersStore;
+  const { myProfile } = $derived(usersStore);
 
   let userPictureUrl = $derived(
     myProfile?.picture
@@ -16,7 +16,7 @@
   let isExpired = $state(false);
 
   onMount(async () => {
-    await getMyProfile();
+    await usersStore.getMyProfile();
 
     if (myProfile) {
       if (myProfile.status!.split(' ')[1]) {

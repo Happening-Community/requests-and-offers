@@ -12,15 +12,16 @@
     offset: number;
   };
 
-  const { myProfile, getMyProfile, createUser } = usersStore;
+  const { myProfile } = $derived(usersStore);
 
   let form: HTMLFormElement;
-  let files: FileList;
-  let fileMessage: string;
   let timezones = moment.tz.names();
-  let filteredTimezones: string[] = [];
-  let formattedTimezones: FormattedTimezone[] = [];
-  let search = '';
+  let userPicture: Blob | null = $state(null);
+  let files: FileList | undefined = $state();
+  let fileMessage: string = $state('');
+  let filteredTimezones: string[] = $state([]);
+  let formattedTimezones: FormattedTimezone[] = $state([]);
+  let search = $state('');
 
   function formatTimezones(timezones: string[]): FormattedTimezone[] {
     return timezones.map((timezone) => {
@@ -39,24 +40,30 @@
     });
   }
 
-  $: search
-    ? (formattedTimezones = formatTimezones(filteredTimezones).sort((a, b) => a.offset - b.offset))
-    : (formattedTimezones = formatTimezones(timezones)).sort((a, b) => a.offset - b.offset);
+  $effect(() => {
+    search
+      ? (formattedTimezones = formatTimezones(filteredTimezones))
+      : (formattedTimezones = formatTimezones(timezones));
+  });
+
+  $effect(() => {
+    formattedTimezones.sort((a, b) => {
+      return a.offset - b.offset;
+    });
+  });
 
   function filterTimezones(event: any) {
     search = event.target.value.trim();
     filteredTimezones = timezones.filter((tz) => tz.toLowerCase().includes(search.toLowerCase()));
   }
 
-  let userPicture: Blob | undefined;
-
   async function onPictureFileChange() {
-    fileMessage = `${files[0].name}`;
-    userPicture = new Blob([new Uint8Array(await files[0].arrayBuffer())]);
+    fileMessage = `${files![0].name}`;
+    userPicture = new Blob([new Uint8Array(await files![0].arrayBuffer())]);
   }
 
   function RemoveUserPicture() {
-    userPicture = undefined;
+    userPicture = null;
     fileMessage = '';
     const pictureInput = form.querySelector('input[name="picture"]') as HTMLInputElement;
     if (pictureInput) {
@@ -66,8 +73,8 @@
 
   async function mockUsers() {
     try {
-      await createUser((await createMockedUsers())[0]);
-      await getMyProfile();
+      await usersStore.createUser((await createMockedUsers())[0]);
+      await usersStore.getMyProfile();
 
       goto('/user');
     } catch (error) {
@@ -94,8 +101,10 @@
     };
 
     try {
-      await createUser(user);
-      await getMyProfile();
+      await usersStore.createUser(user);
+      await usersStore.getMyProfile();
+
+      console.log('created user :', user);
 
       goto('/user');
     } catch (error) {

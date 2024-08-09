@@ -1,5 +1,5 @@
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
-import hc from '@services/HolochainClientService';
+import hc from '@services/HolochainClientService.svelte';
 import { decodeRecords } from '@utils';
 import type { User, UserStatus } from './users.svelte';
 import usersStore from './users.svelte';

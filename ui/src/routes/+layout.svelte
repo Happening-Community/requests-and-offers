@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import '../app.postcss';
-  import hc from '@services/HolochainClientService';
+  import hc from '@services/HolochainClientService.svelte';
   import usersStore from '@stores/users.svelte';
   import { Modal, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
   import { initializeStores } from '@skeletonlabs/skeleton';
@@ -19,9 +19,8 @@
 
   const { children } = $props() as Props;
 
-  const { myProfile } = usersStore;
-  const { agentIsAdministrator, registerAdministrator, checkIfAgentIsAdministrator } =
-    administratorsStore;
+  const { myProfile } = $derived(usersStore);
+  const { agentIsAdministrator } = $derived(administratorsStore);
 
   storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
@@ -34,7 +33,9 @@
     await usersStore.getMyProfile();
 
     if (myProfile) {
-      await checkIfAgentIsAdministrator((await hc.getAppInfo())?.agent_pub_key!);
+      await administratorsStore.checkIfAgentIsAdministrator(
+        (await hc.getAppInfo())?.agent_pub_key!
+      );
     }
 
     console.log('Ping response:', record);
@@ -60,8 +61,10 @@
       event.preventDefault();
       let confirmation = confirm('Register Admin ?');
       if (confirmation && myProfile.original_action_hash) {
-        await registerAdministrator(myProfile.original_action_hash);
-        await checkIfAgentIsAdministrator((await hc.getAppInfo())?.agent_pub_key!);
+        await administratorsStore.registerAdministrator(myProfile.original_action_hash);
+        await administratorsStore.checkIfAgentIsAdministrator(
+          (await hc.getAppInfo())?.agent_pub_key!
+        );
       }
     }
   }

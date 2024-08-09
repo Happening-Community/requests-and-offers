@@ -4,8 +4,7 @@
   import { type User } from '@stores/users.svelte';
   import { onMount } from 'svelte';
 
-  const { administrators, getNonAdministratorUsers, nonAdministrators, registerAdministrator } =
-    $derived(administratorsStore);
+  const { administrators, nonAdministrators } = $derived(administratorsStore);
 
   let filteredUsers: User[] = $state([]);
   let searchInput = $state('');
@@ -17,7 +16,7 @@
   ];
 
   onMount(async () => {
-    await getNonAdministratorUsers();
+    await administratorsStore.getNonAdministratorUsers();
     filteredUsers = nonAdministrators;
 
     isLoading = false;
@@ -29,7 +28,7 @@
     const confirmation = confirm('Do you really want to make this user an administrator ?');
     if (confirmation) {
       try {
-        await registerAdministrator(user.original_action_hash!);
+        await administratorsStore.registerAdministrator(user.original_action_hash!);
         administratorsStore.administrators = [...administrators, user];
       } catch (error) {}
 

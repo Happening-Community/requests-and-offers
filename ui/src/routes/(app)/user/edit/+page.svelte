@@ -12,17 +12,17 @@
     offset: number;
   };
 
-  const { myProfile, getMyProfile, updateMyProfile } = usersStore;
+  const { myProfile } = $derived(usersStore);
 
-  let form: HTMLFormElement;
-  let files: FileList;
-  let fileMessage: string;
-  let userPicture: Blob | undefined;
+  let form: HTMLFormElement | undefined = $state();
   let timezones = moment.tz.names();
-  let filteredTimezones: string[] = [];
-  let formattedTimezones: FormattedTimezone[] = [];
-  let search = '';
-  let isChanged = false;
+  let filteredTimezones: string[] = $state([]);
+  let formattedTimezones: FormattedTimezone[] = $state([]);
+  let userPicture: Blob | null = $state(null);
+  let files: FileList | undefined = $state();
+  let fileMessage: string = $state('');
+  let search = $state('');
+  let isChanged = $state(false);
 
   function formatTimezones(timezones: string[]): FormattedTimezone[] {
     return timezones.map((timezone) => {
@@ -41,9 +41,17 @@
     });
   }
 
-  $: search
-    ? (formattedTimezones = formatTimezones(filteredTimezones).sort((a, b) => a.offset - b.offset))
-    : (formattedTimezones = formatTimezones(timezones)).sort((a, b) => a.offset - b.offset);
+  $effect(() => {
+    search
+      ? (formattedTimezones = formatTimezones(filteredTimezones))
+      : (formattedTimezones = formatTimezones(timezones));
+  });
+
+  $effect(() => {
+    formattedTimezones.sort((a, b) => {
+      return a.offset - b.offset;
+    });
+  });
 
   function filterTimezones(event: any) {
     search = event.target.value.trim();
@@ -51,15 +59,15 @@
   }
 
   async function onPictureFileChange() {
-    fileMessage = `${files[0].name}`;
-    userPicture = new Blob([new Uint8Array(await files[0].arrayBuffer())]);
+    fileMessage = `${files![0].name}`;
+    userPicture = new Blob([new Uint8Array(await files![0].arrayBuffer())]);
   }
 
   function RemoveUserPicture() {
     isChanged = true;
-    userPicture = undefined;
+    userPicture = null;
     fileMessage = '';
-    const pictureInput = form.querySelector('input[name="picture"]') as HTMLInputElement;
+    const pictureInput = form!.querySelector('input[name="picture"]') as HTMLInputElement;
     if (pictureInput) {
       pictureInput.value = '';
     }
@@ -91,8 +99,8 @@
     };
 
     try {
-      await updateMyProfile(user);
-      await getMyProfile();
+      await usersStore.updateMyProfile(user);
+      await usersStore.getMyProfile();
 
       goto('/user');
     } catch (error) {

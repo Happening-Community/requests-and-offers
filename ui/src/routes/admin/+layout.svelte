@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import AdminSideBar from '@lib/AdminSideBar.svelte';
   import Navbar from '@lib/NavBar.svelte';
-  import { isConnected } from '@services/HolochainClientService';
+  import hc from '@services/HolochainClientService.svelte';
   import { AppShell, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
   import administratorsStore from '@stores/administrators.svelte';
   import { onMount } from 'svelte';
@@ -42,7 +42,7 @@
   <main
     class="bg-surface-800 mx-auto flex min-h-screen flex-col items-center justify-center px-5 pb-10 pt-40"
   >
-    {#if !$isConnected}
+    {#if !hc.isConnected}
       <p>Not connected yet.</p>
       <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
     {:else}

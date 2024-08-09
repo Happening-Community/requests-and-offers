@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { isConnected } from '@services/HolochainClientService';
   import { AppShell, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
   import Navbar from '@lib/NavBar.svelte';
   import { onMount } from 'svelte';
+  import hc from '@services/HolochainClientService.svelte';
 
   type Props = {
     children: any;
@@ -29,7 +29,7 @@
   <main
     class="container mx-auto flex min-h-screen flex-col items-center justify-center px-5 pb-10 pt-40"
   >
-    {#if !$isConnected}
+    {#if !hc.isConnected}
       <p>Not connected yet.</p>
       <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
     {:else}

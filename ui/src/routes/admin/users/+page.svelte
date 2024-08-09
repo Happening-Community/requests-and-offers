@@ -12,8 +12,7 @@
   import { onMount } from 'svelte';
   import UserDetailsModal from '@lib/modals/UserDetailsModal.svelte';
 
-  const { allUsers, getAllUsers } = $derived(administratorsStore);
-
+  const { allUsers } = $derived(administratorsStore);
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
     { color: 'rgb(var(--color-secondary-500))', start: 75, end: 50 }
@@ -45,7 +44,7 @@
   let indefinitelySuspendedUsers = $derived(allUsers.filter((user) => user.status === 'suspended'));
 
   onMount(async () => {
-    await getAllUsers();
+    await administratorsStore.getAllUsers();
 
     isLoading = false;
   });

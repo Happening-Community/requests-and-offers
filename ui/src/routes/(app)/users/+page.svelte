@@ -12,7 +12,7 @@
   import usersStore, { type User } from '@stores/users.svelte';
   import { onMount } from 'svelte';
 
-  const { getAcceptedUsers, myProfile, acceptedUsers } = usersStore;
+  const { myProfile, acceptedUsers } = $derived(usersStore);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -22,7 +22,7 @@
   let isLoading = $state(true);
 
   onMount(async () => {
-    await getAcceptedUsers();
+    await usersStore.getAcceptedUsers();
     isLoading = false;
   });
 

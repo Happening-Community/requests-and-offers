@@ -1,21 +1,16 @@
 import { AppAgentWebsocket, type AppAgentClient, type AppInfoResponse } from '@holochain/client';
-import { writable, type Writable } from 'svelte/store';
-
-/**
- * A writable Svelte store to track the connection status.
- */
-export const isConnected: Writable<boolean> = writable(false);
 
 class HolochainClientService {
   appId = 'requests_and_offers';
-  client: AppAgentClient | null = null;
+  client: AppAgentClient | null = $state(null);
+  isConnected = $state(false);
 
   /**
    * Connects the client to the Holochain network.
    */
   async connectClient() {
     this.client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), this.appId);
-    isConnected.set(true);
+    this.isConnected = true;
   }
 
   /**

@@ -11,7 +11,7 @@
   import AddAdministratorModal from '@lib/modals/AddAdministratorModal.svelte';
   import type { User } from '@stores/users.svelte';
 
-  const { administrators, getAllAdministrators } = $derived(administratorsStore);
+  const { administrators } = $derived(administratorsStore);
 
   const modalStore = getModalStore();
   const userDetailsModalComponent: ModalComponent = { ref: UserDetailsModal };
@@ -33,7 +33,7 @@
   let isLoading = $state(true);
 
   onMount(async () => {
-    await getAllAdministrators();
+    await administratorsStore.getAllAdministrators();
 
     isLoading = false;
   });
