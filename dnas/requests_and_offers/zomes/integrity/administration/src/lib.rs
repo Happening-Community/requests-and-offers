@@ -1,9 +1,23 @@
 use hdi::prelude::*;
+use status::*;
+
+pub mod status;
+
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "type")]
+#[hdk_entry_defs]
+#[unit_enum(UnitEntryTypes)]
+pub enum EntryTypes {
+  Status(Status),
+}
 
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
 pub enum LinkTypes {
   AllAdministrators,
+  StatusUpdates,
+  AllStatus,
+  AcceptedUsers,
 }
 
 #[hdk_extern]

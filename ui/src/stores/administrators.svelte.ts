@@ -14,7 +14,7 @@ class AdministratorsStore {
     return await hc.callZome('users', 'get_all_users', null);
   }
 
-  private async getAllUsersRecordsAndLinks(): Promise<[Link[], Record[]]> {
+  private async getAllUsersLinksAndRecords(): Promise<[Link[], Record[]]> {
     const usersLinks: Link[] = await this.getAllUsersLinks();
     let usersRecords: Record[] = [];
 
@@ -27,20 +27,25 @@ class AdministratorsStore {
   }
 
   async getAllUsers(): Promise<User[]> {
-    const [usersLinks, usersRecords] = await this.getAllUsersRecordsAndLinks();
+    const [usersLinks, usersRecords] = await this.getAllUsersLinksAndRecords();
 
     let recordsContents: User[] = [];
 
     for (let i = 0; i < usersRecords.length; i++) {
       let user = decodeRecords([usersRecords[i]])[0];
+      let status = await this.getLatestStatusForUser(usersRecords[i].signed_action.hashed.hash);
+
       recordsContents.push({
         ...user,
-        remaining_time: this.getRemainingSuspensionTime(user.status),
+        status,
+        remaining_time: status ? this.getRemainingSuspensionTime(status) : 0,
         original_action_hash: usersLinks[i].target,
         previous_action_hash: usersRecords[i].signed_action.hashed.hash
       });
     }
     this.allUsers = recordsContents;
+
+    console.log('all users', recordsContents);
 
     return recordsContents;
   }
@@ -101,61 +106,94 @@ class AdministratorsStore {
     return nonAdministratorsUsers;
   }
 
+  async getLatestStatusRecordForUser(
+    user_original_action_hash: ActionHash
+  ): Promise<Record | null> {
+    return await hc.callZome(
+      'administration',
+      'get_latest_status_record_for_user',
+      user_original_action_hash
+    );
+  }
+
+  async getLatestStatusForUser(user_original_action_hash: ActionHash): Promise<UserStatus | null> {
+    return await hc.callZome(
+      'administration',
+      'get_latest_status_for_user',
+      user_original_action_hash
+    );
+  }
+
+  async getProfileStatusLink(user_original_action_hash: ActionHash): Promise<Link | null> {
+    return await hc.callZome('users', 'get_profile_status_link', user_original_action_hash);
+  }
+
   async updateUserStatus(
-    original_action_hash: Uint8Array,
-    previous_action_hash: Uint8Array,
-    status: UserStatus
+    user_original_action_hash: ActionHash,
+    status_original_action_hash: ActionHash,
+    status_previous_action_hash: ActionHash,
+    new_status: UserStatus
   ): Promise<boolean> {
-    return await hc.callZome('users', 'update_user_status', {
-      original_action_hash,
-      previous_action_hash,
-      status
+    return await hc.callZome('administration', 'update_user_status', {
+      user_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
+      new_status
     });
   }
 
   async suspendUserIndefinitely(
-    original_action_hash: Uint8Array,
-    previous_action_hash: Uint8Array
+    user_original_action_hash: ActionHash,
+    status_original_action_hash: ActionHash,
+    status_previous_action_hash: ActionHash
   ): Promise<boolean> {
-    return await hc.callZome('users', 'suspend_user_indefinitely', {
-      original_action_hash,
-      previous_action_hash
+    return await hc.callZome('administration', 'suspend_user_indefinitely', {
+      user_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash
     });
   }
 
   async suspendUserTemporarily(
-    original_action_hash: Uint8Array,
-    previous_action_hash: Uint8Array,
+    user_original_action_hash: ActionHash,
+    status_original_action_hash: ActionHash,
+    status_previous_action_hash: ActionHash,
     duration_in_days: number
   ): Promise<boolean> {
-    return await hc.callZome('users', 'suspend_user_temporarily', {
-      original_action_hash,
-      previous_action_hash,
+    return await hc.callZome('administration', 'suspend_user_temporarily', {
+      user_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
       duration_in_days
     });
   }
 
   async unsuspendUser(
-    original_action_hash: Uint8Array,
-    previous_action_hash: Uint8Array
+    user_original_action_hash: ActionHash,
+    status_original_action_hash: ActionHash,
+    status_previous_action_hash: ActionHash
   ): Promise<boolean> {
-    return await hc.callZome('users', 'unsuspend_user', {
-      original_action_hash,
-      previous_action_hash
+    return await hc.callZome('administration', 'unsuspend_user', {
+      user_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash
     });
   }
 
   async unsuspendUserIfTimePassed(
-    original_action_hash: Uint8Array,
-    previous_action_hash: Uint8Array
+    user_original_action_hash: ActionHash,
+    status_original_action_hash: ActionHash,
+    status_previous_action_hash: ActionHash
   ): Promise<boolean> {
-    return await hc.callZome('users', 'unsuspend_user_if_time_passed', {
-      original_action_hash,
-      previous_action_hash
+    return await hc.callZome('administration', 'unsuspend_user_if_time_passed', {
+      user_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash
     });
   }
 
   getRemainingSuspensionTime(status: UserStatus): number | null {
+    if (!status) return null;
     const suspensionDate = new Date(status.split(' ')[1]);
     const now = new Date();
 

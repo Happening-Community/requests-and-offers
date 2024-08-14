@@ -42,8 +42,8 @@ impl SuspendedStatus<Timestamp> {
   }
 }
 
-#[derive(Clone, Debug, PartialEq, Default)]
-pub enum Status {
+#[derive(Clone, PartialEq, Default)]
+pub enum StatusList {
   #[default]
   Pending,
   Accepted,
@@ -51,7 +51,7 @@ pub enum Status {
   Suspended(SuspendedStatus<Timestamp>),
 }
 
-impl Display for Status {
+impl Display for StatusList {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self {
       Self::Pending => write!(f, "pending"),
@@ -79,7 +79,7 @@ impl Display for StatusParsingError {
 
 impl Error for StatusParsingError {}
 
-impl FromStr for Status {
+impl FromStr for StatusList {
   type Err = StatusParsingError;
 
   fn from_str(status: &str) -> Result<Self, Self::Err> {
@@ -97,29 +97,29 @@ impl FromStr for Status {
   }
 }
 
-impl From<&str> for Status {
+impl From<&str> for StatusList {
   fn from(status: &str) -> Self {
     Self::from_str(status).unwrap_or_default()
   }
 }
 
-impl Status {
+impl StatusList {
   pub fn suspend(&mut self, time: Option<(Duration, &Timestamp)>) -> ExternResult<()> {
     if time.is_none() {
-      *self = Status::Suspended(Indefinitely);
+      *self = StatusList::Suspended(Indefinitely);
       return Ok(());
     }
 
     let duration = time.unwrap().0.num_microseconds().unwrap_or(0);
     let now = time.unwrap().1.as_micros();
 
-    *self = Status::Suspended(Temporarily(Timestamp::from_micros(now + duration)));
+    *self = StatusList::Suspended(Temporarily(Timestamp::from_micros(now + duration)));
 
     Ok(())
   }
 
   pub fn unsuspend(&mut self) {
-    *self = Status::Accepted
+    *self = StatusList::Accepted
   }
 
   pub fn unsuspend_if_time_passed(&mut self, now: &Timestamp) -> bool {
@@ -136,4 +136,98 @@ impl Status {
       _ => false,
     }
   }
+}
+
+#[hdk_entry_helper]
+#[derive(Clone, PartialEq)]
+pub struct Status(pub String);
+
+impl Default for Status {
+  fn default() -> Self {
+    Self(StatusList::Pending.to_string())
+  }
+}
+
+impl From<StatusList> for Status {
+  fn from(status: StatusList) -> Self {
+    Self(status.to_string())
+  }
+}
+
+impl Status {
+  pub fn to_status_list(&self) -> StatusList {
+    StatusList::from(self.0.as_str())
+  }
+}
+
+pub fn validate_status(status: Status) -> ExternResult<ValidateCallbackResult> {
+  if StatusList::from_str(status.0.as_str()).is_err() {
+    return Ok(ValidateCallbackResult::Invalid(format!(
+      "Status must be '{}', '{}', '{}' or suspended (with a timestamp or not).",
+      StatusList::Pending,
+      StatusList::Accepted,
+      StatusList::Rejected,
+    )));
+  };
+
+  Ok(ValidateCallbackResult::Valid)
+}
+
+pub fn validate_update_user(
+  _action: Update,
+  _status: Status,
+  _original_action: EntryCreationAction,
+  _original_status: Status,
+) -> ExternResult<ValidateCallbackResult> {
+  Ok(ValidateCallbackResult::Valid)
+}
+
+pub fn validate_delete_status(
+  _action: Delete,
+  _original_action: EntryCreationAction,
+  _original_status: Status,
+) -> ExternResult<ValidateCallbackResult> {
+  Ok(ValidateCallbackResult::Invalid(String::from(
+    "User profile cannot be deleted",
+  )))
+}
+
+pub fn validate_create_link_status_updates(
+  _action: CreateLink,
+  base_address: AnyLinkableHash,
+  target_address: AnyLinkableHash,
+  _tag: LinkTag,
+) -> ExternResult<ValidateCallbackResult> {
+  let action_hash = base_address.into_action_hash().unwrap();
+  let record = must_get_valid_record(action_hash)?;
+  let _status: crate::Status = record
+    .entry()
+    .to_app_option()
+    .map_err(|e| wasm_error!(e))?
+    .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+      "Linked action must reference an entry"
+    ))))?;
+  // Check the entry type for the given action hash
+  let action_hash = target_address.into_action_hash().unwrap();
+  let record = must_get_valid_record(action_hash)?;
+  let _status: crate::Status = record
+    .entry()
+    .to_app_option()
+    .map_err(|e| wasm_error!(e))?
+    .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+      "Linked action must reference an entry"
+    ))))?;
+  Ok(ValidateCallbackResult::Valid)
+}
+
+pub fn validate_delete_link_status_updates(
+  _action: DeleteLink,
+  _original_action: CreateLink,
+  _base: AnyLinkableHash,
+  _target: AnyLinkableHash,
+  _tag: LinkTag,
+) -> ExternResult<ValidateCallbackResult> {
+  Ok(ValidateCallbackResult::Invalid(String::from(
+    "StatusUpdates links cannot be deleted",
+  )))
 }

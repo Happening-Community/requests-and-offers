@@ -12,13 +12,13 @@ import {
   sampleUserInput,
   updateUser,
   UserInput,
-  getAcceptedUsers,
 } from "./common.js";
 import {
   decodeRecords,
   imagePathToArrayBuffer,
   runScenarioWithTwoAgents,
 } from "../utils.js";
+import { getLatestStatusForUser } from "../administration/common";
 
 test("create and read User", async () => {
   await runScenarioWithTwoAgents(
@@ -51,7 +51,12 @@ test("create and read User", async () => {
       assert.containsAllKeys(aliceCreatedUser, bobCreatedUser);
 
       // Verify that the user status is "pending"
-      assert.equal(bobCreatedUser.status, "pending");
+      const bobStatus = await getLatestStatusForUser(
+        bob.cells[0],
+        record.signed_action.hashed.hash
+      );
+
+      assert.equal(bobStatus, "pending");
 
       // Bob try to get his user before he create it
       let links = await getAgentUser(bob.cells[0], bob.agentPubKey);

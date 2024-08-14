@@ -22,6 +22,7 @@ name = "administration"
 version = "0.0.1"
 dependencies = [
  "administration_integrity",
+ "chrono 0.3.0",
  "hdk",
  "serde",
  "utils",
@@ -31,6 +32,7 @@ dependencies = [
 name = "administration_integrity"
 version = "0.0.1"
 dependencies = [
+ "chrono 0.3.0",
  "hdi",
  "serde",
 ]
@@ -2497,7 +2499,6 @@ dependencies = [
 name = "users"
 version = "0.0.1"
 dependencies = [
- "chrono 0.3.0",
  "hdk",
  "serde",
  "users_integrity",

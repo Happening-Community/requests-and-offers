@@ -81,7 +81,7 @@ export async function getAgentUser(
 
 export async function getAcceptedUsers(cell: CallableCell): Promise<Link[]> {
   return cell.callZome({
-    zome_name: "users",
+    zome_name: "administration",
     fn_name: "get_accepted_users",
   });
 }

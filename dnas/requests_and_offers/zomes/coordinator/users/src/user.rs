@@ -2,42 +2,10 @@ use hdk::prelude::*;
 use users_integrity::*;
 use utils::wasm_error;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct UserInput {
-  pub name: String,
-  pub nickname: String,
-  pub bio: String,
-  pub picture: Option<SerializedBytes>,
-  pub user_type: String,
-  pub skills: Vec<String>,
-  pub email: String,
-  pub phone: Option<String>,
-  pub time_zone: String,
-  pub location: String,
-}
-
-impl From<UserInput> for User {
-  fn from(input: UserInput) -> Self {
-    User {
-      name: input.name.clone(),
-      nickname: input.nickname.clone(),
-      bio: input.bio.clone(),
-      picture: input.picture.clone(),
-      user_type: input.user_type.clone(),
-      skills: input.skills.clone(),
-      email: input.email.clone(),
-      phone: input.phone.clone(),
-      time_zone: input.time_zone.clone(),
-      location: input.location.clone(),
-      status: "pending".to_string(),
-    }
-  }
-}
+use crate::external_calls::create_status;
 
 #[hdk_extern]
-pub fn create_user(user_input: UserInput) -> ExternResult<Record> {
-  let user = User::from(user_input);
-
+pub fn create_user(user: User) -> ExternResult<Record> {
   let record = get_agent_user(agent_info()?.agent_initial_pubkey)?;
   if !record.is_empty() {
     return Err(wasm_error("You already have a User profile"));
@@ -57,8 +25,17 @@ pub fn create_user(user_input: UserInput) -> ExternResult<Record> {
 
   create_link(
     agent_info()?.agent_initial_pubkey,
-    user_hash,
+    user_hash.clone(),
     LinkTypes::MyUser,
+    (),
+  )?;
+
+  let created_status_record = create_status(user_hash.clone())?;
+
+  create_link(
+    user_hash.clone(),
+    created_status_record.action_address().clone(),
+    LinkTypes::ProfileStatus,
     (),
   )?;
 
@@ -116,26 +93,16 @@ pub fn get_agent_user_hash(agent_pubkey: AgentPubKey) -> ExternResult<Option<Act
   }
 }
 
-#[hdk_extern]
-pub fn get_accepted_users(_: ()) -> ExternResult<Vec<Link>> {
-  let path = Path::from("accepted_users");
-  get_links(path.path_entry_hash()?, LinkTypes::AcceptedUsers, None)
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateUserInput {
   pub original_action_hash: ActionHash,
   pub previous_action_hash: ActionHash,
-  pub updated_user: UserInput,
+  pub updated_user: User,
 }
 
 #[hdk_extern]
 pub fn update_user(input: UpdateUserInput) -> ExternResult<Record> {
-  let mut user = User::from(input.updated_user.clone());
   let original_record = must_get_valid_record(input.original_action_hash.clone())?;
-
-  let record_option = get_latest_user(input.original_action_hash.clone())?;
-  user.status = record_option.status;
 
   let author = original_record.action().author().clone();
   if author != agent_info()?.agent_initial_pubkey {
@@ -144,7 +111,7 @@ pub fn update_user(input: UpdateUserInput) -> ExternResult<Record> {
     ));
   }
 
-  let updated_user_hash = update_entry(input.previous_action_hash.clone(), &user)?;
+  let updated_user_hash = update_entry(input.previous_action_hash.clone(), &input.updated_user)?;
 
   create_link(
     input.original_action_hash.clone(),

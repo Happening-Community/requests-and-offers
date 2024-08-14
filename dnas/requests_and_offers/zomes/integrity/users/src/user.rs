@@ -1,4 +1,3 @@
-use crate::status::*;
 use std::{fmt::Display, io::Cursor, str::FromStr};
 
 use email_address::EmailAddress;
@@ -29,8 +28,6 @@ pub struct User {
   pub time_zone: String,
   /// The location where the user is based.
   pub location: String,
-  /// The status of the user, either 'pending', 'accepted' or 'rejected'.
-  pub status: String,
 }
 
 enum AllowedTypes {
@@ -75,15 +72,6 @@ pub fn validate_user(user: User) -> ExternResult<ValidateCallbackResult> {
       "User Type must be '{}' or '{}'.",
       AllowedTypes::Advocate,
       AllowedTypes::Creator,
-    )));
-  };
-
-  if Status::from_str(user.status.as_str()).is_err() {
-    return Ok(ValidateCallbackResult::Invalid(format!(
-      "Status must be '{}', '{}', '{}' or suspended (with a timestamp or not).",
-      Status::Pending,
-      Status::Accepted,
-      Status::Rejected,
     )));
   };
 

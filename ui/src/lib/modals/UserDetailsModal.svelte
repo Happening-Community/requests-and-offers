@@ -48,9 +48,17 @@
     const confirmation = confirm(confirmMessage);
     if (!confirmation) return;
 
+    const statusOriginalActionHash = (await administratorsStore.getProfileStatusLink(
+      user?.original_action_hash!
+    ))!.target;
+    const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForUser(
+      user?.original_action_hash!
+    ))!.signed_action.hashed.hash;
+
     await administratorsStore.updateUserStatus(
-      user?.original_action_hash!,
-      user?.previous_action_hash!,
+      user.original_action_hash!,
+      statusOriginalActionHash,
+      latestStatusActionHash,
       status
     );
     await administratorsStore.getAllUsers();
@@ -63,9 +71,17 @@
     const confirmation = confirm('Are you sure you want to suspend this user indefinitely ?');
     if (!confirmation) return;
 
+    const statusOriginalActionHash = (await administratorsStore.getProfileStatusLink(
+      user?.original_action_hash!
+    ))!.target;
+    const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForUser(
+      user?.original_action_hash!
+    ))!.signed_action.hashed.hash;
+
     await administratorsStore.suspendUserIndefinitely(
-      user?.original_action_hash!,
-      user?.previous_action_hash!
+      user.original_action_hash!,
+      statusOriginalActionHash,
+      latestStatusActionHash
     );
 
     await administratorsStore.getAllUsers();
@@ -89,9 +105,17 @@
     );
     if (!confirmation) return;
 
+    const statusOriginalActionHash = (await administratorsStore.getProfileStatusLink(
+      user?.original_action_hash!
+    ))!.target;
+    const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForUser(
+      user?.original_action_hash!
+    ))!.signed_action.hashed.hash;
+
     await administratorsStore.suspendUserTemporarily(
-      user?.original_action_hash!,
-      user?.previous_action_hash!,
+      user.original_action_hash!,
+      statusOriginalActionHash,
+      latestStatusActionHash,
       suspendedDays
     );
     await administratorsStore.getAllUsers();

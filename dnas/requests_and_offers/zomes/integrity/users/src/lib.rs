@@ -1,5 +1,3 @@
-pub mod status;
-mod tests;
 pub mod user;
 use hdi::prelude::*;
 pub use user::*;
@@ -17,7 +15,7 @@ pub enum LinkTypes {
   UserUpdates,
   AllUsers,
   MyUser,
-  AcceptedUsers,
+  ProfileStatus,
 }
 
 #[hdk_extern]

@@ -62,31 +62,72 @@ export async function removeAdministrator(
   });
 }
 
-export async function updateUserStatus(
+export async function getLatestStatusRecordForUser(
   cell: CallableCell,
-  original_action_hash: ActionHash,
-  previous_action_hash: ActionHash,
-  status: Status
-): Promise<Record> {
+  user_hash: ActionHash
+): Promise<Record | null> {
+  return cell.callZome({
+    zome_name: "administration",
+    fn_name: "get_latest_status_record_for_user",
+    payload: user_hash,
+  });
+}
+
+export async function getLatestStatusForUser(
+  cell: CallableCell,
+  user_original_action_hash: ActionHash
+): Promise<string | null> {
+  return cell.callZome({
+    zome_name: "administration",
+    fn_name: "get_latest_status_for_user",
+    payload: user_original_action_hash,
+  });
+}
+
+export async function getProfileStatusLink(
+  cell: CallableCell,
+  user_original_action_hash: ActionHash
+): Promise<Link | null> {
   return cell.callZome({
     zome_name: "users",
+    fn_name: "get_profile_status_link",
+    payload: user_original_action_hash,
+  });
+}
+
+export async function updateUserStatus(
+  cell: CallableCell,
+  user_original_action_hash: ActionHash,
+  status_original_action_hash: ActionHash,
+  status_previous_action_hash: ActionHash,
+  new_status: Status
+): Promise<Record> {
+  return cell.callZome({
+    zome_name: "administration",
     fn_name: "update_user_status",
-    payload: { original_action_hash, previous_action_hash, status },
+    payload: {
+      user_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
+      new_status,
+    },
   });
 }
 
 export async function suspendUserTemporarily(
   cell: CallableCell,
-  original_action_hash: ActionHash,
-  previous_action_hash: ActionHash,
+  user_original_action_hash: ActionHash,
+  status_original_action_hash: ActionHash,
+  status_previous_action_hash: ActionHash,
   duration_in_days: number
 ): Promise<boolean> {
   return cell.callZome({
-    zome_name: "users",
+    zome_name: "administration",
     fn_name: "suspend_user_temporarily",
     payload: {
-      original_action_hash,
-      previous_action_hash,
+      user_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
       duration_in_days,
     },
   });
@@ -94,45 +135,51 @@ export async function suspendUserTemporarily(
 
 export async function suspendUserIndefinitely(
   cell: CallableCell,
-  original_action_hash: ActionHash,
-  previous_action_hash: ActionHash
+  user_original_action_hash: ActionHash,
+  status_original_action_hash: ActionHash,
+  status_previous_action_hash: ActionHash
 ): Promise<boolean> {
   return cell.callZome({
-    zome_name: "users",
+    zome_name: "administration",
     fn_name: "suspend_user_indefinitely",
     payload: {
-      original_action_hash,
-      previous_action_hash,
+      user_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
     },
   });
 }
 
 export async function unsuspendUser(
   cell: CallableCell,
-  original_action_hash: ActionHash,
-  previous_action_hash: ActionHash
+  user_original_action_hash: ActionHash,
+  status_original_action_hash: ActionHash,
+  status_previous_action_hash: ActionHash
 ): Promise<boolean> {
   return cell.callZome({
-    zome_name: "users",
+    zome_name: "administration",
     fn_name: "unsuspend_user",
     payload: {
-      original_action_hash,
-      previous_action_hash,
+      user_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
     },
   });
 }
 
 export async function unsuspendUserIfTimePassed(
   cell: CallableCell,
-  original_action_hash: ActionHash,
-  previous_action_hash: ActionHash
+  user_original_action_hash: ActionHash,
+  status_original_action_hash: ActionHash,
+  status_previous_action_hash: ActionHash
 ): Promise<boolean> {
   return cell.callZome({
-    zome_name: "users",
+    zome_name: "administration",
     fn_name: "unsuspend_user_if_time_passed",
     payload: {
-      original_action_hash,
-      previous_action_hash,
+      user_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
     },
   });
 }

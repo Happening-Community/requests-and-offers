@@ -12,6 +12,10 @@
       : '/default_avatar.webp'
   );
 
+  $effect(() => {
+    console.log(myProfile?.status);
+  });
+
   let suspensionDate = $state('');
   let isExpired = $state(false);
 

@@ -15,6 +15,9 @@ import {
   checkIfUserIsAdministrator,
   getAllAdministratorsLinks,
   getAllUsers,
+  getLatestStatusForUser,
+  getLatestStatusRecordForUser,
+  getProfileStatusLink,
   registerAdministrator,
   removeAdministrator,
   suspendUserIndefinitely,
@@ -86,7 +89,7 @@ test("create a User and make it administrator", async () => {
   });
 });
 
-test("update User status", async () => {
+test.only("update User status", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: User;
     let record: Record;
@@ -104,21 +107,31 @@ test("update User status", async () => {
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Update Alice's status
+    const aliceStatusOriginalActionHash = (
+      await getProfileStatusLink(alice.cells[0], aliceUserLink.target)
+    ).target;
+    const aliceLatestStatusRecord = await getLatestStatusRecordForUser(
+      alice.cells[0],
+      aliceUserLink.target
+    );
+
     await updateUserStatus(
       alice.cells[0],
       aliceUserLink.target,
-      aliceUserLink.target,
+      aliceStatusOriginalActionHash,
+      aliceLatestStatusRecord.signed_action.hashed.hash,
       "accepted"
     );
 
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Verify that Alice's status is "accepted"
-    let aliceUser = decodeRecords([
-      await getLatestUser(alice.cells[0], aliceUserLink.target),
-    ])[0] as User;
+    let aliceStatus = await getLatestStatusForUser(
+      alice.cells[0],
+      aliceUserLink.target
+    );
 
-    assert.equal(aliceUser.status, "accepted");
+    assert.equal(aliceStatus, "accepted");
 
     // Verify the all_users list
     let allUsers = await getAllUsers(alice.cells[0]);
@@ -126,14 +139,24 @@ test("update User status", async () => {
 
     // Verify the accepted_users list
     let acceptedUsers = await getAcceptedUsers(alice.cells[0]);
+
     assert.equal(acceptedUsers.length, 1);
 
     // Bob can not update his status
+    const bobStatusOriginalActionHash = (
+      await getProfileStatusLink(bob.cells[0], bobUserLink.target)
+    ).target;
+    let bobLatestStatusRecord = await getLatestStatusRecordForUser(
+      bob.cells[0],
+      bobUserLink.target
+    );
+
     await expect(
       updateUserStatus(
         bob.cells[0],
         bobUserLink.target,
-        bobUserLink.target,
+        bobStatusOriginalActionHash,
+        bobLatestStatusRecord.signed_action.hashed.hash,
         "accepted"
       )
     ).rejects.toThrow();
@@ -142,44 +165,59 @@ test("update User status", async () => {
     await suspendUserIndefinitely(
       alice.cells[0],
       bobUserLink.target,
-      bobUserLink.target
+      bobStatusOriginalActionHash,
+      bobLatestStatusRecord.signed_action.hashed.hash
     );
 
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
-    // Verify that Bob's status is "suspended"
-    let bobUserRecord = await getLatestUser(bob.cells[0], bobUserLink.target);
-    let bobUser = decodeRecords([bobUserRecord])[0] as User;
+    // Alice verify that her status is still "accepted"
+    aliceStatus = await getLatestStatusForUser(
+      alice.cells[0],
+      aliceUserLink.target
+    );
+    assert.equal(aliceStatus, "accepted");
 
-    assert.equal(bobUser.status, "suspended");
+    // Verify that Bob's status is "suspended"
+    let bobStatus = await getLatestStatusForUser(
+      bob.cells[0],
+      bobUserLink.target
+    );
+    assert.equal(bobStatus, "suspended");
+
+    bobLatestStatusRecord = await getLatestStatusRecordForUser(
+      bob.cells[0],
+      bobUserLink.target
+    );
 
     // Alice unsuspends Bob
     await unsuspendUser(
       alice.cells[0],
       bobUserLink.target,
-      bobUserRecord.signed_action.hashed.hash
+      bobStatusOriginalActionHash,
+      bobLatestStatusRecord.signed_action.hashed.hash
     );
 
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Verify that Bob's status is "accepted"
-    bobUser = decodeRecords([
-      await getLatestUser(bob.cells[0], bobUserLink.target),
-    ])[0] as User;
-    assert.equal(bobUser.status, "accepted");
+    bobStatus = await getLatestStatusForUser(bob.cells[0], bobUserLink.target);
+    assert.equal(bobStatus, "accepted");
 
     // Alice suspends Bob for 7 days
+    let bobUserRecord = await getLatestUser(bob.cells[0], bobUserLink.target);
+
     await suspendUserTemporarily(
       alice.cells[0],
       bobUserLink.target,
-      bobUserLink.target,
+      bobStatusOriginalActionHash,
+      bobLatestStatusRecord.signed_action.hashed.hash,
       7
     );
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     // Verify that Bob's status is suspended for 7 days
-    bobUserRecord = await getLatestUser(bob.cells[0], bobUserLink.target);
-    bobUser = decodeRecords([bobUserRecord])[0] as User;
-    const suspensionTime = new Date(bobUser.status.split(" ")[1]);
+    bobStatus = await getLatestStatusForUser(bob.cells[0], bobUserLink.target);
+    const suspensionTime = new Date(bobStatus.split(" ")[1]);
     const now = new Date();
     const diffInDays = Math.round(
       (suspensionTime.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
@@ -188,10 +226,13 @@ test("update User status", async () => {
     assert.equal(diffInDays, 7);
 
     // Alice try to unsuspends Bob with the unsuspendUserIfTimePassed function
+    bobUserRecord = await getLatestUser(bob.cells[0], bobUserLink.target);
+
     const isUnsuspended = await unsuspendUserIfTimePassed(
       alice.cells[0],
       bobUserLink.target,
-      bobUserRecord.signed_action.hashed.hash
+      bobStatusOriginalActionHash,
+      bobLatestStatusRecord.signed_action.hashed.hash
     );
 
     assert.equal(isUnsuspended, false);

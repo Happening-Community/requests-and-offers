@@ -1,5 +1,6 @@
 pub mod administration;
 mod external_calls;
+pub mod status;
 
 use hdk::prelude::*;
 

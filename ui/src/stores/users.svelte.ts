@@ -17,13 +17,13 @@ type UserInDHT = {
   phone?: string;
   time_zone?: string;
   location?: string;
-  status?: UserStatus;
 };
 
 type UserAdditionalFields = {
   remaining_time?: number;
   original_action_hash?: ActionHash;
   previous_action_hash?: ActionHash;
+  status?: UserStatus;
 };
 
 export type User = UserInDHT & UserAdditionalFields;
@@ -44,10 +44,12 @@ class UsersStore {
 
   async getLatestUser(original_action_hash: ActionHash): Promise<User | null> {
     const record = await this.getLatestUserRecord(original_action_hash);
+    const myStatus = await administratorsStore.getLatestStatusForUser(original_action_hash);
 
     return record
       ? {
           ...decodeRecords([record])[0],
+          status: myStatus,
           original_action_hash: original_action_hash,
           previous_action_hash: record.signed_action.hashed.hash
         }
@@ -75,10 +77,10 @@ class UsersStore {
   }
 
   private async getAcceptedUsersLinks(): Promise<Link[]> {
-    return await hc.callZome('users', 'get_accepted_users', null);
+    return await hc.callZome('administration', 'get_accepted_users', null);
   }
 
-  private async getAcceptedUsersRecordsAndLinks(): Promise<[Link[], Record[]]> {
+  private async getAcceptedUsersLinksAndRecords(): Promise<[Link[], Record[]]> {
     const links = await this.getAcceptedUsersLinks();
     let usersRecords: Record[] = [];
 
@@ -91,15 +93,21 @@ class UsersStore {
   }
 
   async getAcceptedUsers(): Promise<User[]> {
-    const [links, records] = await this.getAcceptedUsersRecordsAndLinks();
+    const [links, records] = await this.getAcceptedUsersLinksAndRecords();
 
     let recordsContents: User[] = [];
 
     for (let i = 0; i < records.length; i++) {
       let user = decodeRecords([records[i]])[0];
+
+      let status = await administratorsStore.getLatestStatusForUser(
+        records[i].signed_action.hashed.hash
+      );
+
       recordsContents.push({
         ...user,
-        remaining_time: administratorsStore.getRemainingSuspensionTime(user.status),
+        status,
+        remaining_time: status && administratorsStore.getRemainingSuspensionTime(status!),
         original_action_hash: links[i].target,
         previous_action_hash: records[i].signed_action.hashed.hash
       });

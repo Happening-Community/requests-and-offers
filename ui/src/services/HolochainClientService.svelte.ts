@@ -1,5 +1,7 @@
 import { AppAgentWebsocket, type AppAgentClient, type AppInfoResponse } from '@holochain/client';
 
+type ZomeName = 'users' | 'administration';
+
 class HolochainClientService {
   appId = 'requests_and_offers';
   client: AppAgentClient | null = $state(null);
@@ -33,7 +35,7 @@ class HolochainClientService {
    * @returns {Promise<unknown>} - The result of the zome function call.
    */
   async callZome(
-    zomeName: string,
+    zomeName: ZomeName,
     fnName: string,
     payload: unknown,
     roleName: string = 'requests_and_offers'
