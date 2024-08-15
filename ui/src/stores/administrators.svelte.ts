@@ -33,7 +33,9 @@ class AdministratorsStore {
 
     for (let i = 0; i < usersRecords.length; i++) {
       let user = decodeRecords([usersRecords[i]])[0];
-      let status = await this.getLatestStatusForUser(usersRecords[i].signed_action.hashed.hash);
+      let status = await this.getLatestStatusForUser(usersLinks[i].target);
+
+      console.log('status', status);
 
       recordsContents.push({
         ...user,
