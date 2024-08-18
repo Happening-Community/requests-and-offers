@@ -4,7 +4,7 @@ pub use user::*;
 
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
-#[hdk_entry_types]
+#[hdk_entry_defs]
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
   User(User),

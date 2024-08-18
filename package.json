@@ -7,31 +7,31 @@
   ],
   "scripts": {
     "postinstall": "npm run download-hrea-suite",
-    "start": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(get-port) SIGNAL_PORT=$(get-port) npm run network",
-    "network": "hc sandbox clean && npm run build:happ && UI_PORT=$(get-port) concurrently \"npm run --filter ui start\" \"npm run launch:happ\" \"holochain-playground\"",
-    "test": "npm run build:zomes && hc app pack workdir --recursive && npm run test -w tests",
-    "test:ui": "npm run build:zomes && hc app pack workdir --recursive && npm test --filter -w ui",
-    "test:misc": "npm run build:zomes && hc app pack workdir --recursive && npm test --filter misc -w tests",
-    "test:users": "npm run build:zomes && hc app pack workdir --recursive && npm test --filter users -w tests",
-    "test:administration": "npm run build:zomes && hc app pack workdir --recursive && npm test --filter administration -w tests",
+    "start": "AGENTS=${AGENTS:-2}  BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) npm run network",
+    "network": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:happ\" \"holochain-playground\"",
+    "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
+    "test:ui": "npm run build:zomes && hc app pack workdir --recursive && npm t -w ui",
+    "test:misc": "npm run build:zomes && hc app pack workdir --recursive && npm t --filter misc -w tests",
+    "test:users": "npm run build:zomes && hc app pack workdir --recursive && npm t --filter users -w tests",
+    "test:administration": "npm run build:zomes && hc app pack workdir --recursive && npm t --filter administration -w tests",
     "launch:happ": "hc-spin -n $AGENTS --ui-port $UI_PORT workdir/requests_and_offers.happ",
-    "start:tauri": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(get-port) SIGNAL_PORT=$(get-port) npm run network:tauri",
-    "network:tauri": "hc sandbox clean && npm run build:happ && UI_PORT=$(get-port) concurrently \"npm run --filter ui start\" \"npm run launch:tauri\" \"holochain-playground\"",
+    "start:tauri": "AGENTS=${AGENTS:-2}  BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) npm run network:tauri",
+    "network:tauri": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:tauri\" \"holochain-playground\"",
     "launch:tauri": "concurrently \"hc run-local-services --bootstrap-port $BOOTSTRAP_PORT --signal-port $SIGNAL_PORT\" \"echo pass | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/requests_and_offers.happ --ui-port $UI_PORT network --bootstrap http://127.0.0.1:\"$BOOTSTRAP_PORT\" webrtc ws://127.0.0.1:\"$SIGNAL_PORT\"\"",
-    "package": "npm run build:happ && npm run --filter ui package && hc web-app pack workdir --recursive",
+    "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
     "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
     "build:zomes": "RUSTFLAGS='' CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown",
     "download-hrea-suite": "[ ! -f \"workdir/hrea_suite.happ\" ] && curl -L --output workdir/hrea_suite.happ https://github.com/h-REA/hREA/releases/download/happ-0.2.0-beta/hrea_suite.happ; exit 0",
     "clean:hrea-suite": "rimraf workdir/hrea_suite.happ"
   },
   "devDependencies": {
-    "@holochain-playground/cli": "^0.300.0-rc.0",
-    "@holochain/hc-spin": "0.300.3",
+    "@holochain-playground/cli": "^0.1.1",
+    "@holochain/hc-spin": "^0.200.10",
     "concurrently": "^6.2.1",
-    "get-port-cli": "^3.0.0"
+    "new-port-cli": "^1.0.0",
+    "rimraf": "^3.0.2"
   },
   "engines": {
     "npm": ">=7.0.0"
-  },
-  "packageManager": "pnpm@9.7.0+sha512.dc09430156b427f5ecfc79888899e1c39d2d690f004be70e05230b72cb173d96839587545d09429b55ac3c429c801b4dc3c0e002f653830a420fa2dd4e3cf9cf"
+  }
 }
