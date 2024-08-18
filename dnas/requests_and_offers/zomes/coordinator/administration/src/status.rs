@@ -35,7 +35,9 @@ pub fn create_status(user_original_action_hash: ActionHash) -> ExternResult<Reco
 
 #[hdk_extern]
 pub fn get_latest_status_record(original_action_hash: ActionHash) -> ExternResult<Option<Record>> {
-  let links = get_links(original_action_hash.clone(), LinkTypes::StatusUpdates, None)?;
+  let links = get_links(
+    GetLinksInputBuilder::try_new(original_action_hash.clone(), LinkTypes::StatusUpdates)?.build(),
+  )?;
   let latest_link = links
     .into_iter()
     .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
@@ -109,7 +111,9 @@ pub fn create_accepted_user_link(original_action_hash: ActionHash) -> ExternResu
 #[hdk_extern]
 pub fn delete_accepted_user_link(original_action_hash: ActionHash) -> ExternResult<bool> {
   let path = Path::from("accepted_users");
-  let links = get_links(path.path_entry_hash()?, LinkTypes::AcceptedUsers, None)?;
+  let links = get_links(
+    GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::AcceptedUsers)?.build(),
+  )?;
   let link = links
     .iter()
     .find(|link| link.target == original_action_hash.clone().into());
@@ -124,7 +128,9 @@ pub fn delete_accepted_user_link(original_action_hash: ActionHash) -> ExternResu
 #[hdk_extern]
 pub fn get_accepted_users(_: ()) -> ExternResult<Vec<Link>> {
   let path = Path::from("accepted_users");
-  get_links(path.path_entry_hash()?, LinkTypes::AcceptedUsers, None)
+  get_links(
+    GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::AcceptedUsers)?.build(),
+  )
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

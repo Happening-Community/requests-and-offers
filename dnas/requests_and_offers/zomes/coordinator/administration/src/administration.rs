@@ -28,7 +28,9 @@ pub fn register_administrator(user_action_hash: ActionHash) -> ExternResult<bool
 #[hdk_extern]
 pub fn get_all_administrators_links(_: ()) -> ExternResult<Vec<Link>> {
   let path = Path::from("administrators");
-  let links = get_links(path.path_entry_hash()?, LinkTypes::AllAdministrators, None)?;
+  let links = get_links(
+    GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::AllAdministrators)?.build(),
+  )?;
   Ok(links)
 }
 

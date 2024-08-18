@@ -11,7 +11,7 @@ pub fn get_all_users(_: ()) -> ExternResult<Vec<Link>> {
   }
 
   let path = Path::from("all_users");
-  get_links(path.path_entry_hash()?, LinkTypes::AllUsers, None)
+  get_links(GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::AllUsers)?.build())
 }
 
 #[hdk_extern]
@@ -19,9 +19,8 @@ pub fn get_profile_status_link(
   user_original_action_hash: ActionHash,
 ) -> ExternResult<Option<Link>> {
   let links = get_links(
-    user_original_action_hash.clone(),
-    LinkTypes::ProfileStatus,
-    None,
+    GetLinksInputBuilder::try_new(user_original_action_hash.clone(), LinkTypes::ProfileStatus)?
+      .build(),
   )?;
 
   let link = links.first().cloned();

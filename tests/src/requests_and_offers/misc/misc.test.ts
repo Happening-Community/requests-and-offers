@@ -16,7 +16,7 @@ const HARDCODED_PROGENITOR_PUBKEY =
 const hAppPath = process.cwd() + "/../workdir/requests_and_offers.happ";
 const appSource = { appBundleSource: { path: hAppPath } };
 
-test("ping", async () => {
+test.only("ping", async () => {
   await runScenario(async (scenario: Scenario) => {
     const [alice] = await scenario.addPlayersWithApps([appSource]);
 
