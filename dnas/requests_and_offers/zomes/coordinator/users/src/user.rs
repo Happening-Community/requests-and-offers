@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 use users_integrity::*;
-use utils::wasm_error;
+use WasmErrorInner::*;
 
 use crate::external_calls::create_status;
 
@@ -8,12 +8,15 @@ use crate::external_calls::create_status;
 pub fn create_user(user: User) -> ExternResult<Record> {
   let record = get_agent_user(agent_info()?.agent_initial_pubkey)?;
   if !record.is_empty() {
-    return Err(wasm_error("You already have a User profile"));
+    return Err(wasm_error!(Guest(
+      "You already have a User profile".to_string()
+    )));
   }
 
   let user_hash = create_entry(&EntryTypes::User(user.clone()))?;
-  let record = get(user_hash.clone(), GetOptions::default())?
-    .ok_or(wasm_error("Could not find the newly created User profile"))?;
+  let record = get(user_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(Guest(
+    "Could not find the newly created User profile".to_string()
+  )))?;
 
   let path = Path::from("all_users");
   create_link(
@@ -53,7 +56,9 @@ pub fn get_latest_user_record(original_action_hash: ActionHash) -> ExternResult<
       .target
       .clone()
       .into_action_hash()
-      .ok_or(wasm_error("Could not find the latest User profile"))?,
+      .ok_or(wasm_error!(Guest(
+        "Could not find the latest User profile".to_string()
+      )))?,
     None => original_action_hash.clone(),
   };
   get(latest_user_hash, GetOptions::default())
@@ -63,11 +68,19 @@ pub fn get_latest_user_record(original_action_hash: ActionHash) -> ExternResult<
 pub fn get_latest_user(original_action_hash: ActionHash) -> ExternResult<User> {
   let latest_user_record = get_latest_user_record(original_action_hash)?;
   let latest_user = latest_user_record
-    .ok_or(wasm_error("Could not find the latest User profile"))?
+    .ok_or(wasm_error!(Guest(
+      "Could not find the latest User profile".to_string()
+    )))?
     .entry()
     .to_app_option()
-    .map_err(|_| wasm_error("wasm_error while deserializing the latest User profile"))?
-    .ok_or(wasm_error("Could not find the latest User profile"))?;
+    .map_err(|_| {
+      wasm_error!(Guest(
+        "Error while deserializing the latest User profile".to_string()
+      ))
+    })?
+    .ok_or(wasm_error!(Guest(
+      "Could not find the latest User profile".to_string()
+    )))?;
   Ok(latest_user)
 }
 
@@ -88,7 +101,9 @@ pub fn get_agent_user_hash(agent_pubkey: AgentPubKey) -> ExternResult<Option<Act
         .target
         .clone()
         .into_action_hash()
-        .ok_or(wasm_error("Could not find the agent User profile hash"))?,
+        .ok_or(wasm_error!(Guest(
+          "Could not find the agent User profile hash".to_string()
+        )))?,
     ))
   }
 }
@@ -106,9 +121,9 @@ pub fn update_user(input: UpdateUserInput) -> ExternResult<Record> {
 
   let author = original_record.action().author().clone();
   if author != agent_info()?.agent_initial_pubkey {
-    return Err(wasm_error(
-      "Only the author of a User profile can update it",
-    ));
+    return Err(wasm_error!(Guest(
+      "Only the author of a User profile can update it".to_string()
+    )));
   }
 
   let updated_user_hash = update_entry(input.previous_action_hash.clone(), &input.updated_user)?;
@@ -120,8 +135,9 @@ pub fn update_user(input: UpdateUserInput) -> ExternResult<Record> {
     (),
   )?;
 
-  let record = get(updated_user_hash.clone(), GetOptions::default())?
-    .ok_or(wasm_error("Could not find the newly updated User profile"))?;
+  let record = get(updated_user_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(Guest(
+    "Could not find the newly updated User profile".to_string()
+  )))?;
 
   Ok(record)
 }

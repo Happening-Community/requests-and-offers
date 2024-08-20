@@ -6,21 +6,21 @@ use chrono::Duration;
 use hdk::prelude::*;
 use status::*;
 use std::str::FromStr;
-use utils::wasm_error;
 use SuspendedStatus::*;
+use WasmErrorInner::*;
 
 #[hdk_extern]
 pub fn create_status(user_original_action_hash: ActionHash) -> ExternResult<Record> {
   let link = get_profile_status_link(user_original_action_hash)?;
 
   if link.is_some() {
-    return Err(wasm_error("You already have a Status"));
+    return Err(wasm_error!(Guest("You already have a Status".to_string())));
   }
 
   let status_hash = create_entry(&EntryTypes::Status(Status::default()))?;
-  let record = get(status_hash.clone(), GetOptions::default())?.ok_or(wasm_error(
-    "Could not find the newly created profile's Status",
-  ))?;
+  let record = get(status_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(Guest(
+    "Could not find the newly created profile's Status".to_string()
+  )))?;
 
   let path = Path::from("all_status");
   create_link(
@@ -44,7 +44,9 @@ pub fn get_latest_status_record(original_action_hash: ActionHash) -> ExternResul
       .target
       .clone()
       .into_action_hash()
-      .ok_or(wasm_error("Could not find the latest profile's Status"))?,
+      .ok_or(wasm_error!(Guest(
+        "Could not find the latest profile's Status".to_string()
+      )))?,
     None => original_action_hash.clone(),
   };
   get(latest_status_hash, GetOptions::default())
@@ -54,10 +56,16 @@ pub fn get_latest_status_record(original_action_hash: ActionHash) -> ExternResul
 pub fn get_latest_status(original_action_hash: ActionHash) -> ExternResult<Option<Status>> {
   let latest_status_record = get_latest_status_record(original_action_hash)?;
   let latest_status_option: Option<Status> = latest_status_record
-    .ok_or(wasm_error("Could not find the latest profile's Status"))?
+    .ok_or(wasm_error!(Guest(
+      "Could not find the latest profile's Status".to_string()
+    )))?
     .entry()
     .to_app_option()
-    .map_err(|_| wasm_error("wasm_error while deserializing the latest profile's Status"))?;
+    .map_err(|_| {
+      wasm_error!(Guest(
+        "wasm_error! Guest(while deserializing the latest profile's Status".to_string()
+      ))
+    })?;
 
   Ok(latest_status_option)
 }
@@ -69,9 +77,9 @@ pub fn get_latest_status_record_for_user(
   let link = get_profile_status_link(user_original_action_hash)?;
 
   if let Some(link) = link {
-    get_latest_status_record(link.target.into_action_hash().ok_or(wasm_error(
-      "Could not find the latest profile's Status action hash",
-    ))?)
+    get_latest_status_record(link.target.into_action_hash().ok_or(wasm_error!(Guest(
+      "Could not find the latest profile's Status action hash".to_string()
+    )))?)
   } else {
     Ok(None)
   }
@@ -84,9 +92,9 @@ pub fn get_latest_status_for_user(
   let link = get_profile_status_link(user_original_action_hash)?;
 
   let latest_status: Option<Status> = if let Some(link) = link {
-    get_latest_status(link.target.into_action_hash().ok_or(wasm_error(
-      "Could not find the latest profile's Status action hash",
-    ))?)?
+    get_latest_status(link.target.into_action_hash().ok_or(wasm_error!(Guest(
+      "Could not find the latest profile's Status action hash".to_string()
+    )))?)?
   } else {
     None
   };
@@ -145,9 +153,9 @@ pub struct UpdateStatusInput {
 #[hdk_extern]
 pub fn update_user_status(input: UpdateStatusInput) -> ExternResult<Record> {
   if !check_if_agent_is_administrator(agent_info()?.agent_initial_pubkey)? {
-    return Err(wasm_error(
-      "Only administrators can update the Status of a User",
-    ));
+    return Err(wasm_error!(Guest(
+      "Only administrators can update the Status of a User".to_string()
+    )));
   }
 
   let action_hash: HoloHash<holo_hash::hash_type::Action> = update_entry(
@@ -162,7 +170,7 @@ pub fn update_user_status(input: UpdateStatusInput) -> ExternResult<Record> {
   )?;
 
   let status =
-    StatusList::from_str(&input.new_status.0).map_err(|err| wasm_error(&err.to_string()))?;
+    StatusList::from_str(&input.new_status.0).map_err(|err| wasm_error!(Guest(err.to_string())))?;
 
   delete_accepted_user_link(input.user_original_action_hash.clone())?;
 
@@ -170,8 +178,9 @@ pub fn update_user_status(input: UpdateStatusInput) -> ExternResult<Record> {
     create_accepted_user_link(input.user_original_action_hash.clone())?;
   }
 
-  let record = get(action_hash.clone(), GetOptions::default())?
-    .ok_or(wasm_error("Could not find the newly updated Status"))?;
+  let record = get(action_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(Guest(
+    "Could not find the newly updated Status".to_string()
+  )))?;
 
   Ok(record)
 }
@@ -217,17 +226,25 @@ pub fn suspend_user_indefinitely(input: UpdateInput) -> ExternResult<bool> {
 pub fn unsuspend_user_if_time_passed(input: UpdateInput) -> ExternResult<bool> {
   let link = match get_profile_status_link(input.user_original_action_hash.clone())? {
     Some(link) => link,
-    None => return Err(wasm_error("Could not find the user's Status link")),
+    None => {
+      return Err(wasm_error!(Guest(
+        "Could not find the user's Status link".to_string()
+      )))
+    }
   };
 
   let status_action_hash = link
     .clone()
     .target
     .into_action_hash()
-    .ok_or(wasm_error("Could not find the user action hash"))?;
+    .ok_or(wasm_error!(Guest(
+      "Could not find the user action hash".to_string()
+    )))?;
 
   let mut status = get_latest_status(status_action_hash)?
-    .ok_or(wasm_error("Could not find the latest user Status"))?
+    .ok_or(wasm_error!(Guest(
+      "Could not find the latest user Status".to_string()
+    )))?
     .to_status_list();
 
   if let StatusList::Suspended(Temporarily(_)) = status {

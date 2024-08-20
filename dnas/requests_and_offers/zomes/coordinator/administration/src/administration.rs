@@ -1,12 +1,12 @@
 use crate::external_calls::get_agent_user_hash;
 use administration_integrity::*;
 use hdk::prelude::*;
-use utils::wasm_error;
+use WasmErrorInner::*;
 
 #[hdk_extern]
 pub fn add_administrator(user_action_hash: ActionHash) -> ExternResult<bool> {
   if check_if_user_is_administrator(user_action_hash.clone())? {
-    return Err(wasm_error("Allready an Administrator"));
+    return Err(wasm_error!(Guest("Allready an Administrator".to_string())));
   }
 
   register_administrator(user_action_hash.clone())?;
@@ -57,19 +57,25 @@ pub fn check_if_agent_is_administrator(agent_pubkey: AgentPubKey) -> ExternResul
 #[hdk_extern]
 pub fn remove_administrator(user_action_hash: ActionHash) -> ExternResult<bool> {
   if !check_if_agent_is_administrator(agent_info()?.agent_initial_pubkey)? {
-    return Err(wasm_error("Only administrators can remove administrators"));
+    return Err(wasm_error!(Guest(
+      "Only administrators can remove administrators".to_string()
+    )));
   }
 
   let administrators_links = get_all_administrators_links(())?;
   if administrators_links.len() == 1 {
-    return Err(wasm_error("There must be at least one administrator"));
+    return Err(wasm_error!(Guest(
+      "There must be at least one administrator".to_string()
+    )));
   }
 
   let links = get_all_administrators_links(())?;
   let link = links
     .iter()
     .find(|link| link.target == user_action_hash.clone().into())
-    .ok_or(wasm_error("Could not find the administrator link"))?;
+    .ok_or(wasm_error!(Guest(
+      "Could not find the administrator link".to_string()
+    )))?;
 
   delete_link(link.create_link_hash.clone())?;
   Ok(true)

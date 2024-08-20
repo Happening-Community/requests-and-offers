@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-use utils::wasm_error;
+use WasmErrorInner::*;
 
 pub fn get_agent_user_hash(agent_pubkey: AgentPubKey) -> ExternResult<Option<ActionHash>> {
   let zome_call_response = call(
@@ -13,9 +13,9 @@ pub fn get_agent_user_hash(agent_pubkey: AgentPubKey) -> ExternResult<Option<Act
   if let ZomeCallResponse::Ok(response) = zome_call_response {
     Ok(response.decode().unwrap())
   } else {
-    Err(wasm_error(
-      "Error while calling the get_agent_user_hash function of the users zome",
-    ))
+    Err(wasm_error!(Guest(
+      "Error while calling the get_agent_user_hash function of the users zome".to_string()
+    )))
   }
 }
 
@@ -31,8 +31,8 @@ pub fn get_profile_status_link(user_original_hash: ActionHash) -> ExternResult<O
   if let ZomeCallResponse::Ok(response) = zome_call_response {
     Ok(response.decode().unwrap())
   } else {
-    Err(wasm_error(
-      "Error while calling the get_profile_status_link function of the users zome",
-    ))
+    Err(wasm_error!(Guest(
+      "Error while calling the get_profile_status_link function of the users zome".to_string()
+    )))
   }
 }

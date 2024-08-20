@@ -6,10 +6,6 @@ pub mod dna_properties;
 
 pub use dna_properties::DnaProperties;
 
-pub fn wasm_error(message: &str) -> WasmError {
-  wasm_error!(WasmErrorInner::Guest(message.to_string()))
-}
-
 pub fn check_if_progenitor() -> ExternResult<bool> {
   let progenitor_pubkey = DnaProperties::get_progenitor_pubkey()?;
 
@@ -17,10 +13,11 @@ pub fn check_if_progenitor() -> ExternResult<bool> {
 }
 
 pub fn now_in_micros() -> ExternResult<i64> {
+  use WasmErrorInner::*;
   Ok(
     SystemTime::now()
       .duration_since(UNIX_EPOCH)
-      .map_err(|_| wasm_error("Could not get current time"))?
+      .map_err(|_| wasm_error!(Guest("Could not get current time".to_string())))?
       .as_micros() as i64,
   )
 }

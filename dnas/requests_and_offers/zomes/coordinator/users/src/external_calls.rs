@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-use utils::wasm_error;
+use WasmErrorInner::*;
 
 pub fn check_if_agent_is_administrator(agent_pubkey: AgentPubKey) -> ExternResult<bool> {
   let zome_call_response = call(
@@ -13,9 +13,10 @@ pub fn check_if_agent_is_administrator(agent_pubkey: AgentPubKey) -> ExternResul
   if let ZomeCallResponse::Ok(response) = zome_call_response {
     Ok(response.decode().unwrap())
   } else {
-    Err(wasm_error(
-      "Error while calling the check_if_agent_is_administrator function of the administration zome",
-    ))
+    Err(wasm_error!(Guest(
+      "Error while calling the check_if_agent_is_administrator function of the administration zome"
+        .to_string()
+    )))
   }
 }
 
@@ -31,8 +32,8 @@ pub fn create_status(user_original_action_hash: ActionHash) -> ExternResult<Reco
   if let ZomeCallResponse::Ok(response) = zome_call_response {
     Ok(response.decode().unwrap())
   } else {
-    Err(wasm_error(
-      "Error while calling the create_status function of the administration zome",
-    ))
+    Err(wasm_error!(Guest(
+      "Error while calling the create_status function of the administration zome".to_string()
+    )))
   }
 }
