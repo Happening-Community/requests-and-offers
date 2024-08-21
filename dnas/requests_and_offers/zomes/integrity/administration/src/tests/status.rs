@@ -10,21 +10,13 @@ mod status_tests {
 
   #[test]
   fn test_create_basic_status() {
-    let mut status = Status::default();
+    let mut status = Status::pending();
     assert_eq!(status.status_type, "pending");
 
-    status = Status {
-      status_type: "accepted".to_string(),
-      reason: None,
-      timestamp: None,
-    };
+    status = Status::accept();
     assert_eq!(status.status_type, "accepted");
 
-    status = Status {
-      status_type: "rejected".to_string(),
-      reason: None,
-      timestamp: None,
-    };
+    status = Status::reject();
     assert_eq!(status.status_type, "rejected");
   }
 
