@@ -141,7 +141,7 @@
   <div class="flex flex-col items-center gap-4">
     <p class="h4 text-center">How many days do you want to suspend this user ?</p>
     <form class="flex gap-4">
-      <input type="number" min="1" max="365" class="input" bind:value={suspendedDays} />
+      <input type="number" min="1" max="365" class="input text-white" bind:value={suspendedDays} />
       <button class="btn variant-filled-secondary" onclick={handleSuspendTemporarily}>
         Suspend
       </button>
