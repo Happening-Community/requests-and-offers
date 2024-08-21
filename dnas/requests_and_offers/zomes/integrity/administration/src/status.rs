@@ -4,16 +4,17 @@ use std::{error::Error, fmt::Display, str::FromStr};
 use chrono::Duration;
 use hdi::prelude::*;
 
-use SuspendedStatus::*;
+use SuspendedStatusType::*;
+use WasmErrorInner::*;
 
 #[derive(Clone, Debug, PartialEq, Default)]
-pub enum SuspendedStatus<Timestamp> {
+pub enum SuspendedStatusType<Timestamp> {
   Temporarily(Timestamp),
   #[default]
   Indefinitely,
 }
 
-impl SuspendedStatus<Timestamp> {
+impl SuspendedStatusType<Timestamp> {
   pub fn is_temporarily(&self) -> bool {
     matches!(self, Self::Temporarily(_))
   }
@@ -42,90 +43,121 @@ impl SuspendedStatus<Timestamp> {
   }
 }
 
+#[derive(Clone, PartialEq)]
+pub struct SuspendedStatus {
+  pub reason: String,
+  pub suspension_type: SuspendedStatusType<Timestamp>,
+}
+
 #[derive(Clone, PartialEq, Default)]
-pub enum StatusList {
+pub enum StatusType {
   #[default]
   Pending,
   Accepted,
   Rejected,
-  Suspended(SuspendedStatus<Timestamp>),
+  Suspended(SuspendedStatus),
 }
 
-impl Display for StatusList {
+impl Display for StatusType {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self {
       Self::Pending => write!(f, "pending"),
       Self::Accepted => write!(f, "accepted"),
       Self::Rejected => write!(f, "rejected"),
-      Self::Suspended(Temporarily(time)) => {
-        write!(f, "suspended {}", time)
-      }
-      Self::Suspended(Indefinitely) => write!(f, "suspended indefinitely"),
+      Self::Suspended(suspend_status) => match suspend_status.suspension_type {
+        Indefinitely => write!(f, "suspended indefinitely"),
+        Temporarily(_) => write!(f, "suspended temporarily"),
+      },
     }
   }
 }
 
 #[derive(Debug)]
 pub enum StatusParsingError {
-  InvalidStatus,
+  InvalidStatus(Option<String>),
   InvalidTimestamp,
 }
 
 impl Display for StatusParsingError {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    write!(f, "{:?}", self)
+    match self {
+      StatusParsingError::InvalidStatus(status) => {
+        if let Some(status) = status {
+          write!(f, "Invalid status: {}", status)
+        } else {
+          write!(f, "Invalid status")
+        }
+      }
+      StatusParsingError::InvalidTimestamp => write!(f, "Invalid timestamp"),
+    }
   }
 }
 
 impl Error for StatusParsingError {}
 
-impl FromStr for StatusList {
+impl FromStr for StatusType {
   type Err = StatusParsingError;
 
   fn from_str(status: &str) -> Result<Self, Self::Err> {
-    let parts: Vec<&str> = status.split_whitespace().collect();
-    match parts.as_slice() {
-      ["pending"] => Ok(Self::Pending),
-      ["accepted"] => Ok(Self::Accepted),
-      ["rejected"] => Ok(Self::Rejected),
-      ["suspended"] => Ok(Self::Suspended(Indefinitely)),
-      ["suspended", timestamp] => Ok(Self::Suspended(Temporarily(
-        Timestamp::from_str(timestamp).or(Err(StatusParsingError::InvalidTimestamp))?,
+    match status {
+      "pending" => Ok(Self::Pending),
+      "accepted" => Ok(Self::Accepted),
+      "rejected" => Ok(Self::Rejected),
+      _ => Err(StatusParsingError::InvalidStatus(Some(
+        "Only valid parsable statuses are: pending, accepted, rejected".into(),
       ))),
-      _ => Err(StatusParsingError::InvalidStatus),
     }
   }
 }
 
-impl From<&str> for StatusList {
+impl From<&str> for StatusType {
   fn from(status: &str) -> Self {
     Self::from_str(status).unwrap_or_default()
   }
 }
 
-impl StatusList {
-  pub fn suspend(&mut self, time: Option<(Duration, &Timestamp)>) -> ExternResult<()> {
+impl From<SuspendedStatus> for StatusType {
+  fn from(status: SuspendedStatus) -> Self {
+    Self::Suspended(status)
+  }
+}
+
+impl StatusType {
+  pub fn suspend(
+    &mut self,
+    reason: &str,
+    time: Option<(Duration, &Timestamp)>,
+  ) -> ExternResult<()> {
     if time.is_none() {
-      *self = StatusList::Suspended(Indefinitely);
+      *self = StatusType::from(SuspendedStatus {
+        reason: reason.to_string(),
+        suspension_type: Indefinitely,
+      });
       return Ok(());
     }
 
     let duration = time.unwrap().0.num_microseconds().unwrap_or(0);
     let now = time.unwrap().1.as_micros();
 
-    *self = StatusList::Suspended(Temporarily(Timestamp::from_micros(now + duration)));
+    *self = StatusType::Suspended(SuspendedStatus {
+      reason: reason.to_string(),
+      suspension_type: Temporarily(Timestamp::from_micros(now + duration)),
+    });
 
     Ok(())
   }
 
   pub fn unsuspend(&mut self) {
-    *self = StatusList::Accepted
+    *self = StatusType::Accepted
   }
 
   pub fn unsuspend_if_time_passed(&mut self, now: &Timestamp) -> bool {
     match self {
-      Self::Suspended(time) if time.is_temporarily() => {
-        match time.get_suspension_time_remaining(now) {
+      Self::Suspended(suspended_status) if suspended_status.suspension_type.is_temporarily() => {
+        match suspended_status
+          .suspension_type
+          .get_suspension_time_remaining(now)
+        {
           Some(time) if time.is_zero() || time < Duration::hours(1) => {
             self.unsuspend();
             true
@@ -140,34 +172,104 @@ impl StatusList {
 
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
-pub struct Status(pub String);
+pub struct Status {
+  pub status_type: String,
+  pub reason: Option<String>,
+  pub timestamp: Option<Timestamp>,
+}
 
 impl Default for Status {
   fn default() -> Self {
-    Self(StatusList::Pending.to_string())
+    Self {
+      status_type: StatusType::Pending.to_string(),
+      reason: None,
+      timestamp: None,
+    }
   }
 }
 
-impl From<StatusList> for Status {
-  fn from(status: StatusList) -> Self {
-    Self(status.to_string())
+impl From<StatusType> for Status {
+  fn from(status: StatusType) -> Self {
+    match status {
+      StatusType::Pending => Status::default(),
+      StatusType::Accepted => Status {
+        status_type: StatusType::Accepted.to_string(),
+        reason: None,
+        timestamp: None,
+      },
+      StatusType::Rejected => Status {
+        status_type: StatusType::Rejected.to_string(),
+        reason: None,
+        timestamp: None,
+      },
+      StatusType::Suspended(suspend_status) => match suspend_status.suspension_type {
+        Indefinitely => Status {
+          status_type: StatusType::Suspended(suspend_status.clone()).to_string(),
+          reason: Some(suspend_status.reason),
+          timestamp: None,
+        },
+        Temporarily(time) => Status {
+          status_type: StatusType::Suspended(suspend_status.clone()).to_string(),
+          reason: Some(suspend_status.reason),
+          timestamp: Some(time),
+        },
+      },
+    }
   }
 }
 
 impl Status {
-  pub fn to_status_list(&self) -> StatusList {
-    StatusList::from(self.0.as_str())
+  pub fn to_status_type(&self) -> ExternResult<StatusType> {
+    match self.status_type.as_str() {
+      "pending" => Ok(StatusType::Pending),
+      "accepted" => Ok(StatusType::Accepted),
+      "rejected" => Ok(StatusType::Rejected),
+      "suspended indefinitely" => Ok(StatusType::Suspended(SuspendedStatus {
+        reason: self.reason.clone().unwrap_or_default(),
+        suspension_type: Indefinitely,
+      })),
+      "suspended temporarily" => Ok(StatusType::Suspended(SuspendedStatus {
+        reason: self.reason.clone().unwrap_or_default(),
+        suspension_type: Temporarily(self.timestamp.unwrap()),
+      })),
+      _ => Err(wasm_error!(Guest(
+        StatusParsingError::InvalidStatus(None).to_string()
+      ))),
+    }
+  }
+
+  pub fn accept() -> Self {
+    Self {
+      status_type: StatusType::Accepted.to_string(),
+      reason: None,
+      timestamp: None,
+    }
+  }
+
+  pub fn reject() -> Self {
+    Self {
+      status_type: StatusType::Rejected.to_string(),
+      reason: None,
+      timestamp: None,
+    }
+  }
+
+  pub fn suspend(reason: &str, time: Option<(Duration, &Timestamp)>) -> Self {
+    Self {
+      status_type: StatusType::Suspended(SuspendedStatus {
+        reason: reason.to_string(),
+        suspension_type: Indefinitely,
+      })
+      .to_string(),
+      reason: Some(reason.to_string()),
+      timestamp: time.map(|time| *time.1),
+    }
   }
 }
 
 pub fn validate_status(status: Status) -> ExternResult<ValidateCallbackResult> {
-  if StatusList::from_str(status.0.as_str()).is_err() {
-    return Ok(ValidateCallbackResult::Invalid(format!(
-      "Status must be '{}', '{}', '{}' or suspended (with a timestamp or not).",
-      StatusList::Pending,
-      StatusList::Accepted,
-      StatusList::Rejected,
-    )));
+  if status.to_status_type().is_err() {
+    return Ok(ValidateCallbackResult::Invalid("Invalid status".into()));
   };
 
   Ok(ValidateCallbackResult::Valid)

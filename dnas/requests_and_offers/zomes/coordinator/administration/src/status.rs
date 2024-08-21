@@ -5,9 +5,8 @@ use administration_integrity::*;
 use chrono::Duration;
 use hdk::prelude::*;
 use status::*;
-use std::str::FromStr;
 use utils::get_all_revisions_for_entry;
-use SuspendedStatus::*;
+use SuspendedStatusType::*;
 use WasmErrorInner::*;
 
 #[hdk_extern]
@@ -191,12 +190,11 @@ pub fn update_user_status(input: UpdateStatusInput) -> ExternResult<Record> {
     (),
   )?;
 
-  let status =
-    StatusList::from_str(&input.new_status.0).map_err(|err| wasm_error!(Guest(err.to_string())))?;
+  let status_type = input.new_status.to_status_type()?;
 
   delete_accepted_user_link(input.user_original_action_hash.clone())?;
 
-  if let StatusList::Accepted = status {
+  if let StatusType::Accepted = status_type {
     create_accepted_user_link(input.user_original_action_hash.clone())?;
   }
 
@@ -212,15 +210,16 @@ pub struct SuspendUserInput {
   pub user_original_action_hash: ActionHash,
   pub status_original_action_hash: ActionHash,
   pub status_previous_action_hash: ActionHash,
+  pub reason: String,
   pub duration_in_days: i64,
 }
 
 #[hdk_extern]
 pub fn suspend_user_temporarily(input: SuspendUserInput) -> ExternResult<bool> {
   let duration = Duration::days(input.duration_in_days);
-  let mut suspended_status = StatusList::default();
+  let mut suspended_status = StatusType::default();
   let now = &sys_time()?;
-  suspended_status.suspend(Some((duration, now)))?;
+  suspended_status.suspend(input.reason.as_str(), Some((duration, now)))?;
 
   let update_status_input = UpdateStatusInput {
     user_original_action_hash: input.user_original_action_hash,
@@ -233,12 +232,15 @@ pub fn suspend_user_temporarily(input: SuspendUserInput) -> ExternResult<bool> {
 }
 
 #[hdk_extern]
-pub fn suspend_user_indefinitely(input: UpdateInput) -> ExternResult<bool> {
+pub fn suspend_user_indefinitely(input: UpdateStatusInput) -> ExternResult<bool> {
   let update_status_input = UpdateStatusInput {
     user_original_action_hash: input.user_original_action_hash,
     status_original_action_hash: input.status_original_action_hash,
     status_previous_action_hash: input.status_previous_action_hash,
-    new_status: Status("suspended".to_string()),
+    new_status: Status::from(StatusType::Suspended(SuspendedStatus {
+      reason: input.new_status.reason.unwrap_or_default(),
+      suspension_type: Indefinitely,
+    })),
   };
 
   Ok(update_user_status(update_status_input).is_ok())
@@ -267,9 +269,9 @@ pub fn unsuspend_user_if_time_passed(input: UpdateInput) -> ExternResult<bool> {
     .ok_or(wasm_error!(Guest(
       "Could not find the latest user Status".to_string()
     )))?
-    .to_status_list();
+    .to_status_type()?;
 
-  if let StatusList::Suspended(Temporarily(_)) = status {
+  if let StatusType::Suspended(_) = status {
     let now = sys_time()?;
     let is_unsuspended = status.unsuspend_if_time_passed(&now);
 
@@ -298,7 +300,7 @@ pub fn unsuspend_user(input: UpdateInput) -> ExternResult<bool> {
     user_original_action_hash: input.user_original_action_hash,
     status_original_action_hash: input.status_original_action_hash,
     status_previous_action_hash: input.status_previous_action_hash,
-    new_status: Status("accepted".to_string()),
+    new_status: Status::from(StatusType::Accepted),
   };
 
   Ok(update_user_status(update_status_input).is_ok())

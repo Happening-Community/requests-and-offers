@@ -2,6 +2,7 @@ use hdi::prelude::*;
 use status::*;
 
 pub mod status;
+mod tests;
 
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]

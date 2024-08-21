@@ -21,7 +21,7 @@ pub fn now_in_micros() -> ExternResult<i64> {
   )
 }
 
-pub fn get_original_entry(original_action_hash: ActionHash) -> ExternResult<Option<Record>> {
+pub fn get_original_record(original_action_hash: ActionHash) -> ExternResult<Option<Record>> {
   let Some(details) = get_details(original_action_hash, GetOptions::default())? else {
     return Ok(None);
   };
@@ -38,7 +38,7 @@ pub fn get_all_revisions_for_entry(
   original_action_hash: ActionHash,
   link_types: impl LinkTypeFilterExt,
 ) -> ExternResult<Vec<Record>> {
-  let Some(original_record) = get_original_entry(original_action_hash.clone())? else {
+  let Some(original_record) = get_original_record(original_action_hash.clone())? else {
     return Ok(vec![]);
   };
 
