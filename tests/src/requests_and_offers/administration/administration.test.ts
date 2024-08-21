@@ -25,6 +25,8 @@ import {
   unsuspendUser,
   unsuspendUserIfTimePassed,
   updateUserStatus,
+  getOriginalStatus,
+  getAllRevisionsForStatus,
 } from "./common";
 
 test("create a User and make it administrator", async () => {
@@ -236,5 +238,23 @@ test.only("update User status", async () => {
     );
 
     assert.equal(isUnsuspended, false);
+
+    // Alice unsuspends Bob again
+    await unsuspendUser(
+      alice.cells[0],
+      bobUserLink.target,
+      bobStatusOriginalActionHash,
+      bobLatestStatusRecord.signed_action.hashed.hash
+    );
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    // Alice get the suspension history of Bob
+    const suspensionHistory = await getAllRevisionsForStatus(
+      alice.cells[0],
+      bobStatusOriginalActionHash
+    );
+
+    console.log(decodeRecords(suspensionHistory));
+    assert.equal(suspensionHistory.length, 5);
   });
 });

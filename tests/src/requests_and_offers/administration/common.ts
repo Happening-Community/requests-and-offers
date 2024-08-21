@@ -183,3 +183,25 @@ export async function unsuspendUserIfTimePassed(
     },
   });
 }
+
+export async function getOriginalStatus(
+  cell: CallableCell,
+  status_original_action_hash: ActionHash
+): Promise<Record | null> {
+  return cell.callZome({
+    zome_name: "administration",
+    fn_name: "get_original_status",
+    payload: status_original_action_hash,
+  });
+}
+
+export async function getAllRevisionsForStatus(
+  cell: CallableCell,
+  status_original_action_hash: ActionHash
+): Promise<Record[]> {
+  return cell.callZome({
+    zome_name: "administration",
+    fn_name: "get_all_revisions_for_status",
+    payload: status_original_action_hash,
+  });
+}

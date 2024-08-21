@@ -6,6 +6,7 @@ use chrono::Duration;
 use hdk::prelude::*;
 use status::*;
 use std::str::FromStr;
+use utils::get_all_revisions_for_entry;
 use SuspendedStatus::*;
 use WasmErrorInner::*;
 
@@ -133,6 +134,27 @@ pub fn delete_accepted_user_link(original_action_hash: ActionHash) -> ExternResu
 pub fn get_accepted_users(_: ()) -> ExternResult<Vec<Link>> {
   let path = Path::from("accepted_users");
   get_links(path.path_entry_hash()?, LinkTypes::AcceptedUsers, None)
+}
+
+#[hdk_extern]
+pub fn get_original_status(original_status_hash: ActionHash) -> ExternResult<Option<Record>> {
+  let Some(details) = get_details(original_status_hash, GetOptions::default())? else {
+    return Ok(None);
+  };
+
+  match details {
+    Details::Record(details) => Ok(Some(details.record)),
+    _ => Err(wasm_error!(Guest(
+      "Malformed get details response".to_string()
+    ))),
+  }
+}
+
+#[hdk_extern]
+pub fn get_all_revisions_for_status(original_status_hash: ActionHash) -> ExternResult<Vec<Record>> {
+  let records = get_all_revisions_for_entry(original_status_hash, LinkTypes::StatusUpdates)?;
+
+  Ok(records)
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
