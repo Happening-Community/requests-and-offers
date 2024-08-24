@@ -1,5 +1,4 @@
 use hdk::prelude::*;
-use std::time::{SystemTime, UNIX_EPOCH};
 use WasmErrorInner::*;
 pub mod dna_properties;
 
@@ -9,16 +8,6 @@ pub fn check_if_progenitor() -> ExternResult<bool> {
   let progenitor_pubkey = DnaProperties::get_progenitor_pubkey()?;
 
   Ok(progenitor_pubkey == agent_info()?.agent_initial_pubkey)
-}
-
-pub fn now_in_micros() -> ExternResult<i64> {
-  use WasmErrorInner::*;
-  Ok(
-    SystemTime::now()
-      .duration_since(UNIX_EPOCH)
-      .map_err(|_| wasm_error!(Guest("Could not get current time".to_string())))?
-      .as_micros() as i64,
-  )
 }
 
 pub fn get_original_record(original_action_hash: ActionHash) -> ExternResult<Option<Record>> {
