@@ -8,7 +8,7 @@ import {
   getAcceptedUsers,
   getAgentUser,
   getLatestUser,
-  sampleUserInput,
+  sampleUser,
 } from "../users/common";
 import {
   checkIfAgentIsAdministrator,
@@ -17,7 +17,7 @@ import {
   getAllUsers,
   getLatestStatusForUser,
   getLatestStatusRecordForUser,
-  getProfileStatusLink,
+  getUserStatusLink,
   registerAdministrator,
   removeAdministrator,
   suspendUserIndefinitely,
@@ -25,7 +25,6 @@ import {
   unsuspendUser,
   unsuspendUserIfTimePassed,
   updateUserStatus,
-  getOriginalStatus,
   getAllRevisionsForStatus,
 } from "./common";
 
@@ -33,9 +32,9 @@ test("create a User and make it administrator", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: User;
     let record: Record;
-    sample = sampleUserInput({ name: "Alice" });
+    sample = sampleUser({ name: "Alice" });
     record = await createUser(alice.cells[0], sample);
-    sample = sampleUserInput({ name: "Bob" });
+    sample = sampleUser({ name: "Bob" });
     record = await createUser(bob.cells[0], sample);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     let aliceUserLink = (
@@ -95,9 +94,9 @@ test.only("update User status", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: User;
     let record: Record;
-    sample = sampleUserInput({ name: "Alice" });
+    sample = sampleUser({ name: "Alice" });
     record = await createUser(alice.cells[0], sample);
-    sample = sampleUserInput({ name: "Bob" });
+    sample = sampleUser({ name: "Bob" });
     record = await createUser(bob.cells[0], sample);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     let aliceUserLink = (
@@ -110,7 +109,7 @@ test.only("update User status", async () => {
 
     // Update Alice's status
     const aliceStatusOriginalActionHash = (
-      await getProfileStatusLink(alice.cells[0], aliceUserLink.target)
+      await getUserStatusLink(alice.cells[0], aliceUserLink.target)
     ).target;
     const aliceLatestStatusRecord = await getLatestStatusRecordForUser(
       alice.cells[0],
@@ -122,7 +121,9 @@ test.only("update User status", async () => {
       aliceUserLink.target,
       aliceStatusOriginalActionHash,
       aliceLatestStatusRecord.signed_action.hashed.hash,
-      "accepted"
+      {
+        status_type: "accepted",
+      }
     );
 
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
@@ -133,7 +134,7 @@ test.only("update User status", async () => {
       aliceUserLink.target
     );
 
-    assert.equal(aliceStatus, "accepted");
+    assert.equal(aliceStatus.status_type, "accepted");
 
     // Verify the all_users list
     let allUsers = await getAllUsers(alice.cells[0]);
@@ -146,7 +147,7 @@ test.only("update User status", async () => {
 
     // Bob can not update his status
     const bobStatusOriginalActionHash = (
-      await getProfileStatusLink(bob.cells[0], bobUserLink.target)
+      await getUserStatusLink(bob.cells[0], bobUserLink.target)
     ).target;
     let bobLatestStatusRecord = await getLatestStatusRecordForUser(
       bob.cells[0],
@@ -159,7 +160,9 @@ test.only("update User status", async () => {
         bobUserLink.target,
         bobStatusOriginalActionHash,
         bobLatestStatusRecord.signed_action.hashed.hash,
-        "accepted"
+        {
+          status_type: "accepted",
+        }
       )
     ).rejects.toThrow();
 
@@ -168,7 +171,8 @@ test.only("update User status", async () => {
       alice.cells[0],
       bobUserLink.target,
       bobStatusOriginalActionHash,
-      bobLatestStatusRecord.signed_action.hashed.hash
+      bobLatestStatusRecord.signed_action.hashed.hash,
+      "Bob is a naughty boy"
     );
 
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
@@ -178,14 +182,14 @@ test.only("update User status", async () => {
       alice.cells[0],
       aliceUserLink.target
     );
-    assert.equal(aliceStatus, "accepted");
+    assert.equal(aliceStatus.status_type, "accepted");
 
     // Verify that Bob's status is "suspended"
     let bobStatus = await getLatestStatusForUser(
       bob.cells[0],
       bobUserLink.target
     );
-    assert.equal(bobStatus, "suspended");
+    assert.equal(bobStatus.status_type, "suspended indefinitely");
 
     bobLatestStatusRecord = await getLatestStatusRecordForUser(
       bob.cells[0],
@@ -204,7 +208,7 @@ test.only("update User status", async () => {
 
     // Verify that Bob's status is "accepted"
     bobStatus = await getLatestStatusForUser(bob.cells[0], bobUserLink.target);
-    assert.equal(bobStatus, "accepted");
+    assert.equal(bobStatus.status_type, "accepted");
 
     // Alice suspends Bob for 7 days
     let bobUserRecord = await getLatestUser(bob.cells[0], bobUserLink.target);
@@ -214,13 +218,20 @@ test.only("update User status", async () => {
       bobUserLink.target,
       bobStatusOriginalActionHash,
       bobLatestStatusRecord.signed_action.hashed.hash,
+      "Bob is a naughty boy",
       7
     );
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     // Verify that Bob's status is suspended for 7 days
     bobStatus = await getLatestStatusForUser(bob.cells[0], bobUserLink.target);
-    const suspensionTime = new Date(bobStatus.split(" ")[1]);
+    console.log("bobStatus: ", bobStatus);
+
+    const suspensionTime = new Date(bobStatus.timestamp);
+    console.log("suspensionTime: ", suspensionTime.toLocaleString());
+
     const now = new Date();
+    console.log("now: ", now);
+
     const diffInDays = Math.round(
       (suspensionTime.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
     );

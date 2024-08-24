@@ -38,7 +38,7 @@ pub fn create_user(user: User) -> ExternResult<Record> {
   create_link(
     user_hash.clone(),
     created_status_record.action_address().clone(),
-    LinkTypes::ProfileStatus,
+    LinkTypes::UserStatus,
     (),
   )?;
 

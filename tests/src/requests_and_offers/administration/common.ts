@@ -1,6 +1,18 @@
 import { CallableCell } from "@holochain/tryorama";
 import { ActionHash, Record, Link, AgentPubKey } from "@holochain/client";
-import { Status } from "../users/common";
+
+export type StatusType =
+  | "pending"
+  | "accepted"
+  | "rejected"
+  | "suspended temporarily"
+  | "suspended indefinitely";
+
+export type Status = {
+  status_type: StatusType;
+  reason?: string;
+  timestamp?: number;
+};
 
 export async function getAllUsers(cell: CallableCell): Promise<Link[]> {
   return cell.callZome({
@@ -76,7 +88,7 @@ export async function getLatestStatusRecordForUser(
 export async function getLatestStatusForUser(
   cell: CallableCell,
   user_original_action_hash: ActionHash
-): Promise<string | null> {
+): Promise<Status | null> {
   return cell.callZome({
     zome_name: "administration",
     fn_name: "get_latest_status_for_user",
@@ -84,13 +96,13 @@ export async function getLatestStatusForUser(
   });
 }
 
-export async function getProfileStatusLink(
+export async function getUserStatusLink(
   cell: CallableCell,
   user_original_action_hash: ActionHash
 ): Promise<Link | null> {
   return cell.callZome({
     zome_name: "users",
-    fn_name: "get_profile_status_link",
+    fn_name: "get_user_status_link",
     payload: user_original_action_hash,
   });
 }
@@ -119,6 +131,7 @@ export async function suspendUserTemporarily(
   user_original_action_hash: ActionHash,
   status_original_action_hash: ActionHash,
   status_previous_action_hash: ActionHash,
+  reason: string,
   duration_in_days: number
 ): Promise<boolean> {
   return cell.callZome({
@@ -128,6 +141,7 @@ export async function suspendUserTemporarily(
       user_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
+      reason,
       duration_in_days,
     },
   });
@@ -137,7 +151,8 @@ export async function suspendUserIndefinitely(
   cell: CallableCell,
   user_original_action_hash: ActionHash,
   status_original_action_hash: ActionHash,
-  status_previous_action_hash: ActionHash
+  status_previous_action_hash: ActionHash,
+  reason: string
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
@@ -146,6 +161,7 @@ export async function suspendUserIndefinitely(
       user_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
+      reason,
     },
   });
 }
@@ -181,17 +197,6 @@ export async function unsuspendUserIfTimePassed(
       status_original_action_hash,
       status_previous_action_hash,
     },
-  });
-}
-
-export async function getOriginalStatus(
-  cell: CallableCell,
-  status_original_action_hash: ActionHash
-): Promise<Record | null> {
-  return cell.callZome({
-    zome_name: "administration",
-    fn_name: "get_original_status",
-    payload: status_original_action_hash,
   });
 }
 

@@ -1,5 +1,5 @@
 use crate::{
-  administration::check_if_agent_is_administrator, external_calls::get_profile_status_link,
+  administration::check_if_agent_is_administrator, external_calls::get_user_status_link,
 };
 use administration_integrity::*;
 use chrono::Duration;
@@ -10,7 +10,7 @@ use WasmErrorInner::*;
 
 #[hdk_extern]
 pub fn create_status(user_original_action_hash: ActionHash) -> ExternResult<Record> {
-  let link = get_profile_status_link(user_original_action_hash)?;
+  let link = get_user_status_link(user_original_action_hash)?;
 
   if link.is_some() {
     return Err(wasm_error!(Guest("You already have a Status".to_string())));
@@ -73,7 +73,7 @@ pub fn get_latest_status(original_action_hash: ActionHash) -> ExternResult<Optio
 pub fn get_latest_status_record_for_user(
   user_original_action_hash: ActionHash,
 ) -> ExternResult<Option<Record>> {
-  let link = get_profile_status_link(user_original_action_hash)?;
+  let link = get_user_status_link(user_original_action_hash)?;
 
   if let Some(link) = link {
     get_latest_status_record(link.target.into_action_hash().ok_or(wasm_error!(Guest(
@@ -88,7 +88,7 @@ pub fn get_latest_status_record_for_user(
 pub fn get_latest_status_for_user(
   user_original_action_hash: ActionHash,
 ) -> ExternResult<Option<Status>> {
-  let link = get_profile_status_link(user_original_action_hash)?;
+  let link = get_user_status_link(user_original_action_hash)?;
 
   let latest_status: Option<Status> = if let Some(link) = link {
     get_latest_status(link.target.into_action_hash().ok_or(wasm_error!(Guest(
@@ -101,7 +101,6 @@ pub fn get_latest_status_for_user(
   Ok(latest_status)
 }
 
-#[hdk_extern]
 pub fn create_accepted_user_link(original_action_hash: ActionHash) -> ExternResult<bool> {
   let path = Path::from("accepted_users");
   create_link(
@@ -113,7 +112,6 @@ pub fn create_accepted_user_link(original_action_hash: ActionHash) -> ExternResu
   Ok(true)
 }
 
-#[hdk_extern]
 pub fn delete_accepted_user_link(original_action_hash: ActionHash) -> ExternResult<bool> {
   let path = Path::from("accepted_users");
   let links = get_links(path.path_entry_hash()?, LinkTypes::AcceptedUsers, None)?;
@@ -132,20 +130,6 @@ pub fn delete_accepted_user_link(original_action_hash: ActionHash) -> ExternResu
 pub fn get_accepted_users(_: ()) -> ExternResult<Vec<Link>> {
   let path = Path::from("accepted_users");
   get_links(path.path_entry_hash()?, LinkTypes::AcceptedUsers, None)
-}
-
-#[hdk_extern]
-pub fn get_original_status(original_status_hash: ActionHash) -> ExternResult<Option<Record>> {
-  let Some(details) = get_details(original_status_hash, GetOptions::default())? else {
-    return Ok(None);
-  };
-
-  match details {
-    Details::Record(details) => Ok(Some(details.record)),
-    _ => Err(wasm_error!(Guest(
-      "Malformed get details response".to_string()
-    ))),
-  }
 }
 
 #[hdk_extern]
@@ -208,12 +192,18 @@ pub struct SuspendUserInput {
   pub status_original_action_hash: ActionHash,
   pub status_previous_action_hash: ActionHash,
   pub reason: String,
-  pub duration_in_days: i64,
+  pub duration_in_days: Option<i64>,
 }
 
 #[hdk_extern]
 pub fn suspend_user_temporarily(input: SuspendUserInput) -> ExternResult<bool> {
-  let duration = Duration::days(input.duration_in_days);
+  if input.duration_in_days.is_none() {
+    return Err(wasm_error!(Guest(
+      "Duration in days must be provided".to_string()
+    )));
+  }
+
+  let duration = Duration::days(input.duration_in_days.unwrap());
   let now = &sys_time()?;
 
   let update_status_input = UpdateStatusInput {
@@ -240,7 +230,7 @@ pub fn suspend_user_indefinitely(input: SuspendUserInput) -> ExternResult<bool> 
 
 #[hdk_extern]
 pub fn unsuspend_user_if_time_passed(input: UpdateInput) -> ExternResult<bool> {
-  let link = match get_profile_status_link(input.user_original_action_hash.clone())? {
+  let link = match get_user_status_link(input.user_original_action_hash.clone())? {
     Some(link) => link,
     None => {
       return Err(wasm_error!(Guest(
@@ -275,6 +265,8 @@ pub fn unsuspend_user_if_time_passed(input: UpdateInput) -> ExternResult<bool> {
       status_previous_action_hash: input.status_previous_action_hash,
       new_status: status,
     };
+
+    warn!("Status input: {:?}", update_status_input.new_status);
 
     update_user_status(update_status_input)?;
 

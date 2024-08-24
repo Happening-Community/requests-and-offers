@@ -15,7 +15,7 @@ pub enum LinkTypes {
   UserUpdates,
   AllUsers,
   MyUser,
-  ProfileStatus,
+  UserStatus,
 }
 
 #[hdk_extern]

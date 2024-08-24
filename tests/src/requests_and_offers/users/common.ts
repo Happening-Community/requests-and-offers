@@ -1,17 +1,9 @@
 import { CallableCell } from "@holochain/tryorama";
 import { ActionHash, Record, Link, AgentPubKey } from "@holochain/client";
-import { DnaProperties } from "../utils";
 
 export type UserType = "advocate" | "creator" | "Non Authorized";
 
-export type Status =
-  | "pending"
-  | "accepted"
-  | "rejected"
-  | "suspended"
-  | `suspended ${string}`;
-
-export type UserInput = {
+export type User = {
   name: string;
   nickname: string;
   bio: string;
@@ -24,11 +16,7 @@ export type UserInput = {
   location: string;
 };
 
-export type User = UserInput & {
-  status?: Status;
-};
-
-export function sampleUserInput(partialUser: Partial<UserInput>): UserInput {
+export function sampleUser(partialUser: Partial<User>): User {
   return {
     ...{
       name: "User",
@@ -48,7 +36,7 @@ export function sampleUserInput(partialUser: Partial<UserInput>): UserInput {
 
 export async function createUser(
   cell: CallableCell,
-  User: UserInput
+  User: User
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "users",
@@ -90,7 +78,7 @@ export async function updateUser(
   cell: CallableCell,
   original_action_hash: ActionHash,
   previous_action_hash: ActionHash,
-  updated_user: UserInput
+  updated_user: User
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "users",

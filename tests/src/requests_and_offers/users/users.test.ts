@@ -6,12 +6,11 @@ import { Record } from "@holochain/client";
 
 import {
   User,
+  sampleUser,
   createUser,
   getAgentUser,
   getLatestUser,
-  sampleUserInput,
   updateUser,
-  UserInput,
 } from "./common.js";
 import {
   decodeRecords,
@@ -20,15 +19,15 @@ import {
 } from "../utils.js";
 import { getLatestStatusForUser } from "../administration/common";
 
-test("create and read User", async () => {
+test.only("create and read User", async () => {
   await runScenarioWithTwoAgents(
     async (_scenario: Scenario, alice: Player, bob: Player) => {
-      let sample: UserInput;
+      let sample: User;
       let record: Record;
       let records: Record[];
 
       // Alice creates a User
-      sample = sampleUserInput({ name: "Alice" });
+      sample = sampleUser({ name: "Alice" });
       record = await createUser(alice.cells[0], sample);
       const aliceCreatedUser = decodeRecords([record])[0] as User;
       assert.ok(record);
@@ -56,14 +55,14 @@ test("create and read User", async () => {
         record.signed_action.hashed.hash
       );
 
-      assert.equal(bobStatus, "pending");
+      assert.equal(bobStatus.status_type, "pending");
 
       // Bob try to get his user before he create it
       let links = await getAgentUser(bob.cells[0], bob.agentPubKey);
       assert.equal(links.length, 0);
 
       // Bob create an User with erroneous UserType
-      let errSample: User = sampleUserInput({
+      let errSample: User = sampleUser({
         user_type: "Non Authorized",
       });
 
@@ -72,7 +71,7 @@ test("create and read User", async () => {
       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
       // Bob create an User with erroneous user Picture
-      errSample = sampleUserInput({
+      errSample = sampleUser({
         name: "Bob",
         picture: new Uint8Array(20),
       });
@@ -85,7 +84,7 @@ test("create and read User", async () => {
         process.cwd() + TestUserPicture
       );
 
-      sample = sampleUserInput({
+      sample = sampleUser({
         name: "Bob",
         picture: new Uint8Array(buffer),
       });
@@ -106,10 +105,10 @@ test("create and read User", async () => {
 
 test("create and update User", async () => {
   await runScenarioWithTwoAgents(async (_scenario, alice, bob) => {
-    let sample: UserInput;
+    let sample: User;
     let record: Record;
 
-    sample = sampleUserInput({ name: "Alice" });
+    sample = sampleUser({ name: "Alice" });
     record = await createUser(alice.cells[0], sample);
     const originalUserHash = record.signed_action.hashed.hash;
 
@@ -120,7 +119,7 @@ test("create and update User", async () => {
     );
 
     // Alice update her user with a valid user picture
-    sample = sampleUserInput({
+    sample = sampleUser({
       name: "Alicia",
       nickname: "Alicialia",
       picture: new Uint8Array(buffer),
@@ -145,7 +144,7 @@ test("create and update User", async () => {
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Alice update her user with an invalid user picture
-    sample = sampleUserInput({
+    sample = sampleUser({
       name: "Alicia",
       nickname: "Alicialia",
       picture: new Uint8Array(20),
@@ -162,7 +161,7 @@ test("create and update User", async () => {
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Bob try to update Alice's user
-    sample = sampleUserInput({
+    sample = sampleUser({
       name: "Bob",
     });
     await expect(
@@ -177,7 +176,7 @@ test("create and update User", async () => {
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Alice update here user again
-    sample = sampleUserInput({
+    sample = sampleUser({
       name: "Alice",
       nickname: "Alicia",
     });

@@ -17,12 +17,10 @@ pub fn get_all_users(_: ()) -> ExternResult<Vec<Link>> {
 }
 
 #[hdk_extern]
-pub fn get_profile_status_link(
-  user_original_action_hash: ActionHash,
-) -> ExternResult<Option<Link>> {
+pub fn get_user_status_link(user_original_action_hash: ActionHash) -> ExternResult<Option<Link>> {
   let links = get_links(
     user_original_action_hash.clone(),
-    LinkTypes::ProfileStatus,
+    LinkTypes::UserStatus,
     None,
   )?;
 
