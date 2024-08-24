@@ -79,8 +79,25 @@ impl Status {
     }
   }
 
+  pub fn mut_suspend(&mut self, reason: &str, time: Option<(Duration, &Timestamp)>) {
+    if time.is_some() {
+      let duration = time.unwrap().0.num_microseconds().unwrap_or(0);
+      let now = time.unwrap().1.as_micros();
+
+      self.status_type = "suspended temporarily".to_string();
+      self.reason = Some(reason.to_string());
+      self.timestamp = Some(Timestamp::from_micros(now + duration));
+    } else {
+      self.status_type = "suspended indefinitely".to_string();
+      self.reason = Some(reason.to_string());
+      self.timestamp = None;
+    }
+  }
+
   pub fn unsuspend(&mut self) -> Self {
     self.status_type = "accepted".to_string();
+    self.reason = None;
+    self.timestamp = None;
 
     self.to_owned()
   }
