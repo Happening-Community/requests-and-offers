@@ -32,7 +32,7 @@ impl FromStr for StatusType {
 pub struct Status {
   pub status_type: String,
   pub reason: Option<String>,
-  pub timestamp: Option<Timestamp>,
+  pub timestamp: Option<String>,
 }
 
 impl Status {
@@ -68,7 +68,7 @@ impl Status {
       return Self {
         status_type: "suspended temporarily".to_string(),
         reason: Some(reason.to_string()),
-        timestamp: Some(Timestamp::from_micros(now + duration)),
+        timestamp: Some(Timestamp::from_micros(now + duration).to_string()),
       };
     }
 
@@ -86,7 +86,7 @@ impl Status {
 
       self.status_type = "suspended temporarily".to_string();
       self.reason = Some(reason.to_string());
-      self.timestamp = Some(Timestamp::from_micros(now + duration));
+      self.timestamp = Some(Timestamp::from_micros(now + duration).to_string());
     } else {
       self.status_type = "suspended indefinitely".to_string();
       self.reason = Some(reason.to_string());
@@ -105,7 +105,8 @@ impl Status {
   pub fn get_suspension_time_remaining(&self, now: &Timestamp) -> Option<Duration> {
     if let Some(timestamp) = &self.timestamp {
       return Some(Duration::microseconds(
-        timestamp
+        Timestamp::from_str(timestamp)
+          .unwrap()
           .checked_difference_signed(now)
           .unwrap_or_default()
           .num_microseconds()?,
