@@ -1,10 +1,9 @@
 import { decodeRecords } from '@utils';
 import hc from '@services/HolochainClientService.svelte';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
-import administratorsStore from './administrators.svelte';
+import administratorsStore, { type Status } from './administrators.svelte';
 
 export type UserType = 'creator' | 'advocate';
-export type UserStatus = 'pending' | 'accepted' | 'rejected' | 'suspended' | `suspended ${string}`;
 
 type UserInDHT = {
   name: string;
@@ -23,7 +22,7 @@ type UserAdditionalFields = {
   remaining_time?: number;
   original_action_hash?: ActionHash;
   previous_action_hash?: ActionHash;
-  status?: UserStatus;
+  status?: Status;
 };
 
 export type User = UserInDHT & UserAdditionalFields;
@@ -33,11 +32,15 @@ class UsersStore {
   myProfile: User | undefined = $state();
 
   async createUser(user: User): Promise<Record> {
-    return await hc.callZome('users', 'create_user', user);
+    return (await hc.callZome('users', 'create_user', user)) as Record;
   }
 
   async getLatestUserRecord(original_action_hash: ActionHash): Promise<Record | null> {
-    const record = await hc.callZome('users', 'get_latest_user_record', original_action_hash);
+    const record = (await hc.callZome(
+      'users',
+      'get_latest_user_record',
+      original_action_hash
+    )) as Record | null;
 
     return record;
   }
@@ -57,7 +60,7 @@ class UsersStore {
   }
 
   private async getAgentUserLinks(agent: AgentPubKey): Promise<Link[]> {
-    return await hc.callZome('users', 'get_agent_user', agent);
+    return (await hc.callZome('users', 'get_agent_user', agent)) as Link[];
   }
 
   async getAgentUser(agent: AgentPubKey): Promise<User | null> {
@@ -77,14 +80,14 @@ class UsersStore {
   }
 
   private async getAcceptedUsersLinks(): Promise<Link[]> {
-    return await hc.callZome('administration', 'get_accepted_users', null);
+    return (await hc.callZome('administration', 'get_accepted_users', null)) as Link[];
   }
 
   private async getAcceptedUsersLinksAndRecords(): Promise<[Link[], Record[]]> {
     const links = await this.getAcceptedUsersLinks();
-    let usersRecords: Record[] = [];
+    const usersRecords: Record[] = [];
 
-    for (let link of links) {
+    for (const link of links) {
       const record = await this.getLatestUserRecord(link.target);
       if (record) usersRecords.push(record);
     }
@@ -95,12 +98,12 @@ class UsersStore {
   async getAcceptedUsers(): Promise<User[]> {
     const [links, records] = await this.getAcceptedUsersLinksAndRecords();
 
-    let recordsContents: User[] = [];
+    const recordsContents: User[] = [];
 
     for (let i = 0; i < records.length; i++) {
-      let user = decodeRecords([records[i]])[0];
+      const user = decodeRecords([records[i]])[0];
 
-      let status = await administratorsStore.getLatestStatusForUser(
+      const status = await administratorsStore.getLatestStatusForUser(
         records[i].signed_action.hashed.hash
       );
 
@@ -128,11 +131,11 @@ class UsersStore {
     const original_action_hash = this.myProfile!.original_action_hash;
     const previous_action_hash = this.myProfile!.previous_action_hash;
 
-    const newUserRecord = await hc.callZome('users', 'update_user', {
+    const newUserRecord = (await hc.callZome('users', 'update_user', {
       original_action_hash,
       previous_action_hash,
       updated_user
-    });
+    })) as Record;
 
     return newUserRecord;
   }

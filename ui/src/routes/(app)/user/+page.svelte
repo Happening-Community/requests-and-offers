@@ -23,8 +23,8 @@
     await usersStore.getMyProfile();
 
     if (myProfile) {
-      if (myProfile.status!.split(' ')[1]) {
-        const date = new Date(myProfile.status!.split(' ')[1]);
+      if (myProfile.status!.timestamp) {
+        const date = new Date(myProfile.status!.timestamp);
         const dateString = date.toString();
         const now = new Date();
 
@@ -54,14 +54,14 @@
       <h3 class="h3 text-wrap text-center">
         <b>Status :</b>
         <span
-          class:text-primary-500={myProfile.status === 'pending'}
-          class:text-error-500={myProfile.status === 'rejected' || myProfile.status === 'suspended'}
-          class:text-green-400={myProfile.status === 'accepted'}
-          class:text-warning-500={myProfile.status ===
-            `suspended ${myProfile.status?.split(' ')[1]}`}
+          class:text-primary-500={myProfile.status?.status_type === 'pending'}
+          class:text-error-500={myProfile.status?.status_type === 'rejected' ||
+            myProfile.status?.status_type === 'suspended indefinitely'}
+          class:text-green-400={myProfile.status?.status_type === 'accepted'}
+          class:text-warning-500={myProfile.status?.status_type === `suspended temporarily`}
         >
           {#if !suspensionDate}
-            {myProfile.status}
+            {myProfile.status?.status_type}
           {:else}
             {isExpired ? 'In review' : `suspended until ${suspensionDate}.`}
           {/if}

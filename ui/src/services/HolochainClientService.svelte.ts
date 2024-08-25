@@ -1,6 +1,6 @@
 import { AppAgentWebsocket, type AppAgentClient, type AppInfoResponse } from '@holochain/client';
 
-type ZomeName = 'users' | 'administration';
+type ZomeName = 'users' | 'administration' | 'misc';
 
 class HolochainClientService {
   appId = 'requests_and_offers';
@@ -39,7 +39,7 @@ class HolochainClientService {
     fnName: string,
     payload: unknown,
     roleName: string = 'requests_and_offers'
-  ): Promise<any> {
+  ): Promise<unknown> {
     if (!this.client) {
       throw new Error('Client not connected');
     }

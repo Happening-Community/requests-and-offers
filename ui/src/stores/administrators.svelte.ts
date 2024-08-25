@@ -1,8 +1,21 @@
-import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
+import type { ActionHash, Link, Record } from '@holochain/client';
 import hc from '@services/HolochainClientService.svelte';
 import { decodeRecords } from '@utils';
-import type { User, UserStatus } from './users.svelte';
+import type { User } from './users.svelte';
 import usersStore from './users.svelte';
+
+export type StatusType =
+  | 'pending'
+  | 'accepted'
+  | 'rejected'
+  | 'suspended temporarily'
+  | 'suspended indefinitely';
+
+export type Status = {
+  status_type: StatusType;
+  reason?: string;
+  timestamp?: number;
+};
 
 class AdministratorsStore {
   allUsers: User[] = $state([]);
@@ -11,14 +24,14 @@ class AdministratorsStore {
   agentIsAdministrator = $state(false);
 
   private async getAllUsersLinks(): Promise<Link[]> {
-    return await hc.callZome('users', 'get_all_users', null);
+    return (await hc.callZome('users', 'get_all_users', null)) as Link[];
   }
 
   private async getAllUsersLinksAndRecords(): Promise<[Link[], Record[]]> {
     const usersLinks: Link[] = await this.getAllUsersLinks();
-    let usersRecords: Record[] = [];
+    const usersRecords: Record[] = [];
 
-    for (let link of usersLinks) {
+    for (const link of usersLinks) {
       const record = await usersStore.getLatestUserRecord(link.target);
       if (record) usersRecords.push(record);
     }
@@ -29,11 +42,11 @@ class AdministratorsStore {
   async getAllUsers(): Promise<User[]> {
     const [usersLinks, usersRecords] = await this.getAllUsersLinksAndRecords();
 
-    let recordsContents: User[] = [];
+    const recordsContents: User[] = [];
 
     for (let i = 0; i < usersRecords.length; i++) {
-      let user = decodeRecords([usersRecords[i]])[0];
-      let status = await this.getLatestStatusForUser(usersLinks[i].target);
+      const user = decodeRecords([usersRecords[i]])[0];
+      const status = await this.getLatestStatusForUser(usersLinks[i].target);
 
       console.log('status', status);
 
@@ -53,22 +66,30 @@ class AdministratorsStore {
   }
 
   async registerAdministrator(original_action_hash: Uint8Array): Promise<boolean> {
-    return await hc.callZome('administration', 'register_administrator', original_action_hash);
+    return (await hc.callZome(
+      'administration',
+      'register_administrator',
+      original_action_hash
+    )) as boolean;
   }
 
   async checkIfAgentIsAdministrator(agentPubKey: Uint8Array): Promise<boolean> {
-    const result = await hc.callZome(
+    const result = (await hc.callZome(
       'administration',
       'check_if_agent_is_administrator',
       agentPubKey
-    );
+    )) as boolean;
     this.agentIsAdministrator = result;
 
     return result;
   }
 
   async checkIfUserIsAdministrator(action_hash: Uint8Array): Promise<boolean> {
-    return await hc.callZome('administration', 'check_if_user_is_administrator', action_hash);
+    return (await hc.callZome(
+      'administration',
+      'check_if_user_is_administrator',
+      action_hash
+    )) as boolean;
   }
 
   private async getAllAdministratorsLinks(): Promise<Link[]> {
@@ -77,7 +98,7 @@ class AdministratorsStore {
 
   async getAllAdministrators(): Promise<User[]> {
     const links = await this.getAllAdministratorsLinks();
-    let administratorUsersPromises = links.map(
+    const administratorUsersPromises = links.map(
       async (link) => await usersStore.getLatestUser(link.target)
     );
 
@@ -90,7 +111,11 @@ class AdministratorsStore {
   }
 
   async removeAdministrator(original_action_hash: Uint8Array): Promise<boolean> {
-    return await hc.callZome('administration', 'remove_administrator', original_action_hash);
+    return (await hc.callZome(
+      'administration',
+      'remove_administrator',
+      original_action_hash
+    )) as boolean;
   }
 
   async getNonAdministratorUsers(): Promise<User[]> {
@@ -111,63 +136,71 @@ class AdministratorsStore {
   async getLatestStatusRecordForUser(
     user_original_action_hash: ActionHash
   ): Promise<Record | null> {
-    return await hc.callZome(
+    return (await hc.callZome(
       'administration',
       'get_latest_status_record_for_user',
       user_original_action_hash
-    );
+    )) as Record | null;
   }
 
-  async getLatestStatusForUser(user_original_action_hash: ActionHash): Promise<UserStatus | null> {
-    return await hc.callZome(
+  async getLatestStatusForUser(user_original_action_hash: ActionHash): Promise<Status | null> {
+    return (await hc.callZome(
       'administration',
       'get_latest_status_for_user',
       user_original_action_hash
-    );
+    )) as Status | null;
   }
 
-  async getProfileStatusLink(user_original_action_hash: ActionHash): Promise<Link | null> {
-    return await hc.callZome('users', 'get_profile_status_link', user_original_action_hash);
+  async getUserStatusLink(user_original_action_hash: ActionHash): Promise<Link | null> {
+    return (await hc.callZome(
+      'users',
+      'get_user_status_link',
+      user_original_action_hash
+    )) as Link | null;
   }
 
   async updateUserStatus(
     user_original_action_hash: ActionHash,
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash,
-    new_status: UserStatus
+    new_status: Status
   ): Promise<boolean> {
-    return await hc.callZome('administration', 'update_user_status', {
+    return (await hc.callZome('administration', 'update_user_status', {
       user_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
       new_status
-    });
+    })) as boolean;
   }
 
   async suspendUserIndefinitely(
     user_original_action_hash: ActionHash,
     status_original_action_hash: ActionHash,
-    status_previous_action_hash: ActionHash
+    status_previous_action_hash: ActionHash,
+    reason: string
   ): Promise<boolean> {
-    return await hc.callZome('administration', 'suspend_user_indefinitely', {
+    return (await hc.callZome('administration', 'suspend_user_indefinitely', {
       user_original_action_hash,
       status_original_action_hash,
-      status_previous_action_hash
-    });
+      status_previous_action_hash,
+      reason
+    })) as boolean;
   }
 
   async suspendUserTemporarily(
     user_original_action_hash: ActionHash,
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash,
+    reason: string,
     duration_in_days: number
   ): Promise<boolean> {
-    return await hc.callZome('administration', 'suspend_user_temporarily', {
+    return (await hc.callZome('administration', 'suspend_user_temporarily', {
       user_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
+      reason,
       duration_in_days
-    });
+    })) as boolean;
   }
 
   async unsuspendUser(
@@ -175,11 +208,11 @@ class AdministratorsStore {
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash
   ): Promise<boolean> {
-    return await hc.callZome('administration', 'unsuspend_user', {
+    return (await hc.callZome('administration', 'unsuspend_user', {
       user_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash
-    });
+    })) as boolean;
   }
 
   async unsuspendUserIfTimePassed(
@@ -187,19 +220,19 @@ class AdministratorsStore {
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash
   ): Promise<boolean> {
-    return await hc.callZome('administration', 'unsuspend_user_if_time_passed', {
+    return (await hc.callZome('administration', 'unsuspend_user_if_time_passed', {
       user_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash
-    });
+    })) as boolean;
   }
 
-  getRemainingSuspensionTime(status: UserStatus): number | null {
+  getRemainingSuspensionTime(status: Status): number | null {
     if (!status) return null;
-    const suspensionDate = new Date(status.split(' ')[1]);
-    const now = new Date();
+    if (!status.timestamp) return null;
 
-    if (!suspensionDate) return null;
+    const suspensionDate = new Date(status.timestamp);
+    const now = new Date();
 
     return suspensionDate.getTime() - now.getTime();
   }

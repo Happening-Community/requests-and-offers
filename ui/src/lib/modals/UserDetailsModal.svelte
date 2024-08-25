@@ -2,8 +2,8 @@
   import { page } from '$app/stores';
   import type { ActionHash } from '@holochain/client';
   import { Avatar, getModalStore, popup, type PopupSettings } from '@skeletonlabs/skeleton';
-  import administratorsStore from '@stores/administrators.svelte';
-  import { type User, type UserStatus } from '@stores/users.svelte';
+  import administratorsStore, { type Status } from '@stores/administrators.svelte';
+  import { type User } from '@stores/users.svelte';
   import { onMount } from 'svelte';
 
   const { administrators } = $derived(administratorsStore);
@@ -21,25 +21,28 @@
       ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
       : '/default_avatar.webp';
 
-    if (user && user.status!.split(' ')[1]) {
+    if (user && user.status!.timestamp) {
       isSuspendedTemporarily = true;
-      suspensionDate = new Date(user.status!.split(' ')[1]).toLocaleString();
+      suspensionDate = new Date(user.status!.timestamp).toLocaleString();
     }
   });
 
-  async function updateStatus(status: UserStatus) {
+  async function updateStatus(status: Status) {
     if (!user) return;
 
     let statusMessage = '';
-    switch (status) {
+    switch (status.status_type) {
       case 'accepted':
         statusMessage = 'accept';
         break;
       case 'rejected':
         statusMessage = 'reject';
         break;
-      default:
-        statusMessage = 'suspend';
+      case 'suspended indefinitely':
+        statusMessage = 'suspend indefinitely';
+        break;
+      case 'suspended temporarily':
+        statusMessage = 'suspend temporarily';
         break;
     }
 
@@ -48,7 +51,7 @@
     const confirmation = confirm(confirmMessage);
     if (!confirmation) return;
 
-    const statusOriginalActionHash = (await administratorsStore.getProfileStatusLink(
+    const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
       user?.original_action_hash!
     ))!.target;
     const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForUser(
@@ -71,7 +74,7 @@
     const confirmation = confirm('Are you sure you want to suspend this user indefinitely ?');
     if (!confirmation) return;
 
-    const statusOriginalActionHash = (await administratorsStore.getProfileStatusLink(
+    const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
       user?.original_action_hash!
     ))!.target;
     const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForUser(
@@ -81,7 +84,8 @@
     await administratorsStore.suspendUserIndefinitely(
       user.original_action_hash!,
       statusOriginalActionHash,
-      latestStatusActionHash
+      latestStatusActionHash,
+      'Suspended indefinitely'
     );
 
     await administratorsStore.getAllUsers();
@@ -105,7 +109,7 @@
     );
     if (!confirmation) return;
 
-    const statusOriginalActionHash = (await administratorsStore.getProfileStatusLink(
+    const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
       user?.original_action_hash!
     ))!.target;
     const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForUser(
@@ -116,10 +120,11 @@
       user.original_action_hash!,
       statusOriginalActionHash,
       latestStatusActionHash,
+      'Suspended temporarily ',
       suspendedDays
     );
     await administratorsStore.getAllUsers();
-    suspensionDate = new Date(user?.status!.split(' ')[1]).toLocaleString();
+    suspensionDate = new Date(user?.status?.timestamp!).toLocaleString();
     suspendedDays = 0;
     modalStore.close();
   }
@@ -160,7 +165,7 @@
       <p>
         <b>Status :</b>
         {#if !suspensionDate}
-          {user.status}
+          {user.status?.status_type}
         {:else}
           suspended until <br /> {suspensionDate}
         {/if}
@@ -186,20 +191,29 @@
     {/if}
     <div class="mt-5 flex flex-col items-center gap-4">
       {#if $page.url.pathname === '/admin/users'}
-        {#if user?.status === 'pending'}
+        {#if user?.status?.status_type === 'pending'}
           <div class="space-x-4">
-            <button class="btn variant-filled-tertiary" onclick={() => updateStatus('accepted')}>
+            <button
+              class="btn variant-filled-tertiary"
+              onclick={() => updateStatus({ status_type: 'accepted' })}
+            >
               Accept
             </button>
-            <button class="btn variant-filled-error" onclick={() => updateStatus('rejected')}>
+            <button
+              class="btn variant-filled-error"
+              onclick={() => updateStatus({ status_type: 'rejected' })}
+            >
               Reject
             </button>
           </div>
-        {:else if user?.status === 'rejected'}
-          <button class="btn variant-filled-tertiary" onclick={() => updateStatus('accepted')}>
+        {:else if user?.status?.status_type === 'rejected'}
+          <button
+            class="btn variant-filled-tertiary"
+            onclick={() => updateStatus({ status_type: 'accepted' })}
+          >
             Accept
           </button>
-        {:else if user?.status === 'accepted'}
+        {:else if user?.status?.status_type === 'accepted'}
           <div class="border-error-600 space-y-4 border-2 p-4">
             <h2 class="h3 text-error-600">Suspend</h2>
             <div class="space-x-2">
@@ -211,9 +225,12 @@
               </button>
             </div>
           </div>
-        {:else if user?.status?.startsWith('suspended')}
+        {:else if user?.status?.status_type.startsWith('suspended')}
           <div class="space-y-4" class:space-x-4={!isSuspendedTemporarily}>
-            <button class="btn variant-filled-tertiary" onclick={() => updateStatus('accepted')}>
+            <button
+              class="btn variant-filled-tertiary"
+              onclick={() => updateStatus({ status_type: 'accepted' })}
+            >
               Unsuspend
             </button>
             {#if isSuspendedTemporarily}

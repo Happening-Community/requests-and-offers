@@ -32,16 +32,17 @@
 
   let isLoading = $state(true);
 
-  let pendingUsers = $derived(allUsers.filter((user) => user.status === 'pending'));
-  let acceptedUsers = $derived(allUsers.filter((user) => user.status === 'accepted'));
-  let rejectedUsers = $derived(allUsers.filter((user) => user.status === 'rejected'));
+  let pendingUsers = $derived(allUsers.filter((user) => user.status?.status_type === 'pending'));
+  let acceptedUsers = $derived(allUsers.filter((user) => user.status?.status_type === 'accepted'));
+  let rejectedUsers = $derived(allUsers.filter((user) => user.status?.status_type === 'rejected'));
   let temporarilySuspendedUsers = $derived(
     allUsers
-      .filter((user) => user.status!.split(' ').length > 1)
-      .filter((user) => user.remaining_time)
+      .filter((user) => user.status?.status_type === 'suspended temporarily')
       .sort((a, b) => a.remaining_time! - b.remaining_time!)
   );
-  let indefinitelySuspendedUsers = $derived(allUsers.filter((user) => user.status === 'suspended'));
+  let indefinitelySuspendedUsers = $derived(
+    allUsers.filter((user) => user.status?.status_type === 'suspended indefinitely')
+  );
 
   onMount(async () => {
     await administratorsStore.getAllUsers();
