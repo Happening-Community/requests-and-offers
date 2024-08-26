@@ -1,10 +1,17 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import type { ActionHash } from '@holochain/client';
-  import { Avatar, getModalStore, popup, type PopupSettings } from '@skeletonlabs/skeleton';
+  import {
+    Avatar,
+    getModalStore,
+    type ModalComponent,
+    type ModalSettings,
+    type PopupSettings
+  } from '@skeletonlabs/skeleton';
   import administratorsStore, { type Status } from '@stores/administrators.svelte';
   import { type User } from '@stores/users.svelte';
   import { onMount } from 'svelte';
+  import PromptModal from '../dialog/PromptModal.svelte';
 
   const { administrators } = $derived(administratorsStore);
   const modalStore = getModalStore();
@@ -15,6 +22,40 @@
   let suspendedDays = $state(1);
   let suspensionDate = $state('');
   let isSuspendedTemporarily = $state(false);
+
+  const suspendTemporarilyModalMeta: PromptModalMeta = {
+    message: 'What is the reason and duration of suspension?',
+    inputs: [
+      {
+        name: 'reason',
+        label: 'Reason',
+        type: 'text',
+        value: '',
+        placeholder: 'Enter a reason',
+        required: true
+      },
+      {
+        name: 'duration',
+        label: 'Number of days',
+        type: 'number',
+        placeholder: 'Number of days',
+        value: '',
+        required: true
+      }
+    ]
+  };
+  const promptModalComponent: ModalComponent = { ref: PromptModal };
+  const promptModal = (): ModalSettings => {
+    return {
+      type: 'component',
+      component: promptModalComponent,
+      meta: suspendTemporarilyModalMeta,
+      response: async (response) => {
+        handleSuspendTemporarily(response.data);
+        modalStore.close();
+      }
+    };
+  };
 
   onMount(async () => {
     userPictureUrl = user?.picture
@@ -102,12 +143,11 @@
     }
   };
 
-  async function handleSuspendTemporarily() {
+  async function handleSuspendTemporarily(data: FormData) {
     if (!user) return;
-    const confirmation = confirm(
-      'Are you sure you want to suspend this user for ' + suspendedDays + ' days ?'
-    );
-    if (!confirmation) return;
+
+    let suspendedDays = Number(data.get('duration'));
+    const reason = String(data.get('reason'));
 
     const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
       user?.original_action_hash!
@@ -120,7 +160,7 @@
       user.original_action_hash!,
       statusOriginalActionHash,
       latestStatusActionHash,
-      'Suspended temporarily ',
+      reason,
       suspendedDays
     );
     await administratorsStore.getAllUsers();
@@ -137,23 +177,12 @@
     await administratorsStore.getAllAdministrators();
     modalStore.close();
   }
-</script>
 
-<div
-  class="card variant-filled-tertiary z-10 w-72 p-4 shadow-xl"
-  data-popup="popupSuspendTemporarily"
->
-  <div class="flex flex-col items-center gap-4">
-    <p class="h4 text-center">How many days do you want to suspend this user ?</p>
-    <form class="flex gap-4">
-      <input type="number" min="1" max="365" class="input text-white" bind:value={suspendedDays} />
-      <button class="btn variant-filled-secondary" onclick={handleSuspendTemporarily}>
-        Suspend
-      </button>
-    </form>
-  </div>
-  <div class="arrow variant-filled-tertiary"></div>
-</div>
+  async function handlePromptModal() {
+    modalStore.trigger(promptModal());
+    modalStore.update((modals) => modals.reverse());
+  }
+</script>
 
 <article
   class="bg-surface-800 flex max-h-[90vh] w-11/12 flex-col items-center gap-4 overflow-auto p-10 text-center text-white shadow-xl md:w-4/5"
@@ -217,7 +246,7 @@
           <div class="border-error-600 space-y-4 border-2 p-4">
             <h2 class="h3 text-error-600">Suspend</h2>
             <div class="space-x-2">
-              <button class="btn variant-filled-error" use:popup={popupSuspendTemporarily}>
+              <button class="btn variant-filled-error" onclick={handlePromptModal}>
                 Temporarily
               </button>
               <button class="btn variant-filled-error" onclick={handleSuspendIndefinitely}>
@@ -235,10 +264,7 @@
             </button>
             {#if isSuspendedTemporarily}
               <div class="space-x-2">
-                <button
-                  class="btn variant-filled-error text-sm"
-                  use:popup={popupSuspendTemporarily}
-                >
+                <button class="btn variant-filled-error text-sm" onclick={handlePromptModal}>
                   Change suspension
                 </button>
                 <button
@@ -249,7 +275,7 @@
                 </button>
               </div>
             {:else}
-              <button class="btn variant-filled-error text-sm" use:popup={popupSuspendTemporarily}>
+              <button class="btn variant-filled-error text-sm" onclick={handlePromptModal}>
                 Suspend for a period
               </button>
             {/if}

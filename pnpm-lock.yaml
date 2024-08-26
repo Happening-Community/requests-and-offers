@@ -62,6 +62,9 @@ importers:
       '@msgpack/msgpack':
         specifier: ^3.0.0-beta2
         version: 3.0.0-beta2
+      '@rgossiaux/svelte-headlessui':
+        specifier: ^2.0.0
+        version: 2.0.0(svelte@5.0.0-next.208)
       '@skeletonlabs/skeleton':
         specifier: 2.7.0
         version: 2.7.0(svelte@5.0.0-next.208)
@@ -1053,6 +1056,14 @@ packages:
 
   /@polka/url@1.0.0-next.25:
     resolution: {integrity: sha512-j7P6Rgr3mmtdkeDGTe0E/aYyWEWVtc5yFXtHCRHs28/jptDEWfaVOc5T7cblqy1XKPPfCxJc/8DwQ5YgLOZOVQ==}
+    dev: true
+
+  /@rgossiaux/svelte-headlessui@2.0.0(svelte@5.0.0-next.208):
+    resolution: {integrity: sha512-ksh245HqMM8yqkzd/OyAK2FCHZYOSA3ldLIHab7C9S60FmifqT24JFVgi8tZpsDEMk3plbfQvfah93n5IEi8sg==}
+    peerDependencies:
+      svelte: ^3.47.0
+    dependencies:
+      svelte: 5.0.0-next.208
     dev: true
 
   /@rollup/rollup-android-arm-eabi@4.19.1:
