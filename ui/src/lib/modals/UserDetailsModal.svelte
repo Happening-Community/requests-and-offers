@@ -5,8 +5,7 @@
     Avatar,
     getModalStore,
     type ModalComponent,
-    type ModalSettings,
-    type PopupSettings
+    type ModalSettings
   } from '@skeletonlabs/skeleton';
   import administratorsStore, { type Status } from '@stores/administrators.svelte';
   import { type User } from '@stores/users.svelte';
@@ -19,18 +18,17 @@
   let userPictureUrl = $state('');
   let user: User = $modalStore[0].meta.user;
   let isTheOnlyAdmin = $derived(administrators.length === 1);
-  let suspendedDays = $state(1);
   let suspensionDate = $state('');
   let isSuspendedTemporarily = $state(false);
 
-  const suspendTemporarilyModalMeta: PromptModalMeta = {
+  const suspendTemporarilyModalMeta: PromptModalMeta = $derived({
+    id: 'suspend-temporarily',
     message: 'What is the reason and duration of suspension?',
     inputs: [
       {
         name: 'reason',
         label: 'Reason',
         type: 'text',
-        value: '',
         placeholder: 'Enter a reason',
         required: true
       },
@@ -39,11 +37,14 @@
         label: 'Number of days',
         type: 'number',
         placeholder: 'Number of days',
-        value: '',
+        value: '1',
+        min: 1,
+        max: 365,
         required: true
       }
     ]
-  };
+  });
+
   const promptModalComponent: ModalComponent = { ref: PromptModal };
   const promptModal = (): ModalSettings => {
     return {
@@ -133,16 +134,6 @@
     modalStore.close();
   }
 
-  const popupSuspendTemporarily: PopupSettings = {
-    event: 'click',
-    target: 'popupSuspendTemporarily',
-    placement: 'top',
-    state(event) {
-      if (!event.state) return;
-      suspendedDays = 1;
-    }
-  };
-
   async function handleSuspendTemporarily(data: FormData) {
     if (!user) return;
 
@@ -199,6 +190,9 @@
           suspended until <br /> {suspensionDate}
         {/if}
       </p>
+      {#if user.status?.status_type.startsWith('suspended')}
+        <p><b>Reason :</b> {user.status?.reason}</p>
+      {/if}
     {/if}
     <div onload={() => URL.revokeObjectURL(userPictureUrl)}>
       <Avatar src={userPictureUrl} width="w-64" background="none" />

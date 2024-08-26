@@ -67,6 +67,9 @@
           {/if}
         </span>
       </h3>
+      {#if myProfile.status?.status_type.startsWith('suspended')}
+        <p class=" text-wrap text-center"><b>Reason :</b> {myProfile.status?.reason}</p>
+      {/if}
       <div onload={() => URL.revokeObjectURL(userPictureUrl)}>
         <Avatar src={userPictureUrl} width="w-64" background="none" />
       </div>

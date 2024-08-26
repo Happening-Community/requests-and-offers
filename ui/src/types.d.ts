@@ -1,4 +1,5 @@
 type PromptModalMeta = {
+  id: string;
   message: string;
   inputs: {
     label: string;
@@ -7,5 +8,8 @@ type PromptModalMeta = {
     placeholder?: string;
     value?: string;
     required?: boolean;
+    min?: number;
+    max?: number;
   }[];
+  confirmText?: string;
 };

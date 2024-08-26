@@ -3,15 +3,22 @@
 
   const modalStore = getModalStore();
   const { message, inputs } = $modalStore[0].meta as PromptModalMeta;
+  let { confirmText } = $modalStore[0].meta as PromptModalMeta;
 
-  console.log($modalStore[0].meta);
-  console.log(message, inputs);
+  let form: HTMLFormElement;
 
   function submitForm(event: SubmitEvent) {
     event.preventDefault();
-    const confirmation = confirm('Are you sure you want to suspend this user for x days ?');
-    if (!confirmation) return;
     const data = new FormData(event.target as HTMLFormElement);
+
+    if (confirmText) {
+      const confirmation = confirm(confirmText);
+      if (!confirmation) {
+        form.reset();
+        return;
+      }
+    }
+
     $modalStore[0].response!({ data });
     modalStore.close();
   }
@@ -22,7 +29,7 @@
 >
   <div class="static mb-8 space-y-4">
     <h2 class="h2 text-center">{message}</h2>
-    <form class="space-y-4" onsubmit={submitForm}>
+    <form class="space-y-4" onsubmit={submitForm} bind:this={form}>
       {#each inputs as input}
         <label>
           {input.label}:
@@ -32,13 +39,15 @@
             class="input"
             name={input.name}
             value={input.value}
-            required={input.required}
+            min={input.min}
+            max={input.max}
           />
         </label>
       {/each}
       <div class="space-x-4">
         <button type="submit" class="btn variant-filled-tertiary w-fit self-center">Submit</button>
         <button
+          type="button"
           class="btn variant-filled-error w-fit self-center"
           onclick={() => modalStore.close()}>Cancel</button
         >
