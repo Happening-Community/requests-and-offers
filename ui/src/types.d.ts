@@ -13,3 +13,10 @@ type PromptModalMeta = {
   }[];
   confirmText?: string;
 };
+
+type ConfirmModalMeta = {
+  id: string;
+  message: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+};

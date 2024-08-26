@@ -11,6 +11,7 @@
   import { type User } from '@stores/users.svelte';
   import { onMount } from 'svelte';
   import PromptModal from '../dialog/PromptModal.svelte';
+  import ConfirmModal from '@lib/dialog/ConfirmModal.svelte';
 
   const { administrators } = $derived(administratorsStore);
   const modalStore = getModalStore();
@@ -45,15 +46,53 @@
     ]
   });
 
+  const suspendIndefinitelyModalMeta: PromptModalMeta = $derived({
+    id: 'suspend-indefinitely',
+    message: 'What is the reason of the suspension?',
+    inputs: [
+      {
+        name: 'reason',
+        label: 'Reason',
+        type: 'text',
+        placeholder: 'Enter a reason',
+        required: true
+      }
+    ]
+  });
+
   const promptModalComponent: ModalComponent = { ref: PromptModal };
-  const promptModal = (): ModalSettings => {
+  const promptModal = (meta: PromptModalMeta): ModalSettings => {
     return {
       type: 'component',
       component: promptModalComponent,
-      meta: suspendTemporarilyModalMeta,
+      meta,
       response: async (response) => {
-        handleSuspendTemporarily(response.data);
+        if (!response) return;
+        if (meta.id === 'suspend-temporarily') handleSuspendTemporarily(response.data);
+        else handleSuspendIndefinitely(response.data);
         modalStore.close();
+      }
+    };
+  };
+
+  const unsuspendConfirmationModalMeta: ConfirmModalMeta = {
+    id: 'confirm-unsuspend',
+    message: 'Are you sure you want to unsuspend this user?',
+    confirmLabel: 'Yes',
+    cancelLabel: 'No'
+  };
+
+  const confirmModalComponent: ModalComponent = { ref: ConfirmModal };
+  const confirmModal = (meta: ConfirmModalMeta): ModalSettings => {
+    return {
+      type: 'component',
+      component: confirmModalComponent,
+      meta,
+      response(r) {
+        if (r) {
+          updateStatus({ status_type: 'accepted' });
+          modalStore.close();
+        }
       }
     };
   };
@@ -88,11 +127,6 @@
         break;
     }
 
-    const confirmMessage = `Are you sure you want to ${statusMessage} ${isSuspendedTemporarily ?? 'back'} this user ?`;
-
-    const confirmation = confirm(confirmMessage);
-    if (!confirmation) return;
-
     const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
       user?.original_action_hash!
     ))!.target;
@@ -111,10 +145,12 @@
     modalStore.close();
   }
 
-  async function handleSuspendIndefinitely() {
+  async function handleSuspendIndefinitely(data: FormData) {
     if (!user) return;
-    const confirmation = confirm('Are you sure you want to suspend this user indefinitely ?');
-    if (!confirmation) return;
+
+    const reason = String(data.get('reason'));
+
+    if (!reason) return;
 
     const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
       user?.original_action_hash!
@@ -127,7 +163,7 @@
       user.original_action_hash!,
       statusOriginalActionHash,
       latestStatusActionHash,
-      'Suspended indefinitely'
+      reason
     );
 
     await administratorsStore.getAllUsers();
@@ -169,8 +205,17 @@
     modalStore.close();
   }
 
-  async function handlePromptModal() {
-    modalStore.trigger(promptModal());
+  async function handleConfirmModal(type: 'unsuspend') {
+    modalStore.trigger(confirmModal(unsuspendConfirmationModalMeta));
+    modalStore.update((modals) => modals.reverse());
+  }
+
+  async function handlePromptModal(type: 'indefinitely' | 'temporarily') {
+    modalStore.trigger(
+      promptModal(
+        type === 'indefinitely' ? suspendIndefinitelyModalMeta : suspendTemporarilyModalMeta
+      )
+    );
     modalStore.update((modals) => modals.reverse());
   }
 </script>
@@ -240,10 +285,16 @@
           <div class="border-error-600 space-y-4 border-2 p-4">
             <h2 class="h3 text-error-600">Suspend</h2>
             <div class="space-x-2">
-              <button class="btn variant-filled-error" onclick={handlePromptModal}>
+              <button
+                class="btn variant-filled-error"
+                onclick={() => handlePromptModal('temporarily')}
+              >
                 Temporarily
               </button>
-              <button class="btn variant-filled-error" onclick={handleSuspendIndefinitely}>
+              <button
+                class="btn variant-filled-error"
+                onclick={() => handlePromptModal('indefinitely')}
+              >
                 Indefinitely
               </button>
             </div>
@@ -252,24 +303,30 @@
           <div class="space-y-4" class:space-x-4={!isSuspendedTemporarily}>
             <button
               class="btn variant-filled-tertiary"
-              onclick={() => updateStatus({ status_type: 'accepted' })}
+              onclick={() => handleConfirmModal('unsuspend')}
             >
               Unsuspend
             </button>
             {#if isSuspendedTemporarily}
               <div class="space-x-2">
-                <button class="btn variant-filled-error text-sm" onclick={handlePromptModal}>
+                <button
+                  class="btn variant-filled-error text-sm"
+                  onclick={() => handlePromptModal('temporarily')}
+                >
                   Change suspension
                 </button>
                 <button
                   class="btn variant-filled-error text-sm"
-                  onclick={handleSuspendIndefinitely}
+                  onclick={() => handlePromptModal('indefinitely')}
                 >
                   Suspend Indefinitely
                 </button>
               </div>
             {:else}
-              <button class="btn variant-filled-error text-sm" onclick={handlePromptModal}>
+              <button
+                class="btn variant-filled-error text-sm"
+                onclick={() => handlePromptModal('indefinitely')}
+              >
                 Suspend for a period
               </button>
             {/if}
