@@ -33,7 +33,7 @@
   <NavBar />
 
   <!-- Grid Columns -->
-  <div class="grid grid-cols-1 md:grid-cols-[auto_1fr]">
+  <div class="grid grid-cols-1 sm:grid-cols-[auto_1fr]">
     <!-- Left Sidebar. -->
     <div class="hidden sm:block">
       <AdminSideBar />

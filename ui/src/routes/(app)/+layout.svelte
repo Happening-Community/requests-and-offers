@@ -1,6 +1,6 @@
 <script lang="ts">
   import { AppShell, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
-  import Navbar from '@lib/NavBar.svelte';
+  import NavBar from '@lib/NavBar.svelte';
   import { onMount } from 'svelte';
   import hc from '@services/HolochainClientService.svelte';
 
@@ -21,9 +21,9 @@
   ];
 </script>
 
-<AppShell>
+<!-- <AppShell>
   <svelte:fragment slot="header">
-    <Navbar />
+    <NavBar />
   </svelte:fragment>
 
   <main
@@ -36,4 +36,21 @@
       {@render children()}
     {/if}
   </main>
-</AppShell>
+</AppShell> -->
+
+<div class="grid grid-rows-[auto_1fr_auto]">
+  <!-- Header -->
+  <NavBar />
+
+  <!-- Main Content -->
+  <main
+    class="container mx-auto flex min-h-screen flex-col items-center justify-center px-5 pb-10 pt-40"
+  >
+    {#if !hc.isConnected}
+      <p>Not connected yet.</p>
+      <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
+    {:else}
+      {@render children()}
+    {/if}
+  </main>
+</div>
