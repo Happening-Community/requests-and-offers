@@ -23,6 +23,7 @@ type UserAdditionalFields = {
   original_action_hash?: ActionHash;
   previous_action_hash?: ActionHash;
   status?: Status;
+  status_history?: { timestamp: number; status: Status }[];
 };
 
 export type User = UserInDHT & UserAdditionalFields;

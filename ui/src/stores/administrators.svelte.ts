@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ActionHash, Link, Record } from '@holochain/client';
 import hc from '@services/HolochainClientService.svelte';
 import { decodeRecords } from '@utils';
 import type { User } from './users.svelte';
 import usersStore from './users.svelte';
+import { decode } from '@msgpack/msgpack';
 
 export type StatusType =
   | 'pending'
@@ -17,11 +19,18 @@ export type Status = {
   timestamp?: number;
 };
 
+export type Revision = {
+  user: User;
+  status: Status;
+  timestamp: number;
+};
+
 class AdministratorsStore {
   allUsers: User[] = $state([]);
   administrators: User[] = $state([]);
   nonAdministrators: User[] = $state([]);
   agentIsAdministrator = $state(false);
+  allStatusHistory: { status: Status; user: User; timestamp: number }[] = $state([]);
 
   private async getAllUsersLinks(): Promise<Link[]> {
     return (await hc.callZome('users', 'get_all_users', null)) as Link[];
@@ -157,6 +166,40 @@ class AdministratorsStore {
       'get_user_status_link',
       user_original_action_hash
     )) as Link | null;
+  }
+
+  async getAllRevisionsForStatus(status_original_action_hash: ActionHash): Promise<Record[]> {
+    return (await hc.callZome(
+      'administration',
+      'get_all_revisions_for_status',
+      status_original_action_hash
+    )) as Record[];
+  }
+
+  async getAllRevisionsForAllUsers(): Promise<Revision[]> {
+    const userLinks = await this.getAllUsersLinks();
+    const revisions: Revision[] = [];
+
+    for (const userLink of userLinks) {
+      const statusLink = await this.getUserStatusLink(userLink.target);
+      if (statusLink) {
+        const recordsForUser = await this.getAllRevisionsForStatus(statusLink.target);
+        const user = await usersStore.getLatestUser(userLink.target);
+
+        for (const record of recordsForUser) {
+          revisions.push({
+            user: user!,
+            status: decode((record.entry as any).Present.entry) as Status,
+            timestamp: record.signed_action.hashed.content.timestamp
+          });
+        }
+      }
+    }
+
+    revisions.sort((a, b) => b.timestamp - a.timestamp);
+
+    this.allStatusHistory = revisions;
+    return revisions;
   }
 
   async updateUserStatus(
