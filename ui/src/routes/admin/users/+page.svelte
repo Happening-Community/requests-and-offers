@@ -33,6 +33,11 @@
 
 <section class="flex flex-col gap-10">
   <h1 class="h1 text-center">Users management</h1>
+  <div class="flex justify-center">
+    <a href="/admin/users/status-history" class="btn variant-ghost-secondary w-fit"
+      >Status history</a
+    >
+  </div>
   {#if isLoading && allUsers.length === 0}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {/if}

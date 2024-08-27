@@ -41,7 +41,7 @@
 
     <!-- Main Content -->
     <main
-      class="bg-surface-800 mx-auto flex h-screen w-full flex-col items-center justify-center px-5 pb-10 pt-40"
+      class="bg-surface-800 mx-auto flex w-full flex-col items-center justify-center px-5 pb-10 pt-40"
     >
       {#if !hc.isConnected}
         <p>Not connected yet.</p>
