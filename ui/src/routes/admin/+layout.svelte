@@ -1,9 +1,9 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import AdminSideBar from '@lib/AdminSideBar.svelte';
-  import Navbar from '@lib/NavBar.svelte';
+  import NavBar from '@lib/NavBar.svelte';
   import hc from '@services/HolochainClientService.svelte';
-  import { AppShell, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
+  import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
   import administratorsStore from '@stores/administrators.svelte';
   import { onMount } from 'svelte';
 
@@ -28,25 +28,27 @@
   });
 </script>
 
-<AppShell>
-  <svelte:fragment slot="header">
-    <Navbar />
-  </svelte:fragment>
+<div class="grid h-screen grid-rows-[auto_1fr_auto]">
+  <!-- Header -->
+  <NavBar />
 
-  <svelte:fragment slot="sidebarLeft">
+  <!-- Grid Columns -->
+  <div class="grid grid-cols-1 md:grid-cols-[auto_1fr]">
+    <!-- Left Sidebar. -->
     <div class="hidden sm:block">
       <AdminSideBar />
     </div>
-  </svelte:fragment>
 
-  <main
-    class="bg-surface-800 mx-auto flex min-h-screen flex-col items-center justify-center px-5 pb-10 pt-40"
-  >
-    {#if !hc.isConnected}
-      <p>Not connected yet.</p>
-      <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
-    {:else}
-      {@render children()}
-    {/if}
-  </main>
-</AppShell>
+    <!-- Main Content -->
+    <main
+      class="bg-surface-800 mx-auto flex h-screen w-full flex-col items-center justify-center px-5 pb-10 pt-40"
+    >
+      {#if !hc.isConnected}
+        <p>Not connected yet.</p>
+        <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
+      {:else}
+        {@render children()}
+      {/if}
+    </main>
+  </div>
+</div>
