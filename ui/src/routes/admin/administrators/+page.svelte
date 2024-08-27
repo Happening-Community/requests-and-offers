@@ -1,29 +1,13 @@
 <script lang="ts">
-  import {
-    Avatar,
-    getModalStore,
-    type ModalComponent,
-    type ModalSettings
-  } from '@skeletonlabs/skeleton';
-  import UserDetailsModal from '@lib/modals/UserDetailsModal.svelte';
+  import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
   import { onMount } from 'svelte';
   import administratorsStore from '@stores/administrators.svelte';
   import AddAdministratorModal from '@lib/modals/AddAdministratorModal.svelte';
-  import type { User } from '@stores/users.svelte';
+  import UsersTable from '@lib/UsersTable.svelte';
 
   const { administrators } = $derived(administratorsStore);
 
   const modalStore = getModalStore();
-  const userDetailsModalComponent: ModalComponent = { ref: UserDetailsModal };
-  const userDetailsModal = (user: User): ModalSettings => {
-    return {
-      type: 'component',
-      component: userDetailsModalComponent,
-      meta: {
-        user
-      }
-    };
-  };
   const addAdministratorModalComponent: ModalComponent = { ref: AddAdministratorModal };
   const addAdministratorModal: ModalSettings = {
     type: 'component',
@@ -52,41 +36,7 @@
     </div>
 
     {#if administrators && administrators.length > 0}
-      <table class="table-hover table drop-shadow-lg">
-        <thead>
-          <tr>
-            <th>Avatar</th>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each administrators as user, i}
-            <tr>
-              <td>
-                <Avatar
-                  src={user.picture
-                    ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
-                    : '/default_avatar.webp'}
-                />
-              </td>
-              <td>{user.name}</td>
-              <td>
-                {user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1)}
-              </td>
-              <td>
-                <button
-                  class="btn variant-filled-secondary"
-                  onclick={() => modalStore.trigger(userDetailsModal(user))}
-                >
-                  View
-                </button>
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
+      <UsersTable users={administrators} />
     {/if}
   </div>
 </section>

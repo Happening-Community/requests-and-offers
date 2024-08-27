@@ -68,8 +68,10 @@
       meta,
       response: async (response) => {
         if (!response) return;
+
         if (meta.id === 'suspend-temporarily') handleSuspendTemporarily(response.data);
         else handleSuspendIndefinitely(response.data);
+
         modalStore.close();
       }
     };
@@ -284,7 +286,7 @@
         {:else if user?.status?.status_type === 'accepted'}
           <div class="border-error-600 space-y-4 border-2 p-4">
             <h2 class="h3 text-error-600">Suspend</h2>
-            <div class="space-x-2">
+            <div class="space-x-2 space-y-4">
               <button
                 class="btn variant-filled-error"
                 onclick={() => handlePromptModal('temporarily')}
