@@ -13,11 +13,17 @@ export type StatusType =
   | 'suspended temporarily'
   | 'suspended indefinitely';
 
-export type Status = {
+export type StatusInDHT = {
   status_type: StatusType;
   reason?: string;
+  suspended_until?: number;
+};
+
+export type StatusAdditionalFields = {
   timestamp?: number;
 };
+
+export type Status = StatusInDHT & StatusAdditionalFields;
 
 export type Revision = {
   user: User;
