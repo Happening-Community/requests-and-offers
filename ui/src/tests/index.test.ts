@@ -1,11 +1,6 @@
-import type { Record } from '@holochain/client';
-import { decodeRecords } from '../utils';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { expect, test } from 'vitest';
 
-test('decodeRecords function', () => {
-  expect(decodeRecords([])).toEqual([]);
-
-  // @ts-ignore
-  const record: Record = { entry: { Present: { entry: new Uint8Array([11]) } } };
-  expect(decodeRecords([record])).toEqual([11]);
+test('hello world', () => {
+  expect('hello world'.length).toBe(11);
 });

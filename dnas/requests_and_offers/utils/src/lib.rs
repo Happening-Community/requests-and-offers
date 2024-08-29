@@ -1,4 +1,5 @@
 use hdk::prelude::*;
+use serde::de::DeserializeOwned;
 use WasmErrorInner::*;
 pub mod dna_properties;
 
@@ -48,4 +49,27 @@ pub fn get_all_revisions_for_entry(
   records.insert(0, original_record);
 
   Ok(records)
+}
+
+pub fn external_local_call<I, T>(fn_name: &str, zome_name: &str, payload: I) -> ExternResult<T>
+where
+  I: Clone + serde::Serialize + std::fmt::Debug,
+  T: std::fmt::Debug + DeserializeOwned,
+{
+  let zome_call_response = call(
+    CallTargetCell::Local,
+    ZomeName(zome_name.to_owned().into()),
+    FunctionName(fn_name.into()),
+    None,
+    payload.clone(),
+  )?;
+
+  if let ZomeCallResponse::Ok(response) = zome_call_response {
+    Ok(response.decode().unwrap())
+  } else {
+    Err(wasm_error!(Guest(format!(
+      "Error while calling the {} function of the {} zome",
+      fn_name, zome_name
+    ))))
+  }
 }
