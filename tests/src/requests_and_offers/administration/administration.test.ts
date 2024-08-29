@@ -32,6 +32,7 @@ test("create a User and make it administrator", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: User;
     let record: Record;
+
     sample = sampleUser({ name: "Alice" });
     record = await createUser(alice.cells[0], sample);
     sample = sampleUser({ name: "Bob" });
@@ -90,10 +91,11 @@ test("create a User and make it administrator", async () => {
   });
 });
 
-test.only("update User status", async () => {
+test("update User status", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: User;
     let record: Record;
+
     sample = sampleUser({ name: "Alice" });
     record = await createUser(alice.cells[0], sample);
     sample = sampleUser({ name: "Bob" });

@@ -207,7 +207,7 @@
     modalStore.close();
   }
 
-  async function handleConfirmModal(type: 'unsuspend') {
+  async function handleConfirmModal() {
     modalStore.trigger(confirmModal(unsuspendConfirmationModalMeta));
     modalStore.update((modals) => modals.reverse());
   }
@@ -223,7 +223,7 @@
 </script>
 
 <article
-  class="bg-surface-800 flex max-h-[90vh] w-11/12 flex-col items-center gap-4 overflow-auto p-10 text-center text-white shadow-xl md:w-4/5"
+  class="bg-surface-400 dark:bg-surface-800 flex max-h-[90vh] w-11/12 flex-col items-center gap-4 overflow-auto p-10 text-center text-white shadow-xl md:w-4/5"
 >
   {#if user}
     <h2 class="h2 font-bold">{user.name}</h2>
@@ -303,10 +303,7 @@
           </div>
         {:else if user?.status?.status_type.startsWith('suspended')}
           <div class="space-y-4" class:space-x-4={!isSuspendedTemporarily}>
-            <button
-              class="btn variant-filled-tertiary"
-              onclick={() => handleConfirmModal('unsuspend')}
-            >
+            <button class="btn variant-filled-tertiary" onclick={() => handleConfirmModal()}>
               Unsuspend
             </button>
             {#if isSuspendedTemporarily}

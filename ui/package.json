@@ -6,7 +6,7 @@
     "build": "npm run check && vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "package": "npm run build && cd dist && bestzip ../dist.zip *",
-    "test": "vitest",
+    "test": "vitest run",
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write ."
   },

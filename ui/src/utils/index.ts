@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Record } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 

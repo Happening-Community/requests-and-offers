@@ -19,12 +19,11 @@ import {
 } from "../utils.js";
 import { getLatestStatusForUser } from "../administration/common";
 
-test.only("create and read User", async () => {
+test("create and read User", async () => {
   await runScenarioWithTwoAgents(
     async (_scenario: Scenario, alice: Player, bob: Player) => {
       let sample: User;
       let record: Record;
-      let records: Record[];
 
       // Alice creates a User
       sample = sampleUser({ name: "Alice" });
