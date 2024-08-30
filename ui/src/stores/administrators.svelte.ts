@@ -13,14 +13,14 @@ export type StatusType =
   | 'suspended temporarily'
   | 'suspended indefinitely';
 
-export type StatusInDHT = {
+type StatusInDHT = {
   status_type: StatusType;
   reason?: string;
   suspended_until?: number;
 };
 
-export type StatusAdditionalFields = {
-  timestamp?: number;
+type StatusAdditionalFields = {
+  duration?: number;
 };
 
 export type Status = StatusInDHT & StatusAdditionalFields;
@@ -193,9 +193,20 @@ class AdministratorsStore {
         const user = await usersStore.getLatestUser(userLink.target);
 
         for (const record of recordsForUser) {
+          const timestamp = new Date(record.signed_action.hashed.content.timestamp).getTime();
+          const status = decode((record.entry as any).Present.entry) as Status;
+          let duration: number | undefined;
+
+          if (status.suspended_until) {
+            duration = timestamp - new Date(status.suspended_until!).getTime() / 1000;
+          }
+
           revisions.push({
             user: user!,
-            status: decode((record.entry as any).Present.entry) as Status,
+            status: {
+              ...status,
+              duration
+            },
             timestamp: record.signed_action.hashed.content.timestamp
           });
         }
