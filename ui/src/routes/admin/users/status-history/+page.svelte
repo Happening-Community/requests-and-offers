@@ -36,8 +36,8 @@
           {#if statusHistoryItem.status.reason}
             <dd>reason: {statusHistoryItem.status.reason}</dd>
           {/if}
-          {#if statusHistoryItem.status.timestamp}
-            <dd>duration: {statusHistoryItem.status.timestamp}</dd>
+          {#if statusHistoryItem.status.suspended_until}
+            <dd>duration: {statusHistoryItem.status.suspended_until}</dd>
           {/if}
         </span>
       </div>

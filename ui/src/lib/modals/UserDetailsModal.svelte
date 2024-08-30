@@ -104,9 +104,9 @@
       ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
       : '/default_avatar.webp';
 
-    if (user && user.status!.timestamp) {
+    if (user && user.status!.suspended_until) {
       isSuspendedTemporarily = true;
-      suspensionDate = new Date(user.status!.timestamp).toLocaleString();
+      suspensionDate = new Date(user.status!.suspended_until).toLocaleString();
     }
   });
 
@@ -193,7 +193,7 @@
       suspendedDays
     );
     await administratorsStore.getAllUsers();
-    suspensionDate = new Date(user?.status?.timestamp!).toLocaleString();
+    suspensionDate = new Date(user?.status?.suspended_until!).toLocaleString();
     suspendedDays = 0;
     modalStore.close();
   }
@@ -324,7 +324,7 @@
             {:else}
               <button
                 class="btn variant-filled-error text-sm"
-                onclick={() => handlePromptModal('indefinitely')}
+                onclick={() => handlePromptModal('temporarily')}
               >
                 Suspend for a period
               </button>

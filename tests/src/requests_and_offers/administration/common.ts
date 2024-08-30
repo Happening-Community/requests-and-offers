@@ -11,7 +11,7 @@ export type StatusType =
 export type Status = {
   status_type: StatusType;
   reason?: string;
-  timestamp?: number;
+  suspended_until?: number;
 };
 
 export async function getAllUsers(cell: CallableCell): Promise<Link[]> {

@@ -228,7 +228,7 @@ test("update User status", async () => {
     bobStatus = await getLatestStatusForUser(bob.cells[0], bobUserLink.target);
     console.log("bobStatus: ", bobStatus);
 
-    const suspensionTime = new Date(bobStatus.timestamp);
+    const suspensionTime = new Date(bobStatus.suspended_until);
     console.log("suspensionTime: ", suspensionTime.toLocaleString());
 
     const now = new Date();

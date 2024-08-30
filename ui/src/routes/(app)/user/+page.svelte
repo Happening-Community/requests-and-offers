@@ -23,8 +23,8 @@
     await usersStore.getMyProfile();
 
     if (myProfile) {
-      if (myProfile.status!.timestamp) {
-        const date = new Date(myProfile.status!.timestamp);
+      if (myProfile.status!.suspended_until) {
+        const date = new Date(myProfile.status!.suspended_until);
         const dateString = date.toString();
         const now = new Date();
 

@@ -278,9 +278,9 @@ class AdministratorsStore {
 
   getRemainingSuspensionTime(status: Status): number | null {
     if (!status) return null;
-    if (!status.timestamp) return null;
+    if (!status.suspended_until) return null;
 
-    const suspensionDate = new Date(status.timestamp);
+    const suspensionDate = new Date(status.suspended_until);
     const now = new Date();
 
     return suspensionDate.getTime() - now.getTime();

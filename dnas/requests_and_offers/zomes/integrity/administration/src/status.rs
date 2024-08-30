@@ -32,7 +32,7 @@ impl FromStr for StatusType {
 pub struct Status {
   pub status_type: String,
   pub reason: Option<String>,
-  pub timestamp: Option<String>,
+  pub suspended_until: Option<String>,
 }
 
 impl Status {
@@ -40,7 +40,7 @@ impl Status {
     Self {
       status_type: "pending".to_string(),
       reason: None,
-      timestamp: None,
+      suspended_until: None,
     }
   }
 
@@ -48,7 +48,7 @@ impl Status {
     Self {
       status_type: "accepted".to_string(),
       reason: None,
-      timestamp: None,
+      suspended_until: None,
     }
   }
 
@@ -56,7 +56,7 @@ impl Status {
     Self {
       status_type: "rejected".to_string(),
       reason: None,
-      timestamp: None,
+      suspended_until: None,
     }
   }
 
@@ -68,14 +68,14 @@ impl Status {
       return Self {
         status_type: "suspended temporarily".to_string(),
         reason: Some(reason.to_string()),
-        timestamp: Some(Timestamp::from_micros(now + duration).to_string()),
+        suspended_until: Some(Timestamp::from_micros(now + duration).to_string()),
       };
     }
 
     Self {
       status_type: "suspended indefinitely".to_string(),
       reason: Some(reason.to_string()),
-      timestamp: None,
+      suspended_until: None,
     }
   }
 
@@ -86,24 +86,24 @@ impl Status {
 
       self.status_type = "suspended temporarily".to_string();
       self.reason = Some(reason.to_string());
-      self.timestamp = Some(Timestamp::from_micros(now + duration).to_string());
+      self.suspended_until = Some(Timestamp::from_micros(now + duration).to_string());
     } else {
       self.status_type = "suspended indefinitely".to_string();
       self.reason = Some(reason.to_string());
-      self.timestamp = None;
+      self.suspended_until = None;
     }
   }
 
   pub fn unsuspend(&mut self) -> Self {
     self.status_type = "accepted".to_string();
     self.reason = None;
-    self.timestamp = None;
+    self.suspended_until = None;
 
     self.to_owned()
   }
 
   pub fn get_suspension_time_remaining(&self, now: &Timestamp) -> Option<Duration> {
-    if let Some(timestamp) = &self.timestamp {
+    if let Some(timestamp) = &self.suspended_until {
       return Some(Duration::microseconds(
         Timestamp::from_str(timestamp)
           .unwrap()
@@ -140,13 +140,13 @@ pub fn validate_status(status: Status) -> ExternResult<ValidateCallbackResult> {
     )));
   }
 
-  if status.status_type == "suspended temporarily" && status.timestamp.is_none() {
+  if status.status_type == "suspended temporarily" && status.suspended_until.is_none() {
     return Ok(ValidateCallbackResult::Invalid(String::from(
       "Temporarily suspended status must have a timestamp",
     )));
   }
 
-  if status.status_type == "suspended indefinitely" && status.timestamp.is_some() {
+  if status.status_type == "suspended indefinitely" && status.suspended_until.is_some() {
     return Ok(ValidateCallbackResult::Invalid(String::from(
       "Indefinitely suspended status must not have a timestamp",
     )));

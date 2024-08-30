@@ -22,22 +22,22 @@ mod status_tests {
     let mut status = Status::pending();
     assert_eq!(status.status_type, "pending");
     assert_eq!(status.reason, None);
-    assert_eq!(status.timestamp, None);
+    assert_eq!(status.suspended_until, None);
 
     status = Status::accept();
     assert_eq!(status.status_type, "accepted");
     assert_eq!(status.reason, None);
-    assert_eq!(status.timestamp, None);
+    assert_eq!(status.suspended_until, None);
 
     status = Status::suspend("test", None);
     assert_eq!(status.status_type, "suspended indefinitely");
     assert_eq!(status.reason, Some("test".to_string()));
-    assert_eq!(status.timestamp, None);
+    assert_eq!(status.suspended_until, None);
 
     status.unsuspend();
     assert_eq!(status.status_type, "accepted");
     assert_eq!(status.reason, None);
-    assert_eq!(status.timestamp, None);
+    assert_eq!(status.suspended_until, None);
 
     let now = Timestamp::now();
     status = Status::suspend("test", Some((Duration::days(7), &now)));
@@ -51,7 +51,7 @@ mod status_tests {
     status.unsuspend();
     assert_eq!(status.status_type, "accepted");
     assert_eq!(status.reason, None);
-    assert_eq!(status.timestamp, None);
+    assert_eq!(status.suspended_until, None);
   }
 
   #[test]
