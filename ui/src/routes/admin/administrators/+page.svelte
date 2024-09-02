@@ -3,7 +3,7 @@
   import { onMount } from 'svelte';
   import administratorsStore from '@stores/administrators.svelte';
   import AddAdministratorModal from '@lib/modals/AddAdministratorModal.svelte';
-  import UsersTable from '@lib/UsersTable.svelte';
+  import UsersTable from '@lib/tables/UsersTable.svelte';
 
   const { administrators } = $derived(administratorsStore);
 

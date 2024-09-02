@@ -1,5 +1,5 @@
 <script lang="ts">
-  import UsersTable from '@lib/UsersTable.svelte';
+  import UsersTable from '@lib/tables/UsersTable.svelte';
   import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
   import administratorsStore from '@stores/administrators.svelte';
   import { onMount } from 'svelte';

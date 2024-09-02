@@ -104,8 +104,6 @@
       await usersStore.createUser(user);
       await usersStore.getMyProfile();
 
-      console.log('created user :', user);
-
       goto('/user');
     } catch (error) {
       console.error('error :', error);

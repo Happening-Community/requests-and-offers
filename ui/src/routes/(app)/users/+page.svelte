@@ -1,6 +1,6 @@
 <script lang="ts">
   import NavButton from '@lib/NavButton.svelte';
-  import UsersTable from '@lib/UsersTable.svelte';
+  import UsersTable from '@lib/tables/UsersTable.svelte';
   import { type ConicStop, ConicGradient } from '@skeletonlabs/skeleton';
   import usersStore from '@stores/users.svelte';
   import { onMount } from 'svelte';
