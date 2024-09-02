@@ -39,15 +39,15 @@
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
   <table
-    class="table-hover w-full text-center text-sm drop-shadow-lg sm:table md:text-left md:text-inherit"
+    class="!bg-surface-700 table-hover w-full text-center text-sm drop-shadow-lg sm:table md:text-left md:text-inherit"
   >
-    <thead>
+    <thead class="!bg-surface-800 dark:!bg-surface-700">
       <tr>
-        <th>Timestamp</th>
-        <th>User</th>
-        <th>Status</th>
-        <th>Reason</th>
-        <th>Duration</th>
+        <th class="px-2">Timestamp</th>
+        <th class="px-2">User</th>
+        <th class="px-2">Status</th>
+        <th class="px-2">Reason</th>
+        <th class="px-2">Duration</th>
       </tr>
     </thead>
 

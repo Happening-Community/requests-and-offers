@@ -13,7 +13,6 @@
   import { onMount } from 'svelte';
   import PromptModal from '../dialogs/PromptModal.svelte';
   import ConfirmModal from '@lib/dialogs/ConfirmModal.svelte';
-  import { decodeRecords } from '@utils';
 
   const { administrators } = $derived(administratorsStore);
   const modalStore = getModalStore();

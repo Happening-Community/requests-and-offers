@@ -1,9 +1,17 @@
 <script lang="ts">
-  import { Avatar } from '@skeletonlabs/skeleton';
+  import {
+    Avatar,
+    getModalStore,
+    type ModalComponent,
+    type ModalSettings
+  } from '@skeletonlabs/skeleton';
   import NavButton from '@lib/NavButton.svelte';
   import { onMount } from 'svelte';
   import usersStore from '@stores/users.svelte';
+  import administratorsStore, { type Revision } from '@stores/administrators.svelte';
+  import StatusHistoryModal from '@lib/modals/StatusHistoryModal.svelte';
 
+  const modalStore = getModalStore();
   const { myProfile } = $derived(usersStore);
 
   let userPictureUrl = $derived(
@@ -30,6 +38,30 @@
       }
     }
   });
+
+  const statusHistoryModalComponent: ModalComponent = { ref: StatusHistoryModal };
+  const statusHistoryModal = (statusHistory: Revision[]): ModalSettings => {
+    return {
+      type: 'component',
+      component: statusHistoryModalComponent,
+      meta: {
+        statusHistory
+      }
+    };
+  };
+
+  async function handleStatusHistoryModal() {
+    const userStatus = await administratorsStore.getUserStatusLink(
+      myProfile!.original_action_hash!
+    );
+    const statusHistory = await administratorsStore.getAllRevisionsForStatus(
+      userStatus!.target,
+      myProfile!
+    );
+
+    modalStore.trigger(statusHistoryModal(statusHistory));
+    modalStore.update((modals) => modals.reverse());
+  }
 </script>
 
 <section class="flex flex-col items-center">
@@ -59,13 +91,24 @@
           {#if !suspensionDate}
             {myProfile.status?.status_type}
           {:else}
-            {isExpired ? 'In review' : `suspended until ${suspensionDate}.`}
+            {isExpired ? 'In review' : 'suspended temporarily'}
           {/if}
         </span>
       </h3>
       {#if myProfile.status?.status_type.startsWith('suspended')}
         <p class=" text-wrap text-center"><b>Reason :</b> {myProfile.status?.reason}</p>
+        {#if suspensionDate}
+          <p class=" text-wrap text-center">
+            <b>Suspended until :</b>
+            {suspensionDate}
+          </p>
+        {/if}
       {/if}
+
+      <button class="btn variant-filled-secondary" onclick={handleStatusHistoryModal}>
+        Status History
+      </button>
+
       <div onload={() => URL.revokeObjectURL(userPictureUrl)}>
         <Avatar src={userPictureUrl} width="w-64" background="none" />
       </div>
