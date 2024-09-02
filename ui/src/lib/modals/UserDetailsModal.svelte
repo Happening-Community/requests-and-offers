@@ -10,8 +10,8 @@
   import administratorsStore, { type Status } from '@stores/administrators.svelte';
   import { type User } from '@stores/users.svelte';
   import { onMount } from 'svelte';
-  import PromptModal from '../dialog/PromptModal.svelte';
-  import ConfirmModal from '@lib/dialog/ConfirmModal.svelte';
+  import PromptModal from '../dialogs/PromptModal.svelte';
+  import ConfirmModal from '@lib/dialogs/ConfirmModal.svelte';
 
   const { administrators } = $derived(administratorsStore);
   const modalStore = getModalStore();
@@ -223,7 +223,7 @@
 </script>
 
 <article
-  class="bg-surface-400 dark:bg-surface-800 flex max-h-[90vh] w-11/12 flex-col items-center gap-4 overflow-auto p-10 text-center text-white shadow-xl md:w-4/5"
+  class="bg-surface-500 dark:bg-surface-800 flex max-h-[90vh] w-11/12 flex-col items-center gap-4 overflow-auto p-10 text-center text-white shadow-xl md:w-4/5"
 >
   {#if user}
     <h2 class="h2 font-bold">{user.name}</h2>

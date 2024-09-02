@@ -6,7 +6,7 @@
     type ModalSettings
   } from '@skeletonlabs/skeleton';
   import type { User } from '@stores/users.svelte';
-  import UserDetailsModal from './modals/UserDetailsModal.svelte';
+  import UserDetailsModal from '../modals/UserDetailsModal.svelte';
 
   type Props = {
     users: User[];

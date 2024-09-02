@@ -31,12 +31,14 @@ export type Revision = {
   timestamp: number;
 };
 
+export type StatusHistoryItem = { status: Status; user: User; timestamp: number };
+
 class AdministratorsStore {
   allUsers: User[] = $state([]);
   administrators: User[] = $state([]);
   nonAdministrators: User[] = $state([]);
   agentIsAdministrator = $state(false);
-  allStatusHistory: { status: Status; user: User; timestamp: number }[] = $state([]);
+  allStatusHistory: StatusHistoryItem[] = $state([]);
 
   private async getAllUsersLinks(): Promise<Link[]> {
     return (await hc.callZome('users', 'get_all_users', null)) as Link[];
@@ -74,8 +76,6 @@ class AdministratorsStore {
       });
     }
     this.allUsers = recordsContents;
-
-    console.log('all users', recordsContents);
 
     return recordsContents;
   }
@@ -193,12 +193,13 @@ class AdministratorsStore {
         const user = await usersStore.getLatestUser(userLink.target);
 
         for (const record of recordsForUser) {
-          const timestamp = new Date(record.signed_action.hashed.content.timestamp).getTime();
+          const timestamp = record.signed_action.hashed.content.timestamp / 1000;
           const status = decode((record.entry as any).Present.entry) as Status;
+          const suspended_until = new Date(status.suspended_until!).getTime();
           let duration: number | undefined;
 
           if (status.suspended_until) {
-            duration = timestamp - new Date(status.suspended_until!).getTime() / 1000;
+            duration = suspended_until - timestamp;
           }
 
           revisions.push({
