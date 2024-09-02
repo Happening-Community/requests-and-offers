@@ -31,14 +31,12 @@ export type Revision = {
   timestamp: number;
 };
 
-export type StatusHistoryItem = { status: Status; user: User; timestamp: number };
-
 class AdministratorsStore {
   allUsers: User[] = $state([]);
   administrators: User[] = $state([]);
   nonAdministrators: User[] = $state([]);
   agentIsAdministrator = $state(false);
-  allStatusHistory: StatusHistoryItem[] = $state([]);
+  allStatusHistory: Revision[] = $state([]);
 
   private async getAllUsersLinks(): Promise<Link[]> {
     return (await hc.callZome('users', 'get_all_users', null)) as Link[];
@@ -174,12 +172,42 @@ class AdministratorsStore {
     )) as Link | null;
   }
 
-  async getAllRevisionsForStatus(status_original_action_hash: ActionHash): Promise<Record[]> {
-    return (await hc.callZome(
+  async getAllRevisionsForStatus(
+    status_original_action_hash: ActionHash,
+    user: User
+  ): Promise<Revision[]> {
+    const revisions: Revision[] = [];
+    // const user = await usersStore.getLatestUser(status_original_action_hash);
+
+    const recordsForUser = (await hc.callZome(
       'administration',
       'get_all_revisions_for_status',
       status_original_action_hash
     )) as Record[];
+
+    for (const record of recordsForUser) {
+      const timestamp = record.signed_action.hashed.content.timestamp / 1000;
+      const status = decode((record.entry as any).Present.entry) as Status;
+      const suspended_until = new Date(status.suspended_until!).getTime();
+      let duration: number | undefined;
+
+      if (status.suspended_until) {
+        duration = suspended_until - timestamp;
+      }
+
+      revisions.push({
+        user,
+        status: {
+          ...status,
+          duration
+        },
+        timestamp: record.signed_action.hashed.content.timestamp
+      });
+    }
+
+    revisions.sort((a, b) => b.timestamp - a.timestamp);
+
+    return revisions;
   }
 
   async getAllRevisionsForAllUsers(): Promise<Revision[]> {
@@ -187,29 +215,13 @@ class AdministratorsStore {
     const revisions: Revision[] = [];
 
     for (const userLink of userLinks) {
+      const user = await usersStore.getLatestUser(userLink.target);
       const statusLink = await this.getUserStatusLink(userLink.target);
-      if (statusLink) {
-        const recordsForUser = await this.getAllRevisionsForStatus(statusLink.target);
-        const user = await usersStore.getLatestUser(userLink.target);
+      if (user && statusLink) {
+        const revisionsForUser = await this.getAllRevisionsForStatus(statusLink.target, user);
 
-        for (const record of recordsForUser) {
-          const timestamp = record.signed_action.hashed.content.timestamp / 1000;
-          const status = decode((record.entry as any).Present.entry) as Status;
-          const suspended_until = new Date(status.suspended_until!).getTime();
-          let duration: number | undefined;
-
-          if (status.suspended_until) {
-            duration = suspended_until - timestamp;
-          }
-
-          revisions.push({
-            user: user!,
-            status: {
-              ...status,
-              duration
-            },
-            timestamp: record.signed_action.hashed.content.timestamp
-          });
+        for (const revision of revisionsForUser) {
+          revisions.push(revision);
         }
       }
     }
