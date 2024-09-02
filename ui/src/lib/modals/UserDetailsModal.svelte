@@ -1,17 +1,19 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import type { ActionHash } from '@holochain/client';
+  import StatusHistoryModal from './StatusHistoryModal.svelte';
   import {
     Avatar,
     getModalStore,
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import administratorsStore, { type Status } from '@stores/administrators.svelte';
+  import administratorsStore, { type Revision, type Status } from '@stores/administrators.svelte';
   import { type User } from '@stores/users.svelte';
   import { onMount } from 'svelte';
   import PromptModal from '../dialogs/PromptModal.svelte';
   import ConfirmModal from '@lib/dialogs/ConfirmModal.svelte';
+  import { decodeRecords } from '@utils';
 
   const { administrators } = $derived(administratorsStore);
   const modalStore = getModalStore();
@@ -95,6 +97,17 @@
           updateStatus({ status_type: 'accepted' });
           modalStore.close();
         }
+      }
+    };
+  };
+
+  const statusHistoryModalComponent: ModalComponent = { ref: StatusHistoryModal };
+  const statusHistoryModal = (statusHistory: Revision[]): ModalSettings => {
+    return {
+      type: 'component',
+      component: statusHistoryModalComponent,
+      meta: {
+        statusHistory
       }
     };
   };
@@ -220,6 +233,17 @@
     );
     modalStore.update((modals) => modals.reverse());
   }
+
+  async function handleStatusHistoryModal() {
+    const userStatus = await administratorsStore.getUserStatusLink(user!.original_action_hash!);
+    const statusHistory = await administratorsStore.getAllRevisionsForStatus(
+      userStatus!.target,
+      user
+    );
+
+    modalStore.trigger(statusHistoryModal(statusHistory));
+    modalStore.update((modals) => modals.reverse());
+  }
 </script>
 
 <article
@@ -261,6 +285,9 @@
     {/if}
     <div class="mt-5 flex flex-col items-center gap-4">
       {#if $page.url.pathname === '/admin/users'}
+        <button class="btn variant-filled-tertiary" onclick={handleStatusHistoryModal}>
+          View Status History
+        </button>
         {#if user?.status?.status_type === 'pending'}
           <div class="space-x-4">
             <button
