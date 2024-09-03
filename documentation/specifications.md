@@ -30,44 +30,9 @@ This application is specifically tailored for the participants in the Holochain 
 
 The `User` entry represents the user profile and its associated agents within the hAppenings.community. An agent can be a single user or a device associated with a user, allowing for the sharing of profiles across multiple devices. This entry includes various fields to capture essential information about the user, facilitating personalized experiences and targeted interactions within the community.
 
-#### 4.1.1.1 Fields
 
-- **name**: The full name of the user.
-  - **Type**: `String`
-  - **Validation**: Must not be empty.
-- **nickname**: A shorter version of the user's name, often used for display purposes.
-  - **Type**: `String`
-  - **Validation**: Must not be empty.
-- **bio**: A brief biography about the user.
-  - **Type**: `String`
-  - **Validation**: Optional, but recommended for a richer user experience.
-- **picture**: An optional serialized image representing the user's picture.
-  - **Type**: `Option<SerializedBytes>`
-  - **Validation**: Optional, but if provided, must be a valid image.
-- **type**: The type of user, either 'advocate' or 'creator'.
-  - **Type**: `String`
-  - **Validation**: Must be either 'advocate' or 'creator'.
-- **email**: The user's email address.
-  - **Type**: `String`
-  - **Validation**: Must be a valid email address format.
-- **urls**: A list of URLs associated with the user.
-  - **Type**: `Vec<String>`
-  - **Validation**: Optional, but recommended for community engagement and networking.
-  - **Default**: Empty
-- **phone**: An optional phone number for the user.
-  - **Type**: `Option<String>`
-  - **Validation**: Optional, but if provided, must be a valid phone number format.
-- **time_zone**: The time zone in which the user resides.
-  - **Type**: `String`
-  - **Validation**: Must be a valid time zone identifier.
-- **location**: The location where the user is based.
-  - **Type**: `String`
-  - **Validation**: Optional, but recommended for community engagement and networking.
-- **status**: The status of the user, either 'pending', 'accepted', or 'rejected'.
-  - **Type**: `String`
-  - **Validation**: Must be either 'pending', 'accepted', or 'rejected'.
 
-#### 4.1.1.2 Links
+#### 4.1.1.1 Links
 
   - **UserUpdates**: A link from the user create header to the user update headers.
   - **UserAgents**: A link from the user to an agent. It is an index of all the agents that have the user.
@@ -90,29 +55,7 @@ The `Project` entry represents a project and its associated agents, including te
 
 In hREA, projects are organizations `classifiedAs` `Project`.
 
-##### 4.2.1.1 Fields
-
-- **name**: The name of the project.
-  - **Type**: `String`
-  - **Validation**: Must not be empty.
-- **description**: A brief description of the project.
-  - **Type**: `Option<String>`
-  - **Validation**: Optional, but recommended for community engagement and networking.
-  - **Default**: `None`
-- **picture**: An optional serialized image representing the project's picture.
-  - **Type**: `Option<SerializedBytes>`
-  - **Validation**: Optional, but if provided, must be a valid image.
-  - **Default**: `None`
-- **urls**: A list of URLs associated with the project.
-  - **Type**: `Vec<String>`
-  - **Validation**: Optional, but recommended for community engagement and networking.
-  - **Default**: Empty
-- **status**: The status of the project, either 'pending', 'accepted', or 'rejected'.
-  - **Type**: `String`
-  - **Validation**: Must be either 'pending', 'accepted', or 'rejected'.
-  - **Default**: `pending`
-
-##### 4.2.1.2 Links
+##### 4.2.1.1 Links
 
 - **AllProjects**: A link to the `projects` anchor.
 - **ProjectAdministrators**: A link from the project's to a user. It is an index of all the administrators.
@@ -127,29 +70,7 @@ The `Organization` entry represents an organization and its associated users and
 
 In hREA, are agents `classifiedAs` `Organization`.
 
-##### 4.2.2.1 Fields
-
-- **name**: The name of the organization.
-  - **Type**: `String`
-  - **Validation**: Must not be empty.
-- **description**: A brief description of the organization.
-  - **Type**: `Option<String>`
-  - **Validation**: Optional, but recommended for community engagement and networking.
-  - **Default**: `None`
-- **picture**: An optional serialized image representing the organization's picture.
-  - **Type**: `Option<SerializedBytes>`
-  - **Validation**: Optional, but if provided, must be a valid image.
-  - **Default**: `None`
-- **urls**: A list of URLs associated with the organization.
-  - **Type**: `Vec<String>`
-  - **Validation**: Optional, but recommended for community engagement and networking.
-  - **Default**: Empty
-- **status**: The status of the organization, either 'pending', 'accepted', or 'rejected'.
-  - **Type**: `String`
-  - **Validation**: Must be either 'pending', 'accepted', or 'rejected'.
-  - **Default**: `pending`
-
-##### 4.2.2.2 Links
+##### 4.2.2.1 Links
 
 - **AllOrganizations**: A link to the `organizations` anchor.
 - **OrganizationAdministrators**: A link from the organization's to a user. It is an index of all the administrators of the organization.
