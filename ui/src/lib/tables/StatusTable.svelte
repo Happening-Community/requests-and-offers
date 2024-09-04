@@ -10,7 +10,7 @@
 
   let allStatusColors: string[] = $state([]);
 
-  onMount(async () => {
+  $effect(() => {
     console.log('statusHistory', statusHistory);
 
     allStatusColors = statusHistory.map((status) => {
@@ -26,6 +26,10 @@
           return 'warning-500';
       }
     });
+
+    return () => {
+      allStatusColors = [];
+    };
   });
 
   function formatDurationInDays(duration: number): string {
