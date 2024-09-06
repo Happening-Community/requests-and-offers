@@ -2,7 +2,17 @@ use hdk::prelude::*;
 use users_integrity::LinkTypes;
 use WasmErrorInner::*;
 
-use crate::external_calls::check_if_agent_is_administrator;
+use crate::{external_calls::check_if_entity_is_administrator, user::get_agent_user_hash};
+
+#[hdk_extern]
+pub fn check_if_agent_is_administrator(agent_pubkey: AgentPubKey) -> ExternResult<bool> {
+  let agent_entity_action_hash = get_agent_user_hash(agent_pubkey)?;
+  if let Some(agent_entity_action_hash) = agent_entity_action_hash {
+    return check_if_entity_is_administrator(agent_entity_action_hash);
+  }
+
+  Ok(false)
+}
 
 #[hdk_extern]
 pub fn get_all_users(_: ()) -> ExternResult<Vec<Link>> {

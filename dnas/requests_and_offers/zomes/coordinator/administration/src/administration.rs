@@ -1,18 +1,17 @@
-use crate::external_calls::get_agent_user_hash;
 use administration_integrity::*;
 use hdk::prelude::*;
 use WasmErrorInner::*;
 
 #[hdk_extern]
-pub fn register_administrator(user_action_hash: ActionHash) -> ExternResult<bool> {
-  if check_if_user_is_administrator(user_action_hash.clone())? {
+pub fn register_administrator(entity_action_hash: ActionHash) -> ExternResult<bool> {
+  if check_if_entity_is_administrator(entity_action_hash.clone())? {
     return Err(wasm_error!(Guest("Allready an Administrator".to_string())));
   }
 
   let path = Path::from("administrators");
   create_link(
     path.path_entry_hash()?,
-    user_action_hash.clone(),
+    entity_action_hash.clone(),
     LinkTypes::AllAdministrators,
     (),
   )?;
@@ -20,14 +19,14 @@ pub fn register_administrator(user_action_hash: ActionHash) -> ExternResult<bool
 }
 
 #[hdk_extern]
-pub fn add_administrator(user_action_hash: ActionHash) -> ExternResult<bool> {
-  if !check_if_user_is_administrator(user_action_hash.clone())? {
+pub fn add_administrator(entity_action_hash: ActionHash) -> ExternResult<bool> {
+  if !check_if_entity_is_administrator(entity_action_hash.clone())? {
     return Err(wasm_error!(Guest(
       "Only administrators can add administrators".to_string()
     )));
   }
 
-  register_administrator(user_action_hash.clone())?;
+  register_administrator(entity_action_hash.clone())?;
   Ok(true)
 }
 
@@ -39,11 +38,11 @@ pub fn get_all_administrators_links(_: ()) -> ExternResult<Vec<Link>> {
 }
 
 #[hdk_extern]
-pub fn check_if_user_is_administrator(user_action_hash: ActionHash) -> ExternResult<bool> {
+pub fn check_if_entity_is_administrator(entity_action_hash: ActionHash) -> ExternResult<bool> {
   let links = get_all_administrators_links(())?;
   if links
     .iter()
-    .any(|link| link.target == user_action_hash.clone().into())
+    .any(|link| link.target == entity_action_hash.clone().into())
   {
     return Ok(true);
   }
@@ -52,16 +51,16 @@ pub fn check_if_user_is_administrator(user_action_hash: ActionHash) -> ExternRes
 
 #[hdk_extern]
 pub fn check_if_agent_is_administrator(agent_pubkey: AgentPubKey) -> ExternResult<bool> {
-  let agent_user_action_hash = get_agent_user_hash(agent_pubkey)?;
-  if let Some(agent_user_action_hash) = agent_user_action_hash {
-    return check_if_user_is_administrator(agent_user_action_hash);
+  let agent_entity_action_hash = get_agent_user_hash(agent_pubkey)?;
+  if let Some(agent_entity_action_hash) = agent_entity_action_hash {
+    return check_if_entity_is_administrator(agent_entity_action_hash);
   }
 
   Ok(false)
 }
 
 #[hdk_extern]
-pub fn remove_administrator(user_action_hash: ActionHash) -> ExternResult<bool> {
+pub fn remove_administrator(entity_action_hash: ActionHash) -> ExternResult<bool> {
   if !check_if_agent_is_administrator(agent_info()?.agent_initial_pubkey)? {
     return Err(wasm_error!(Guest(
       "Only administrators can remove administrators".to_string()
@@ -78,7 +77,7 @@ pub fn remove_administrator(user_action_hash: ActionHash) -> ExternResult<bool> 
   let links = get_all_administrators_links(())?;
   let link = links
     .iter()
-    .find(|link| link.target == user_action_hash.clone().into())
+    .find(|link| link.target == entity_action_hash.clone().into())
     .ok_or(wasm_error!(Guest(
       "Could not find the administrator link".to_string()
     )))?;
