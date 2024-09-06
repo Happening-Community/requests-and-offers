@@ -170,7 +170,7 @@ pub fn validate_delete_status(
   _original_status: Status,
 ) -> ExternResult<ValidateCallbackResult> {
   Ok(ValidateCallbackResult::Invalid(String::from(
-    "User profile cannot be deleted",
+    "Status cannot be deleted",
   )))
 }
 

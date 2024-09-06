@@ -4,17 +4,11 @@ use hdk::prelude::*;
 use WasmErrorInner::*;
 
 #[hdk_extern]
-pub fn add_administrator(user_action_hash: ActionHash) -> ExternResult<bool> {
+pub fn register_administrator(user_action_hash: ActionHash) -> ExternResult<bool> {
   if check_if_user_is_administrator(user_action_hash.clone())? {
     return Err(wasm_error!(Guest("Allready an Administrator".to_string())));
   }
 
-  register_administrator(user_action_hash.clone())?;
-  Ok(true)
-}
-
-#[hdk_extern]
-pub fn register_administrator(user_action_hash: ActionHash) -> ExternResult<bool> {
   let path = Path::from("administrators");
   create_link(
     path.path_entry_hash()?,
@@ -22,6 +16,18 @@ pub fn register_administrator(user_action_hash: ActionHash) -> ExternResult<bool
     LinkTypes::AllAdministrators,
     (),
   )?;
+  Ok(true)
+}
+
+#[hdk_extern]
+pub fn add_administrator(user_action_hash: ActionHash) -> ExternResult<bool> {
+  if !check_if_user_is_administrator(user_action_hash.clone())? {
+    return Err(wasm_error!(Guest(
+      "Only administrators can add administrators".to_string()
+    )));
+  }
+
+  register_administrator(user_action_hash.clone())?;
   Ok(true)
 }
 
