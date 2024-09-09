@@ -133,23 +133,23 @@ pub fn get_latest_status_for_user(input: StatusInput) -> ExternResult<Option<Sta
   Ok(latest_status)
 }
 
-pub fn create_accepted_entity_link(original_action_hash: ActionHash) -> ExternResult<bool> {
-  let path = Path::from("accepted_users");
+pub fn create_accepted_entity_link(input: StatusInput) -> ExternResult<bool> {
+  let path = Path::from(format!("{}.status.accepted", input.entity));
   create_link(
     path.path_entry_hash()?,
-    original_action_hash,
+    input.entity_original_action_hash,
     LinkTypes::AcceptedUsers,
     (),
   )?;
   Ok(true)
 }
 
-pub fn delete_accepted_entity_link(original_action_hash: ActionHash) -> ExternResult<bool> {
-  let path = Path::from("accepted_users");
+pub fn delete_accepted_entity_link(input: StatusInput) -> ExternResult<bool> {
+  let path = Path::from(format!("{}.status.accepted", input.entity));
   let links = get_links(path.path_entry_hash()?, LinkTypes::AcceptedUsers, None)?;
   let link = links
     .iter()
-    .find(|link| link.target == original_action_hash.clone().into());
+    .find(|link| link.target == input.entity_original_action_hash.clone().into());
 
   if let Some(link) = link {
     delete_link(ActionHash::from(link.clone().create_link_hash))?;
@@ -159,8 +159,8 @@ pub fn delete_accepted_entity_link(original_action_hash: ActionHash) -> ExternRe
 }
 
 #[hdk_extern]
-pub fn get_accepted_users(_: ()) -> ExternResult<Vec<Link>> {
-  let path = Path::from("accepted_users");
+pub fn get_accepted_entities(entity: String) -> ExternResult<Vec<Link>> {
+  let path = Path::from(format!("{}.status.accepted", entity));
   get_links(path.path_entry_hash()?, LinkTypes::AcceptedUsers, None)
 }
 
@@ -173,6 +173,7 @@ pub fn get_all_revisions_for_status(original_status_hash: ActionHash) -> ExternR
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UpdateInput {
+  pub entity: String,
   pub entity_original_action_hash: ActionHash,
   pub status_original_action_hash: ActionHash,
   pub status_previous_action_hash: ActionHash,
@@ -180,6 +181,7 @@ pub struct UpdateInput {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UpdateStatusInput {
+  pub entity: String,
   pub entity_original_action_hash: ActionHash,
   pub status_original_action_hash: ActionHash,
   pub status_previous_action_hash: ActionHash,
@@ -205,10 +207,16 @@ pub fn update_entity_status(input: UpdateStatusInput) -> ExternResult<Record> {
     (),
   )?;
 
-  delete_accepted_entity_link(input.entity_original_action_hash.clone())?;
+  delete_accepted_entity_link(StatusInput {
+    entity_original_action_hash: input.entity_original_action_hash.clone(),
+    entity: input.entity.clone(),
+  })?;
 
   if input.new_status.status_type == "accepted" {
-    create_accepted_entity_link(input.entity_original_action_hash.clone())?;
+    create_accepted_entity_link(StatusInput {
+      entity_original_action_hash: input.entity_original_action_hash,
+      entity: input.entity,
+    })?;
   }
 
   let record = get(action_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(Guest(
@@ -220,6 +228,7 @@ pub fn update_entity_status(input: UpdateStatusInput) -> ExternResult<Record> {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SuspendUserInput {
+  pub entity: String,
   pub entity_original_action_hash: ActionHash,
   pub status_original_action_hash: ActionHash,
   pub status_previous_action_hash: ActionHash,
@@ -239,6 +248,7 @@ pub fn suspend_entity_temporarily(input: SuspendUserInput) -> ExternResult<bool>
   let now = &sys_time()?;
 
   let update_status_input = UpdateStatusInput {
+    entity: input.entity,
     entity_original_action_hash: input.entity_original_action_hash,
     status_original_action_hash: input.status_original_action_hash,
     status_previous_action_hash: input.status_previous_action_hash,
@@ -251,6 +261,7 @@ pub fn suspend_entity_temporarily(input: SuspendUserInput) -> ExternResult<bool>
 #[hdk_extern]
 pub fn suspend_entity_indefinitely(input: SuspendUserInput) -> ExternResult<bool> {
   let update_status_input = UpdateStatusInput {
+    entity: input.entity,
     entity_original_action_hash: input.entity_original_action_hash,
     status_original_action_hash: input.status_original_action_hash,
     status_previous_action_hash: input.status_previous_action_hash,
@@ -298,6 +309,7 @@ pub fn unsuspend_entity_if_time_passed(input: UpdateInput) -> ExternResult<bool>
     }
 
     let update_status_input = UpdateStatusInput {
+      entity: input.entity,
       entity_original_action_hash: input.entity_original_action_hash,
       status_original_action_hash: input.status_original_action_hash,
       status_previous_action_hash: input.status_previous_action_hash,
@@ -317,6 +329,7 @@ pub fn unsuspend_entity_if_time_passed(input: UpdateInput) -> ExternResult<bool>
 #[hdk_extern]
 pub fn unsuspend_user(input: UpdateInput) -> ExternResult<bool> {
   let update_status_input = UpdateStatusInput {
+    entity: input.entity,
     entity_original_action_hash: input.entity_original_action_hash,
     status_original_action_hash: input.status_original_action_hash,
     status_previous_action_hash: input.status_previous_action_hash,
