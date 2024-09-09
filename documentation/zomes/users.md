@@ -125,18 +125,6 @@ Retrieves all user profiles associated with a given agent public key.
 
 This function follows the "MyUser" link type to find user records linked to the agent.
 
-#### get_agent_user_hash
-
-``` rust
-rust pub fn get_agent_user_hash(agent_pubkey: AgentPubKey) -> ExternResult<Option<ActionHash>>
-```
-
- Retrieves the action hash of the user profile associated with a given agent public key.
-
-This function uses `get_agent_user` to find the user links and returns the action hash of the first link found.
-
-Returns an error if unable to convert the link target to an ActionHash.
-
 #### update_user
 
 ``` rust

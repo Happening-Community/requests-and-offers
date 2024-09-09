@@ -89,25 +89,6 @@ pub fn get_agent_user(author: AgentPubKey) -> ExternResult<Vec<Link>> {
   get_links(author, LinkTypes::MyUser, None)
 }
 
-#[hdk_extern]
-pub fn get_agent_user_hash(agent_pubkey: AgentPubKey) -> ExternResult<Option<ActionHash>> {
-  let agent_user_links = get_agent_user(agent_pubkey)?;
-
-  if agent_user_links.is_empty() {
-    Ok(None)
-  } else {
-    Ok(Some(
-      agent_user_links[0]
-        .target
-        .clone()
-        .into_action_hash()
-        .ok_or(wasm_error!(Guest(
-          "Could not find the agent User profile hash".to_string()
-        )))?,
-    ))
-  }
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateUserInput {
   pub original_action_hash: ActionHash,
