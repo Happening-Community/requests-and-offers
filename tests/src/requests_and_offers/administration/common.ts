@@ -21,14 +21,17 @@ export async function getAllUsers(cell: CallableCell): Promise<Link[]> {
   });
 }
 
-export async function registerAdministrator(
+export async function registerNetworkAdministrator(
   cell: CallableCell,
-  user_hash: ActionHash
+  entity_action_hash: ActionHash
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
     fn_name: "register_administrator",
-    payload: user_hash,
+    payload: {
+      entity: "network",
+      entity_action_hash,
+    },
   });
 }
 
@@ -38,17 +41,21 @@ export async function getAllAdministratorsLinks(
   return cell.callZome({
     zome_name: "administration",
     fn_name: "get_all_administrators_links",
+    payload: "network",
   });
 }
 
 export function checkIfUserIsAdministrator(
   cell: CallableCell,
-  user_hash: ActionHash
+  entity_action_hash: ActionHash
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
-    fn_name: "check_if_user_is_administrator",
-    payload: user_hash,
+    fn_name: "check_if_entity_is_administrator",
+    payload: {
+      entity: "network",
+      entity_action_hash,
+    },
   });
 }
 
@@ -65,23 +72,29 @@ export async function checkIfAgentIsAdministrator(
 
 export async function removeAdministrator(
   cell: CallableCell,
-  user_hash: ActionHash
+  entity_action_hash: ActionHash
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
     fn_name: "remove_administrator",
-    payload: user_hash,
+    payload: {
+      entity: "network",
+      entity_action_hash,
+    },
   });
 }
 
 export async function getLatestStatusRecordForUser(
   cell: CallableCell,
-  user_hash: ActionHash
+  entity_original_action_hash: ActionHash
 ): Promise<Record | null> {
   return cell.callZome({
     zome_name: "administration",
-    fn_name: "get_latest_status_record_for_user",
-    payload: user_hash,
+    fn_name: "get_latest_status_record_for_entity",
+    payload: {
+      entity: "users",
+      entity_original_action_hash,
+    },
   });
 }
 
@@ -112,16 +125,17 @@ export async function getUserStatusLink(
 
 export async function updateUserStatus(
   cell: CallableCell,
-  user_original_action_hash: ActionHash,
+  entity_original_action_hash: ActionHash,
   status_original_action_hash: ActionHash,
   status_previous_action_hash: ActionHash,
   new_status: Status
 ): Promise<Record> {
   return cell.callZome({
     zome_name: "administration",
-    fn_name: "update_user_status",
+    fn_name: "update_entity_status",
     payload: {
-      user_original_action_hash,
+      entity: "users",
+      entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
       new_status,
@@ -131,7 +145,7 @@ export async function updateUserStatus(
 
 export async function suspendUserTemporarily(
   cell: CallableCell,
-  user_original_action_hash: ActionHash,
+  entity_original_action_hash: ActionHash,
   status_original_action_hash: ActionHash,
   status_previous_action_hash: ActionHash,
   reason: string,
@@ -139,9 +153,10 @@ export async function suspendUserTemporarily(
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
-    fn_name: "suspend_user_temporarily",
+    fn_name: "suspend_entity_temporarily",
     payload: {
-      user_original_action_hash,
+      entity: "users",
+      entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
       reason,
@@ -152,16 +167,17 @@ export async function suspendUserTemporarily(
 
 export async function suspendUserIndefinitely(
   cell: CallableCell,
-  user_original_action_hash: ActionHash,
+  entity_original_action_hash: ActionHash,
   status_original_action_hash: ActionHash,
   status_previous_action_hash: ActionHash,
   reason: string
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
-    fn_name: "suspend_user_indefinitely",
+    fn_name: "suspend_entity_indefinitely",
     payload: {
-      user_original_action_hash,
+      entity: "users",
+      entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
       reason,
@@ -171,7 +187,7 @@ export async function suspendUserIndefinitely(
 
 export async function unsuspendUser(
   cell: CallableCell,
-  user_original_action_hash: ActionHash,
+  entity_original_action_hash: ActionHash,
   status_original_action_hash: ActionHash,
   status_previous_action_hash: ActionHash
 ): Promise<boolean> {
@@ -179,7 +195,8 @@ export async function unsuspendUser(
     zome_name: "administration",
     fn_name: "unsuspend_user",
     payload: {
-      user_original_action_hash,
+      entity: "users",
+      entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
     },
@@ -188,15 +205,16 @@ export async function unsuspendUser(
 
 export async function unsuspendUserIfTimePassed(
   cell: CallableCell,
-  user_original_action_hash: ActionHash,
+  entity_original_action_hash: ActionHash,
   status_original_action_hash: ActionHash,
   status_previous_action_hash: ActionHash
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
-    fn_name: "unsuspend_user_if_time_passed",
+    fn_name: "unsuspend_entity_if_time_passed",
     payload: {
-      user_original_action_hash,
+      entity: "users",
+      entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
     },

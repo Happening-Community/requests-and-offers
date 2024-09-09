@@ -5,7 +5,7 @@ import { decodeRecords, runScenarioWithTwoAgents } from "../utils";
 import {
   User,
   createUser,
-  getAcceptedEntity,
+  getAcceptedEntities,
   getAgentUser,
   getLatestUser,
   sampleUser,
@@ -18,7 +18,7 @@ import {
   getLatestStatusForUser,
   getLatestStatusRecordForUser,
   getUserStatusLink,
-  registerAdministrator,
+  registerNetworkAdministrator,
   removeAdministrator,
   suspendUserIndefinitely,
   suspendUserTemporarily,
@@ -43,7 +43,7 @@ test("create a User and make it administrator", async () => {
     )[0];
     let bobUserLink = (await getAgentUser(bob.cells[0], bob.agentPubKey))[0];
     // Register AlicUser administrator
-    await registerAdministrator(alice.cells[0], aliceUserLink.target);
+    await registerNetworkAdministrator(alice.cells[0], aliceUserLink.target);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     const administrators = await getAllAdministratorsLinks(alice.cells[0]);
 
@@ -77,7 +77,7 @@ test("create a User and make it administrator", async () => {
     );
 
     // Add bob as an administrator and then remove him
-    await registerAdministrator(bob.cells[0], bobUserLink.target);
+    await registerNetworkAdministrator(bob.cells[0], bobUserLink.target);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     assert.ok(
       await checkIfUserIsAdministrator(bob.cells[0], bobUserLink.target)
@@ -106,7 +106,7 @@ test("update User status", async () => {
     )[0];
     let bobUserLink = (await getAgentUser(bob.cells[0], bob.agentPubKey))[0];
     // Register AlicUser administrator
-    await registerAdministrator(alice.cells[0], aliceUserLink.target);
+    await registerNetworkAdministrator(alice.cells[0], aliceUserLink.target);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Update Alice's status
@@ -143,9 +143,9 @@ test("update User status", async () => {
     assert.equal(allUsers.length, 2);
 
     // Verify the accepted_users list
-    let AcceptedEntity = await getAcceptedEntity(alice.cells[0]);
+    let AcceptedEntities = await getAcceptedEntities(alice.cells[0]);
 
-    assert.equal(AcceptedEntity.length, 1);
+    assert.equal(AcceptedEntities.length, 1);
 
     // Bob can not update his status
     const bobStatusOriginalActionHash = (
