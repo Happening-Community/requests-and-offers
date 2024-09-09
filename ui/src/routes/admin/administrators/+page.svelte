@@ -16,6 +16,8 @@
 
   let isLoading = $state(true);
 
+  $inspect('administrators:', administrators);
+
   onMount(async () => {
     await administratorsStore.getAllAdministrators();
 

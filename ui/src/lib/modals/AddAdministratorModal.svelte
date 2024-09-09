@@ -28,7 +28,7 @@
     const confirmation = confirm('Do you really want to make this user an administrator ?');
     if (confirmation) {
       try {
-        await administratorsStore.registerAdministrator(user.original_action_hash!);
+        await administratorsStore.registerNetworkAdministrator(user.original_action_hash!);
         administratorsStore.administrators = [...administrators, user];
       } catch (error) {}
 

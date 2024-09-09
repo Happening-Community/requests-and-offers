@@ -80,12 +80,12 @@ class UsersStore {
     return agentUser;
   }
 
-  private async getAcceptedEntityLinks(): Promise<Link[]> {
-    return (await hc.callZome('administration', 'get_accepted_users', null)) as Link[];
+  private async getAcceptedUsersLinks(): Promise<Link[]> {
+    return (await hc.callZome('administration', 'get_accepted_entities', 'users')) as Link[];
   }
 
-  private async getAcceptedEntityLinksAndRecords(): Promise<[Link[], Record[]]> {
-    const links = await this.getAcceptedEntityLinks();
+  private async getAcceptedUsersLinksAndRecords(): Promise<[Link[], Record[]]> {
+    const links = await this.getAcceptedUsersLinks();
     const usersRecords: Record[] = [];
 
     for (const link of links) {
@@ -96,8 +96,8 @@ class UsersStore {
     return [links, usersRecords];
   }
 
-  async getAcceptedEntity(): Promise<User[]> {
-    const [links, records] = await this.getAcceptedEntityLinksAndRecords();
+  async getAcceptedUsers(): Promise<User[]> {
+    const [links, records] = await this.getAcceptedUsersLinksAndRecords();
 
     const recordsContents: User[] = [];
 

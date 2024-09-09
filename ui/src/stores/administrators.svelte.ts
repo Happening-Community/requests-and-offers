@@ -31,6 +31,11 @@ export type Revision = {
   timestamp: number;
 };
 
+enum AdministrationEntity {
+  Network = 'network',
+  Users = 'users'
+}
+
 class AdministratorsStore {
   allUsers: User[] = $state([]);
   administrators: User[] = $state([]);
@@ -63,8 +68,6 @@ class AdministratorsStore {
       const user = decodeRecords([usersRecords[i]])[0];
       const status = await this.getLatestStatusForUser(usersLinks[i].target);
 
-      console.log('status', status);
-
       recordsContents.push({
         ...user,
         status,
@@ -78,12 +81,11 @@ class AdministratorsStore {
     return recordsContents;
   }
 
-  async registerAdministrator(original_action_hash: Uint8Array): Promise<boolean> {
-    return (await hc.callZome(
-      'administration',
-      'register_administrator',
-      original_action_hash
-    )) as boolean;
+  async registerNetworkAdministrator(entity_action_hash: Uint8Array): Promise<boolean> {
+    return (await hc.callZome('administration', 'register_administrator', {
+      entity: AdministrationEntity.Network,
+      entity_action_hash
+    })) as boolean;
   }
 
   async checkIfAgentIsAdministrator(agentPubKey: Uint8Array): Promise<boolean> {
@@ -97,20 +99,25 @@ class AdministratorsStore {
     return result;
   }
 
-  async checkIfUserIsAdministrator(action_hash: Uint8Array): Promise<boolean> {
-    return (await hc.callZome(
-      'administration',
-      'check_if_user_is_administrator',
-      action_hash
-    )) as boolean;
+  async checkIfUserIsAdministrator(entity_action_hash: Uint8Array): Promise<boolean> {
+    return (await hc.callZome('administration', 'check_if_entity_is_administrator', {
+      entity: AdministrationEntity.Network,
+      entity_action_hash
+    })) as boolean;
   }
 
   private async getAllAdministratorsLinks(): Promise<Link[]> {
-    return (await hc.callZome('administration', 'get_all_administrators_links', null)) as Link[];
+    return (await hc.callZome(
+      'administration',
+      'get_all_administrators_links',
+      AdministrationEntity.Network
+    )) as Link[];
   }
 
   async getAllAdministrators(): Promise<User[]> {
     const links = await this.getAllAdministratorsLinks();
+    console.log('links', links);
+
     const administratorUsersPromises = links.map(
       async (link) => await usersStore.getLatestUser(link.target)
     );
@@ -123,12 +130,11 @@ class AdministratorsStore {
     return administratorUsers;
   }
 
-  async removeAdministrator(original_action_hash: Uint8Array): Promise<boolean> {
-    return (await hc.callZome(
-      'administration',
-      'remove_administrator',
-      original_action_hash
-    )) as boolean;
+  async removeAdministrator(entity_action_hash: Uint8Array): Promise<boolean> {
+    return (await hc.callZome('administration', 'remove_administrator', {
+      entity: AdministrationEntity.Network,
+      entity_action_hash
+    })) as boolean;
   }
 
   async getNonAdministratorUsers(): Promise<User[]> {
@@ -147,21 +153,19 @@ class AdministratorsStore {
   }
 
   async getLatestStatusRecordForUser(
-    user_original_action_hash: ActionHash
+    entity_original_action_hash: ActionHash
   ): Promise<Record | null> {
-    return (await hc.callZome(
-      'administration',
-      'get_latest_status_record_for_user',
-      user_original_action_hash
-    )) as Record | null;
+    return (await hc.callZome('administration', 'get_latest_status_record_for_entity', {
+      entity: AdministrationEntity.Users,
+      entity_original_action_hash
+    })) as Record | null;
   }
 
-  async getLatestStatusForUser(user_original_action_hash: ActionHash): Promise<Status | null> {
-    return (await hc.callZome(
-      'administration',
-      'get_latest_status_for_user',
-      user_original_action_hash
-    )) as Status | null;
+  async getLatestStatusForUser(entity_original_action_hash: ActionHash): Promise<Status | null> {
+    return (await hc.callZome('administration', 'get_latest_status_for_entity', {
+      entity: AdministrationEntity.Users,
+      entity_original_action_hash
+    })) as Status | null;
   }
 
   async getUserStatusLink(user_original_action_hash: ActionHash): Promise<Link | null> {
@@ -233,13 +237,14 @@ class AdministratorsStore {
   }
 
   async updateUserStatus(
-    user_original_action_hash: ActionHash,
+    entity_original_action_hash: ActionHash,
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash,
     new_status: Status
   ): Promise<boolean> {
-    return (await hc.callZome('administration', 'update_user_status', {
-      user_original_action_hash,
+    return (await hc.callZome('administration', 'update_entity_status', {
+      entity: AdministrationEntity.Users,
+      entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
       new_status
@@ -247,13 +252,14 @@ class AdministratorsStore {
   }
 
   async suspendUserIndefinitely(
-    user_original_action_hash: ActionHash,
+    entity_original_action_hash: ActionHash,
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash,
     reason: string
   ): Promise<boolean> {
-    return (await hc.callZome('administration', 'suspend_user_indefinitely', {
-      user_original_action_hash,
+    return (await hc.callZome('administration', 'suspend_entity_indefinitely', {
+      entity: AdministrationEntity.Users,
+      entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
       reason
@@ -261,14 +267,15 @@ class AdministratorsStore {
   }
 
   async suspendUserTemporarily(
-    user_original_action_hash: ActionHash,
+    entity_original_action_hash: ActionHash,
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash,
     reason: string,
     duration_in_days: number
   ): Promise<boolean> {
-    return (await hc.callZome('administration', 'suspend_user_temporarily', {
-      user_original_action_hash,
+    return (await hc.callZome('administration', 'suspend_entity_temporarily', {
+      entity: AdministrationEntity.Users,
+      entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
       reason,
@@ -277,24 +284,26 @@ class AdministratorsStore {
   }
 
   async unsuspendUser(
-    user_original_action_hash: ActionHash,
+    entity_original_action_hash: ActionHash,
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash
   ): Promise<boolean> {
     return (await hc.callZome('administration', 'unsuspend_user', {
-      user_original_action_hash,
+      entity: AdministrationEntity.Users,
+      entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash
     })) as boolean;
   }
 
   async unsuspendUserIfTimePassed(
-    user_original_action_hash: ActionHash,
+    entity_original_action_hash: ActionHash,
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash
   ): Promise<boolean> {
-    return (await hc.callZome('administration', 'unsuspend_user_if_time_passed', {
-      user_original_action_hash,
+    return (await hc.callZome('administration', 'unsuspend_entity_if_time_passed', {
+      entity: AdministrationEntity.Users,
+      entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash
     })) as boolean;

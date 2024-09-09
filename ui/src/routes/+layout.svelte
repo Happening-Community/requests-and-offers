@@ -61,7 +61,7 @@
       event.preventDefault();
       let confirmation = confirm('Register Admin ?');
       if (confirmation && myProfile.original_action_hash) {
-        await administratorsStore.registerAdministrator(myProfile.original_action_hash);
+        await administratorsStore.registerNetworkAdministrator(myProfile.original_action_hash);
         await administratorsStore.checkIfAgentIsAdministrator(
           (await hc.getAppInfo())?.agent_pub_key!
         );
