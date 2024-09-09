@@ -5,17 +5,23 @@ use status::*;
 use utils::get_all_revisions_for_entry;
 use WasmErrorInner::*;
 
+use crate::administration::check_if_agent_is_administrator;
+
 #[derive(Serialize, Deserialize, Debug)]
-pub struct CreateStatusInput {
+pub struct StatusInput {
   pub entity_original_action_hash: ActionHash,
   pub entity: String,
 }
 
 #[hdk_extern]
-pub fn create_status(input: CreateStatusInput) -> ExternResult<Record> {
-  let link = get_entity_status_link(entity_original_action_hash)?;
+pub fn create_status(input: StatusInput) -> ExternResult<Record> {
+  let link = get_links(
+    input.entity_original_action_hash.clone(),
+    LinkTypes::EntityStatus,
+    None,
+  )?;
 
-  if link.is_some() {
+  if !link.is_empty() {
     return Err(wasm_error!(Guest("You already have a Status".to_string())));
   }
 
@@ -24,11 +30,18 @@ pub fn create_status(input: CreateStatusInput) -> ExternResult<Record> {
     "Could not find the newly created profile's Status".to_string()
   )))?;
 
-  let path = Path::from("all_status");
+  let path = Path::from(format!("{}.status", input.entity));
   create_link(
     path.path_entry_hash()?,
     status_hash.clone(),
     LinkTypes::AllStatus,
+    (),
+  )?;
+
+  create_link(
+    input.entity_original_action_hash,
+    status_hash,
+    LinkTypes::EntityStatus,
     (),
   )?;
 
@@ -73,30 +86,46 @@ pub fn get_latest_status(original_action_hash: ActionHash) -> ExternResult<Optio
 }
 
 #[hdk_extern]
-pub fn get_latest_status_record_for_user(
-  entity_original_action_hash: ActionHash,
-) -> ExternResult<Option<Record>> {
-  let link = get_entity_status_link(entity_original_action_hash)?;
+pub fn get_latest_status_record_for_user(input: StatusInput) -> ExternResult<Option<Record>> {
+  let link = get_links(
+    input.entity_original_action_hash.clone(),
+    LinkTypes::EntityStatus,
+    None,
+  )?;
 
-  if let Some(link) = link {
-    get_latest_status_record(link.target.into_action_hash().ok_or(wasm_error!(Guest(
-      "Could not find the latest profile's Status action hash".to_string()
-    )))?)
+  if !link.is_empty() {
+    get_latest_status_record(
+      link[0]
+        .clone()
+        .target
+        .into_action_hash()
+        .ok_or(wasm_error!(Guest(
+          "Could not find the latest profile's Status action hash".to_string()
+        )))?,
+    )
   } else {
     Ok(None)
   }
 }
 
 #[hdk_extern]
-pub fn get_latest_status_for_user(
-  entity_original_action_hash: ActionHash,
-) -> ExternResult<Option<Status>> {
-  let link = get_entity_status_link(entity_original_action_hash)?;
+pub fn get_latest_status_for_user(input: StatusInput) -> ExternResult<Option<Status>> {
+  let link = get_links(
+    input.entity_original_action_hash.clone(),
+    LinkTypes::EntityStatus,
+    None,
+  )?;
 
-  let latest_status: Option<Status> = if let Some(link) = link {
-    get_latest_status(link.target.into_action_hash().ok_or(wasm_error!(Guest(
-      "Could not find the latest profile's Status action hash".to_string()
-    )))?)?
+  let latest_status: Option<Status> = if !link.is_empty() {
+    get_latest_status(
+      link[0]
+        .target
+        .clone()
+        .into_action_hash()
+        .ok_or(wasm_error!(Guest(
+          "Could not find the latest profile's Status action hash".to_string()
+        )))?,
+    )?
   } else {
     None
   };
@@ -233,7 +262,13 @@ pub fn suspend_entity_indefinitely(input: SuspendUserInput) -> ExternResult<bool
 
 #[hdk_extern]
 pub fn unsuspend_entity_if_time_passed(input: UpdateInput) -> ExternResult<bool> {
-  let link = match get_entity_status_link(input.entity_original_action_hash.clone())? {
+  let link = get_links(
+    input.entity_original_action_hash.clone(),
+    LinkTypes::EntityStatus,
+    None,
+  )?;
+
+  let link = match link.first() {
     Some(link) => link,
     None => {
       return Err(wasm_error!(Guest(
