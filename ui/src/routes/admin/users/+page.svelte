@@ -13,7 +13,7 @@
   let isLoading = $state(true);
 
   let pendingUsers = $derived(allUsers.filter((user) => user.status?.status_type === 'pending'));
-  let acceptedUsers = $derived(allUsers.filter((user) => user.status?.status_type === 'accepted'));
+  let AcceptedEntity = $derived(allUsers.filter((user) => user.status?.status_type === 'accepted'));
   let rejectedUsers = $derived(allUsers.filter((user) => user.status?.status_type === 'rejected'));
   let temporarilySuspendedUsers = $derived(
     allUsers
@@ -52,8 +52,8 @@
     </div>
     <div class="flex flex-col gap-4 lg:pl-4">
       <h2 class="h3 text-green-600">Accepted users</h2>
-      {#if acceptedUsers && acceptedUsers.length > 0}
-        <UsersTable users={acceptedUsers} />
+      {#if AcceptedEntity && AcceptedEntity.length > 0}
+        <UsersTable users={AcceptedEntity} />
       {:else}
         <p>No accepted users</p>
       {/if}

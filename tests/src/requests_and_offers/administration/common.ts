@@ -87,12 +87,15 @@ export async function getLatestStatusRecordForUser(
 
 export async function getLatestStatusForUser(
   cell: CallableCell,
-  user_original_action_hash: ActionHash
+  entity_original_action_hash: ActionHash
 ): Promise<Status | null> {
   return cell.callZome({
     zome_name: "administration",
-    fn_name: "get_latest_status_for_user",
-    payload: user_original_action_hash,
+    fn_name: "get_latest_status_for_entity",
+    payload: {
+      entity: "users",
+      entity_original_action_hash,
+    },
   });
 }
 

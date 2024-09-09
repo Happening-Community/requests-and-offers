@@ -5,7 +5,7 @@ import { decodeRecords, runScenarioWithTwoAgents } from "../utils";
 import {
   User,
   createUser,
-  getAcceptedUsers,
+  getAcceptedEntity,
   getAgentUser,
   getLatestUser,
   sampleUser,
@@ -143,9 +143,9 @@ test("update User status", async () => {
     assert.equal(allUsers.length, 2);
 
     // Verify the accepted_users list
-    let acceptedUsers = await getAcceptedUsers(alice.cells[0]);
+    let AcceptedEntity = await getAcceptedEntity(alice.cells[0]);
 
-    assert.equal(acceptedUsers.length, 1);
+    assert.equal(AcceptedEntity.length, 1);
 
     // Bob can not update his status
     const bobStatusOriginalActionHash = (

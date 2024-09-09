@@ -20,7 +20,7 @@ pub enum LinkTypes {
   StatusUpdates,
   AllStatus,
   EntityStatus,
-  AcceptedUsers,
+  AcceptedEntity,
 }
 
 #[hdk_extern]

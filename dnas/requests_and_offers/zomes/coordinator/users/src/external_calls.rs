@@ -9,6 +9,19 @@ pub fn check_if_agent_is_administrator(agent_pubkey: AgentPubKey) -> ExternResul
   )
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct StatusInput {
+  entity_original_action_hash: ActionHash,
+  entity: String,
+}
+
 pub fn create_status(user_original_action_hash: ActionHash) -> ExternResult<Record> {
-  external_local_call("create_status", "administration", user_original_action_hash)
+  external_local_call(
+    "create_status",
+    "administration",
+    StatusInput {
+      entity_original_action_hash: user_original_action_hash,
+      entity: "users".to_string(),
+    },
+  )
 }

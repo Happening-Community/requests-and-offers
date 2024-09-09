@@ -43,7 +43,7 @@ pub enum LinkTypes {
   AllAdministrators,
   StatusUpdates,
   AllStatus,
-  AcceptedUsers,
+  AcceptedEntity,
 }
 ```
 
@@ -261,7 +261,7 @@ pub fn get_accepted_users(_: ()) -> ExternResult<Vec<Link>>
 
 Retrieves all links representing accepted users in the system.
 
-This function retrieves all links of type `AcceptedUsers` from the "accepted_users" path.
+This function retrieves all links of type `AcceptedEntity` from the "accepted_users" path.
 
 Returns an error if:
 - Unable to retrieve links

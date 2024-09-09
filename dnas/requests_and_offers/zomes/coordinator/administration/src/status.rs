@@ -86,7 +86,7 @@ pub fn get_latest_status(original_action_hash: ActionHash) -> ExternResult<Optio
 }
 
 #[hdk_extern]
-pub fn get_latest_status_record_for_user(input: StatusInput) -> ExternResult<Option<Record>> {
+pub fn get_latest_status_record_for_entity(input: StatusInput) -> ExternResult<Option<Record>> {
   let link = get_links(
     input.entity_original_action_hash.clone(),
     LinkTypes::EntityStatus,
@@ -109,7 +109,7 @@ pub fn get_latest_status_record_for_user(input: StatusInput) -> ExternResult<Opt
 }
 
 #[hdk_extern]
-pub fn get_latest_status_for_user(input: StatusInput) -> ExternResult<Option<Status>> {
+pub fn get_latest_status_for_entity(input: StatusInput) -> ExternResult<Option<Status>> {
   let link = get_links(
     input.entity_original_action_hash.clone(),
     LinkTypes::EntityStatus,
@@ -138,7 +138,7 @@ pub fn create_accepted_entity_link(input: StatusInput) -> ExternResult<bool> {
   create_link(
     path.path_entry_hash()?,
     input.entity_original_action_hash,
-    LinkTypes::AcceptedUsers,
+    LinkTypes::AcceptedEntity,
     (),
   )?;
   Ok(true)
@@ -146,7 +146,7 @@ pub fn create_accepted_entity_link(input: StatusInput) -> ExternResult<bool> {
 
 pub fn delete_accepted_entity_link(input: StatusInput) -> ExternResult<bool> {
   let path = Path::from(format!("{}.status.accepted", input.entity));
-  let links = get_links(path.path_entry_hash()?, LinkTypes::AcceptedUsers, None)?;
+  let links = get_links(path.path_entry_hash()?, LinkTypes::AcceptedEntity, None)?;
   let link = links
     .iter()
     .find(|link| link.target == input.entity_original_action_hash.clone().into());
@@ -161,7 +161,7 @@ pub fn delete_accepted_entity_link(input: StatusInput) -> ExternResult<bool> {
 #[hdk_extern]
 pub fn get_accepted_entities(entity: String) -> ExternResult<Vec<Link>> {
   let path = Path::from(format!("{}.status.accepted", entity));
-  get_links(path.path_entry_hash()?, LinkTypes::AcceptedUsers, None)
+  get_links(path.path_entry_hash()?, LinkTypes::AcceptedEntity, None)
 }
 
 #[hdk_extern]

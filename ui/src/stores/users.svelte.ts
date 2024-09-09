@@ -29,7 +29,7 @@ type UserAdditionalFields = {
 export type User = UserInDHT & UserAdditionalFields;
 
 class UsersStore {
-  acceptedUsers: User[] = $state([]);
+  AcceptedEntities: User[] = $state([]);
   myProfile: User | undefined = $state();
 
   async createUser(user: User): Promise<Record> {
@@ -80,12 +80,12 @@ class UsersStore {
     return agentUser;
   }
 
-  private async getAcceptedUsersLinks(): Promise<Link[]> {
+  private async getAcceptedEntityLinks(): Promise<Link[]> {
     return (await hc.callZome('administration', 'get_accepted_users', null)) as Link[];
   }
 
-  private async getAcceptedUsersLinksAndRecords(): Promise<[Link[], Record[]]> {
-    const links = await this.getAcceptedUsersLinks();
+  private async getAcceptedEntityLinksAndRecords(): Promise<[Link[], Record[]]> {
+    const links = await this.getAcceptedEntityLinks();
     const usersRecords: Record[] = [];
 
     for (const link of links) {
@@ -96,8 +96,8 @@ class UsersStore {
     return [links, usersRecords];
   }
 
-  async getAcceptedUsers(): Promise<User[]> {
-    const [links, records] = await this.getAcceptedUsersLinksAndRecords();
+  async getAcceptedEntity(): Promise<User[]> {
+    const [links, records] = await this.getAcceptedEntityLinksAndRecords();
 
     const recordsContents: User[] = [];
 
@@ -117,7 +117,7 @@ class UsersStore {
       });
     }
 
-    this.acceptedUsers = recordsContents;
+    this.AcceptedEntities = recordsContents;
 
     return recordsContents;
   }
