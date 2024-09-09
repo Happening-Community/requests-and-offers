@@ -12,7 +12,7 @@ pub fn get_all_users(_: ()) -> ExternResult<Vec<Link>> {
     )));
   }
 
-  let path = Path::from("all_users");
+  let path = Path::from("users");
   get_links(path.path_entry_hash()?, LinkTypes::AllUsers, None)
 }
 

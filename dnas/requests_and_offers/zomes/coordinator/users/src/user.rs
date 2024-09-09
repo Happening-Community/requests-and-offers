@@ -18,7 +18,7 @@ pub fn create_user(user: User) -> ExternResult<Record> {
     "Could not find the newly created User profile".to_string()
   )))?;
 
-  let path = Path::from("all_users");
+  let path = Path::from("users");
   create_link(
     path.path_entry_hash()?,
     user_hash.clone(),
