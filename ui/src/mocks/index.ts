@@ -5,7 +5,7 @@ import { fetchImageAndConvertToUInt8Array, getRandomNumber } from '@utils';
 import type { Project } from '@stores/projects.svelte';
 
 export async function createMockedUsers(count: number = 1): Promise<User[]> {
-  let users: User[] = [];
+  const users: User[] = [];
 
   const fakedUserType = new SimpleFaker().helpers.arrayElements<UserType>(
     ['creator', 'advocate'],
@@ -32,7 +32,7 @@ export async function createMockedUsers(count: number = 1): Promise<User[]> {
 }
 
 export async function createMockedOrganizations(count: number = 1): Promise<Organization[]> {
-  let organizations: Organization[] = [];
+  const organizations: Organization[] = [];
 
   for (let i = 0; i < count; i++) {
     organizations.push({
@@ -50,7 +50,7 @@ export async function createMockedOrganizations(count: number = 1): Promise<Orga
 }
 
 export async function createMockedProjects(count: number = 1): Promise<Project[]> {
-  let projects: Project[] = [];
+  const projects: Project[] = [];
 
   for (let i = 0; i < count; i++) {
     projects.push({

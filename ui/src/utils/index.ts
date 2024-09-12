@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Record } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
+import { type ModalSettings, type ModalStore } from '@skeletonlabs/skeleton';
 
 /**
  * Decodes the outputs from the records.
@@ -33,4 +34,9 @@ export async function fetchImageAndConvertToUInt8Array(url: string): Promise<Uin
  */
 export function getRandomNumber(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+export function queueAndReverseModal(modalSettings: ModalSettings, modalStore: ModalStore) {
+  modalStore.trigger(modalSettings);
+  modalStore.update((modals) => modals.reverse());
 }

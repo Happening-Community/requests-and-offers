@@ -1,7 +1,16 @@
 <script lang="ts">
-  import { Avatar, ConicGradient, getModalStore, type ConicStop } from '@skeletonlabs/skeleton';
+  import ConfirmModal from '@lib/dialogs/ConfirmModal.svelte';
+  import {
+    Avatar,
+    ConicGradient,
+    getModalStore,
+    type ConicStop,
+    type ModalComponent,
+    type ModalSettings
+  } from '@skeletonlabs/skeleton';
   import administratorsStore from '@stores/administrators.svelte';
   import { type User } from '@stores/users.svelte';
+  import { queueAndReverseModal } from '@utils';
   import { onMount } from 'svelte';
 
   const { administrators, nonAdministrators } = $derived(administratorsStore);
@@ -24,16 +33,33 @@
 
   const modalStore = getModalStore();
 
-  async function addAdministrator(user: User) {
-    const confirmation = confirm('Do you really want to make this user an administrator ?');
-    if (confirmation) {
-      try {
-        await administratorsStore.registerNetworkAdministrator(user.original_action_hash!);
-        administratorsStore.administrators = [...administrators, user];
-      } catch (error) {}
+  const addAdministratorConfirmationModalMeta: ConfirmModalMeta = {
+    id: 'confirm-add-administrator',
+    message: 'Do you really want to make this user an administrator ?',
+    confirmLabel: 'Yes',
+    cancelLabel: 'No'
+  };
 
-      modalStore.close();
-    }
+  const confirmModalComponent: ModalComponent = { ref: ConfirmModal };
+  const confirmModal = (meta: ConfirmModalMeta, user: User): ModalSettings => {
+    return {
+      type: 'component',
+      component: confirmModalComponent,
+      meta,
+      async response(r: boolean) {
+        if (r) {
+          try {
+            await administratorsStore.registerNetworkAdministrator(user.original_action_hash!);
+            administratorsStore.administrators = [...administrators, user];
+          } catch (error) {}
+          modalStore.close();
+        }
+      }
+    };
+  };
+
+  async function addAdministrator(user: User) {
+    queueAndReverseModal(confirmModal(addAdministratorConfirmationModalMeta, user), modalStore);
   }
 
   function searchInputHandler(evt: Event) {

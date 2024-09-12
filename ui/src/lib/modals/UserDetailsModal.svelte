@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import type { ActionHash } from '@holochain/client';
   import StatusHistoryModal from './StatusHistoryModal.svelte';
   import {
     Avatar,
@@ -13,6 +12,7 @@
   import { onMount } from 'svelte';
   import PromptModal from '../dialogs/PromptModal.svelte';
   import ConfirmModal from '@lib/dialogs/ConfirmModal.svelte';
+  import { queueAndReverseModal } from '@utils';
 
   const { administrators } = $derived(administratorsStore);
   const modalStore = getModalStore();
@@ -78,13 +78,6 @@
     };
   };
 
-  const unsuspendConfirmationModalMeta: ConfirmModalMeta = {
-    id: 'confirm-unsuspend',
-    message: 'Are you sure you want to unsuspend this user?',
-    confirmLabel: 'Yes',
-    cancelLabel: 'No'
-  };
-
   const confirmModalComponent: ModalComponent = { ref: ConfirmModal };
   const confirmModal = (meta: ConfirmModalMeta): ModalSettings => {
     return {
@@ -93,7 +86,15 @@
       meta,
       response(r) {
         if (r) {
-          updateStatus({ status_type: 'accepted' });
+          switch (meta.id) {
+            case 'unsuspend':
+              updateStatus({ status_type: 'accepted' });
+              break;
+            case 'remove-administrator':
+              removeAdministrator();
+              break;
+          }
+
           modalStore.close();
         }
       }
@@ -210,27 +211,44 @@
     modalStore.close();
   }
 
-  async function handleRemoveAdmin(original_action_hash: ActionHash) {
-    const confirmation = confirm('Are you sure you want to remove this administrator ?');
-    if (!confirmation) return;
+  async function removeAdministrator() {
+    if (!user) return;
 
-    await administratorsStore.removeAdministrator(original_action_hash);
+    await administratorsStore.removeAdministrator(user.original_action_hash!);
     await administratorsStore.getAllAdministrators();
-    modalStore.close();
   }
 
-  async function handleConfirmModal() {
-    modalStore.trigger(confirmModal(unsuspendConfirmationModalMeta));
-    modalStore.update((modals) => modals.reverse());
+  async function handleRemoveAdminModal() {
+    queueAndReverseModal(
+      confirmModal({
+        id: 'remove-administrator',
+        message: 'Do you really want to remove this administrator ?',
+        confirmLabel: 'Yes',
+        cancelLabel: 'No'
+      }),
+      modalStore
+    );
+  }
+
+  async function handleUnsuspendModal() {
+    queueAndReverseModal(
+      confirmModal({
+        id: 'unsuspend',
+        message: 'Are you sure you want to unsuspend this user?',
+        confirmLabel: 'Yes',
+        cancelLabel: 'No'
+      }),
+      modalStore
+    );
   }
 
   async function handlePromptModal(type: 'indefinitely' | 'temporarily') {
-    modalStore.trigger(
+    queueAndReverseModal(
       promptModal(
         type === 'indefinitely' ? suspendIndefinitelyModalMeta : suspendTemporarilyModalMeta
-      )
+      ),
+      modalStore
     );
-    modalStore.update((modals) => modals.reverse());
   }
 
   async function handleStatusHistoryModal() {
@@ -240,8 +258,7 @@
       user
     );
 
-    modalStore.trigger(statusHistoryModal(statusHistory));
-    modalStore.update((modals) => modals.reverse());
+    queueAndReverseModal(statusHistoryModal(statusHistory), modalStore);
   }
 </script>
 
@@ -329,7 +346,7 @@
           </div>
         {:else if user?.status?.status_type.startsWith('suspended')}
           <div class="space-y-4" class:space-x-4={!isSuspendedTemporarily}>
-            <button class="btn variant-filled-tertiary" onclick={() => handleConfirmModal()}>
+            <button class="btn variant-filled-tertiary" onclick={handleUnsuspendModal}>
               Unsuspend
             </button>
             {#if isSuspendedTemporarily}
@@ -362,8 +379,7 @@
         <div class="space-x-4">
           <button
             class="btn variant-filled-error"
-            onclick={() =>
-              user.original_action_hash && handleRemoveAdmin(user.original_action_hash)}
+            onclick={handleRemoveAdminModal}
             disabled={isTheOnlyAdmin}
             title={isTheOnlyAdmin ? 'Can not remove last admin' : ''}
           >
