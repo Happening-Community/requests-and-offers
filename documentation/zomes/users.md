@@ -80,12 +80,11 @@ pub fn create_user(user: User) -> ExternResult<Record>
 
 Creates a new user profile.
 
-This function creates a new user entry, adds it to the "all_users" path, links it to the creating agent, and creates a status record linked to the user.
+This function creates a new user entry, adds it to the "users" path, links it to the creating agent with a link type of `MyUser`, and creates a status record linked to the user with the `UserStatus` link type.
 
 Returns an error if:
 - The agent already has a user profile
 - Failed to find the newly created user record
-
 
 #### get_latest_user_record
 

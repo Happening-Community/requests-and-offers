@@ -20,7 +20,7 @@ pub struct Status {
 }
 ```
 
-The `StatusType` enum represents the various status types that can be associated with a user.
+The `StatusType` enum represents the various status types that can be associated with an entity.
 It is used for validating the `status_type` field of the `Status` entry.
 
 ``` rust
@@ -36,13 +36,15 @@ pub enum StatusType {
 
 ### Link Types
 
-The zome defines four link types:
+The zome defines six link types:
 
 ``` rust
 pub enum LinkTypes {
   AllAdministrators,
+  AgentAdministrators,
   StatusUpdates,
   AllStatus,
+  EntityStatus,
   AcceptedEntity,
 }
 ```
@@ -80,13 +82,12 @@ Prevents deletion of status entries.
 pub fn register_administrator(user_action_hash: ActionHash) -> ExternResult<bool>
 ```
 
-Registers a user as an administrator.
+Registers a user as an administrator for a specific entity.
 
-This function checks if the user is already an administrator. If not, it creates a link between the administrators path and the user's action hash.
+This function checks if the user is already an administrator for the entity. If not, it creates a link between the entity's administrators path and the user's action hash, and creates another link between the agent's public key and the entity's administrators path.
 
 Returns `Ok(true)` if successful, or an error if:
-
-- The user is already an administrator
+- The user is already an administrator for the entity
 
 The `register_administrator` is temporarily used to manually add the first administrator. In the future, its logic will be moved to the `add_administrator` function and the first administrator will be registered using the `progenitor` pattern. `register_administrator` must be secured to ensure that it cannot be called by anyone other than the first administrator.
 
@@ -95,50 +96,49 @@ The `register_administrator` is temporarily used to manually add the first admin
 ``` rust
 pub fn add_administrator(user_action_hash: ActionHash) -> ExternResult<bool>
 ```
-Adds a new administrator to the system.
+Adds a new administrator to the system for a specific entity.
 
-This function checks if the calling agent is already an administrator. If so, it calls `register_administrator` to add the new administrator.
+This function checks if the calling agent is already an administrator for the entity. If so, it calls `register_administrator` to add the new administrator.
 
 Returns `Ok(true)` if successful, or an error if:
-
-- The calling agent is not an administrator
-- The user being added is already an administrator
+- The calling agent is not an administrator for the entity
 
 #### get_all_administrators_links
 
 ``` rust
-pub fn get_all_administrators_links(_: ()) -> ExternResult<Vec<Link>>
+pub fn get_all_administrators_links(entity: String) -> ExternResult<Vec<Link>>
 ```
 
-Retrieves all links representing administrators in the system.
+Retrieves all links representing administrators for a specific entity in the system.
 
-This function retrieves all links of type `AllAdministrators` from the root path.
+This function retrieves all links of type `AllAdministrators` from the entity's administrators path.
 
 Returns an error if:
 - Unable to retrieve links
 
-#### check_if_user_is_administrator
+#### check_if_entity_is_administrator
 
 ``` rust
-pub fn check_if_user_is_administrator(user_action_hash: ActionHash) -> ExternResult<bool>
+pub fn check_if_entity_is_administrator(input: EntityWithActionHash) -> ExternResult<bool>
 ```
-Checks if a given user is an administrator.
 
-This function retrieves all administrators links and checks if the given user action hash exists among them.
+Checks if the agent associated with a given public key is an administrator for any entity.
 
-Returns `true` if the user is an administrator, `false` otherwise
+This function checks if there are any links of type AgentAdministrators associated with the agent's public key.
+
+Returns `true` if the agent is an administrator for any entity, `false` otherwise
 
 #### check_if_agent_is_administrator
 
 ``` rust
-pub fn check_if_agent_is_administrator(agent_pubkey: AgentPubKey) -> ExternResult<bool>
+pub fn check_if_agent_is_administrator(input: EntityWithAgentPubkey) -> ExternResult<bool>
 ```
 
-Checks if the agent associated with a given public key is an administrator.
+Checks if the agent associated with a given public key is an administrator for any entity.
 
-This function first finds the user action hash associated with the agent public key, then calls `check_if_user_is_administrator`.
+This function checks if there are any links of type `AgentAdministrators` associated with the agent's public key.
 
-Returns `true` if the agent is an administrator, `false` otherwise.
+Returns `true` if the agent is an administrator for any entity, `false` otherwise.
 
 #### remove_administrator
 
