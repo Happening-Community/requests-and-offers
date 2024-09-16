@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { ActionHash, Link, Record } from '@holochain/client';
+import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
 import hc from '@services/HolochainClientService.svelte';
 import { decodeRecords } from '@utils';
 import type { User } from './users.svelte';
@@ -81,28 +81,31 @@ class AdministratorsStore {
     return recordsContents;
   }
 
-  async registerNetworkAdministrator(entity_action_hash: Uint8Array): Promise<boolean> {
+  async registerNetworkAdministrator(
+    entity_original_action_hash: Uint8Array,
+    agent_pubkeys: AgentPubKey[]
+  ): Promise<boolean> {
     return (await hc.callZome('administration', 'register_administrator', {
       entity: AdministrationEntity.Network,
-      entity_action_hash
+      entity_original_action_hash,
+      agent_pubkeys
     })) as boolean;
   }
 
   async checkIfAgentIsAdministrator(agentPubKey: Uint8Array): Promise<boolean> {
-    const result = (await hc.callZome(
-      'administration',
-      'check_if_agent_is_administrator',
-      agentPubKey
-    )) as boolean;
+    const result = (await hc.callZome('administration', 'check_if_agent_is_administrator', {
+      entity: AdministrationEntity.Network,
+      agent_pubkey: agentPubKey
+    })) as boolean;
     this.agentIsAdministrator = result;
 
     return result;
   }
 
-  async checkIfUserIsAdministrator(entity_action_hash: Uint8Array): Promise<boolean> {
+  async checkIfUserIsAdministrator(entity_original_action_hash: Uint8Array): Promise<boolean> {
     return (await hc.callZome('administration', 'check_if_entity_is_administrator', {
       entity: AdministrationEntity.Network,
-      entity_action_hash
+      entity_original_action_hash
     })) as boolean;
   }
 
@@ -130,10 +133,10 @@ class AdministratorsStore {
     return administratorUsers;
   }
 
-  async removeAdministrator(entity_action_hash: Uint8Array): Promise<boolean> {
+  async removeAdministrator(entity_original_action_hash: Uint8Array): Promise<boolean> {
     return (await hc.callZome('administration', 'remove_administrator', {
       entity: AdministrationEntity.Network,
-      entity_action_hash
+      entity_original_action_hash
     })) as boolean;
   }
 

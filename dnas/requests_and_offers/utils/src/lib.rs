@@ -5,6 +5,25 @@ pub mod dna_properties;
 
 pub use dna_properties::DnaProperties;
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct EntityActionHash {
+  pub entity_original_action_hash: ActionHash,
+  pub entity: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct EntityAgent {
+  pub entity: String,
+  pub agent_pubkey: AgentPubKey,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct EntityActionHashAgents {
+  pub entity: String,
+  pub entity_original_action_hash: ActionHash,
+  pub agent_pubkeys: Vec<AgentPubKey>,
+}
+
 pub fn check_if_progenitor() -> ExternResult<bool> {
   let progenitor_pubkey = DnaProperties::get_progenitor_pubkey()?;
 

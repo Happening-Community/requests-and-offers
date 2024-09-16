@@ -8,6 +8,7 @@ import {
   getAcceptedEntities,
   getAgentUser,
   getLatestUser,
+  getUserAgents,
   sampleUser,
 } from "../users/common";
 import {
@@ -28,7 +29,7 @@ import {
   getAllRevisionsForStatus,
 } from "./common";
 
-test("create a User and make it administrator", async () => {
+test("create a User, register administrator and remove administrator", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: User;
     let record: Record;
@@ -43,7 +44,9 @@ test("create a User and make it administrator", async () => {
     )[0];
     let bobUserLink = (await getAgentUser(bob.cells[0], bob.agentPubKey))[0];
     // Register AlicUser administrator
-    await registerNetworkAdministrator(alice.cells[0], aliceUserLink.target);
+    await registerNetworkAdministrator(alice.cells[0], aliceUserLink.target, [
+      alice.agentPubKey,
+    ]);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     const administrators = await getAllAdministratorsLinks(alice.cells[0]);
 
@@ -76,17 +79,26 @@ test("create a User and make it administrator", async () => {
       await checkIfAgentIsAdministrator(bob.cells[0], bob.agentPubKey)
     );
 
-    // Add bob as an administrator and then remove him
-    await registerNetworkAdministrator(bob.cells[0], bobUserLink.target);
+    const bobAgents = await getUserAgents(bob.cells[0], bobUserLink.target);
+    // Alice add bob as an administrator and then remove him
+    await registerNetworkAdministrator(
+      alice.cells[0],
+      bobUserLink.target,
+      bobAgents
+    );
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     assert.ok(
       await checkIfUserIsAdministrator(bob.cells[0], bobUserLink.target)
     );
 
-    await removeAdministrator(bob.cells[0], bobUserLink.target);
+    await removeAdministrator(alice.cells[0], bobUserLink.target);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     assert.notOk(
       await checkIfUserIsAdministrator(bob.cells[0], bobUserLink.target)
+    );
+
+    assert.notOk(
+      await checkIfAgentIsAdministrator(bob.cells[0], bob.agentPubKey)
     );
   });
 });
@@ -106,7 +118,9 @@ test("update User status", async () => {
     )[0];
     let bobUserLink = (await getAgentUser(bob.cells[0], bob.agentPubKey))[0];
     // Register AlicUser administrator
-    await registerNetworkAdministrator(alice.cells[0], aliceUserLink.target);
+    await registerNetworkAdministrator(alice.cells[0], aliceUserLink.target, [
+      alice.agentPubKey,
+    ]);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Update Alice's status
@@ -223,16 +237,15 @@ test("update User status", async () => {
       "Bob is a naughty boy",
       7
     );
+
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
     // Verify that Bob's status is suspended for 7 days
     bobStatus = await getLatestStatusForUser(bob.cells[0], bobUserLink.target);
-    console.log("bobStatus: ", bobStatus);
 
     const suspensionTime = new Date(bobStatus.suspended_until);
-    console.log("suspensionTime: ", suspensionTime.toLocaleString());
 
     const now = new Date();
-    console.log("now: ", now);
 
     const diffInDays = Math.round(
       (suspensionTime.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
@@ -267,7 +280,6 @@ test("update User status", async () => {
       bobStatusOriginalActionHash
     );
 
-    console.log(decodeRecords(suspensionHistory));
     assert.equal(suspensionHistory.length, 5);
   });
 });

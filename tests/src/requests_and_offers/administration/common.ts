@@ -23,14 +23,16 @@ export async function getAllUsers(cell: CallableCell): Promise<Link[]> {
 
 export async function registerNetworkAdministrator(
   cell: CallableCell,
-  entity_action_hash: ActionHash
+  entity_original_action_hash: ActionHash,
+  agent_pubkeys: AgentPubKey[]
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
     fn_name: "register_administrator",
     payload: {
       entity: "network",
-      entity_action_hash,
+      entity_original_action_hash,
+      agent_pubkeys,
     },
   });
 }
@@ -47,39 +49,42 @@ export async function getAllAdministratorsLinks(
 
 export function checkIfUserIsAdministrator(
   cell: CallableCell,
-  entity_action_hash: ActionHash
+  entity_original_action_hash: ActionHash
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
     fn_name: "check_if_entity_is_administrator",
     payload: {
       entity: "network",
-      entity_action_hash,
+      entity_original_action_hash,
     },
   });
 }
 
 export async function checkIfAgentIsAdministrator(
   cell: CallableCell,
-  agent_pub_key: AgentPubKey
+  agent_pubkey: AgentPubKey
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
     fn_name: "check_if_agent_is_administrator",
-    payload: agent_pub_key,
+    payload: {
+      entity: "network",
+      agent_pubkey,
+    },
   });
 }
 
 export async function removeAdministrator(
   cell: CallableCell,
-  entity_action_hash: ActionHash
+  entity_original_action_hash: ActionHash
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
     fn_name: "remove_administrator",
     payload: {
       entity: "network",
-      entity_action_hash,
+      entity_original_action_hash,
     },
   });
 }
