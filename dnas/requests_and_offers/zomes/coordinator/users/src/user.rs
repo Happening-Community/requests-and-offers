@@ -89,6 +89,17 @@ pub fn get_agent_user(author: AgentPubKey) -> ExternResult<Vec<Link>> {
   get_links(author, LinkTypes::MyUser, None)
 }
 
+#[hdk_extern]
+pub fn get_user_agents(user_original_action_hash: ActionHash) -> ExternResult<Vec<AgentPubKey>> {
+  let links = get_links(user_original_action_hash, LinkTypes::MyUser, None)?;
+  let agent_pubkeys: Vec<AgentPubKey> = links
+    .iter()
+    .filter_map(|link| link.target.clone().into_agent_pub_key())
+    .collect();
+
+  Ok(agent_pubkeys)
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateUserInput {
   pub original_action_hash: ActionHash,

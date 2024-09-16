@@ -67,6 +67,17 @@ export async function getAgentUser(
   });
 }
 
+export async function getUserAgents(
+  cell: CallableCell,
+  user_original_action_hash: ActionHash
+): Promise<AgentPubKey[]> {
+  return cell.callZome({
+    zome_name: "users",
+    fn_name: "get_user_agents",
+    payload: user_original_action_hash,
+  });
+}
+
 export async function getAcceptedEntities(cell: CallableCell): Promise<Link[]> {
   return cell.callZome({
     zome_name: "administration",
