@@ -19,6 +19,7 @@ type UserInDHT = {
 };
 
 type UserAdditionalFields = {
+  agents?: AgentPubKey[];
   remaining_time?: number;
   original_action_hash?: ActionHash;
   previous_action_hash?: ActionHash;
@@ -69,6 +70,10 @@ class UsersStore {
     if (links.length === 0) return null;
 
     return await this.getLatestUser(links[0].target);
+  }
+
+  async getUserAgents(original_action_hash: ActionHash): Promise<AgentPubKey[]> {
+    return (await hc.callZome('users', 'get_user_agents', original_action_hash)) as AgentPubKey[];
   }
 
   async getMyProfile(): Promise<User | null> {

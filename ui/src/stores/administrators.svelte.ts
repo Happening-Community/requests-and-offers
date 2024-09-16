@@ -133,10 +133,14 @@ class AdministratorsStore {
     return administratorUsers;
   }
 
-  async removeAdministrator(entity_original_action_hash: Uint8Array): Promise<boolean> {
+  async removeAdministrator(
+    entity_original_action_hash: Uint8Array,
+    agent_pubkeys: AgentPubKey[]
+  ): Promise<boolean> {
     return (await hc.callZome('administration', 'remove_administrator', {
       entity: AdministrationEntity.Network,
-      entity_original_action_hash
+      entity_original_action_hash,
+      agent_pubkeys
     })) as boolean;
   }
 

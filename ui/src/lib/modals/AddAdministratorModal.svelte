@@ -9,7 +9,7 @@
     type ModalSettings
   } from '@skeletonlabs/skeleton';
   import administratorsStore from '@stores/administrators.svelte';
-  import { type User } from '@stores/users.svelte';
+  import usersStore, { type User } from '@stores/users.svelte';
   import { queueAndReverseModal } from '@utils';
   import { onMount } from 'svelte';
 
@@ -49,7 +49,17 @@
       async response(r: boolean) {
         if (r) {
           try {
-            await administratorsStore.registerNetworkAdministrator(user.original_action_hash!);
+            const userAgents = await usersStore.getUserAgents(user.original_action_hash!);
+            console.log('userAgents', userAgents);
+
+            if (!userAgents.length) {
+              modalStore.close();
+              return;
+            }
+            await administratorsStore.registerNetworkAdministrator(
+              user.original_action_hash!,
+              userAgents
+            );
             administratorsStore.administrators = [...administrators, user];
           } catch (error) {}
           modalStore.close();

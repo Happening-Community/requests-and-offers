@@ -79,8 +79,10 @@ test("create a User, register administrator and remove administrator", async () 
       await checkIfAgentIsAdministrator(bob.cells[0], bob.agentPubKey)
     );
 
-    const bobAgents = await getUserAgents(bob.cells[0], bobUserLink.target);
     // Alice add bob as an administrator and then remove him
+    const bobAgents = await getUserAgents(bob.cells[0], bobUserLink.target);
+    console.log("bobAgents", bobAgents);
+
     await registerNetworkAdministrator(
       alice.cells[0],
       bobUserLink.target,
@@ -91,7 +93,7 @@ test("create a User, register administrator and remove administrator", async () 
       await checkIfUserIsAdministrator(bob.cells[0], bobUserLink.target)
     );
 
-    await removeAdministrator(alice.cells[0], bobUserLink.target);
+    await removeAdministrator(alice.cells[0], bobUserLink.target, bobAgents);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     assert.notOk(
       await checkIfUserIsAdministrator(bob.cells[0], bobUserLink.target)

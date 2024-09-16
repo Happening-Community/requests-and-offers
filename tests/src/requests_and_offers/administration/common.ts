@@ -77,7 +77,8 @@ export async function checkIfAgentIsAdministrator(
 
 export async function removeAdministrator(
   cell: CallableCell,
-  entity_original_action_hash: ActionHash
+  entity_original_action_hash: ActionHash,
+  agent_pubkeys: AgentPubKey[]
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
@@ -85,6 +86,7 @@ export async function removeAdministrator(
     payload: {
       entity: "network",
       entity_original_action_hash,
+      agent_pubkeys,
     },
   });
 }

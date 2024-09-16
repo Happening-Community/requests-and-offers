@@ -33,6 +33,13 @@ pub fn create_user(user: User) -> ExternResult<Record> {
     (),
   )?;
 
+  create_link(
+    user_hash.clone(),
+    agent_info()?.agent_initial_pubkey,
+    LinkTypes::UserAgents,
+    (),
+  )?;
+
   let created_status_record = create_status(user_hash.clone())?;
 
   create_link(
@@ -91,7 +98,7 @@ pub fn get_agent_user(author: AgentPubKey) -> ExternResult<Vec<Link>> {
 
 #[hdk_extern]
 pub fn get_user_agents(user_original_action_hash: ActionHash) -> ExternResult<Vec<AgentPubKey>> {
-  let links = get_links(user_original_action_hash, LinkTypes::MyUser, None)?;
+  let links = get_links(user_original_action_hash, LinkTypes::UserAgents, None)?;
   let agent_pubkeys: Vec<AgentPubKey> = links
     .iter()
     .filter_map(|link| link.target.clone().into_agent_pub_key())

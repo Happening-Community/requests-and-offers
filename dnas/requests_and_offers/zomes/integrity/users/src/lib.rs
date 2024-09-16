@@ -15,6 +15,7 @@ pub enum LinkTypes {
   UserUpdates,
   AllUsers,
   MyUser,
+  UserAgents,
   UserStatus,
 }
 

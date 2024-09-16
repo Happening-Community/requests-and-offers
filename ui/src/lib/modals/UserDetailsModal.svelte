@@ -8,7 +8,7 @@
     type ModalSettings
   } from '@skeletonlabs/skeleton';
   import administratorsStore, { type Revision, type Status } from '@stores/administrators.svelte';
-  import { type User } from '@stores/users.svelte';
+  import usersStore, { type User } from '@stores/users.svelte';
   import { onMount } from 'svelte';
   import PromptModal from '../dialogs/PromptModal.svelte';
   import ConfirmModal from '@lib/dialogs/ConfirmModal.svelte';
@@ -214,7 +214,10 @@
   async function removeAdministrator() {
     if (!user) return;
 
-    await administratorsStore.removeAdministrator(user.original_action_hash!);
+    const userAgents = await usersStore.getUserAgents(user.original_action_hash!);
+    if (!userAgents.length) return;
+
+    await administratorsStore.removeAdministrator(user.original_action_hash!, userAgents);
     await administratorsStore.getAllAdministrators();
   }
 
