@@ -1,4 +1,16 @@
-type PromptModalMeta = {
+export type AlertModalMeta = {
+  id: string;
+  message: string;
+};
+
+export type ConfirmModalMeta = {
+  id: string;
+  message: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+};
+
+export type PromptModalMeta = {
   id: string;
   message: string;
   inputs: {
@@ -12,11 +24,4 @@ type PromptModalMeta = {
     max?: number;
   }[];
   confirmText?: string;
-};
-
-type ConfirmModalMeta = {
-  id: string;
-  message: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
 };

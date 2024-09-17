@@ -13,6 +13,7 @@
   import PromptModal from '../dialogs/PromptModal.svelte';
   import ConfirmModal from '@lib/dialogs/ConfirmModal.svelte';
   import { queueAndReverseModal } from '@utils';
+  import type { ConfirmModalMeta, PromptModalMeta } from '@lib/types';
 
   const { administrators } = $derived(administratorsStore);
   const modalStore = getModalStore();

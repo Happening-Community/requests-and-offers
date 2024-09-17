@@ -1,5 +1,6 @@
 <script lang="ts">
   import ConfirmModal from '@lib/dialogs/ConfirmModal.svelte';
+  import type { ConfirmModalMeta } from '@lib/types';
   import {
     Avatar,
     ConicGradient,

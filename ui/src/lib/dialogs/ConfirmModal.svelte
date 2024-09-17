@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { ConfirmModalMeta } from '@lib/types';
   import { getModalStore } from '@skeletonlabs/skeleton';
 
   const modalStore = getModalStore();
