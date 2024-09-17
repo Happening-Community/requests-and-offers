@@ -23,7 +23,7 @@ pub fn register_administrator(input: EntityActionHashAgents) -> ExternResult<boo
   for agent_pubkey in input.agent_pubkeys.clone() {
     create_link(
       agent_pubkey.clone(),
-      input.entity_original_action_hash.clone(),
+      path.path_entry_hash()?,
       LinkTypes::AgentAdministrators,
       (),
     )?;
@@ -95,8 +95,7 @@ pub fn remove_administrator(input: EntityActionHashAgents) -> ExternResult<bool>
     )));
   }
 
-  let all_administrators_links = get_all_administrators_links(input.entity.clone())?;
-  let administrator_link = all_administrators_links
+  let administrator_link = administrators_links
     .iter()
     .find(|link| link.target == input.entity_original_action_hash.clone().into())
     .ok_or(wasm_error!(Guest(
@@ -105,15 +104,15 @@ pub fn remove_administrator(input: EntityActionHashAgents) -> ExternResult<bool>
 
   delete_link(administrator_link.create_link_hash.clone())?;
 
-  let agent_admin_links = get_links(
-    agent_info()?.agent_latest_pubkey,
-    LinkTypes::AgentAdministrators,
-    None,
-  )?;
-  let agent_admin_link = agent_admin_links.first().ok_or(wasm_error!(Guest(
-    "Could not find the agent administrator link".to_string()
-  )))?;
+  for agent_pubkey in input.agent_pubkeys.clone() {
+    let links = get_links(agent_pubkey, LinkTypes::AgentAdministrators, None)?;
 
-  delete_link(agent_admin_link.create_link_hash.clone())?;
+    let link = links.first().ok_or(wasm_error!(Guest(
+      "Could not find the administrator link".to_string()
+    )))?;
+
+    delete_link(link.create_link_hash.clone())?;
+  }
+
   Ok(true)
 }

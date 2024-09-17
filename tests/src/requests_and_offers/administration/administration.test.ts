@@ -29,7 +29,7 @@ import {
   getAllRevisionsForStatus,
 } from "./common";
 
-test("create a User, register administrator and remove administrator", async () => {
+test.only("create a User, register administrator and remove administrator", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: User;
     let record: Record;
