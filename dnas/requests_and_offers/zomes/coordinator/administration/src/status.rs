@@ -193,7 +193,7 @@ pub fn update_entity_status(input: UpdateEntityActionHash) -> ExternResult<Recor
     entity: input.entity.clone(),
   })? {
     return Err(wasm_error!(Guest(
-      "Only administrators can update the Status of a User".to_string()
+      "Only administrators can update the Status of a Entity".to_string()
     )));
   }
 
@@ -228,7 +228,7 @@ pub fn update_entity_status(input: UpdateEntityActionHash) -> ExternResult<Recor
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct SuspendUserInput {
+pub struct SuspendEntityInput {
   pub entity: String,
   pub entity_original_action_hash: ActionHash,
   pub status_original_action_hash: ActionHash,
@@ -238,7 +238,7 @@ pub struct SuspendUserInput {
 }
 
 #[hdk_extern]
-pub fn suspend_entity_temporarily(input: SuspendUserInput) -> ExternResult<bool> {
+pub fn suspend_entity_temporarily(input: SuspendEntityInput) -> ExternResult<bool> {
   if input.duration_in_days.is_none() {
     return Err(wasm_error!(Guest(
       "Duration in days must be provided".to_string()
@@ -260,7 +260,7 @@ pub fn suspend_entity_temporarily(input: SuspendUserInput) -> ExternResult<bool>
 }
 
 #[hdk_extern]
-pub fn suspend_entity_indefinitely(input: SuspendUserInput) -> ExternResult<bool> {
+pub fn suspend_entity_indefinitely(input: SuspendEntityInput) -> ExternResult<bool> {
   let update_status_input = UpdateEntityActionHash {
     entity: input.entity,
     entity_original_action_hash: input.entity_original_action_hash,
@@ -284,7 +284,7 @@ pub fn unsuspend_entity_if_time_passed(input: UpdateInput) -> ExternResult<bool>
     Some(link) => link,
     None => {
       return Err(wasm_error!(Guest(
-        "Could not find the user's Status link".to_string()
+        "Could not find the entity's Status link".to_string()
       )))
     }
   };
@@ -294,11 +294,11 @@ pub fn unsuspend_entity_if_time_passed(input: UpdateInput) -> ExternResult<bool>
     .target
     .into_action_hash()
     .ok_or(wasm_error!(Guest(
-      "Could not find the user action hash".to_string()
+      "Could not find the entity action hash".to_string()
     )))?;
 
   let mut status = get_latest_status(status_action_hash)?.ok_or(wasm_error!(Guest(
-    "Could not find the latest user Status".to_string()
+    "Could not find the latest entity Status".to_string()
   )))?;
 
   if status.status_type == "suspended temporarily" {
@@ -328,7 +328,7 @@ pub fn unsuspend_entity_if_time_passed(input: UpdateInput) -> ExternResult<bool>
 }
 
 #[hdk_extern]
-pub fn unsuspend_user(input: UpdateInput) -> ExternResult<bool> {
+pub fn unsuspend_entity(input: UpdateInput) -> ExternResult<bool> {
   let update_status_input = UpdateEntityActionHash {
     entity: input.entity,
     entity_original_action_hash: input.entity_original_action_hash,
