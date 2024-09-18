@@ -1,10 +1,13 @@
 <script lang="ts">
   import moment from 'moment-timezone';
-  import { FileDropzone, InputChip, Avatar } from '@skeletonlabs/skeleton';
+  import { FileDropzone, InputChip, Avatar, getModalStore } from '@skeletonlabs/skeleton';
+  import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
   import usersStore, { type User, type UserType } from '@stores/users.svelte';
   import { goto } from '$app/navigation';
   import { createMockedUsers } from '@mocks';
-  import { onMount } from 'svelte';
+  import { createRawSnippet, onMount, type Snippet } from 'svelte';
+  import AlertModal from '@lib/dialogs/AlertModal.svelte';
+  import type { AlertModalMeta } from '@lib/types';
 
   type FormattedTimezone = {
     name: string;
@@ -12,7 +15,38 @@
     offset: number;
   };
 
+  const alertModalComponent: ModalComponent = { ref: AlertModal };
+  const alertModal = (meta: AlertModalMeta): ModalSettings => {
+    return {
+      type: 'component',
+      component: alertModalComponent,
+      meta
+    };
+  };
+
   const { myProfile } = $derived(usersStore);
+  const modalStore = getModalStore();
+
+  const welcomeAndNextStepsMessage = (name: string) => `
+       <img src="/hAppeningsLogoWsun2.webp" alt="hAppenings Community Logo" class="w-28" />
+        
+        <h2 class="text-xl font-semibold text-center">Welcome to hCRON!</h2>
+        
+        <p class="text-lg text-center">Hello ${name}, we're thrilled to have you join our community!</p>
+        
+        <div class="space-y-4">
+          <div class="p-4 rounded-lg border-l-4 border-blue-500">
+            <h3 class="font-bold text-lg text-tertiary-500">Important Next Steps:</h3>
+            <ul class="list-disc pl-5 mt-2 space-y-2">
+              <li>A network administrator will contact you via email and platform message shortly.</li>
+              <li>You'll be invited to schedule a meeting for identity verification.</li>
+              <li>After successful verification, your status will update to "accepted".</li>
+            </ul>
+          </div>
+          
+          <p class="text-sm">Once accepted, you'll gain full access to participate in our vibrant community!</p>
+        </div>
+      `;
 
   let form: HTMLFormElement;
   let timezones = moment.tz.names();
@@ -73,8 +107,17 @@
 
   async function mockUsers() {
     try {
-      await usersStore.createUser((await createMockedUsers())[0]);
+      let user: User = (await createMockedUsers())[0];
+      await usersStore.createUser(user);
       await usersStore.getMyProfile();
+
+      modalStore.trigger(
+        alertModal({
+          id: 'welcome-and-next-steps',
+          message: welcomeAndNextStepsMessage(user.name),
+          confirmLabel: 'Ok !'
+        })
+      );
 
       goto('/user');
     } catch (error) {
@@ -103,6 +146,13 @@
     try {
       await usersStore.createUser(user);
       await usersStore.getMyProfile();
+
+      modalStore.trigger(
+        alertModal({
+          id: 'welcome-and-next-steps',
+          message: welcomeAndNextStepsMessage(user.name)
+        })
+      );
 
       goto('/user');
     } catch (error) {

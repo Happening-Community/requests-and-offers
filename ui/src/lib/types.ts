@@ -1,6 +1,7 @@
 export type AlertModalMeta = {
   id: string;
   message: string;
+  confirmLabel?: string;
 };
 
 export type ConfirmModalMeta = {
