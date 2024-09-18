@@ -80,7 +80,7 @@ pub fn create_user(user: User) -> ExternResult<Record>
 
 Creates a new user profile.
 
-This function creates a new user entry, adds it to the "users" path, links it to the creating agent with a link type of `MyUser`, and creates a status record linked to the user with the `UserStatus` link type.
+This function creates a new user entry, adds it to the `users` path with a `AllUsers` link, make a link from the agent to the new user with a `MyUser` link, create a link from the created user to the agent with a `UserAgents` link and creates a status record linked from the user with the `UserStatus` link type.
 
 Returns an error if:
 - The agent already has a user profile
@@ -89,12 +89,12 @@ Returns an error if:
 #### get_latest_user_record
 
 ``` rust
-rust pub fn get_latest_user_record(original_action_hash: ActionHash) -> ExternResult<Option<Record>>
+pub fn get_latest_user_record(user_original_action_hash: ActionHash) -> ExternResult<Option<Record>>
 ```
 
 Retrieves the latest user record associated with a given action hash.
 
-This function follows the chain of updates to find the most recent user record.
+This function follows the chain of updates using the `UserUpdates` links to find the most recent user record.
 
 Returns an error if:
 - Unable to find links
@@ -103,7 +103,7 @@ Returns an error if:
 #### get_latest_user
 
 ``` rust
-rust pub fn get_latest_user(original_action_hash: ActionHash) -> ExternResult<User>
+pub fn get_latest_user(user_original_action_hash: ActionHash) -> ExternResult<User>
 ```
 
 Retrieves the latest user data associated with a given action hash.
@@ -117,17 +117,28 @@ Returns an error if:
 #### get_agent_user
 
 ``` rust
-rust pub fn get_agent_user(author: AgentPubKey) -> ExternResult<Vec<Link>>
+pub fn get_agent_user(author: AgentPubKey) -> ExternResult<Vec<Link>>
 ```
 
 Retrieves all user profiles associated with a given agent public key.
 
 This function follows the "MyUser" link type to find user records linked to the agent.
 
+#### get_user_agents
+
+``` rust
+pub fn get_user_agents(user_original_action_hash: ActionHash) -> ExternResult<Vec<AgentPubKey>>
+```
+
+Retrieves all agents associated with a given user profile.
+
+This function follows the "UserAgents" link type to find agent public keys linked to the user.
+
+
 #### update_user
 
 ``` rust
-rust pub fn update_user(input: UpdateUserInput) -> ExternResult<Record>
+pub fn update_user(input: UpdateUserInput) -> ExternResult<Record>
 ```
 
 Updates an existing user profile.
@@ -145,13 +156,14 @@ Returns an error if:
 #### get_all_users
 
 ``` rust
-rust pub fn get_all_users(_: ()) -> ExternResult<Vec<Link>>
+pub fn get_all_users(_: ()) -> ExternResult<Vec<Link>>
 ```
 
 Retrieves all user profiles in the system.
 
 This function checks if the calling agent is an administrator before proceeding.
-It retrieves all links of type `AllUsers` from the root path.
+
+It retrieves all links of type `AllUsers` from the `users` root path.
 
 Returns an error if:
 - The calling agent is not an administrator
@@ -159,7 +171,7 @@ Returns an error if:
 #### get_user_status_link
 
 ``` rust
-rust pub fn get_user_status_link(user_original_action_hash: ActionHash) -> ExternResult<Option<Link>>
+pub fn get_user_status_link(user_user_original_action_hash: ActionHash) -> ExternResult<Option<Link>>
 ```
 
 Retrieves the status link associated with a given user profile.

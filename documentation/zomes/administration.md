@@ -2,7 +2,7 @@
 
 ## 1. Introduction
 
-The Administration Zome is a crucial component of the Requests and Offers Holochain application. It provides functionality for managing administrators and user statuses within the system.
+The Administration Zome is a crucial component of the Requests and Offers Holochain application. It provides functionality for managing administrators and entity statuses within the system.
 
 ## 2. Zome Integrity
 
@@ -10,7 +10,7 @@ The Administration Zome implements several integrity functions to ensure data co
 
 ### Entry Types
 
-The zome defines one main entry type, `Status`, which represents a user's status with various attributes such as status type, reason, and suspension time.
+The zome defines one main entry type, `Status`, which represents a entity's status with various attributes such as status type, reason, and suspension time.
 
 ``` rust
 pub struct Status {
@@ -43,8 +43,8 @@ pub enum LinkTypes {
   AllAdministrators,
   AgentAdministrators,
   StatusUpdates,
-  AllStatus,
-  EntityStatus,
+  AllStatuses,
+  Entitiestatus,
   AcceptedEntity,
 }
 ```
@@ -79,26 +79,33 @@ Prevents deletion of status entries.
 #### register_administrator
 
 ``` rust
-pub fn register_administrator(user_action_hash: ActionHash) -> ExternResult<bool>
+pub fn register_administrator(input: EntityActionHashAgents) -> ExternResult<bool> 
 ```
 
-Registers a user as an administrator for a specific entity.
+Registers a entity as an administrator for a specific entity.
 
-This function checks if the user is already an administrator for the entity. If not, it creates a link between the entity's administrators path and the user's action hash, and creates another link between the agent's public key and the entity's administrators path.
+This function received 3 arguments :
+- `entity` that is a `string` that is the name of the entity
+- `entity_original_action_hash` that is a `ActionHash` of the entity
+- `agent_pubkeys` that is an array of `AgentPubKey`
+
+It checks if the entity is already an administrator for the entity. If not, it creates a `AllAdministrators` link between the entity's `administrators` path and the entity's action hash, and creates `AgentAdministrators` links for each agent in the `agent_pubkeys` array.
 
 Returns `Ok(true)` if successful, or an error if:
-- The user is already an administrator for the entity
+- The entity is already an administrator for the entity
 
 The `register_administrator` is temporarily used to manually add the first administrator. In the future, its logic will be moved to the `add_administrator` function and the first administrator will be registered using the `progenitor` pattern. `register_administrator` must be secured to ensure that it cannot be called by anyone other than the first administrator.
 
 #### add_administrator
 
 ``` rust
-pub fn add_administrator(user_action_hash: ActionHash) -> ExternResult<bool>
+pub fn add_administrator(input: EntityActionHashAgents) -> ExternResult<bool>
 ```
 Adds a new administrator to the system for a specific entity.
 
-This function checks if the calling agent is already an administrator for the entity. If so, it calls `register_administrator` to add the new administrator.
+This function take the same `EntityActionHashAgents` input as `register_administrator`.
+
+It checks if the calling agent is already an administrator for the entity using `check_if_entity_is_administrator` function. If so, it calls `register_administrator` to add the new administrator.
 
 Returns `Ok(true)` if successful, or an error if:
 - The calling agent is not an administrator for the entity
@@ -111,7 +118,10 @@ pub fn get_all_administrators_links(entity: String) -> ExternResult<Vec<Link>>
 
 Retrieves all links representing administrators for a specific entity in the system.
 
-This function retrieves all links of type `AllAdministrators` from the entity's administrators path.
+This function received 3 arguments :
+- `entity` that is a `string` that is the name of the entity
+- `entity_original_action_hash` that is a `ActionHash` of the entity
+- `agent_pubkeys` that is an array of `AgentPubKey`
 
 Returns an error if:
 - Unable to retrieve links
@@ -122,52 +132,73 @@ Returns an error if:
 pub fn check_if_entity_is_administrator(input: EntityWithActionHash) -> ExternResult<bool>
 ```
 
-Checks if the agent associated with a given public key is an administrator for any entity.
+Checks if the given entity is an administrator.
 
-This function checks if there are any links of type AgentAdministrators associated with the agent's public key.
+This function take 2 arguments:
+- `entity` that is a `string` that is the name of the entity
+- `entity_original_action_hash` that is a `ActionHash` of the entity
 
-Returns `true` if the agent is an administrator for any entity, `false` otherwise
+
+It checks if there are any links of type `AgentAdministrators` associated with the agent's public key.
+
+Returns `true` if the agent is an administrator for any entity, `false` otherwise.
 
 #### check_if_agent_is_administrator
 
 ``` rust
-pub fn check_if_agent_is_administrator(input: EntityWithAgentPubkey) -> ExternResult<bool>
+pub fn check_if_agent_is_administrator(input: EntityActionHash) -> ExternResult<bool>
 ```
 
-Checks if the agent associated with a given public key is an administrator for any entity.
+Checks if the given agent is an administrator.
 
-This function checks if there are any links of type `AgentAdministrators` associated with the agent's public key.
+This function take 2 arguments:
+- `entity` that is a `string` that is the name of the entity
+- `agent_pubkey` that is a `AgentPubKey` of the agent
+
+
+It checks if there are any links of type `AgentAdministrators` associated with the agent's public key.
 
 Returns `true` if the agent is an administrator for any entity, `false` otherwise.
 
 #### remove_administrator
 
 ``` rust
-pub fn remove_administrator(user_action_hash: ActionHash) -> ExternResult<bool>
+pub fn remove_administrator(input: EntityActionHashAgents) -> ExternResult<bool>
 ```
 Removes an administrator from the system.
 
+This function takes 3 arguments:
+- `entity` that is a `string` that is the name of the entity
+- `entity_original_action_hash` that is a `ActionHash` of the entity
+- `agent_pubkeys` that is an array of `AgentPubKey`
+
 This function checks if the current agent is an administrator, ensures there will be at least one administrator left after removal, finds the link representing the administrator to be removed, and deletes it.
+
+Then, it get the `AgentAdministrators` links for all the agents public keys in the `agent_pubkeys` array, and deletes them as well.
 
 Returns an error if:
 - The current agent is not an administrator
 - Removing this administrator would leave no administrators
-- Unable to find or delete the administrator link
+- Unable to find or delete an administrator link
 
 ### Status
 
 #### create_status
 
 ``` rust
-pub fn create_status(user_original_action_hash: ActionHash) -> ExternResult<Record>
+pub fn create_status(input: EntityActionHash) -> ExternResult<Record>
 ```
 
-Creates a new status entry for a user.
+Creates a new status entry for an entity.
 
-This function checks if the user already has a status, creates a new status entry, and links it to the "all_status" path.
+This function take 2 arguments:
+- `entity` that is a `string` that is the name of the entity
+- `entity_original_action_hash` that is a `ActionHash` of the entity
+
+It checks if the entity already has a status, creates a new status entry, and links it to the `<entity>.status` path with a `AllStatuses` link. It also create a `Entitiestatus` link from the entity original action hash to the new status original action hash.
 
 Returns an error if:
-- The user already has a status
+- The entity already has a status
 - Unable to create the status entry or link
 
 #### get_latest_status_record
@@ -178,7 +209,7 @@ pub fn get_latest_status_record(original_action_hash: ActionHash) -> ExternResul
 
 Retrieves the latest status record associated with a given original action hash.
 
-This function follows the chain of updates to find the most recent status record.
+This function follows the chain of updates using the `StatusUpdates` link to find the most recent status record.
 
 Returns an error if:
 - Unable to find links
@@ -199,69 +230,70 @@ Returns an error if:
 - Failed to deserialize the status data
 
 
-#### get_latest_status_record_for_user
+#### get_latest_status_record_for_entity
 
 ``` rust
-pub fn get_latest_status_record_for_user(user_original_action_hash: ActionHash) -> ExternResult<Option<Record>>
+pub fn get_latest_status_record_for_entity(
+  input: EntityActionHash,
+) -> ExternResult<Option<Record>> 
 ```
 
-Retrieves the latest status record associated with a given user profile.
+Retrieves the latest status record associated with a given entity.
 
-This function first retrieves the status link for the user, then calls `get_latest_status_record` with that link.
+This function takes 2 arguments:
+- `entity` that is a `string` that is the name of the entity
+- `entity_original_action_hash` that is a `ActionHash` of the entity
+
+It first retrieves the status link for the entity using the `Entitiestatus` link, then calls `get_latest_status_record` with that link.
 
 Returns an error if:
 - Unable to retrieve the status link
 - Unable to find the latest status record
 
-#### get_latest_status_for_user
+
+#### create_accepted_entity_link
 
 ``` rust
-pub fn get_latest_status_for_user(user_original_action_hash: ActionHash) -> ExternResult<Option<Status>>
+pub fn create_accepted_entity_link(input: EntityActionHash) -> ExternResult<bool>
 ```
 
-Retrieves the latest status data associated with a given user profile.
+Creates a link indicating that a entity has been accepted.
 
-This function calls `get_latest_status_record_for_user`, then extracts and returns the Status data from the record.
+This function takes 2 arguments:
+- `entity` that is a `string` that is the name of the entity
+- `entity_original_action_hash` that is a `ActionHash` of the entity
 
-Returns an error if:
-- Unable to find the latest status record
-- Failed to deserialize the status data
-
-#### create_accepted_user_link
-
-``` rust
-pub fn create_accepted_user_link(original_action_hash: ActionHash) -> ExternResult<bool>
-```
-
-Creates a link indicating that a user has been accepted.
-
-This function creates a link between the "accepted_users" path and the user's action hash.
+It creates a `AcceptedEntity` link between the `<entity>.status.accepted` path and the entity's action hash.
 
 Returns an error if:
 - Unable to create the link
 
-#### delete_accepted_user_link
+#### delete_accepted_entity_link
 
 ``` rust
-pub fn delete_accepted_user_link(original_action_hash: ActionHash) -> ExternResult<bool>
+pub fn delete_accepted_entity_link(input: EntityActionHash) -> ExternResult<bool>
 ```
 
-Deletes the link indicating that a user has been accepted.
+Deletes the link indicating that a entity has been accepted.
 
-This function finds the link representing the accepted user and deletes it.
+This function takes 2 arguments:
+- `entity` that is a `string` that is the name of the entity
+- `entity_original_action_hash` that is a `ActionHash` of the entity
+
+It finds the `AcceptedEntity` link representing the accepted entity and deletes it.
 
 Returns an error if:
 - Unable to find or delete the link
 
-#### get_accepted_users
+#### get_accepted_entities
 
 ``` rust
-pub fn get_accepted_users(_: ()) -> ExternResult<Vec<Link>>
+pub fn get_accepted_entities(entity: String) -> ExternResult<Vec<Link>>
 ```
 
-Retrieves all links representing accepted users in the system.
+Retrieves all links representing the accepted specified entities in the network.
 
-This function retrieves all links of type `AcceptedEntity` from the "accepted_users" path.
+This function retrieves all links of type `AcceptedEntity` from the `<entity>.status.accepted` path.
 
 Returns an error if:
 - Unable to retrieve links
@@ -279,71 +311,106 @@ This function uses a utility function `get_all_revisions_for_entry` to retrieve 
 Returns an error if:
 - Unable to retrieve revisions
 
-#### update_user_status
+#### update_entity_status
 
 ``` rust
-pub fn update_user_status(input: UpdateStatusInput) -> ExternResult<Record>
+pub fn update_entity_status(input: UpdateEntityActionHash) -> ExternResult<Record>
 ```
 
-Updates a user's status.
+Updates a entity's status.
 
-This function checks if the calling agent is an administrator, updates the status entry, creates a link between the old and new status entries, removes the accepted user link if necessary, and adds it back if the new status is "accepted".
+This function takes 5 arguments:
+- `entity` that is a `string` that is the name of the entity
+- `entity_original_action_hash` that is a `ActionHash` of the entity
+- `status_original_action_hash` that is a `ActionHash` of the status
+- `status_previous_action_hash` that is a `ActionHash` of the previous status
+- `new_status` that is a `Status` type.
+
+It checks if the calling agent is an administrator, updates the status entry, creates a `StatusUpdates` link between the old and new status entries, removes the `AcceptedEntity` link if necessary, and adds it back if the new status is "accepted".
 
 Returns an error if:
 - The calling agent is not an administrator
 - Unable to update the status entry or create links
 
-#### suspend_user_temporarily
+#### suspend_entity_temporarily
 
 ``` rust
-pub fn suspend_user_temporarily(input: SuspendUserInput) -> ExternResult<bool>
+pub fn suspend_entity_temporarily(input: SuspendUserInput) -> ExternResult<bool>
 ```
 
-Suspends a user temporarily.
+Suspends a entity temporarily.
 
-This function calls `update_user_status` with a suspended status and a duration.
+This function takes 6 arguments:
+- `entity` that is a `string` that is the name of the entity
+- `entity_original_action_hash` that is a `ActionHash` of the entity
+- `status_original_action_hash` that is a `ActionHash` of the status
+- `status_previous_action_hash` that is a `ActionHash` of the previous status
+- `reason` that is a `string`
+- `duration` that is a `i64` that represents the duration of the suspension
+
+It calls `update_entity_status` with a suspended status and a duration.
 
 Returns an error if:
 - Duration is not provided
-- Unable to update the user status
+- Unable to update the entity status
 
-#### suspend_user_indefinitely
-
-``` rust
-pub fn suspend_user_indefinitely(input: SuspendUserInput) -> ExternResult<bool>
-```
-
-Suspends a user indefinitely.
-
-This function calls `update_user_status` with a suspended status and no duration.
-
-Returns an error if:
-- Unable to update the user status
-
-#### unsuspend_user_if_time_passed
+#### suspend_entity_indefinitely
 
 ``` rust
-pub fn unsuspend_user_if_time_passed(input: UpdateInput) -> ExternResult<bool>
+pub fn suspend_entity_indefinitely(input: SuspendUserInput) -> ExternResult<bool>
 ```
 
-Unsuspends a user if the suspension period has passed.
+Suspends a entity indefinitely.
 
-This function retrieves the latest status, checks if it's a temporary suspension, and if the current time exceeds the suspension end time, it updates the status to "accepted".
+This function takes 6 arguments:
+- `entity` that is a `string` that is the name of the entity
+- `entity_original_action_hash` that is a `ActionHash` of the entity
+- `status_original_action_hash` that is a `ActionHash` of the status
+- `status_previous_action_hash` that is a `ActionHash` of the previous status
+- `reason` that is a `string`
+
+It calls `update_entity_status` with a suspended status and no duration.
 
 Returns an error if:
-- Unable to retrieve the user's status
-- Unable to update the user status
+- Unable to update the entity status
 
-#### unsuspend_user
+#### unsuspend_entity_if_time_passed
 
 ``` rust
-pub fn unsuspend_user(input: UpdateInput) -> ExternResult<bool>
+pub fn unsuspend_entity_if_time_passed(input: UpdateInput) -> ExternResult<bool>
 ```
 
-Unsuspends a user regardless of the current time.
+Unsuspends a entity if the suspension period has passed.
 
-This function calls `update_user_status` with an "accepted" status.
+
+This function takes 4 arguments:
+- `entity` that is a `string` that is the name of the entity
+- `entity_original_action_hash` that is a `ActionHash` of the entity
+- `status_original_action_hash` that is a `ActionHash` of the status
+- `status_previous_action_hash` that is a `ActionHash` of the previous status
+
+It retrieves the latest status, checks if it's a temporary suspension, and if the current time exceeds the suspension end time, it updates the status to "accepted".
 
 Returns an error if:
-- Unable to update the user status
+- Unable to retrieve the entity's status
+- Unable to update the entity status
+
+#### unsuspend_entity
+
+``` rust
+pub fn unsuspend_entity(input: UpdateInput) -> ExternResult<bool>
+```
+
+Unsuspends a entity regardless of the current time.
+
+This function takes 4 arguments:
+- `entity` that is a `string` that is the name of the entity
+- `entity_original_action_hash` that is a `ActionHash` of the entity
+- `status_original_action_hash` that is a `ActionHash` of the status
+- `status_previous_action_hash` that is a `ActionHash` of the previous status
+
+This function calls `update_entity_status` with an "accepted" status.
+
+Returns an error if:
+- Unable to update the entity status
 
