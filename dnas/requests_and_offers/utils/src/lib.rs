@@ -7,8 +7,8 @@ pub use dna_properties::DnaProperties;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EntityActionHash {
-  pub entity_original_action_hash: ActionHash,
   pub entity: String,
+  pub entity_original_action_hash: ActionHash,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

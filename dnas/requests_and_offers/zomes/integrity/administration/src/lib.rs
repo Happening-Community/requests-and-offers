@@ -18,7 +18,7 @@ pub enum LinkTypes {
   AllAdministrators,
   AgentAdministrators,
   StatusUpdates,
-  AllStatus,
+  AllStatuses,
   EntityStatus,
   AcceptedEntity,
 }

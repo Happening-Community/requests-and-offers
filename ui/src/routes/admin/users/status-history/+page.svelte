@@ -11,5 +11,5 @@
 <section class="space-y-10">
   <h1 class="h1 text-center">Status History</h1>
 
-  <StatusTable statusHistory={administratorsStore.allStatusHistory} />
+  <StatusTable statusHistory={administratorsStore.allStatusesHistory} />
 </section>

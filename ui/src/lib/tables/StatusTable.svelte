@@ -8,12 +8,12 @@
 
   const { statusHistory }: Props = $props();
 
-  let allStatusColors: string[] = $state([]);
+  let allStatusesColors: string[] = $state([]);
 
   $effect(() => {
     console.log('statusHistory', statusHistory);
 
-    allStatusColors = statusHistory.map((status) => {
+    allStatusesColors = statusHistory.map((status) => {
       switch (status.status.status_type) {
         case 'pending':
           return 'primary-400';
@@ -28,7 +28,7 @@
     });
 
     return () => {
-      allStatusColors = [];
+      allStatusesColors = [];
     };
   });
 
@@ -57,7 +57,7 @@
 
     <tbody>
       {#each statusHistory as Revision, i}
-        <tr class="text-{allStatusColors[i]}">
+        <tr class="text-{allStatusesColors[i]}">
           <td>{new Date(Revision.timestamp).toLocaleString()}</td>
           <td>{Revision.user.name}</td>
           <td>{Revision.status.status_type}</td>

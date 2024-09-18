@@ -41,7 +41,7 @@ class AdministratorsStore {
   administrators: User[] = $state([]);
   nonAdministrators: User[] = $state([]);
   agentIsAdministrator = $state(false);
-  allStatusHistory: Revision[] = $state([]);
+  allStatusesHistory: Revision[] = $state([]);
 
   private async getAllUsersLinks(): Promise<Link[]> {
     return (await hc.callZome('users', 'get_all_users', null)) as Link[];
@@ -239,7 +239,7 @@ class AdministratorsStore {
 
     revisions.sort((a, b) => b.timestamp - a.timestamp);
 
-    this.allStatusHistory = revisions;
+    this.allStatusesHistory = revisions;
     return revisions;
   }
 

@@ -9,14 +9,16 @@ use crate::administration::check_if_agent_is_administrator;
 
 #[hdk_extern]
 pub fn create_status(input: EntityActionHash) -> ExternResult<Record> {
-  let link = get_links(
+  let links = get_links(
     input.entity_original_action_hash.clone(),
     LinkTypes::EntityStatus,
     None,
   )?;
 
-  if !link.is_empty() {
-    return Err(wasm_error!(Guest("You already have a Status".to_string())));
+  if !links.is_empty() {
+    return Err(wasm_error!(Guest(
+      "This status already has a Status".to_string()
+    )));
   }
 
   let status_hash = create_entry(&EntryTypes::Status(Status::pending()))?;
@@ -28,7 +30,7 @@ pub fn create_status(input: EntityActionHash) -> ExternResult<Record> {
   create_link(
     path.path_entry_hash()?,
     status_hash.clone(),
-    LinkTypes::AllStatus,
+    LinkTypes::AllStatuses,
     (),
   )?;
 
