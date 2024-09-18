@@ -16,7 +16,7 @@
   }
 </script>
 
-<article class="hcron-modal z-20">
+<article class="hcron-modal !bg-surface-800 z-20">
   <div class="static space-y-10">
     <h2 class="h3 text-center">{@html message}</h2>
     <div class="flex justify-center gap-4">
