@@ -25,19 +25,17 @@
   }
 </script>
 
-<article
-  class="bg-surface-800 z-20 flex max-h-[90vh] w-11/12 flex-col items-center gap-4 overflow-auto p-10 text-white shadow-xl md:w-4/5 lg:w-3/5"
->
-  <div class="static space-y-4">
+<article class="hcron-modal z-20">
+  <div class="static space-y-8">
     <h2 class="h2 text-center">{@html message}</h2>
     <form class="space-y-10" onsubmit={submitForm} bind:this={form}>
       {#each inputs as input}
-        <label>
-          {input.label}:
+        <label class="space-y-4">
+          <span class="text-xl">{input.label}:</span>
           <input
             type={input.type}
             placeholder={input.placeholder}
-            class="input"
+            class="input bg-surface-300 dark:bg-surface-600 text-black dark:text-white"
             name={input.name}
             value={input.value}
             min={input.min}

@@ -296,9 +296,7 @@
   }
 </script>
 
-<article
-  class="bg-surface-500 dark:bg-surface-800 flex max-h-[90vh] w-11/12 flex-col items-center gap-4 overflow-auto p-10 text-center text-white shadow-xl md:w-4/5"
->
+<article class="hcron-modal">
   {#if user}
     <h2 class="h2 font-bold">{user.name}</h2>
     <h3 class="h3"><b>Nickname :</b> {user.nickname}</h3>

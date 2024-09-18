@@ -85,9 +85,7 @@
   }
 </script>
 
-<article
-  class="bg-surface-800 flex max-h-[90vh] w-11/12 flex-col items-center gap-4 overflow-auto p-10 text-white shadow-xl md:w-4/5 lg:w-3/5"
->
+<article class="hcron-modal">
   <div class="static mb-8 space-y-4">
     <h2 class="h2 text-center">Add an administrator</h2>
 
