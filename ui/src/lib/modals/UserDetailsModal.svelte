@@ -94,6 +94,12 @@
             case 'remove-administrator':
               removeAdministrator();
               break;
+            case 'accept-user':
+              updateStatus({ status_type: 'accepted' });
+              break;
+            case 'reject-user':
+              updateStatus({ status_type: 'rejected' });
+              break;
           }
 
           modalStore.close();
@@ -222,7 +228,31 @@
     await administratorsStore.getAllAdministrators();
   }
 
-  async function handleRemoveAdminModal() {
+  function handleAcceptModal() {
+    queueAndReverseModal(
+      confirmModal({
+        id: 'accept-user',
+        message: 'Are you sure you want to accept this user?',
+        confirmLabel: 'Yes',
+        cancelLabel: 'No'
+      }),
+      modalStore
+    );
+  }
+
+  function handleRejectModal() {
+    queueAndReverseModal(
+      confirmModal({
+        id: 'reject-user',
+        message: 'Are you sure you want to reject this user?',
+        confirmLabel: 'Yes',
+        cancelLabel: 'No'
+      }),
+      modalStore
+    );
+  }
+
+  function handleRemoveAdminModal() {
     queueAndReverseModal(
       confirmModal({
         id: 'remove-administrator',
@@ -234,7 +264,7 @@
     );
   }
 
-  async function handleUnsuspendModal() {
+  function handleUnsuspendModal() {
     queueAndReverseModal(
       confirmModal({
         id: 'unsuspend',
@@ -246,7 +276,7 @@
     );
   }
 
-  async function handlePromptModal(type: 'indefinitely' | 'temporarily') {
+  function handlePromptModal(type: 'indefinitely' | 'temporarily') {
     queueAndReverseModal(
       promptModal(
         type === 'indefinitely' ? suspendIndefinitelyModalMeta : suspendTemporarilyModalMeta
@@ -308,28 +338,15 @@
         <button class="btn variant-filled-tertiary" onclick={handleStatusHistoryModal}>
           View Status History
         </button>
-        {#if user?.status?.status_type === 'pending'}
+        {#if user?.status?.status_type === 'pending' || user?.status?.status_type === 'rejected'}
           <div class="space-x-4">
-            <button
-              class="btn variant-filled-tertiary"
-              onclick={() => updateStatus({ status_type: 'accepted' })}
-            >
+            <button class="btn variant-filled-tertiary" onclick={handleAcceptModal}>
               Accept
             </button>
-            <button
-              class="btn variant-filled-error"
-              onclick={() => updateStatus({ status_type: 'rejected' })}
-            >
-              Reject
-            </button>
+            {#if user?.status?.status_type === 'pending'}
+              <button class="btn variant-filled-error" onclick={handleRejectModal}> Reject </button>
+            {/if}
           </div>
-        {:else if user?.status?.status_type === 'rejected'}
-          <button
-            class="btn variant-filled-tertiary"
-            onclick={() => updateStatus({ status_type: 'accepted' })}
-          >
-            Accept
-          </button>
         {:else if user?.status?.status_type === 'accepted'}
           <div class="border-error-600 space-y-4 border-2 p-4">
             <h2 class="h3 text-error-600">Suspend</h2>
