@@ -6,7 +6,7 @@ mod tests;
 
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
-#[hdk_entry_defs]
+#[hdk_entry_types]
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
   Status(Status),

@@ -51,7 +51,8 @@ pub fn get_all_revisions_for_entry(
     return Ok(vec![]);
   };
 
-  let links = get_links(original_action_hash.clone(), link_types, None)?;
+  let links =
+    get_links(GetLinksInputBuilder::try_new(original_action_hash.clone(), link_types)?.build())?;
 
   let records: Vec<Option<Record>> = links
     .into_iter()
@@ -91,4 +92,8 @@ where
       fn_name, zome_name
     ))))
   }
+}
+
+pub fn timetamp_now() -> Timestamp {
+  Timestamp::from_micros(chrono::UTC::now().timestamp_subsec_micros() as i64)
 }

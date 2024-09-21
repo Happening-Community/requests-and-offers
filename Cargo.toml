@@ -12,15 +12,18 @@ members = [
 ]
 
 [workspace.dependencies]
-hdi = "=0.3.6"
-hdk = "=0.2.6"
-image = "0.24"     # 0.25 non stable for rustc 1.75
-serde = "=1.0.166"
-chrono = "0.3"     # 0.4 compatibility error with wasm_bindgen  
+hdi = "=0.4.2"
+hdk = "=0.3.2"
+image = "0.24" # 0.25 non stable for rustc 1.75
+serde = "1.0"
+chrono = "0.3" # 0.4 compatibility error with wasm_bindgen  
 
 
 [workspace.dependencies.utils]
 path = "dnas/requests_and_offers/utils"
+
+[workspace.dependencies.misc]
+path = "dnas/requests_and_offers/zomes/coordinator/misc"
 
 [workspace.dependencies.administration]
 path = "dnas/requests_and_offers/zomes/coordinator/administration"
@@ -33,6 +36,3 @@ path = "dnas/requests_and_offers/zomes/coordinator/users"
 
 [workspace.dependencies.users_integrity]
 path = "dnas/requests_and_offers/zomes/integrity/users"
-
-[workspace.dependencies.misc]
-path = "dnas/requests_and_offers/zomes/coordinator/misc"

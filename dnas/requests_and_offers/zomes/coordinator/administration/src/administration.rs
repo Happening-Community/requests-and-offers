@@ -50,7 +50,9 @@ pub fn add_administrator(input: EntityActionHashAgents) -> ExternResult<bool> {
 #[hdk_extern]
 pub fn get_all_administrators_links(entity: String) -> ExternResult<Vec<Link>> {
   let path = Path::from(format!("{}.administrators", entity));
-  let links = get_links(path.path_entry_hash()?, LinkTypes::AllAdministrators, None)?;
+  let links = get_links(
+    GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::AllAdministrators)?.build(),
+  )?;
   Ok(links)
 }
 
@@ -68,8 +70,9 @@ pub fn check_if_entity_is_administrator(input: EntityActionHash) -> ExternResult
 
 #[hdk_extern]
 pub fn check_if_agent_is_administrator(input: EntityAgent) -> ExternResult<bool> {
-  let agent_administrator_links =
-    get_links(input.agent_pubkey, LinkTypes::AgentAdministrators, None)?;
+  let agent_administrator_links = get_links(
+    GetLinksInputBuilder::try_new(input.agent_pubkey, LinkTypes::AgentAdministrators)?.build(),
+  )?;
   if !agent_administrator_links.is_empty() {
     return Ok(true);
   }
@@ -105,7 +108,9 @@ pub fn remove_administrator(input: EntityActionHashAgents) -> ExternResult<bool>
   delete_link(administrator_link.create_link_hash.clone())?;
 
   for agent_pubkey in input.agent_pubkeys.clone() {
-    let links = get_links(agent_pubkey, LinkTypes::AgentAdministrators, None)?;
+    let links = get_links(
+      GetLinksInputBuilder::try_new(agent_pubkey, LinkTypes::AgentAdministrators)?.build(),
+    )?;
 
     let link = links.first().ok_or(wasm_error!(Guest(
       "Could not find the administrator link".to_string()

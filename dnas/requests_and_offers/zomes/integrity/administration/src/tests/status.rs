@@ -2,6 +2,7 @@
 mod status_tests {
   use chrono::Duration;
   use hdi::prelude::Timestamp;
+  use utils::timetamp_now;
 
   use crate::status::*;
 
@@ -39,7 +40,7 @@ mod status_tests {
     assert_eq!(status.reason, None);
     assert_eq!(status.suspended_until, None);
 
-    let now = Timestamp::now();
+    let now = Timestamp::from_micros(chrono::UTC::now().timestamp_subsec_micros() as i64);
     status = Status::suspend("test", Some((Duration::days(7), &now)));
     assert_eq!(status.status_type, "suspended temporarily");
     assert_eq!(status.reason, Some("test".to_string()));
@@ -56,9 +57,9 @@ mod status_tests {
 
   #[test]
   fn test_unsuspend_if_time_passed() {
-    let now = Timestamp::now();
+    let now = timetamp_now();
     let timestamp_1_hours_ago = Timestamp::from_micros(
-      Timestamp::now().as_micros() - Duration::hours(1).num_microseconds().unwrap_or(0),
+      timetamp_now().as_micros() - Duration::hours(1).num_microseconds().unwrap_or(0),
     );
 
     let mut status = Status::suspend("test", Some((Duration::hours(1), &timestamp_1_hours_ago)));
