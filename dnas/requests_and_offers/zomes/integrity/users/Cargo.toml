@@ -8,15 +8,9 @@ crate-type = ["cdylib", "rlib"]
 name = "users_integrity"
 
 [dependencies]
-
-hdi = { workspace = true }
-
-serde = { workspace = true }
-
-chrono = { workspace = true }
-
-image = { workspace = true }
-
 utils = { workspace = true }
-
+hdi = { workspace = true }
+serde = { workspace = true }
+chrono = { workspace = true }
+image = { workspace = true }
 email_address = "0.2.7"

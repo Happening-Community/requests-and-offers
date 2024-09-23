@@ -8,10 +8,7 @@ crate-type = ["cdylib", "rlib"]
 name = "users"
 
 [dependencies]
-hdk = { workspace = true }
-
-users_integrity = { workspace = true }
-
-serde = { workspace = true }
-
 utils = { workspace = true }
+hdk = { workspace = true }
+users_integrity = { workspace = true }
+serde = { workspace = true }
