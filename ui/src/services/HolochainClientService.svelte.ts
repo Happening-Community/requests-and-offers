@@ -1,17 +1,17 @@
-import { AppAgentWebsocket, type AppAgentClient, type AppInfoResponse } from '@holochain/client';
+import { AppWebsocket, type AppInfoResponse } from '@holochain/client';
 
 type ZomeName = 'users' | 'administration' | 'misc';
 
 class HolochainClientService {
   appId = 'requests_and_offers';
-  client: AppAgentClient | null = $state(null);
+  client: AppWebsocket | null = $state(null);
   isConnected = $state(false);
 
   /**
    * Connects the client to the Holochain network.
    */
   async connectClient() {
-    this.client = await AppAgentWebsocket.connect(new URL('https://UNUSED'), this.appId);
+    this.client = await AppWebsocket.connect();
     this.isConnected = true;
   }
 
