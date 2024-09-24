@@ -30,7 +30,7 @@ type UserAdditionalFields = {
 export type User = UserInDHT & UserAdditionalFields;
 
 class UsersStore {
-  AcceptedEntities: User[] = $state([]);
+  AcceptedUsers: User[] = $state([]);
   myProfile: User | undefined = $state();
 
   async createUser(user: User): Promise<Record> {
@@ -122,7 +122,7 @@ class UsersStore {
       });
     }
 
-    this.AcceptedEntities = recordsContents;
+    this.AcceptedUsers = recordsContents;
 
     return recordsContents;
   }

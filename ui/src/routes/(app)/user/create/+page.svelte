@@ -37,7 +37,7 @@
         <div class="space-y-4">
           <div class="p-4 rounded-lg border-l-4 border-blue-500">
             <h3 class="font-bold text-lg text-tertiary-500">Important Next Steps:</h3>
-            <ul class="list-disc pl-5 mt-2 space-y-2">
+            <ul class="list-disc pl-5 mt-2 space-y-2 text-left">
               <li>A network administrator will contact you via email and platform message shortly.</li>
               <li>You'll be invited to schedule a meeting for identity verification.</li>
               <li>After successful verification, your status will update to "accepted".</li>
