@@ -38,19 +38,26 @@ class HolochainClientService {
     zomeName: ZomeName,
     fnName: string,
     payload: unknown,
+    capSecret: Uint8Array | null = null,
     roleName: string = 'requests_and_offers'
   ): Promise<unknown> {
     if (!this.client) {
       throw new Error('Client not connected');
     }
-    const record = await this.client.callZome({
-      cap_secret: null,
-      zome_name: zomeName,
-      role_name: roleName,
-      fn_name: fnName,
-      payload: payload
-    });
-    return record;
+
+    try {
+      const record = await this.client.callZome({
+        cap_secret: capSecret,
+        zome_name: zomeName,
+        role_name: roleName,
+        fn_name: fnName,
+        payload: payload
+      });
+
+      return record;
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
 

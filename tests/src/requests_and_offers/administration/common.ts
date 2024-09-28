@@ -8,6 +8,11 @@ export type StatusType =
   | "suspended temporarily"
   | "suspended indefinitely";
 
+enum AdministrationEntity {
+  Network = "network",
+  Users = "users",
+}
+
 export type Status = {
   status_type: StatusType;
   reason?: string;
@@ -30,7 +35,7 @@ export async function registerNetworkAdministrator(
     zome_name: "administration",
     fn_name: "register_administrator",
     payload: {
-      entity: "network",
+      entity: AdministrationEntity.Network,
       entity_original_action_hash,
       agent_pubkeys,
     },
@@ -55,7 +60,7 @@ export function checkIfUserIsAdministrator(
     zome_name: "administration",
     fn_name: "check_if_entity_is_administrator",
     payload: {
-      entity: "network",
+      entity: AdministrationEntity.Network,
       entity_original_action_hash,
     },
   });
@@ -69,7 +74,7 @@ export async function checkIfAgentIsAdministrator(
     zome_name: "administration",
     fn_name: "check_if_agent_is_administrator",
     payload: {
-      entity: "network",
+      entity: AdministrationEntity.Network,
       agent_pubkey,
     },
   });
@@ -84,7 +89,7 @@ export async function removeAdministrator(
     zome_name: "administration",
     fn_name: "remove_administrator",
     payload: {
-      entity: "network",
+      entity: AdministrationEntity.Network,
       entity_original_action_hash,
       agent_pubkeys,
     },
@@ -99,7 +104,7 @@ export async function getLatestStatusRecordForUser(
     zome_name: "administration",
     fn_name: "get_latest_status_record_for_entity",
     payload: {
-      entity: "users",
+      entity: AdministrationEntity.Users,
       entity_original_action_hash,
     },
   });
@@ -113,7 +118,7 @@ export async function getLatestStatusForUser(
     zome_name: "administration",
     fn_name: "get_latest_status_for_entity",
     payload: {
-      entity: "users",
+      entity: AdministrationEntity.Users,
       entity_original_action_hash,
     },
   });
@@ -141,7 +146,7 @@ export async function updateUserStatus(
     zome_name: "administration",
     fn_name: "update_entity_status",
     payload: {
-      entity: "users",
+      entity: AdministrationEntity.Users,
       entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
@@ -162,7 +167,7 @@ export async function suspendUserTemporarily(
     zome_name: "administration",
     fn_name: "suspend_entity_temporarily",
     payload: {
-      entity: "users",
+      entity: AdministrationEntity.Users,
       entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
@@ -183,7 +188,7 @@ export async function suspendUserIndefinitely(
     zome_name: "administration",
     fn_name: "suspend_entity_indefinitely",
     payload: {
-      entity: "users",
+      entity: AdministrationEntity.Users,
       entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
@@ -200,9 +205,9 @@ export async function unsuspendUser(
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "administration",
-    fn_name: "unsuspend_user",
+    fn_name: "unsuspend_entity",
     payload: {
-      entity: "users",
+      entity: AdministrationEntity.Users,
       entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
@@ -220,7 +225,7 @@ export async function unsuspendUserIfTimePassed(
     zome_name: "administration",
     fn_name: "unsuspend_entity_if_time_passed",
     payload: {
-      entity: "users",
+      entity: AdministrationEntity.Users,
       entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,

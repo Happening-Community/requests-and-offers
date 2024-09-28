@@ -10,6 +10,7 @@
     "start": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(get-port) SIGNAL_PORT=$(get-port) pnpm run network",
     "network": "hc sandbox clean && pnpm run build:happ && UI_PORT=$(get-port) concurrently \"pnpm --filter ui start\" \"pnpm run launch:happ\" \"holochain-playground\"",
     "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests && npm t -w ui && npm run test:status",
+    "tests": "npm run test",
     "test:ui": "npm run build:zomes && hc app pack workdir --recursive && npm t -w ui",
     "test:misc": "npm run build:zomes && hc app pack workdir --recursive && npm t --filter misc -w tests",
     "test:users": "npm run build:zomes && hc app pack workdir --recursive && npm t --filter users -w tests",

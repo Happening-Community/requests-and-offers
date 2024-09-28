@@ -89,7 +89,7 @@ pub fn get_latest_status(original_action_hash: ActionHash) -> ExternResult<Optio
 pub fn get_latest_status_record_for_entity(
   input: EntityActionHash,
 ) -> ExternResult<Option<Record>> {
-  let link = get_links(
+  let links = get_links(
     GetLinksInputBuilder::try_new(
       input.entity_original_action_hash.clone(),
       LinkTypes::EntityStatus,
@@ -97,9 +97,9 @@ pub fn get_latest_status_record_for_entity(
     .build(),
   )?;
 
-  if !link.is_empty() {
+  if !links.is_empty() {
     get_latest_status_record(
-      link[0]
+      links[0]
         .clone()
         .target
         .into_action_hash()
@@ -114,7 +114,7 @@ pub fn get_latest_status_record_for_entity(
 
 #[hdk_extern]
 pub fn get_latest_status_for_entity(input: EntityActionHash) -> ExternResult<Option<Status>> {
-  let link = get_links(
+  let links = get_links(
     GetLinksInputBuilder::try_new(
       input.entity_original_action_hash.clone(),
       LinkTypes::EntityStatus,
@@ -122,9 +122,9 @@ pub fn get_latest_status_for_entity(input: EntityActionHash) -> ExternResult<Opt
     .build(),
   )?;
 
-  let latest_status: Option<Status> = if !link.is_empty() {
+  let latest_status: Option<Status> = if !links.is_empty() {
     get_latest_status(
-      link[0]
+      links[0]
         .target
         .clone()
         .into_action_hash()
@@ -217,6 +217,25 @@ pub fn update_entity_status(input: UpdateEntityActionHash) -> ExternResult<Recor
     input.status_original_action_hash.clone(),
     action_hash.clone(),
     LinkTypes::StatusUpdates,
+    (),
+  )?;
+
+  let entity_link = get_links(
+    GetLinksInputBuilder::try_new(
+      input.entity_original_action_hash.clone(),
+      LinkTypes::EntityStatus,
+    )?
+    .build(),
+  )?[0]
+    .to_owned();
+  let entity_link_hash = entity_link.create_link_hash;
+
+  delete_link(entity_link_hash)?;
+
+  create_link(
+    input.entity_original_action_hash.clone(),
+    action_hash.clone(),
+    LinkTypes::EntityStatus,
     (),
   )?;
 
