@@ -2,27 +2,10 @@ use hdk::prelude::*;
 use serde::de::DeserializeOwned;
 use WasmErrorInner::*;
 pub mod dna_properties;
+pub mod types;
 
 pub use dna_properties::DnaProperties;
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct EntityActionHash {
-  pub entity: String,
-  pub entity_original_action_hash: ActionHash,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct EntityAgent {
-  pub entity: String,
-  pub agent_pubkey: AgentPubKey,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct EntityActionHashAgents {
-  pub entity: String,
-  pub entity_original_action_hash: ActionHash,
-  pub agent_pubkeys: Vec<AgentPubKey>,
-}
+pub use types::*;
 
 pub fn check_if_progenitor() -> ExternResult<bool> {
   let progenitor_pubkey = DnaProperties::get_progenitor_pubkey()?;
