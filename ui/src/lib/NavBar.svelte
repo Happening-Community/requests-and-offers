@@ -21,7 +21,7 @@
       <img src="/hAppeningsLogoWsun2.webp" alt="hAppenings Community Logo" class="w-28" />
     </a>
 
-    <a class="h2 text-white" href="/">Requests and Offers hApp</a>
+    <a class="h1 text-white" href="/">hCRON</a>
 
     <div class="flex justify-end gap-4">
       <button class="btn variant-filled-secondary lg:hidden" onclick={openDrawer}>

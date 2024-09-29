@@ -290,7 +290,7 @@
   }
 </script>
 
-<div class="flex items-center gap-4">
+<div class="flex flex-wrap items-center justify-center gap-4">
   {#if $page.url.pathname === '/admin/users'}
     <button class="btn variant-filled-tertiary rounded-lg" onclick={handleStatusHistoryModal}>
       View Status History
