@@ -8,9 +8,9 @@
   const { organizations } = organizationsStore;
   const { projects } = projectsStore;
 
-  let pendingUsers = $derived(allUsers.filter((p) => p.status === 'pending'));
-  let pendingprojects = $state(projects.filter((p) => p.status === 'pending'));
+  let pendingUsers = $derived(allUsers.filter((p) => p.status?.status_type === 'pending'));
   let pendingOrganizations = $state(organizations.filter((o) => o.status === 'pending'));
+  let pendingprojects = $state(projects.filter((p) => p.status === 'pending'));
 </script>
 
 <section class="space-y-8">

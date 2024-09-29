@@ -5,7 +5,7 @@
   import usersStore from '@stores/users.svelte';
   import { onMount } from 'svelte';
 
-  const { myProfile, AcceptedEntities } = $derived(usersStore);
+  const { myProfile, AcceptedUsers } = $derived(usersStore);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -27,12 +27,12 @@
       <NavButton href="/user/create">Create Profile</NavButton>
     {/if}
   </div>
-  {#if AcceptedEntities.length}
-    <UsersTable users={AcceptedEntities} />
+  {#if AcceptedUsers.length}
+    <UsersTable users={AcceptedUsers} />
   {:else}
     <p class="h3 text-error-500">No users found.</p>
   {/if}
-  {#if isLoading && AcceptedEntities.length === 0}
+  {#if isLoading && AcceptedUsers.length === 0}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {/if}
 </section>
