@@ -47,7 +47,7 @@ The `User` entry represents the user profile and its associated agents within th
 ### 4.2 Projects and Organizations
 
 - **Project and Organization Creation**: Users can create projects and organizations, with projects owned by organizations. Projects have specific requirements and status.
-![Project status](images/project-stat  - **AdministratorsUser**: A link from the `administrators` anchor to the user. It is an index of all the administrators of the network.
+![Project status](images/project-status.png)
 
 #### 4.2.1 Project Entry
 
@@ -68,7 +68,7 @@ In hREA, projects are organizations `classifiedAs` `Project`.
 
 The `Organization` entry represents an organization and its associated users and projects. Organizations are created by users.
 
-In hREA, are agents `classifiedAs` `Organization`.
+In hREA, organization are agents `classifiedAs` `Organization`.
 
 ##### 4.2.2.1 Links
 
@@ -87,14 +87,16 @@ Projects and Organizations facilitators are integral to the operation and govern
 ##### 4.2.3.1 Onboarding and Approval
 
 - Projects and organizations facilitators are individuals or groups designated to represent a project or organization within the network. They are onboarded and approved by the network's administrators to participate in the network, taking on the role of facilitators of projects or organizations.
+- The projects and organizations facilitators can then fill out the project or organization profile and invite others to participate in the project or organization.
+- Users can ask to join a project or organization.
 
 ##### 4.2.3.2 Project/Organization Profile
 
-- Projects and organizations facilitators can file out their user profiles, including their skills, location, type, etc. This profile is crucial for matching their expertise with relevant requests and offers within the network and for making offers and requests on behalf of their projects or organizations.
+- Projects and organizations facilitators has their own profile. It includes their skills, location, type, etc.
 
 ##### 4.2.3.3 Offers and Requests
 
-- Projects and organizations facilitators can make offers and requests for themselves and on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
+- Projects and organizations facilitators can make offers and requests for themselves or on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
 
 ### 4.3 Requests and Offers
 
