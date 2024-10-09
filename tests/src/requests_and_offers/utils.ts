@@ -1,6 +1,11 @@
 import fs from "fs";
 import { Conductor, Player, Scenario, runScenario } from "@holochain/tryorama";
-import { AppInfo, AppRoleManifest, Record } from "@holochain/client";
+import {
+  AppRoleManifest,
+  AppWebsocket,
+  Record,
+  WsClient,
+} from "@holochain/client";
 import { decode } from "@msgpack/msgpack";
 import { Base64 } from "js-base64";
 import { decompressSync } from "fflate";
@@ -105,7 +110,7 @@ export function serializeHash(hash: Uint8Array) {
 
 export async function installApp(
   scenario: Scenario
-): Promise<[Conductor, AppInfo]> {
+): Promise<[Scenario, AppWebsocket]> {
   const conductor = await scenario.addConductor();
   const adminWs = conductor.adminWs();
   const agentPubKey = await adminWs.generateAgentPubKey();
@@ -124,20 +129,22 @@ export async function installApp(
     },
   };
 
-  const agent = await conductor.installApp(
+  await conductor.installApp(
     { bundle: appBundle },
     {
       installedAppId: "requests_and_offers",
       agentPubKey: agentPubKey,
     }
   );
-  const response = await conductor
+  await conductor
     .adminWs()
     .enableApp({ installed_app_id: "requests_and_offers" });
 
-  console.log("response : ", response);
+  // const wsClientPort = conductor.adminWs().client.url.port;
+  const appWebSocket = await conductor.connectAppWs([], 0);
+  console.log("appWebSocket", appWebSocket);
 
-  return [conductor, agent];
+  return [scenario, appWebSocket];
 }
 
 export function imagePathToArrayBuffer(
