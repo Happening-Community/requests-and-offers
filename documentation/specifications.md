@@ -58,8 +58,8 @@ In hREA, projects are organizations `classifiedAs` `Project`.
 ##### 4.2.1.1 Links
 
 - **AllProjects**: A link to the `projects` anchor.
-- **ProjectAdministrators**: A link from the project's to a user. It is an index of all the administrators.
-- **ProjectTeamMembers**: A link from the project's to a user. It is an index of all the team members.
+- **ProjectCoordinators**: A link from the project's to a user. It is an index of all the coordinators.
+- **ProjectContributors**: A link from the project's to a user. It is an index of all the project contributors.
 - **ProjectCategories**: A link from the project's to a category. It is an index of all the categories.
 - **ProjectRequests**: A link from the project's to a request. It is an index of all the requests made by the project.
 - **ProjectOffers**: A link from the project's to an offer. It is an index of all the offers made to the project.
@@ -73,30 +73,30 @@ In hREA, organization are agents `classifiedAs` `Organization`.
 ##### 4.2.2.1 Links
 
 - **AllOrganizations**: A link to the `organizations` anchor.
-- **OrganizationAdministrators**: A link from the organization's to a user. It is an index of all the administrators of the organization.
+- **OrganizationCoordinators**: A link from the organization's to a user. It is an index of all the coordinators of the organization.
 - **OrganizationMembers**: A link from the organization's to a user. It is an index of all the members of the organization.
 - **OrganizationProjects**: A link from the organization's to a project. It is an index of all the projects under the organization.
 - **OrganizationCategories**: A link from the organization's to a category. It is an index of all the categories under the organization.
 - **OrganizationRequests**: A link from the organization's to a request. It is an index of all the requests made by the organization.
 - **OrganizationOffers**: A link from the organization's to an offer. It is an index of all the offers made to the organization.
 
-#### 4.2.3 Project/Organization Facilitators
+#### 4.2.3 Project/Organization Coordinators
 
-Projects and Organizations facilitators are integral to the operation and governance of projects and organizations within the network. They serve as the responsibles for the management and representation of their respective projects or organizations.
+Projects and Organizations coordinators are integral to the operation and governance of projects and organizations within the network. They serve as the responsibles for the management and representation of their respective projects or organizations.
 
 ##### 4.2.3.1 Onboarding and Approval
 
-- Projects and organizations facilitators are individuals or groups designated to represent a project or organization within the network. They are onboarded and approved by the network's administrators to participate in the network, taking on the role of facilitators of projects or organizations.
-- The projects and organizations facilitators can then fill out the project or organization profile and invite others to participate in the project or organization.
+- Projects and organizations coordinators are individuals or groups designated to represent a project or organization within the network. They are onboarded and approved by the network's administrators to participate in the network, taking on the role of coordinators of projects or organizations.
+- The projects and organizations coordinators can then fill out the project or organization profile and invite others to participate in the project or organization.
 - Users can ask to join a project or organization.
 
 ##### 4.2.3.2 Project/Organization Profile
 
-- Projects and organizations facilitators has their own profile. It includes their skills, location, type, etc.
+- Projects and organizations coordinators has their own profile. It includes their skills, location, type, etc.
 
 ##### 4.2.3.3 Offers and Requests
 
-- Projects and organizations facilitators can make offers and requests for themselves or on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
+- Projects and organizations coordinators can make offers and requests for themselves or on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
 
 ### 4.3 Requests and Offers
 
