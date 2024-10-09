@@ -4,6 +4,9 @@ Request And Offers is a hAppenings.community project to facilitate exchanges bet
 
 - [Litepaper](https://happenings-community.gitbook.io/)
 - [Specifications](documentation/specifications.md)
+- Zomes documentation
+    - [Users zome](documentation/zomes/users.md)
+    - [Administration zome](documentation/zomes/administration.md)
 
 ## Environment Setup
 
