@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, type Snippet } from 'svelte';
   import '../app.postcss';
   import hc from '@services/HolochainClientService.svelte';
   import usersStore from '@stores/users.svelte';
@@ -14,7 +14,7 @@
   import { storePopup } from '@skeletonlabs/skeleton';
 
   type Props = {
-    children: any;
+    children: Snippet;
   };
 
   const { children } = $props() as Props;

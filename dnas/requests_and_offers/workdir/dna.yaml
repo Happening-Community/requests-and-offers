@@ -29,7 +29,6 @@ coordinator:
       bundled: "../../../target/wasm32-unknown-unknown/release/administration.wasm"
       dependencies:
         - name: administration_integrity
-        - name: users_integrity
       dylib: ~
     - name: misc
       hash: ~
