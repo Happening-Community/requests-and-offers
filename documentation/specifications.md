@@ -208,12 +208,12 @@ The Requests & Offers - MVP project is designed with a focus on facilitating col
 - **Requests**: Creators can make requests for themselves, such as mentoring, brainstorming time, or testing in the early days of their projects.
 - **Reporting**: Creators can access reports on their exchanges and a general report of total exchanges for the month.
 
-#### 4.7.3 Projects and Organizations Facilitators
+#### 4.7.3 Projects and Organizations Coordinators
 
-- **Onboarded/Approved**: Projects and organizations facilitators are individuals or groups designated to represent a project or organization within the network. They are onboarded and approved to participate in the network.
-- **Project Profile**: Projects and organizations facilitators can file out the project profile, including the skills involved, location, type, etc.
-- **Offers**: Projects and organizations facilitators can make offers, including the skills and talents they wish to offer.
-- **Requests**: Projects and organizations facilitators can make requests for themselves and on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
+- **Onboarded/Approved**: Projects and organizations coordinators are individuals or groups designated to represent a project or organization within the network. They are onboarded and approved to participate in the network.
+- **Project Profile**: Projects and organizations coordinators can file out the project profile, including the skills involved, location, type, etc.
+- **Offers**: Projects and organizations coordinators can make offers, including the skills and talents they wish to offer.
+- **Requests**: Projects and organizations coordinators can make requests for themselves and on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
 
 
 #### 4.7.5 Matchmaker (Potential Future Role)
