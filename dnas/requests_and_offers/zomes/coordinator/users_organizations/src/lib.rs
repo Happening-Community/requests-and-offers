@@ -3,7 +3,7 @@ mod external_calls;
 pub mod user;
 
 use hdk::prelude::*;
-use users_integrity::*;
+use users_organizations_integrity::*;
 
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {

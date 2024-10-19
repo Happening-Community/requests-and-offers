@@ -2640,17 +2640,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "users"
+name = "users_organizations"
 version = "0.0.1"
 dependencies = [
  "hdk",
  "serde",
- "users_integrity",
+ "users_organizations_integrity",
  "utils",
 ]
 
 [[package]]
-name = "users_integrity"
+name = "users_organizations_integrity"
 version = "0.0.1"
 dependencies = [
  "chrono 0.3.0",

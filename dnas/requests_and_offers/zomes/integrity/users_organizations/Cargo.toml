@@ -1,11 +1,11 @@
 [package]
-name = "users_integrity"
+name = "users_organizations_integrity"
 version = "0.0.1"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-name = "users_integrity"
+name = "users_organizations_integrity"
 
 [dependencies]
 utils = { workspace = true }

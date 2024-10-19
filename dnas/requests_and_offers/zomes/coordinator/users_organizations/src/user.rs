@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-use users_integrity::*;
+use users_organizations_integrity::*;
 use WasmErrorInner::*;
 
 use crate::external_calls::create_status;

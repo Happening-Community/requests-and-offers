@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-use users_integrity::LinkTypes;
+use users_organizations_integrity::LinkTypes;
 use WasmErrorInner::*;
 
 use crate::external_calls::check_if_agent_is_administrator;
