@@ -23,12 +23,13 @@ pub enum LinkTypes {
   MyUser,
   UserAgents,
   UserStatus,
+  UserOrganizations,
 
   // Organizations Links
   OrganizationUpdates,
   AllOrganizations,
-  UserOrganizations,
-  OrganizationsUsers,
+  OrganizationCoordinators,
+  OrganizationMembers,
   OrganizationStatus,
 }
 

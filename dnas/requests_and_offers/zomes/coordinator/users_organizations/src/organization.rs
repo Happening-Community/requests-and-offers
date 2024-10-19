@@ -6,8 +6,8 @@ use crate::{external_calls::create_status, user::get_agent_user};
 
 #[hdk_extern]
 pub fn create_organization(organization: Organization) -> ExternResult<Record> {
-  let user = get_agent_user(agent_info()?.agent_initial_pubkey)?;
-  if user.is_empty() {
+  let user_links = get_agent_user(agent_info()?.agent_initial_pubkey)?;
+  if user_links.is_empty() {
     return Err(wasm_error!(Guest(
       "You must first create a User profile".to_string()
     )));
@@ -32,6 +32,13 @@ pub fn create_organization(organization: Organization) -> ExternResult<Record> {
     organization_hash.clone(),
     created_status_record.action_address().clone(),
     LinkTypes::OrganizationStatus,
+    (),
+  )?;
+
+  create_link(
+    organization_hash,
+    user_links[0].target.clone(),
+    LinkTypes::OrganizationCoordinators,
     (),
   )?;
 
@@ -80,6 +87,52 @@ pub fn get_latest_organization(original_action_hash: ActionHash) -> ExternResult
       "Could not find the latest Organization profile".to_string()
     )))?;
   Ok(latest_organization)
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct OrganizationAndUserInput {
+  pub organization_original_action_hash: ActionHash,
+  pub user_original_action_hash: ActionHash,
+}
+
+#[hdk_extern]
+pub fn add_member_to_organization(input: OrganizationAndUserInput) -> ExternResult<Record> {
+  unimplemented!()
+}
+
+#[hdk_extern]
+pub fn invite_member_to_organization(input: OrganizationAndUserInput) -> ExternResult<Record> {
+  unimplemented!()
+}
+
+#[hdk_extern]
+pub fn get_organization_members(original_action_hash: ActionHash) -> ExternResult<Vec<User>> {
+  unimplemented!()
+}
+
+#[hdk_extern]
+pub fn add_coordinator_to_organization(input: OrganizationAndUserInput) -> ExternResult<Record> {
+  unimplemented!()
+}
+
+#[hdk_extern]
+pub fn invite_coordinator_to_organization(input: OrganizationAndUserInput) -> ExternResult<Record> {
+  unimplemented!()
+}
+
+#[hdk_extern]
+pub fn get_organization_coordinators(original_action_hash: ActionHash) -> ExternResult<Vec<User>> {
+  unimplemented!()
+}
+
+#[hdk_extern]
+pub fn leave_organization(original_action_hash: ActionHash) -> ExternResult<bool> {
+  unimplemented!()
+}
+
+#[hdk_extern]
+pub fn remove_organization_coordinator(input: OrganizationAndUserInput) -> ExternResult<bool> {
+  unimplemented!()
 }
 
 #[derive(Serialize, Deserialize, Debug)]
