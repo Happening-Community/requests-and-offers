@@ -1,6 +1,10 @@
+pub mod organization;
 pub mod user;
-use hdi::prelude::*;
+
+pub use organization::*;
 pub use user::*;
+
+use hdi::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
@@ -8,15 +12,24 @@ pub use user::*;
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
   User(User),
+  Organization(Organization),
 }
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
 pub enum LinkTypes {
+  // Users Links
   UserUpdates,
   AllUsers,
   MyUser,
   UserAgents,
   UserStatus,
+
+  // Organizations Links
+  OrganizationUpdates,
+  AllOrganizations,
+  UserOrganizations,
+  OrganizationsUsers,
+  OrganizationStatus,
 }
 
 #[hdk_extern]
@@ -41,6 +54,9 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
         match app_entry {
           EntryTypes::User(user) => {
             return validate_user(user);
+          }
+          EntryTypes::Organization(organization) => {
+            return validate_organization(organization);
           }
         }
       }
@@ -99,6 +115,11 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
           EntryTypes::User(_original_user) => {
             return Ok(ValidateCallbackResult::Invalid(String::from(
               "User profile cannot be deleted",
+            )))
+          }
+          EntryTypes::Organization(_original_organization) => {
+            return Ok(ValidateCallbackResult::Invalid(String::from(
+              "Organization cannot be deleted",
             )))
           }
         }
