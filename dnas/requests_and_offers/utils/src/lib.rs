@@ -1,11 +1,15 @@
-use hdk::prelude::*;
-use serde::de::DeserializeOwned;
-use WasmErrorInner::*;
 pub mod dna_properties;
 pub mod types;
 
 pub use dna_properties::DnaProperties;
 pub use types::*;
+
+use std::io::Cursor;
+
+use hdk::prelude::*;
+use image::io::Reader as ImageReader;
+use serde::de::DeserializeOwned;
+use WasmErrorInner::*;
 
 pub fn check_if_progenitor() -> ExternResult<bool> {
   let progenitor_pubkey = DnaProperties::get_progenitor_pubkey()?;
@@ -79,4 +83,14 @@ where
 
 pub fn timetamp_now() -> Timestamp {
   Timestamp::from_micros(chrono::UTC::now().timestamp_subsec_micros() as i64)
+}
+
+pub fn is_image(bytes: SerializedBytes) -> bool {
+  let data = bytes.bytes().to_vec();
+  let reader = match ImageReader::new(Cursor::new(data)).with_guessed_format() {
+    Ok(reader) => reader,
+    Err(_) => return false,
+  };
+
+  reader.decode().is_ok()
 }

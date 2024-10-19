@@ -1,8 +1,8 @@
-use std::{fmt::Display, io::Cursor, str::FromStr};
+use std::{fmt::Display, str::FromStr};
 
 use email_address::EmailAddress;
 use hdi::prelude::*;
-use image::io::Reader as ImageReader;
+use utils::is_image;
 
 /// Represents a user Entry with various attributes such as name, nickname, bio, etc.
 #[hdk_entry_helper]
@@ -54,16 +54,6 @@ impl FromStr for AllowedTypes {
       _ => Err(()),
     }
   }
-}
-
-fn is_image(bytes: SerializedBytes) -> bool {
-  let data = bytes.bytes().to_vec();
-  let reader = match ImageReader::new(Cursor::new(data)).with_guessed_format() {
-    Ok(reader) => reader,
-    Err(_) => return false,
-  };
-
-  reader.decode().is_ok()
 }
 
 pub fn validate_user(user: User) -> ExternResult<ValidateCallbackResult> {
