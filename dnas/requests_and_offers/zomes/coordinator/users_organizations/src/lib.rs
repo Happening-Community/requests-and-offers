@@ -1,6 +1,8 @@
 pub mod administration;
-mod external_calls;
+pub mod organization;
 pub mod user;
+
+mod external_calls;
 
 use hdk::prelude::*;
 use users_organizations_integrity::*;
