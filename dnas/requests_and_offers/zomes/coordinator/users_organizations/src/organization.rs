@@ -152,7 +152,27 @@ pub fn invite_member_to_organization(input: OrganizationAndUserInput) -> ExternR
 
 #[hdk_extern]
 pub fn get_organization_members(original_action_hash: ActionHash) -> ExternResult<Vec<User>> {
-  unimplemented!()
+  let links = get_links(
+    GetLinksInputBuilder::try_new(original_action_hash.clone(), LinkTypes::OrganizationMembers)?
+      .build(),
+  )?;
+
+  let users = links
+    .into_iter()
+    .map(|link| {
+      get_latest_user(
+        link
+          .target
+          .clone()
+          .into_action_hash()
+          .ok_or(wasm_error!(Guest(
+            "Could not find the user's action hash".to_string()
+          )))?,
+      )
+    })
+    .collect::<ExternResult<Vec<User>>>()?;
+
+  Ok(users)
 }
 
 #[hdk_extern]
