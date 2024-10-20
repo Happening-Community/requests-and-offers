@@ -146,7 +146,7 @@ pub fn add_member_to_organization(input: OrganizationAndUserInput) -> ExternResu
 }
 
 #[hdk_extern]
-pub fn invite_member_to_organization(input: OrganizationAndUserInput) -> ExternResult<Record> {
+pub fn invite_member_to_organization(input: OrganizationAndUserInput) -> ExternResult<bool> {
   unimplemented!()
 }
 
@@ -193,18 +193,80 @@ pub fn is_organization_member(input: OrganizationAndUserInput) -> ExternResult<b
 }
 
 #[hdk_extern]
-pub fn add_coordinator_to_organization(input: OrganizationAndUserInput) -> ExternResult<Record> {
-  unimplemented!()
+pub fn add_coordinator_to_organization(input: OrganizationAndUserInput) -> ExternResult<bool> {
+  let agent_user_links = get_agent_user(agent_info()?.agent_initial_pubkey)?;
+  if agent_user_links.is_empty() {
+    return Err(wasm_error!(Guest(
+      "You must first create a User profile".to_string()
+    )));
+  }
+
+  if !is_organization_coordinator(OrganizationAndUserInput {
+    organization_original_action_hash: input.organization_original_action_hash.clone(),
+    user_original_action_hash: agent_user_links[0]
+      .target
+      .clone()
+      .into_action_hash()
+      .ok_or(wasm_error!(Guest(
+        "Could not find the user's action hash".to_string()
+      )))?,
+  })? {
+    return Err(wasm_error!(Guest(
+      "Only coordinators can add other coordinators".to_string()
+    )));
+  }
+
+  if !is_organization_coordinator(input.clone())? {
+    return Err(wasm_error!(Guest(
+      "The invited user is already a coordinator of this organization".to_string()
+    )));
+  }
+
+  if !is_organization_member(input.clone())? {
+    add_member_to_organization(input.clone())?;
+  }
+
+  create_link(
+    input.organization_original_action_hash.clone(),
+    input.user_original_action_hash.clone(),
+    LinkTypes::OrganizationCoordinators,
+    (),
+  )?;
+
+  Ok(true)
 }
 
 #[hdk_extern]
-pub fn invite_coordinator_to_organization(input: OrganizationAndUserInput) -> ExternResult<Record> {
+pub fn invite_coordinator_to_organization(input: OrganizationAndUserInput) -> ExternResult<bool> {
   unimplemented!()
 }
 
 #[hdk_extern]
 pub fn get_organization_coordinators(original_action_hash: ActionHash) -> ExternResult<Vec<User>> {
-  unimplemented!()
+  let links = get_links(
+    GetLinksInputBuilder::try_new(
+      original_action_hash.clone(),
+      LinkTypes::OrganizationCoordinators,
+    )?
+    .build(),
+  )?;
+
+  let users = links
+    .into_iter()
+    .map(|link| {
+      get_latest_user(
+        link
+          .target
+          .clone()
+          .into_action_hash()
+          .ok_or(wasm_error!(Guest(
+            "Could not find the user's action hash".to_string()
+          )))?,
+      )
+    })
+    .collect::<ExternResult<Vec<User>>>()?;
+
+  Ok(users)
 }
 
 #[hdk_extern]
