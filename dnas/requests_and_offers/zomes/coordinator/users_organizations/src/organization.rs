@@ -2,7 +2,10 @@ use hdk::prelude::*;
 use users_organizations_integrity::*;
 use WasmErrorInner::*;
 
-use crate::{external_calls::create_status, user::get_agent_user};
+use crate::{
+  external_calls::create_status,
+  user::{get_agent_user, get_latest_user},
+};
 
 #[hdk_extern]
 pub fn create_organization(organization: Organization) -> ExternResult<Record> {
@@ -89,15 +92,57 @@ pub fn get_latest_organization(original_action_hash: ActionHash) -> ExternResult
   Ok(latest_organization)
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct OrganizationAndUserInput {
   pub organization_original_action_hash: ActionHash,
   pub user_original_action_hash: ActionHash,
 }
 
 #[hdk_extern]
-pub fn add_member_to_organization(input: OrganizationAndUserInput) -> ExternResult<Record> {
-  unimplemented!()
+pub fn add_member_to_organization(input: OrganizationAndUserInput) -> ExternResult<bool> {
+  let agent_user_links = get_agent_user(agent_info()?.agent_initial_pubkey)?;
+  if agent_user_links.is_empty() {
+    return Err(wasm_error!(Guest(
+      "You must first create a User profile".to_string()
+    )));
+  }
+
+  if !is_organization_coordinator(OrganizationAndUserInput {
+    organization_original_action_hash: input.organization_original_action_hash.clone(),
+    user_original_action_hash: agent_user_links[0]
+      .target
+      .clone()
+      .into_action_hash()
+      .ok_or(wasm_error!(Guest(
+        "Could not find the user's action hash".to_string()
+      )))?,
+  })? {
+    return Err(wasm_error!(Guest(
+      "Only coordinators can add members".to_string()
+    )));
+  }
+
+  if !is_organization_member(input.clone())? {
+    return Err(wasm_error!(Guest(
+      "The invited user is already a member".to_string()
+    )));
+  }
+
+  create_link(
+    input.organization_original_action_hash.clone(),
+    input.user_original_action_hash.clone(),
+    LinkTypes::OrganizationMembers,
+    (),
+  )?;
+
+  create_link(
+    input.user_original_action_hash.clone(),
+    input.organization_original_action_hash.clone(),
+    LinkTypes::UserOrganizations,
+    (),
+  )?;
+
+  Ok(true)
 }
 
 #[hdk_extern]
@@ -107,6 +152,11 @@ pub fn invite_member_to_organization(input: OrganizationAndUserInput) -> ExternR
 
 #[hdk_extern]
 pub fn get_organization_members(original_action_hash: ActionHash) -> ExternResult<Vec<User>> {
+  unimplemented!()
+}
+
+#[hdk_extern]
+pub fn is_organization_member(input: OrganizationAndUserInput) -> ExternResult<bool> {
   unimplemented!()
 }
 
@@ -122,6 +172,11 @@ pub fn invite_coordinator_to_organization(input: OrganizationAndUserInput) -> Ex
 
 #[hdk_extern]
 pub fn get_organization_coordinators(original_action_hash: ActionHash) -> ExternResult<Vec<User>> {
+  unimplemented!()
+}
+
+#[hdk_extern]
+pub fn is_organization_coordinator(input: OrganizationAndUserInput) -> ExternResult<bool> {
   unimplemented!()
 }
 
