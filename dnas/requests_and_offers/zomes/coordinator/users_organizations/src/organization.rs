@@ -271,7 +271,19 @@ pub fn get_organization_coordinators(original_action_hash: ActionHash) -> Extern
 
 #[hdk_extern]
 pub fn is_organization_coordinator(input: OrganizationAndUserInput) -> ExternResult<bool> {
-  unimplemented!()
+  let links = get_links(
+    GetLinksInputBuilder::try_new(
+      input.organization_original_action_hash.clone(),
+      LinkTypes::OrganizationCoordinators,
+    )?
+    .build(),
+  )?;
+
+  let is_coordinator = links
+    .into_iter()
+    .any(|link| link.target.clone().into_action_hash().unwrap() == input.user_original_action_hash);
+
+  Ok(is_coordinator)
 }
 
 #[hdk_extern]
