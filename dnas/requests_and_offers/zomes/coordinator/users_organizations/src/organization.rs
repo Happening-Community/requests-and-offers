@@ -288,12 +288,96 @@ pub fn is_organization_coordinator(input: OrganizationAndUserInput) -> ExternRes
 
 #[hdk_extern]
 pub fn leave_organization(original_action_hash: ActionHash) -> ExternResult<bool> {
-  unimplemented!()
+  let agent_user_links = get_agent_user(agent_info()?.agent_initial_pubkey)?;
+  if agent_user_links.is_empty() {
+    return Err(wasm_error!(Guest(
+      "Agent does not have a User profile".to_string()
+    )));
+  }
+
+  let agent_user_action_hash = agent_user_links[0]
+    .target
+    .clone()
+    .into_action_hash()
+    .ok_or(wasm_error!(Guest(
+      "Could not find the agent's user action hash".to_string()
+    )))?;
+
+  let user_organizations_link = get_links(
+    GetLinksInputBuilder::try_new(agent_user_action_hash.clone(), LinkTypes::UserOrganizations)?
+      .build(),
+  )?
+  .into_iter()
+  .find(|link| link.target.clone().into_action_hash().unwrap() == original_action_hash.clone());
+
+  if user_organizations_link.is_none() {
+    return Err(wasm_error!(Guest(
+      "The agent is not a member of this organization".to_string()
+    )));
+  }
+
+  delete_link(user_organizations_link.unwrap().create_link_hash)?;
+
+  let organization_members_link = get_links(
+    GetLinksInputBuilder::try_new(original_action_hash.clone(), LinkTypes::OrganizationMembers)?
+      .build(),
+  )?
+  .into_iter()
+  .find(|link| link.target.clone().into_action_hash().unwrap() == agent_user_action_hash);
+
+  if organization_members_link.is_none() {
+    return Err(wasm_error!(Guest(
+      "The agent is not a member of this organization".to_string()
+    )));
+  }
+
+  delete_link(organization_members_link.unwrap().create_link_hash)?;
+
+  Ok(true)
 }
 
 #[hdk_extern]
 pub fn remove_organization_coordinator(input: OrganizationAndUserInput) -> ExternResult<bool> {
-  unimplemented!()
+  let agent_user_links = get_agent_user(agent_info()?.agent_initial_pubkey)?;
+  if agent_user_links.is_empty() {
+    return Err(wasm_error!(Guest(
+      "Agent does not have a User profile".to_string()
+    )));
+  }
+
+  let agent_user_action_hash = agent_user_links[0]
+    .target
+    .clone()
+    .into_action_hash()
+    .ok_or(wasm_error!(Guest(
+      "Could not find the agent's user action hash".to_string()
+    )))?;
+
+  if !is_organization_coordinator(input.clone())? {
+    return Err(wasm_error!(Guest(
+      "Only coordinators can remove other coordinators".to_string()
+    )));
+  }
+
+  let organization_coordinators_link = get_links(
+    GetLinksInputBuilder::try_new(
+      input.organization_original_action_hash.clone(),
+      LinkTypes::OrganizationCoordinators,
+    )?
+    .build(),
+  )?
+  .into_iter()
+  .find(|link| link.target.clone().into_action_hash().unwrap() == agent_user_action_hash);
+
+  if organization_coordinators_link.is_none() {
+    return Err(wasm_error!(Guest(
+      "The user is not a coordinator of this organization".to_string()
+    )));
+  }
+
+  delete_link(organization_coordinators_link.unwrap().create_link_hash)?;
+
+  Ok(true)
 }
 
 #[derive(Serialize, Deserialize, Debug)]
