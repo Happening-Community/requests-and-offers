@@ -193,6 +193,26 @@ pub fn is_organization_member(input: OrganizationAndUserInput) -> ExternResult<b
 }
 
 #[hdk_extern]
+pub fn get_user_organizations(original_action_hash: ActionHash) -> ExternResult<Vec<Organization>> {
+  let links = get_links(
+    GetLinksInputBuilder::try_new(original_action_hash.clone(), LinkTypes::UserOrganizations)?
+      .build(),
+  )?;
+
+  let organizations =
+    links
+      .into_iter()
+      .map(|link| {
+        get_latest_organization(link.target.clone().into_action_hash().ok_or(wasm_error!(
+          Guest("Could not find the organization's action hash".to_string())
+        ))?)
+      })
+      .collect::<ExternResult<Vec<Organization>>>()?;
+
+  Ok(organizations)
+}
+
+#[hdk_extern]
 pub fn add_coordinator_to_organization(input: OrganizationAndUserInput) -> ExternResult<bool> {
   let agent_user_links = get_agent_user(agent_info()?.agent_initial_pubkey)?;
   if agent_user_links.is_empty() {
