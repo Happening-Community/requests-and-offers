@@ -40,11 +40,11 @@ class AdministratorsStore {
   allUsers: User[] = $state([]);
   administrators: User[] = $state([]);
   nonAdministrators: User[] = $state([]);
-  agentIsAdministrator = $state(false);
   allStatusesHistory: Revision[] = $state([]);
+  agentIsAdministrator = $state(false);
 
   private async getAllUsersLinks(): Promise<Link[]> {
-    return (await hc.callZome('users', 'get_all_users', null)) as Link[];
+    return (await hc.callZome('users_organizations', 'get_all_users', null)) as Link[];
   }
 
   private async getAllUsersLinksAndRecords(): Promise<[Link[], Record[]]> {
@@ -177,7 +177,7 @@ class AdministratorsStore {
 
   async getUserStatusLink(user_original_action_hash: ActionHash): Promise<Link | null> {
     return (await hc.callZome(
-      'users',
+      'users_organizations',
       'get_user_status_link',
       user_original_action_hash
     )) as Link | null;

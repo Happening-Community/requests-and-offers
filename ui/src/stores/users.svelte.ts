@@ -34,12 +34,12 @@ class UsersStore {
   myProfile: User | undefined = $state();
 
   async createUser(user: User): Promise<Record> {
-    return (await hc.callZome('users', 'create_user', user)) as Record;
+    return (await hc.callZome('users_organizations', 'create_user', user)) as Record;
   }
 
   async getLatestUserRecord(original_action_hash: ActionHash): Promise<Record | null> {
     const record = (await hc.callZome(
-      'users',
+      'users_organizations',
       'get_latest_user_record',
       original_action_hash
     )) as Record | null;
@@ -62,7 +62,7 @@ class UsersStore {
   }
 
   private async getAgentUserLinks(agent: AgentPubKey): Promise<Link[]> {
-    return (await hc.callZome('users', 'get_agent_user', agent)) as Link[];
+    return (await hc.callZome('users_organizations', 'get_agent_user', agent)) as Link[];
   }
 
   async getAgentUser(agent: AgentPubKey): Promise<User | null> {
@@ -73,7 +73,11 @@ class UsersStore {
   }
 
   async getUserAgents(original_action_hash: ActionHash): Promise<AgentPubKey[]> {
-    return (await hc.callZome('users', 'get_user_agents', original_action_hash)) as AgentPubKey[];
+    return (await hc.callZome(
+      'users_organizations',
+      'get_user_agents',
+      original_action_hash
+    )) as AgentPubKey[];
   }
 
   async getMyProfile(): Promise<User | null> {
@@ -137,7 +141,7 @@ class UsersStore {
     const original_action_hash = this.myProfile!.original_action_hash;
     const previous_action_hash = this.myProfile!.previous_action_hash;
 
-    const newUserRecord = (await hc.callZome('users', 'update_user', {
+    const newUserRecord = (await hc.callZome('users_organizations', 'update_user', {
       original_action_hash,
       previous_action_hash,
       updated_user
