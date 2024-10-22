@@ -39,7 +39,7 @@ export async function createUser(
   User: User
 ): Promise<Record> {
   return cell.callZome({
-    zome_name: "users",
+    zome_name: "users_organizations",
     fn_name: "create_user",
     payload: User,
   });
@@ -50,7 +50,7 @@ export async function getLatestUser(
   original_action_hash: ActionHash
 ): Promise<Record | null> {
   return cell.callZome({
-    zome_name: "users",
+    zome_name: "users_organizations",
     fn_name: "get_latest_user_record",
     payload: original_action_hash,
   });
@@ -61,7 +61,7 @@ export async function getAgentUser(
   author: AgentPubKey
 ): Promise<Link[]> {
   return cell.callZome({
-    zome_name: "users",
+    zome_name: "users_organizations",
     fn_name: "get_agent_user",
     payload: author,
   });
@@ -72,7 +72,7 @@ export async function getUserAgents(
   user_original_action_hash: ActionHash
 ): Promise<AgentPubKey[]> {
   return cell.callZome({
-    zome_name: "users",
+    zome_name: "users_organizations",
     fn_name: "get_user_agents",
     payload: user_original_action_hash,
   });
@@ -93,7 +93,7 @@ export async function updateUser(
   updated_user: User
 ): Promise<Record> {
   return cell.callZome({
-    zome_name: "users",
+    zome_name: "users_organizations",
     fn_name: "update_user",
     payload: { original_action_hash, previous_action_hash, updated_user },
   });

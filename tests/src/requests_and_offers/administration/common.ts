@@ -21,7 +21,7 @@ export type Status = {
 
 export async function getAllUsers(cell: CallableCell): Promise<Link[]> {
   return cell.callZome({
-    zome_name: "users",
+    zome_name: "users_organizations",
     fn_name: "get_all_users",
   });
 }
@@ -129,7 +129,7 @@ export async function getUserStatusLink(
   user_original_action_hash: ActionHash
 ): Promise<Link | null> {
   return cell.callZome({
-    zome_name: "users",
+    zome_name: "users_organizations",
     fn_name: "get_user_status_link",
     payload: user_original_action_hash,
   });
