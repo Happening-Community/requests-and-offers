@@ -175,6 +175,18 @@ pub fn get_accepted_entities(entity: String) -> ExternResult<Vec<Link>> {
 }
 
 #[hdk_extern]
+pub fn check_if_entity_is_accepted(input: EntityActionHash) -> ExternResult<bool> {
+  let links = get_links(
+    GetLinksInputBuilder::try_new(
+      input.entity_original_action_hash.clone(),
+      LinkTypes::AcceptedEntity,
+    )?
+    .build(),
+  )?;
+  Ok(!links.is_empty())
+}
+
+#[hdk_extern]
 pub fn get_all_revisions_for_status(original_status_hash: ActionHash) -> ExternResult<Vec<Record>> {
   let records = get_all_revisions_for_entry(original_status_hash, LinkTypes::StatusUpdates)?;
 

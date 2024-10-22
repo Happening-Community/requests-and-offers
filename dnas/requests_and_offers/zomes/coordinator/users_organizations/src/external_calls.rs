@@ -25,3 +25,7 @@ pub fn create_status(user_original_action_hash: ActionHash) -> ExternResult<Reco
     },
   )
 }
+
+pub fn check_if_entity_is_accepted(input: EntityActionHash) -> ExternResult<bool> {
+  external_local_call("check_if_entity_is_accepted", "administration", input)
+}
