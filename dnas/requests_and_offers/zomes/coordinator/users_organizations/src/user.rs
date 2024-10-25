@@ -82,11 +82,7 @@ pub fn get_latest_user(original_action_hash: ActionHash) -> ExternResult<User> {
     )))?
     .entry()
     .to_app_option()
-    .map_err(|_| {
-      wasm_error!(Guest(
-        "Error while deserializing the latest User profile".to_string()
-      ))
-    })?
+    .map_err(|e| wasm_error!(Serialize(e)))?
     .ok_or(wasm_error!(Guest(
       "Could not find the latest User profile".to_string()
     )))?;

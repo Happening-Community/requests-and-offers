@@ -76,11 +76,7 @@ pub fn get_latest_status(original_action_hash: ActionHash) -> ExternResult<Optio
     )))?
     .entry()
     .to_app_option()
-    .map_err(|_| {
-      wasm_error!(Guest(
-        "wasm_error! Guest(while deserializing the latest profile's Status".to_string()
-      ))
-    })?;
+    .map_err(|e| wasm_error!(Serialize(e)))?;
 
   Ok(latest_status_option)
 }

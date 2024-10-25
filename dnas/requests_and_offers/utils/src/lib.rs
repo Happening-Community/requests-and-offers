@@ -25,9 +25,7 @@ pub fn get_original_record(original_action_hash: ActionHash) -> ExternResult<Opt
 
   match details {
     Details::Record(details) => Ok(Some(details.record)),
-    _ => Err(wasm_error!(Guest(
-      "Malformed get_details response".to_string()
-    ))),
+    _ => Err(wasm_error!(Guest("Details is not a record".to_string()))),
   }
 }
 
@@ -74,7 +72,7 @@ where
 
   match zome_call_response {
     ZomeCallResponse::Ok(response) => Ok(response.decode().map_err(|e| wasm_error!(Serialize(e)))?),
-    _ => Err(wasm_error!(Guest(format!(
+    _ => Err(wasm_error!(Host(format!(
       "Error while calling the {} function of the {} zome",
       fn_name, zome_name
     )))),
