@@ -176,14 +176,13 @@ pub fn get_accepted_entities(entity: String) -> ExternResult<Vec<Link>> {
 
 #[hdk_extern]
 pub fn check_if_entity_is_accepted(input: EntityActionHash) -> ExternResult<bool> {
-  let links = get_links(
-    GetLinksInputBuilder::try_new(
-      input.entity_original_action_hash.clone(),
-      LinkTypes::AcceptedEntity,
-    )?
-    .build(),
-  )?;
-  Ok(!links.is_empty())
+  let accepted_entites_links = get_accepted_entities(input.entity.clone())?;
+
+  Ok(
+    accepted_entites_links
+      .into_iter()
+      .any(|link| link.target == input.entity_original_action_hash.clone().into()),
+  )
 }
 
 #[hdk_extern]

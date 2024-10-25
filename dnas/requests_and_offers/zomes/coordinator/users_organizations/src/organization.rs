@@ -18,8 +18,26 @@ pub fn create_organization(organization: Organization) -> ExternResult<Record> {
     )));
   }
 
-  let user_status_link =
-    get_user_status_link(user_links[0].target.clone().into_action_hash().unwrap())?.unwrap();
+  let user_status_link = get_user_status_link(
+    user_links[0]
+      .target
+      .clone()
+      .into_action_hash()
+      .ok_or(wasm_error!(Guest(
+        "Could not find the user's action hash".to_string()
+      )))?,
+  )?
+  .ok_or(wasm_error!(Guest(
+    "Could not find the user's status".to_string()
+  )))?;
+
+  warn!(
+    "User is accepted: {:?}",
+    check_if_entity_is_accepted(EntityActionHash {
+      entity: "users".to_string(),
+      entity_original_action_hash: user_status_link.target.clone().into_action_hash().unwrap(),
+    })
+  );
 
   if !check_if_entity_is_accepted(EntityActionHash {
     entity: "users".to_string(),
