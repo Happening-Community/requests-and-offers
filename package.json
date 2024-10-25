@@ -16,7 +16,7 @@
     "test:users": "npm run build:zomes && hc app pack workdir --recursive && npm t --filter users -w tests",
     "test:administration": "npm run build:zomes && hc app pack workdir --recursive && npm t --filter administration -w tests",
     "test:status": "cargo test --package administration_integrity --lib -- tests::status::status_tests --show-output",
-    "test:organizations": "cargo test --package administration_integrity --lib -- tests::organizations::organizations_tests --show-output",
+    "test:organizations": "npm run build:zomes && hc app pack workdir --recursive && npm t --filter organizations -w tests",
     "launch:happ": "hc-spin -n $AGENTS --ui-port $UI_PORT workdir/requests_and_offers.happ",
     "start:tauri": "AGENTS=${AGENTS:-2} BOOTSTRAP_PORT=$(get-port) SIGNAL_PORT=$(get-port) pnpm run network:tauri",
     "network:tauri": "hc sandbox clean && pnpm run build:happ && UI_PORT=$(get-port) concurrently \"pnpm --filter ui start\" \"pnpm run launch:tauri\" \"holochain-playground\"",
