@@ -47,6 +47,10 @@ importers:
       vitest:
         specifier: ^0.28.4
         version: 0.28.5
+    devDependencies:
+      vite:
+        specifier: ^5.3.6
+        version: 5.3.6(@types/node@20.11.0)
 
   ui:
     devDependencies:
@@ -3041,7 +3045,6 @@ packages:
         optional: true
       terser:
         optional: true
-
   vite@5.4.7:
     resolution: {integrity: sha512-5l2zxqMEPVENgvzTuBpHer2awaetimj2BGkhBPdnwKbPNOlHsODU+oiazEZzLK7KhAnOrO+XGYJYn4ZlUhDtDQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
@@ -3739,6 +3742,7 @@ snapshots:
     dependencies:
       tailwindcss: 3.4.12
 
+
   '@sveltejs/adapter-auto@3.2.2(@sveltejs/kit@2.5.18(@sveltejs/vite-plugin-svelte@3.1.1(svelte@5.0.5)(vite@5.4.7(@types/node@20.11.0)))(svelte@5.0.5)(vite@5.4.7(@types/node@20.11.0)))':
     dependencies:
       '@sveltejs/kit': 2.5.18(@sveltejs/vite-plugin-svelte@3.1.1(svelte@5.0.5)(vite@5.4.7(@types/node@20.11.0)))(svelte@5.0.5)(vite@5.4.7(@types/node@20.11.0))
@@ -3747,6 +3751,7 @@ snapshots:
   '@sveltejs/kit@2.5.18(@sveltejs/vite-plugin-svelte@3.1.1(svelte@5.0.5)(vite@5.4.7(@types/node@20.11.0)))(svelte@5.0.5)(vite@5.4.7(@types/node@20.11.0))':
     dependencies:
       '@sveltejs/vite-plugin-svelte': 3.1.1(svelte@5.0.5)(vite@5.4.7(@types/node@20.11.0))
+
       '@types/cookie': 0.6.0
       cookie: 0.6.0
       devalue: 5.0.0
@@ -3761,7 +3766,6 @@ snapshots:
       svelte: 5.0.5
       tiny-glob: 0.2.9
       vite: 5.4.7(@types/node@20.11.0)
-
   '@sveltejs/vite-plugin-svelte-inspector@2.1.0(@sveltejs/vite-plugin-svelte@3.1.1(svelte@5.0.5)(vite@5.4.7(@types/node@20.11.0)))(svelte@5.0.5)(vite@5.4.7(@types/node@20.11.0))':
     dependencies:
       '@sveltejs/vite-plugin-svelte': 3.1.1(svelte@5.0.5)(vite@5.4.7(@types/node@20.11.0))
@@ -3770,7 +3774,6 @@ snapshots:
       vite: 5.4.7(@types/node@20.11.0)
     transitivePeerDependencies:
       - supports-color
-
   '@sveltejs/vite-plugin-svelte@3.1.1(svelte@5.0.5)(vite@5.4.7(@types/node@20.11.0))':
     dependencies:
       '@sveltejs/vite-plugin-svelte-inspector': 2.1.0(@sveltejs/vite-plugin-svelte@3.1.1(svelte@5.0.5)(vite@5.4.7(@types/node@20.11.0)))(svelte@5.0.5)(vite@5.4.7(@types/node@20.11.0))

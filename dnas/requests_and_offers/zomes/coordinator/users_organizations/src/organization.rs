@@ -1,6 +1,6 @@
 use hdk::prelude::*;
 use users_organizations_integrity::*;
-use utils::EntityActionHash;
+use utils::{delete_links, EntityActionHash, OrganizationUser};
 use WasmErrorInner::*;
 
 use crate::{
@@ -106,15 +106,9 @@ pub fn get_latest_organization(original_action_hash: ActionHash) -> ExternResult
   Ok(latest_organization)
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct OrganizationAndUserInput {
-  pub organization_original_action_hash: ActionHash,
-  pub user_original_action_hash: ActionHash,
-}
-
 #[hdk_extern]
-pub fn add_member_to_organization(input: OrganizationAndUserInput) -> ExternResult<bool> {
-  if !check_if_agent_is_a_coordinator(input.organization_original_action_hash.clone())? {
+pub fn add_member_to_organization(input: OrganizationUser) -> ExternResult<bool> {
+  if !check_if_agent_is_organization_coordinator(input.organization_original_action_hash.clone())? {
     return Err(wasm_error!(Guest(
       "Only coordinators can add other members".to_string()
     )));
@@ -144,21 +138,29 @@ pub fn add_member_to_organization(input: OrganizationAndUserInput) -> ExternResu
 }
 
 #[hdk_extern]
-pub fn invite_member_to_organization(input: OrganizationAndUserInput) -> ExternResult<bool> {
+pub fn invite_member_to_organization(input: OrganizationUser) -> ExternResult<bool> {
   unimplemented!()
+}
+
+#[hdk_extern]
+pub fn get_organization_members_links(
+  organization_original_action_hash: ActionHash,
+) -> ExternResult<Vec<Link>> {
+  get_links(
+    GetLinksInputBuilder::try_new(
+      organization_original_action_hash.clone(),
+      LinkTypes::OrganizationMembers,
+    )
+    .unwrap()
+    .build(),
+  )
 }
 
 #[hdk_extern]
 pub fn get_organization_members(
   organization_original_action_hash: ActionHash,
 ) -> ExternResult<Vec<User>> {
-  let links = get_links(
-    GetLinksInputBuilder::try_new(
-      organization_original_action_hash.clone(),
-      LinkTypes::OrganizationMembers,
-    )?
-    .build(),
-  )?;
+  let links = get_organization_members_links(organization_original_action_hash.clone())?;
 
   let users = links
     .into_iter()
@@ -179,14 +181,8 @@ pub fn get_organization_members(
 }
 
 #[hdk_extern]
-pub fn is_organization_member(input: OrganizationAndUserInput) -> ExternResult<bool> {
-  let links = get_links(
-    GetLinksInputBuilder::try_new(
-      input.organization_original_action_hash.clone(),
-      LinkTypes::OrganizationMembers,
-    )?
-    .build(),
-  )?;
+pub fn is_organization_member(input: OrganizationUser) -> ExternResult<bool> {
+  let links = get_organization_members_links(input.organization_original_action_hash.clone())?;
 
   let is_member = links
     .into_iter()
@@ -196,16 +192,23 @@ pub fn is_organization_member(input: OrganizationAndUserInput) -> ExternResult<b
 }
 
 #[hdk_extern]
-pub fn get_user_organizations(
+pub fn get_user_organizations_links(
   user_original_action_hash: ActionHash,
-) -> ExternResult<Vec<Organization>> {
-  let links = get_links(
+) -> ExternResult<Vec<Link>> {
+  get_links(
     GetLinksInputBuilder::try_new(
       user_original_action_hash.clone(),
       LinkTypes::UserOrganizations,
     )?
     .build(),
-  )?;
+  )
+}
+
+#[hdk_extern]
+pub fn get_user_organizations(
+  user_original_action_hash: ActionHash,
+) -> ExternResult<Vec<Organization>> {
+  let links = get_user_organizations_links(user_original_action_hash.clone())?;
 
   let organizations =
     links
@@ -221,7 +224,7 @@ pub fn get_user_organizations(
 }
 
 #[hdk_extern]
-pub fn add_coordinator_to_organization(input: OrganizationAndUserInput) -> ExternResult<bool> {
+pub fn add_coordinator_to_organization(input: OrganizationUser) -> ExternResult<bool> {
   let agent_user_links = get_agent_user(agent_info()?.agent_initial_pubkey)?;
   if agent_user_links.is_empty() {
     return Err(wasm_error!(Guest(
@@ -229,7 +232,7 @@ pub fn add_coordinator_to_organization(input: OrganizationAndUserInput) -> Exter
     )));
   }
 
-  if !check_if_agent_is_a_coordinator(input.organization_original_action_hash.clone())? {
+  if !check_if_agent_is_organization_coordinator(input.organization_original_action_hash.clone())? {
     return Err(wasm_error!(Guest(
       "Only coordinators can add other coordinators".to_string()
     )));
@@ -256,21 +259,28 @@ pub fn add_coordinator_to_organization(input: OrganizationAndUserInput) -> Exter
 }
 
 #[hdk_extern]
-pub fn invite_coordinator_to_organization(input: OrganizationAndUserInput) -> ExternResult<bool> {
+pub fn invite_coordinator_to_organization(input: OrganizationUser) -> ExternResult<bool> {
   unimplemented!()
+}
+
+#[hdk_extern]
+pub fn get_organization_coordinators_links(
+  organization_original_action_hash: ActionHash,
+) -> ExternResult<Vec<Link>> {
+  get_links(
+    GetLinksInputBuilder::try_new(
+      organization_original_action_hash.clone(),
+      LinkTypes::OrganizationCoordinators,
+    )?
+    .build(),
+  )
 }
 
 #[hdk_extern]
 pub fn get_organization_coordinators(
   organization_original_action_hash: ActionHash,
 ) -> ExternResult<Vec<User>> {
-  let links = get_links(
-    GetLinksInputBuilder::try_new(
-      organization_original_action_hash.clone(),
-      LinkTypes::OrganizationCoordinators,
-    )?
-    .build(),
-  )?;
+  let links = get_organization_coordinators_links(organization_original_action_hash.clone())?;
 
   let users = links
     .into_iter()
@@ -291,14 +301,8 @@ pub fn get_organization_coordinators(
 }
 
 #[hdk_extern]
-pub fn is_organization_coordinator(input: OrganizationAndUserInput) -> ExternResult<bool> {
-  let links = get_links(
-    GetLinksInputBuilder::try_new(
-      input.organization_original_action_hash.clone(),
-      LinkTypes::OrganizationCoordinators,
-    )?
-    .build(),
-  )?;
+pub fn is_organization_coordinator(input: OrganizationUser) -> ExternResult<bool> {
+  let links = get_organization_coordinators_links(input.organization_original_action_hash.clone())?;
 
   let is_coordinator = links
     .into_iter()
@@ -308,7 +312,7 @@ pub fn is_organization_coordinator(input: OrganizationAndUserInput) -> ExternRes
 }
 
 #[hdk_extern]
-pub fn check_if_agent_is_a_coordinator(
+pub fn check_if_agent_is_organization_coordinator(
   organization_original_action_hash: ActionHash,
 ) -> ExternResult<bool> {
   let agent_user_links = get_agent_user(agent_info()?.agent_initial_pubkey)?;
@@ -327,7 +331,7 @@ pub fn check_if_agent_is_a_coordinator(
     )))?;
 
   Ok(!is_organization_coordinator(
-    OrganizationAndUserInput {
+    OrganizationUser {
       organization_original_action_hash,
       user_original_action_hash: agent_user_action_hash,
     }
@@ -352,12 +356,9 @@ pub fn leave_organization(original_action_hash: ActionHash) -> ExternResult<bool
       "Could not find the agent's user action hash".to_string()
     )))?;
 
-  let user_organizations_link = get_links(
-    GetLinksInputBuilder::try_new(agent_user_action_hash.clone(), LinkTypes::UserOrganizations)?
-      .build(),
-  )?
-  .into_iter()
-  .find(|link| link.target.clone().into_action_hash().unwrap() == original_action_hash.clone());
+  let user_organizations_link = get_user_organizations_links(agent_user_action_hash.clone())?
+    .into_iter()
+    .find(|link| link.target.clone().into_action_hash().unwrap() == original_action_hash.clone());
 
   if user_organizations_link.is_none() {
     return Err(wasm_error!(Guest(
@@ -386,24 +387,19 @@ pub fn leave_organization(original_action_hash: ActionHash) -> ExternResult<bool
 }
 
 #[hdk_extern]
-pub fn remove_organization_member(input: OrganizationAndUserInput) -> ExternResult<bool> {
-  if !check_if_agent_is_a_coordinator(input.organization_original_action_hash.clone())? {
+pub fn remove_organization_member(input: OrganizationUser) -> ExternResult<bool> {
+  if !check_if_agent_is_organization_coordinator(input.organization_original_action_hash.clone())? {
     return Err(wasm_error!(Guest(
       "Only coordinators can remove other members".to_string()
     )));
   }
 
-  let user_organizations_link = get_links(
-    GetLinksInputBuilder::try_new(
-      input.user_original_action_hash.clone(),
-      LinkTypes::UserOrganizations,
-    )?
-    .build(),
-  )?
-  .into_iter()
-  .find(|link| {
-    link.target.clone().into_action_hash().unwrap() == input.organization_original_action_hash
-  });
+  let user_organizations_link =
+    get_user_organizations_links(input.user_original_action_hash.clone())?
+      .into_iter()
+      .find(|link| {
+        link.target.clone().into_action_hash().unwrap() == input.organization_original_action_hash
+      });
 
   if user_organizations_link.is_none() {
     return Err(wasm_error!(Guest(
@@ -413,52 +409,46 @@ pub fn remove_organization_member(input: OrganizationAndUserInput) -> ExternResu
 
   delete_link(user_organizations_link.unwrap().create_link_hash)?;
 
-  let organization_members_link = get_links(
-    GetLinksInputBuilder::try_new(
-      input.organization_original_action_hash.clone(),
-      LinkTypes::OrganizationMembers,
-    )?
-    .build(),
-  )?
-  .into_iter()
-  .find(|link| link.target.clone().into_action_hash().unwrap() == input.user_original_action_hash);
+  let organization_members_link =
+    get_organization_members_links(input.organization_original_action_hash)?
+      .into_iter()
+      .find(|link| {
+        link.target.clone().into_action_hash().unwrap() == input.user_original_action_hash
+      });
 
-  if organization_members_link.is_none() {
+  if let Some(link) = organization_members_link {
+    delete_link(link.create_link_hash)?;
+  } else {
     return Err(wasm_error!(Guest(
       "The user is not a member of this organization".to_string()
     )));
   }
 
-  delete_link(organization_members_link.unwrap().create_link_hash)?;
-
   Ok(true)
 }
 
 #[hdk_extern]
-pub fn remove_organization_coordinator(input: OrganizationAndUserInput) -> ExternResult<bool> {
-  if !check_if_agent_is_a_coordinator(input.organization_original_action_hash.clone())? {
+pub fn remove_organization_coordinator(input: OrganizationUser) -> ExternResult<bool> {
+  if !check_if_agent_is_organization_coordinator(input.organization_original_action_hash.clone())? {
     return Err(wasm_error!(Guest(
       "Only coordinators can remove other members".to_string()
     )));
   }
 
-  let organization_coordinators_link = get_links(
-    GetLinksInputBuilder::try_new(
-      input.organization_original_action_hash.clone(),
-      LinkTypes::OrganizationCoordinators,
-    )?
-    .build(),
-  )?
-  .into_iter()
-  .find(|link| link.target.clone().into_action_hash().unwrap() == input.user_original_action_hash);
+  let organization_coordinators_link =
+    get_organization_coordinators_links(input.organization_original_action_hash.clone())?
+      .into_iter()
+      .find(|link| {
+        link.target.clone().into_action_hash().unwrap() == input.user_original_action_hash
+      });
 
-  if organization_coordinators_link.is_none() {
+  if let Some(link) = organization_coordinators_link {
+    delete_link(link.create_link_hash)?;
+  } else {
     return Err(wasm_error!(Guest(
       "The user is not a coordinator of this organization".to_string()
     )));
   }
-
-  delete_link(organization_coordinators_link.unwrap().create_link_hash)?;
 
   Ok(true)
 }
@@ -472,7 +462,7 @@ pub struct UpdateOrganizationInput {
 
 #[hdk_extern]
 pub fn update_organization(input: UpdateOrganizationInput) -> ExternResult<Record> {
-  if !check_if_agent_is_a_coordinator(input.original_action_hash.clone())? {
+  if !check_if_agent_is_organization_coordinator(input.original_action_hash.clone())? {
     return Err(wasm_error!(Guest(
       "Only coordinators can update the organization".to_string()
     )));
@@ -500,13 +490,26 @@ pub fn update_organization(input: UpdateOrganizationInput) -> ExternResult<Recor
 
 #[hdk_extern]
 pub fn delete_organization(organization_original_action_hash: ActionHash) -> ExternResult<bool> {
-  if !check_if_agent_is_a_coordinator(organization_original_action_hash.clone())? {
+  if !check_if_agent_is_organization_coordinator(organization_original_action_hash.clone())? {
     return Err(wasm_error!(Guest(
       "Only coordinators can delete organizations".to_string()
     )));
   }
 
-  // TODO: Delete all links related to the organization
+  delete_links(
+    organization_original_action_hash.clone(),
+    LinkTypes::OrganizationUpdates,
+  )?;
+
+  delete_links(
+    organization_original_action_hash.clone(),
+    LinkTypes::OrganizationMembers,
+  )?;
+
+  delete_links(
+    organization_original_action_hash.clone(),
+    LinkTypes::OrganizationCoordinators,
+  )?;
 
   delete_entry(organization_original_action_hash)?;
 

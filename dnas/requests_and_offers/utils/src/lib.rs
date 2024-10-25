@@ -8,7 +8,8 @@ use std::io::Cursor;
 
 use hdk::prelude::*;
 use image::io::Reader as ImageReader;
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Serialize};
+use std::fmt::Debug;
 use WasmErrorInner::*;
 
 pub fn check_if_progenitor() -> ExternResult<bool> {
@@ -25,7 +26,7 @@ pub fn get_original_record(original_action_hash: ActionHash) -> ExternResult<Opt
   match details {
     Details::Record(details) => Ok(Some(details.record)),
     _ => Err(wasm_error!(Guest(
-      "Malformed get details response".to_string()
+      "Malformed get_details response".to_string()
     ))),
   }
 }
@@ -60,8 +61,8 @@ pub fn get_all_revisions_for_entry(
 
 pub fn external_local_call<I, T>(fn_name: &str, zome_name: &str, payload: I) -> ExternResult<T>
 where
-  I: Clone + serde::Serialize + std::fmt::Debug,
-  T: std::fmt::Debug + DeserializeOwned,
+  I: Clone + Serialize + Debug,
+  T: Debug + DeserializeOwned,
 {
   let zome_call_response = call(
     CallTargetCell::Local,
@@ -71,13 +72,12 @@ where
     payload.clone(),
   )?;
 
-  if let ZomeCallResponse::Ok(response) = zome_call_response {
-    Ok(response.decode().unwrap())
-  } else {
-    Err(wasm_error!(Guest(format!(
+  match zome_call_response {
+    ZomeCallResponse::Ok(response) => Ok(response.decode().map_err(|e| wasm_error!(Serialize(e)))?),
+    _ => Err(wasm_error!(Guest(format!(
       "Error while calling the {} function of the {} zome",
       fn_name, zome_name
-    ))))
+    )))),
   }
 }
 
@@ -93,4 +93,18 @@ pub fn is_image(bytes: SerializedBytes) -> bool {
   };
 
   reader.decode().is_ok()
+}
+
+pub fn delete_links(
+  base_address: impl Into<AnyLinkableHash>,
+  link_type: impl LinkTypeFilterExt,
+) -> ExternResult<bool> {
+  let organization_updates_links =
+    get_links(GetLinksInputBuilder::try_new(base_address, link_type)?.build())?;
+
+  for link in organization_updates_links {
+    delete_link(link.create_link_hash)?;
+  }
+
+  Ok(true)
 }
