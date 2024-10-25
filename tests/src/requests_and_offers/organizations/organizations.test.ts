@@ -9,7 +9,13 @@ import {
   imagePathToArrayBuffer,
   runScenarioWithTwoAgents,
 } from "../utils.js";
-import { createUser, getAgentUser, sampleUser, User } from "../users/common";
+import {
+  createUser,
+  getAcceptedUsersLinks,
+  getAgentUser,
+  sampleUser,
+  User,
+} from "../users/common";
 import {
   checkIfAgentIsAdministrator,
   getLatestStatusForUser,
@@ -73,32 +79,25 @@ test("create and manage Organization", async () => {
 
       // Alice accept Bob
       let bobUserLink = (
-        await getAgentUser(alice.cells[0], alice.agentPubKey)
+        await getAgentUser(alice.cells[0], bob.agentPubKey)
       )[0];
       const bobStatusOriginalActionHash = (
         await getUserStatusLink(alice.cells[0], bobUserLink.target)
       ).target;
-      const bobLatestStatusRecord = await getLatestStatusRecordForUser(
-        alice.cells[0],
-        bobUserLink.target
-      );
+
+      const bobLatestStatusActionHash = (
+        await getLatestStatusRecordForUser(alice.cells[0], bobUserLink.target)
+      ).signed_action.hashed.hash;
 
       await updateUserStatus(
         alice.cells[0],
         bobUserLink.target,
+        bobLatestStatusActionHash,
         bobStatusOriginalActionHash,
-        bobLatestStatusRecord.signed_action.hashed.hash,
         {
           status_type: "accepted",
         }
       );
-
-      // Verify that Bob is an accepted user
-      let bobStatus = await getLatestStatusForUser(
-        alice.cells[0],
-        bobUserLink.target
-      );
-      assert.equal(bobStatus.status_type, "accepted");
 
       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 

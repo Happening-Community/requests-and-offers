@@ -5,7 +5,7 @@ import { decodeRecords, runScenarioWithTwoAgents } from "../utils";
 import {
   User,
   createUser,
-  getAcceptedEntities,
+  getAcceptedUsersLinks,
   getAgentUser,
   getLatestUser,
   getUserAgents,
@@ -159,7 +159,7 @@ test("update User status", async () => {
     assert.equal(allUsers.length, 2);
 
     // Verify the accepted_users list
-    let AcceptedEntities = await getAcceptedEntities(alice.cells[0]);
+    let AcceptedEntities = await getAcceptedUsersLinks(alice.cells[0]);
 
     assert.equal(AcceptedEntities.length, 1);
 

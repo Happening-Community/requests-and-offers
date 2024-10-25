@@ -172,13 +172,11 @@ pub fn get_accepted_entities(entity: String) -> ExternResult<Vec<Link>> {
 
 #[hdk_extern]
 pub fn check_if_entity_is_accepted(input: EntityActionHash) -> ExternResult<bool> {
-  let accepted_entites_links = get_accepted_entities(input.entity.clone())?;
+  let entity_is_accepted = get_accepted_entities(input.entity.clone())?
+    .into_iter()
+    .any(|link| link.target == input.entity_original_action_hash.clone().into());
 
-  Ok(
-    accepted_entites_links
-      .into_iter()
-      .any(|link| link.target == input.entity_original_action_hash.clone().into()),
-  )
+  Ok(entity_is_accepted)
 }
 
 #[hdk_extern]
@@ -227,15 +225,15 @@ pub fn update_entity_status(input: UpdateEntityActionHash) -> ExternResult<Recor
     (),
   )?;
 
-  let entity_link = get_links(
+  let entity_link_hash = get_links(
     GetLinksInputBuilder::try_new(
       input.entity_original_action_hash.clone(),
       LinkTypes::EntityStatus,
     )?
     .build(),
   )?[0]
-    .to_owned();
-  let entity_link_hash = entity_link.create_link_hash;
+    .to_owned()
+    .create_link_hash;
 
   delete_link(entity_link_hash)?;
 
