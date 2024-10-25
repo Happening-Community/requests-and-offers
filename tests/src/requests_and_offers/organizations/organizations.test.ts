@@ -1,208 +1,112 @@
-// import { assert, expect, test } from "vitest";
-// import TestUserPicture from "../organizations./users/assets/favicon.png";
+import { assert, expect, test } from "vitest";
+import TestUserPicture from "./assets/favicon.png";
 
-// import { Scenario, Player, dhtSync } from "@holochain/tryorama";
-// import { Record } from "@holochain/client";
+import { Scenario, Player, dhtSync } from "@holochain/tryorama";
+import { Record } from "@holochain/client";
 
-// import {
-//   User,
-//   sampleUser,
-//   createUser,
-//   getAgentUser,
-//   getLatestUser,
-//   updateUser,
-// } from "./common.js";
-// import {
-//   decodeRecords,
-//   imagePathToArrayBuffer,
-//   runScenarioWithTwoAgents,
-// } from "../utils.js";
-// import { getLatestStatusForUser } from "../administration/common";
+import {
+  decodeRecords,
+  imagePathToArrayBuffer,
+  runScenarioWithTwoAgents,
+} from "../utils.js";
+import { createUser, getAgentUser, sampleUser, User } from "../users/common";
+import {
+  checkIfAgentIsAdministrator,
+  getLatestStatusForUser,
+  getLatestStatusRecordForUser,
+  getUserStatusLink,
+  registerNetworkAdministrator,
+  updateUserStatus,
+} from "../administration/common";
+import { createOrganization, sampleOrganization } from "./common";
 
-// test("create and read User", async () => {
-//   await runScenarioWithTwoAgents(
-//     async (_scenario: Scenario, alice: Player, bob: Player) => {
-//       let sample: User;
-//       let record: Record;
+test("create and manage Organization", async () => {
+  await runScenarioWithTwoAgents(
+    async (_scenario: Scenario, alice: Player, bob: Player) => {
+      let sample: User;
+      let record: Record;
 
-//       // Alice creates a User
-//       sample = sampleUser({ name: "Alice" });
-//       record = await createUser(alice.cells[0], sample);
-//       const aliceCreatedUser = decodeRecords([record])[0] as User;
-//       assert.ok(record);
+      // Alice creates a User
+      sample = sampleUser({ name: "Alice" });
+      record = await createUser(alice.cells[0], sample);
+      assert.ok(record);
 
-//       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+      await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
-//       // Alice get her user
-//       let aliceUserLink = await getAgentUser(alice.cells[0], alice.agentPubKey);
-//       assert.ok(aliceUserLink);
+      // Bob creates a User
+      sample = sampleUser({
+        name: "Bob",
+      });
+      record = await createUser(bob.cells[0], sample);
+      assert.ok(record);
 
-//       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+      await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
 
-//       // Bob gets the created User
-//       const createdRecord: Record = await getLatestUser(
-//         bob.cells[0],
-//         record.signed_action.hashed.hash
-//       );
-//       const bobCreatedUser = decodeRecords([createdRecord])[0] as User;
+      // Alice become an network administrator
+      let aliceUserLink = (
+        await getAgentUser(alice.cells[0], alice.agentPubKey)
+      )[0];
+      await registerNetworkAdministrator(alice.cells[0], aliceUserLink.target, [
+        alice.agentPubKey,
+      ]);
+      await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
-//       assert.containsAllKeys(aliceCreatedUser, bobCreatedUser);
+      // Verify that Alice is an administrator
+      assert.ok(
+        await checkIfAgentIsAdministrator(alice.cells[0], alice.agentPubKey)
+      );
 
-//       // Verify that the user status is "pending"
-//       const bobStatus = await getLatestStatusForUser(
-//         bob.cells[0],
-//         record.signed_action.hashed.hash
-//       );
+      // Bob create an Organization without being an accepted user
+      const buffer = await imagePathToArrayBuffer(
+        process.cwd() + TestUserPicture
+      );
+      const sampleOrg = sampleOrganization({
+        name: "Organization",
+        logo: new Uint8Array(buffer),
+      });
 
-//       assert.equal(bobStatus.status_type, "pending");
+      await expect(
+        createOrganization(bob.cells[0], sampleOrg)
+      ).rejects.toThrow();
 
-//       // Bob try to get his user before he create it
-//       let links = await getAgentUser(bob.cells[0], bob.agentPubKey);
-//       assert.equal(links.length, 0);
+      await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
-//       // Bob create an User with erroneous UserType
-//       let errSample: User = sampleUser({
-//         user_type: "Non Authorized",
-//       });
+      // Alice accept Bob
+      let bobUserLink = (
+        await getAgentUser(alice.cells[0], alice.agentPubKey)
+      )[0];
+      const bobStatusOriginalActionHash = (
+        await getUserStatusLink(alice.cells[0], bobUserLink.target)
+      ).target;
+      const bobLatestStatusRecord = await getLatestStatusRecordForUser(
+        alice.cells[0],
+        bobUserLink.target
+      );
 
-//       await expect(createUser(bob.cells[0], errSample)).rejects.toThrow();
+      await updateUserStatus(
+        alice.cells[0],
+        bobUserLink.target,
+        bobStatusOriginalActionHash,
+        bobLatestStatusRecord.signed_action.hashed.hash,
+        {
+          status_type: "accepted",
+        }
+      );
 
-//       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+      // Verify that Bob is an accepted user
+      let bobStatus = await getLatestStatusForUser(
+        alice.cells[0],
+        bobUserLink.target
+      );
+      assert.equal(bobStatus.status_type, "accepted");
 
-//       // Bob create an User with erroneous user Picture
-//       errSample = sampleUser({
-//         name: "Bob",
-//         picture: new Uint8Array(20),
-//       });
-//       await expect(createUser(bob.cells[0], errSample)).rejects.toThrow();
+      await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
-//       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+      // Bob retry to create an Organization
+      record = await createOrganization(bob.cells[0], sampleOrg);
+      assert.ok(record);
 
-//       // Bob creates a User with a real image file
-//       const buffer = await imagePathToArrayBuffer(
-//         process.cwd() + TestUserPicture
-//       );
-
-//       sample = sampleUser({
-//         name: "Bob",
-//         picture: new Uint8Array(buffer),
-//       });
-//       record = await createUser(bob.cells[0], sample);
-//       assert.ok(record);
-
-//       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-
-//       // Alice get the created User
-//       record = await getLatestUser(
-//         alice.cells[0],
-//         record.signed_action.hashed.hash
-//       );
-//       assert.ok(record);
-//     }
-//   );
-// });
-
-// test("create and update User", async () => {
-//   await runScenarioWithTwoAgents(async (_scenario, alice, bob) => {
-//     let sample: User;
-//     let record: Record;
-
-//     sample = sampleUser({ name: "Alice" });
-//     record = await createUser(alice.cells[0], sample);
-//     const originalUserHash = record.signed_action.hashed.hash;
-
-//     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-
-//     const buffer = await imagePathToArrayBuffer(
-//       process.cwd() + TestUserPicture
-//     );
-
-//     // Alice update her user with a valid user picture
-//     sample = sampleUser({
-//       name: "Alicia",
-//       nickname: "Alicialia",
-//       picture: new Uint8Array(buffer),
-//     });
-
-//     await updateUser(
-//       alice.cells[0],
-//       originalUserHash,
-//       record.signed_action.hashed.hash,
-//       sample
-//     );
-
-//     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-
-//     let latestUserRecord = await getLatestUser(
-//       alice.cells[0],
-//       originalUserHash
-//     );
-//     let aliceUser = decodeRecords([latestUserRecord])[0] as User;
-//     assert.equal(sample.name, aliceUser.name);
-
-//     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-
-//     // Alice update her user with an invalid user picture
-//     sample = sampleUser({
-//       name: "Alicia",
-//       nickname: "Alicialia",
-//       picture: new Uint8Array(20),
-//     });
-//     await expect(
-//       updateUser(
-//         alice.cells[0],
-//         originalUserHash,
-//         latestUserRecord.signed_action.hashed.hash,
-//         sample
-//       )
-//     ).rejects.toThrow();
-
-//     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-
-//     // Bob try to update Alice's user
-//     sample = sampleUser({
-//       name: "Bob",
-//     });
-//     await expect(
-//       updateUser(
-//         bob.cells[0],
-//         originalUserHash,
-//         latestUserRecord.signed_action.hashed.hash,
-//         sample
-//       )
-//     ).rejects.toThrow();
-
-//     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-
-//     // Alice update here user again
-//     sample = sampleUser({
-//       name: "Alice",
-//       nickname: "Alicia",
-//     });
-
-//     await updateUser(
-//       alice.cells[0],
-//       originalUserHash,
-//       latestUserRecord.signed_action.hashed.hash,
-//       sample
-//     );
-
-//     latestUserRecord = await getLatestUser(alice.cells[0], originalUserHash);
-//     aliceUser = decodeRecords([latestUserRecord])[0] as User;
-//     assert.equal(aliceUser.nickname, sample.nickname);
-//   });
-// });
-
-// // test("get progenitor pubkey", async () => {
-// //   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
-// //     let guestDnaProperties = decode(
-// //       alice.cells[0].dna_modifiers.properties
-// //     ) as DnaProperties;
-// //     let hostDnaProperties = await getDnaProperties(alice.cells[0]);
-
-// //     assert.equal(
-// //       guestDnaProperties.progenitor_pubkey,
-// //       hostDnaProperties.progenitor_pubkey
-// //     );
-// //   });
-// // });
+      await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
+    }
+  );
+});
