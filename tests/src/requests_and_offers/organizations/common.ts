@@ -40,13 +40,24 @@ export function createOrganization(
   });
 }
 
-export function getLatestOrganization(
+export function getLatestOrganizationRecord(
   cell: CallableCell,
   original_action_hash: ActionHash
 ): Promise<Record | null> {
   return cell.callZome({
     zome_name: "users_organizations",
     fn_name: "get_latest_organization_record",
+    payload: original_action_hash,
+  });
+}
+
+export function getLatestOrganization(
+  cell: CallableCell,
+  original_action_hash: ActionHash
+): Promise<Organization> {
+  return cell.callZome({
+    zome_name: "users_organizations",
+    fn_name: "get_latest_organization",
     payload: original_action_hash,
   });
 }
@@ -63,6 +74,17 @@ export function addMembersToOrganization(
       organization_original_action_hash,
       user_original_action_hash,
     },
+  });
+}
+
+export function getOrganizationMembersLinks(
+  cell: CallableCell,
+  organization_original_action_hash: ActionHash
+): Promise<Link[]> {
+  return cell.callZome({
+    zome_name: "users_organizations",
+    fn_name: "get_organization_members_links",
+    payload: organization_original_action_hash,
   });
 }
 
@@ -92,6 +114,17 @@ export function isOrganizationMember(
   });
 }
 
+export function getUserOrganizationsLinks(
+  cell: CallableCell,
+  user_original_action_hash: ActionHash
+): Promise<Link[]> {
+  return cell.callZome({
+    zome_name: "users_organizations",
+    fn_name: "get_user_organizations_links",
+    payload: user_original_action_hash,
+  });
+}
+
 export function getUserOrganizations(
   cell: CallableCell,
   user_original_action_hash: ActionHash
@@ -115,6 +148,17 @@ export function addCoordinatorToOrganization(
       organization_original_action_hash,
       user_original_action_hash,
     },
+  });
+}
+
+export function getOrganizationCoordinatorsLinks(
+  cell: CallableCell,
+  organization_original_action_hash: ActionHash
+): Promise<Link[]> {
+  return cell.callZome({
+    zome_name: "users_organizations",
+    fn_name: "get_organization_coordinators_links",
+    payload: organization_original_action_hash,
   });
 }
 
@@ -144,6 +188,17 @@ export function isOrganizationCoordinator(
   });
 }
 
+export function checkIfAgentIsOrganizationCoordinator(
+  cell: CallableCell,
+  organization_original_action_hash: ActionHash
+) {
+  return cell.callZome({
+    zome_name: "users_organizations",
+    fn_name: "check_if_agent_is_organization_coordinator",
+    payload: organization_original_action_hash,
+  });
+}
+
 export function leaveOrganization(
   cell: CallableCell,
   organization_original_action_hash: ActionHash
@@ -151,6 +206,64 @@ export function leaveOrganization(
   return cell.callZome({
     zome_name: "users_organizations",
     fn_name: "leave_organization",
+    payload: organization_original_action_hash,
+  });
+}
+
+export function removeOrganizationMember(
+  cell: CallableCell,
+  organization_original_action_hash: ActionHash,
+  user_original_action_hash: ActionHash
+): Promise<boolean> {
+  return cell.callZome({
+    zome_name: "users_organizations",
+    fn_name: "remove_organization_member",
+    payload: {
+      organization_original_action_hash,
+      user_original_action_hash,
+    },
+  });
+}
+
+export function removeOrganizationCoordinator(
+  cell: CallableCell,
+  organization_original_action_hash: ActionHash,
+  user_original_action_hash: ActionHash
+): Promise<boolean> {
+  return cell.callZome({
+    zome_name: "users_organizations",
+    fn_name: "remove_organization_coordinator",
+    payload: {
+      organization_original_action_hash,
+      user_original_action_hash,
+    },
+  });
+}
+
+export function updateOrganization(
+  cell: CallableCell,
+  organization_original_action_hash: ActionHash,
+  organization_previous_action_hash: ActionHash,
+  updated_organization: Organization
+): Promise<boolean> {
+  return cell.callZome({
+    zome_name: "users_organizations",
+    fn_name: "update_organization",
+    payload: {
+      organization_original_action_hash,
+      organization_previous_action_hash,
+      updated_organization,
+    },
+  });
+}
+
+export function deleteOrganization(
+  cell: CallableCell,
+  organization_original_action_hash: ActionHash
+): Promise<boolean> {
+  return cell.callZome({
+    zome_name: "users_organizations",
+    fn_name: "delete_organization",
     payload: organization_original_action_hash,
   });
 }

@@ -18,3 +18,9 @@ pub struct EntityActionHashAgents {
   pub entity_original_action_hash: ActionHash,
   pub agent_pubkeys: Vec<AgentPubKey>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct OrganizationUser {
+  pub organization_original_action_hash: ActionHash,
+  pub user_original_action_hash: ActionHash,
+}
