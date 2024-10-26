@@ -62,14 +62,14 @@ export function getLatestOrganization(
   });
 }
 
-export function addMembersToOrganization(
+export function addMemberToOrganization(
   cell: CallableCell,
   organization_original_action_hash: ActionHash,
   user_original_action_hash: ActionHash
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "users_organizations",
-    fn_name: "add_members_to_organization",
+    fn_name: "add_member_to_organization",
     payload: {
       organization_original_action_hash,
       user_original_action_hash,
@@ -191,7 +191,7 @@ export function isOrganizationCoordinator(
 export function checkIfAgentIsOrganizationCoordinator(
   cell: CallableCell,
   organization_original_action_hash: ActionHash
-) {
+): Promise<boolean> {
   return cell.callZome({
     zome_name: "users_organizations",
     fn_name: "check_if_agent_is_organization_coordinator",

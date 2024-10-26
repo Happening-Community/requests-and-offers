@@ -20,7 +20,11 @@ pub fn create_organization(organization: Organization) -> ExternResult<Record> {
 
   if !check_if_entity_is_accepted(EntityActionHash {
     entity: "users".to_string(),
-    entity_original_action_hash: user_links[0].target.clone().into_action_hash().unwrap(),
+    entity_original_action_hash: user_links[0]
+      .target
+      .clone()
+      .into_action_hash()
+      .expect("Could not find the user's action hash"),
   })? {
     return Err(wasm_error!(Guest(
       "Your User profile is not accepted".to_string()
@@ -46,6 +50,13 @@ pub fn create_organization(organization: Organization) -> ExternResult<Record> {
     organization_hash.clone(),
     created_status_record.action_address().clone(),
     LinkTypes::OrganizationStatus,
+    (),
+  )?;
+
+  create_link(
+    organization_hash.clone(),
+    user_links[0].target.clone(),
+    LinkTypes::OrganizationMembers,
     (),
   )?;
 
@@ -111,7 +122,7 @@ pub fn add_member_to_organization(input: OrganizationUser) -> ExternResult<bool>
     )));
   }
 
-  if !is_organization_member(input.clone())? {
+  if is_organization_member(input.clone())? {
     return Err(wasm_error!(Guest(
       "The invited user is already a member".to_string()
     )));
@@ -147,8 +158,7 @@ pub fn get_organization_members_links(
     GetLinksInputBuilder::try_new(
       organization_original_action_hash.clone(),
       LinkTypes::OrganizationMembers,
-    )
-    .unwrap()
+    )?
     .build(),
   )
 }
@@ -235,7 +245,7 @@ pub fn add_coordinator_to_organization(input: OrganizationUser) -> ExternResult<
     )));
   }
 
-  if !is_organization_coordinator(input.clone())? {
+  if is_organization_coordinator(input.clone())? {
     return Err(wasm_error!(Guest(
       "The invited user is already a coordinator of this organization".to_string()
     )));
@@ -327,13 +337,13 @@ pub fn check_if_agent_is_organization_coordinator(
       "Could not find the agent's user action hash".to_string()
     )))?;
 
-  Ok(!is_organization_coordinator(
+  is_organization_coordinator(
     OrganizationUser {
       organization_original_action_hash,
       user_original_action_hash: agent_user_action_hash,
     }
     .clone(),
-  )?)
+  )
 }
 
 #[hdk_extern]

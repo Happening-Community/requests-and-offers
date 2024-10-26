@@ -275,13 +275,16 @@ pub struct SuspendEntityInput {
 
 #[hdk_extern]
 pub fn suspend_entity_temporarily(input: SuspendEntityInput) -> ExternResult<bool> {
-  if input.duration_in_days.is_none() {
-    return Err(wasm_error!(Guest(
-      "Duration in days must be provided".to_string()
-    )));
-  }
+  let duration_in_days = match input.duration_in_days {
+    Some(duration_in_days) => duration_in_days,
+    None => {
+      return Err(wasm_error!(Guest(
+        "Duration in days must be provided".to_string()
+      )))
+    }
+  };
 
-  let duration = Duration::days(input.duration_in_days.unwrap());
+  let duration = Duration::days(duration_in_days);
   let now = &sys_time()?;
 
   let update_status_input = UpdateEntityActionHash {
