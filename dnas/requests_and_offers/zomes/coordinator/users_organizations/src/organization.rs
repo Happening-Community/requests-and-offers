@@ -4,6 +4,7 @@ use utils::{delete_links, EntityActionHash, OrganizationUser};
 use WasmErrorInner::*;
 
 use crate::{
+  administration::get_all_organizations,
   external_calls::{check_if_entity_is_accepted, create_status},
   user::{get_agent_user, get_latest_user},
 };
@@ -70,6 +71,20 @@ pub fn create_organization(organization: Organization) -> ExternResult<Record> {
 }
 
 #[hdk_extern]
+pub fn get_accepted_organizations_links(_: ()) -> ExternResult<Vec<Link>> {
+  let links = get_all_organizations(())?;
+  let accepted_links = links.into_iter().filter(|link| {
+    check_if_entity_is_accepted(EntityActionHash {
+      entity: "organizations".to_string(),
+      entity_original_action_hash: link.target.clone().into_action_hash().unwrap(),
+    })
+    .is_ok()
+  });
+
+  Ok(accepted_links.collect())
+}
+
+#[hdk_extern]
 pub fn get_latest_organization_record(
   original_action_hash: ActionHash,
 ) -> ExternResult<Option<Record>> {
@@ -96,20 +111,17 @@ pub fn get_latest_organization_record(
 #[hdk_extern]
 pub fn get_latest_organization(original_action_hash: ActionHash) -> ExternResult<Organization> {
   let latest_organization_record = get_latest_organization_record(original_action_hash)?;
-  let latest_organization = latest_organization_record
+  let latest_organization: Organization = latest_organization_record
     .ok_or(wasm_error!(Guest(
       "Could not find the latest Organization profile".to_string()
     )))?
     .entry()
     .to_app_option()
-    .map_err(|_| {
-      wasm_error!(Guest(
-        "Error while deserializing the latest Organization profile".to_string()
-      ))
-    })?
+    .map_err(|_| wasm_error!(Guest("Could not parse Organization".to_string())))?
     .ok_or(wasm_error!(Guest(
       "Could not find the latest Organization profile".to_string()
     )))?;
+
   Ok(latest_organization)
 }
 

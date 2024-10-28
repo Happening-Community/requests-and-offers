@@ -29,6 +29,17 @@ export function sampleOrganization(
   };
 }
 
+export async function getOrganizationStatusLink(
+  cell: CallableCell,
+  organization_original_action_hash: ActionHash
+): Promise<Link | null> {
+  return cell.callZome({
+    zome_name: "users_organizations",
+    fn_name: "get_user_status_link",
+    payload: organization_original_action_hash,
+  });
+}
+
 export function createOrganization(
   cell: CallableCell,
   organization: Organization
@@ -37,6 +48,24 @@ export function createOrganization(
     zome_name: "users_organizations",
     fn_name: "create_organization",
     payload: organization,
+  });
+}
+
+export function getAllOrganizationsLinks(cell: CallableCell): Promise<Link[]> {
+  return cell.callZome({
+    zome_name: "users_organizations",
+    fn_name: "get_all_organizations_links",
+    payload: null,
+  });
+}
+
+export function getAcceptedOrganizationsLinks(
+  cell: CallableCell
+): Promise<Link[]> {
+  return cell.callZome({
+    zome_name: "users_organizations",
+    fn_name: "get_accepted_organizations_links",
+    payload: null,
   });
 }
 

@@ -9,6 +9,7 @@ import {
   getAgentUser,
   getLatestUser,
   getUserAgents,
+  getUserStatusLink,
   sampleUser,
 } from "../users/common";
 import {
@@ -18,7 +19,6 @@ import {
   getAllUsers,
   getLatestStatusForUser,
   getLatestStatusRecordForUser,
-  getUserStatusLink,
   registerNetworkAdministrator,
   removeAdministrator,
   suspendUserIndefinitely,

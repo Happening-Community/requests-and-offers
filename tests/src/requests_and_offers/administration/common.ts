@@ -124,17 +124,6 @@ export async function getLatestStatusForUser(
   });
 }
 
-export async function getUserStatusLink(
-  cell: CallableCell,
-  user_original_action_hash: ActionHash
-): Promise<Link | null> {
-  return cell.callZome({
-    zome_name: "users_organizations",
-    fn_name: "get_user_status_link",
-    payload: user_original_action_hash,
-  });
-}
-
 export async function updateUserStatus(
   cell: CallableCell,
   entity_original_action_hash: ActionHash,
