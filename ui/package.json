@@ -5,7 +5,7 @@
     "start": "vite --clearScreen false --port $UI_PORT",
     "build": "npm run check && vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "package": "pnpm run build && rimraf dist.zip && cd dist && bestzip ../dist.zip *",
+    "package": "pnpm run build && rimraf dist.zip && cd build && bestzip ../dist.zip *",
     "test": "vitest run",
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write ."
@@ -31,6 +31,7 @@
     "@vf-ui/graphql-client-holochain": "^0.0.1-alpha.22",
     "@vf-ui/graphql-client-mock": "^0.0.9",
     "autoprefixer": "10.4.16",
+    "bestzip": "^2.2.1",
     "daisyui": "^4.12.10",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
@@ -42,8 +43,8 @@
     "prettier": "^3.2.5",
     "prettier-plugin-svelte": "^3.1.2",
     "prettier-plugin-tailwindcss": "^0.5.11",
-    "rimraf": "^5.0.7",
-    "svelte": "^5.0.3",
+    "rimraf": "^6.0.1",
+    "svelte": "^5.1.3",
     "svelte-check": "^3.8.5",
     "svelte-fa": "^4.0.2",
     "tailwindcss": "^3.4.12",
@@ -53,5 +54,8 @@
     "vite-plugin-tailwind-purgecss": "^0.2.0",
     "vitest": "^1.0.0"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@sveltejs/adapter-static": "^3.0.6"
+  }
 }
