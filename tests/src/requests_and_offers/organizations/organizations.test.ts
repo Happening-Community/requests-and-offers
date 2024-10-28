@@ -24,6 +24,7 @@ import {
   getLatestOrganization,
   getOrganizationCoordinatorsLinks,
   getOrganizationMembersLinks,
+  removeOrganizationCoordinator,
   sampleOrganization,
 } from "./common";
 
@@ -189,6 +190,31 @@ test("create and manage Organization", async () => {
       );
       assert.lengthOf(organizationLinks, 2);
       assert.deepEqual(organizationLinks[1].target, aliceUserLink.target);
+
+      // Alice remove Bob as a coordinator of the Organization
+      assert.ok(
+        await removeOrganizationCoordinator(
+          alice.cells[0],
+          organizationOriginalActionHash,
+          bobUserLink.target
+        )
+      );
+
+      await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+      // Verify that Bob is not a coordinator of the Organization
+      assert.notOk(
+        await checkIfAgentIsOrganizationCoordinator(
+          bob.cells[0],
+          organizationOriginalActionHash
+        )
+      );
+
+      organizationLinks = await getOrganizationCoordinatorsLinks(
+        alice.cells[0],
+        organizationOriginalActionHash
+      );
+      assert.lengthOf(organizationLinks, 1);
     }
   );
 });

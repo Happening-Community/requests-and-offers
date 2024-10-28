@@ -59,12 +59,17 @@ This one run the miscellaneous tests.
 ```bash
 pnpm test:users
 ```
-This one run the users zome test.
+This one run the users tests of the users_organizations zome.
 
 ```bash
 pnpm test:administration
 ```
-This one run the administration zome test.
+This one run the administration zome tests.
+
+```bash
+pnpm test:organizations
+```
+This one run the organizations tests of the users_organizations zome.
 
 ## Packaging
 

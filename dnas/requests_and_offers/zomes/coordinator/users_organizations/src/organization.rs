@@ -4,7 +4,6 @@ use utils::{delete_links, EntityActionHash, OrganizationUser};
 use WasmErrorInner::*;
 
 use crate::{
-  administration::get_user_status_link,
   external_calls::{check_if_entity_is_accepted, create_status},
   user::{get_agent_user, get_latest_user},
 };
