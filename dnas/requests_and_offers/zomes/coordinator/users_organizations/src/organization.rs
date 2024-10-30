@@ -71,20 +71,6 @@ pub fn create_organization(organization: Organization) -> ExternResult<Record> {
 }
 
 #[hdk_extern]
-pub fn get_accepted_organizations_links(_: ()) -> ExternResult<Vec<Link>> {
-  let links = get_all_organizations(())?;
-  let accepted_links = links.into_iter().filter(|link| {
-    check_if_entity_is_accepted(EntityActionHash {
-      entity: "organizations".to_string(),
-      entity_original_action_hash: link.target.clone().into_action_hash().unwrap(),
-    })
-    .is_ok()
-  });
-
-  Ok(accepted_links.collect())
-}
-
-#[hdk_extern]
 pub fn get_latest_organization_record(
   original_action_hash: ActionHash,
 ) -> ExternResult<Option<Record>> {

@@ -27,7 +27,7 @@ import {
   checkIfAgentIsOrganizationCoordinator,
   createOrganization,
   getAcceptedOrganizationsLinks,
-  getAllOrganizationsLinks,
+  getAllOrganizations,
   getLatestOrganization,
   getOrganizationCoordinatorsLinks,
   getOrganizationMembersLinks,
@@ -252,6 +252,27 @@ test("create and manage Organization", async () => {
       );
       assert.lengthOf(organizationMembers, 1);
 
+      // Alice, as a network administrator, accept her user profile
+      const aliceStatusOriginalActionHash = (
+        await getUserStatusLink(alice.cells[0], aliceUserLink.target)
+      ).target;
+
+      const aliceLatestStatusActionHash = (
+        await getLatestStatusRecordForUser(alice.cells[0], aliceUserLink.target)
+      ).signed_action.hashed.hash;
+
+      await updateUserStatus(
+        alice.cells[0],
+        aliceUserLink.target,
+        aliceLatestStatusActionHash,
+        aliceStatusOriginalActionHash,
+        {
+          status_type: "accepted",
+        }
+      );
+
+      await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
       // Alice create her own Organization
       sampleOrg = sampleOrganization({ name: "Alice's Organization" });
       record = await createOrganization(alice.cells[0], sampleOrg);
@@ -269,13 +290,11 @@ test("create and manage Organization", async () => {
       assert.deepEqual(organizationMembers[0].target, aliceUserLink.target);
 
       // Alice can get all the Organizations because she is a network administrator
-      const allOrganizationsLinks = await getAllOrganizationsLinks(
-        alice.cells[0]
-      );
+      const allOrganizationsLinks = await getAllOrganizations(alice.cells[0]);
       assert.lengthOf(allOrganizationsLinks, 2);
 
       // Verify that Bob can not get all the Organizations because he is not a network administrator
-      await expect(getAllOrganizationsLinks(bob.cells[0])).rejects.toThrow();
+      await expect(getAllOrganizations(bob.cells[0])).rejects.toThrow();
 
       // Verify that there is no accepted Organization
       const acceptedOrganizationsLinks = await getAcceptedOrganizationsLinks(

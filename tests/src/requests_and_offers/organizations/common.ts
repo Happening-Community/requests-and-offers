@@ -51,21 +51,21 @@ export function createOrganization(
   });
 }
 
-export function getAllOrganizationsLinks(cell: CallableCell): Promise<Link[]> {
+export function getAllOrganizations(cell: CallableCell): Promise<Link[]> {
   return cell.callZome({
     zome_name: "users_organizations",
-    fn_name: "get_all_organizations_links",
+    fn_name: "get_all_organizations",
     payload: null,
   });
 }
 
-export function getAcceptedOrganizationsLinks(
+export async function getAcceptedOrganizationsLinks(
   cell: CallableCell
 ): Promise<Link[]> {
   return cell.callZome({
-    zome_name: "users_organizations",
-    fn_name: "get_accepted_organizations_links",
-    payload: null,
+    zome_name: "administration",
+    fn_name: "get_accepted_entities",
+    payload: "organizations",
   });
 }
 
