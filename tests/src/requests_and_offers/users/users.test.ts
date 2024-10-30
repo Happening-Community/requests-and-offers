@@ -17,7 +17,10 @@ import {
   imagePathToArrayBuffer,
   runScenarioWithTwoAgents,
 } from "../utils.js";
-import { getLatestStatusForUser } from "../administration/common";
+import {
+  AdministrationEntity,
+  getLatestStatusForEntity,
+} from "../administration/common";
 
 test("create and read User", async () => {
   await runScenarioWithTwoAgents(
@@ -49,8 +52,9 @@ test("create and read User", async () => {
       assert.containsAllKeys(aliceCreatedUser, bobCreatedUser);
 
       // Verify that the user status is "pending"
-      const bobStatus = await getLatestStatusForUser(
+      const bobStatus = await getLatestStatusForEntity(
         bob.cells[0],
+        AdministrationEntity.Users,
         record.signed_action.hashed.hash
       );
 

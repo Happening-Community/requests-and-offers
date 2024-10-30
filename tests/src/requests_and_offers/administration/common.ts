@@ -8,9 +8,10 @@ export type StatusType =
   | "suspended temporarily"
   | "suspended indefinitely";
 
-enum AdministrationEntity {
+export enum AdministrationEntity {
   Network = "network",
   Users = "users",
+  Organizations = "organizations",
 }
 
 export type Status = {
@@ -52,7 +53,7 @@ export async function getAllAdministratorsLinks(
   });
 }
 
-export function checkIfUserIsAdministrator(
+export function checkIfEntityIsAdministrator(
   cell: CallableCell,
   entity_original_action_hash: ActionHash
 ): Promise<boolean> {
@@ -96,36 +97,39 @@ export async function removeAdministrator(
   });
 }
 
-export async function getLatestStatusRecordForUser(
+export async function getLatestStatusRecordForEntity(
   cell: CallableCell,
+  entity: AdministrationEntity,
   entity_original_action_hash: ActionHash
 ): Promise<Record | null> {
   return cell.callZome({
     zome_name: "administration",
     fn_name: "get_latest_status_record_for_entity",
     payload: {
-      entity: AdministrationEntity.Users,
+      entity,
       entity_original_action_hash,
     },
   });
 }
 
-export async function getLatestStatusForUser(
+export async function getLatestStatusForEntity(
   cell: CallableCell,
+  entity: AdministrationEntity,
   entity_original_action_hash: ActionHash
 ): Promise<Status | null> {
   return cell.callZome({
     zome_name: "administration",
     fn_name: "get_latest_status_for_entity",
     payload: {
-      entity: AdministrationEntity.Users,
+      entity,
       entity_original_action_hash,
     },
   });
 }
 
-export async function updateUserStatus(
+export async function updateEntityStatus(
   cell: CallableCell,
+  entity: AdministrationEntity,
   entity_original_action_hash: ActionHash,
   status_original_action_hash: ActionHash,
   status_previous_action_hash: ActionHash,
@@ -135,7 +139,7 @@ export async function updateUserStatus(
     zome_name: "administration",
     fn_name: "update_entity_status",
     payload: {
-      entity: AdministrationEntity.Users,
+      entity,
       entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
@@ -144,8 +148,9 @@ export async function updateUserStatus(
   });
 }
 
-export async function suspendUserTemporarily(
+export async function suspendEntityTemporarily(
   cell: CallableCell,
+  entity: AdministrationEntity,
   entity_original_action_hash: ActionHash,
   status_original_action_hash: ActionHash,
   status_previous_action_hash: ActionHash,
@@ -156,7 +161,7 @@ export async function suspendUserTemporarily(
     zome_name: "administration",
     fn_name: "suspend_entity_temporarily",
     payload: {
-      entity: AdministrationEntity.Users,
+      entity,
       entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
@@ -166,8 +171,9 @@ export async function suspendUserTemporarily(
   });
 }
 
-export async function suspendUserIndefinitely(
+export async function suspendEntityIndefinitely(
   cell: CallableCell,
+  entity: AdministrationEntity,
   entity_original_action_hash: ActionHash,
   status_original_action_hash: ActionHash,
   status_previous_action_hash: ActionHash,
@@ -177,7 +183,7 @@ export async function suspendUserIndefinitely(
     zome_name: "administration",
     fn_name: "suspend_entity_indefinitely",
     payload: {
-      entity: AdministrationEntity.Users,
+      entity,
       entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
@@ -186,8 +192,9 @@ export async function suspendUserIndefinitely(
   });
 }
 
-export async function unsuspendUser(
+export async function unsuspendEntity(
   cell: CallableCell,
+  entity: AdministrationEntity,
   entity_original_action_hash: ActionHash,
   status_original_action_hash: ActionHash,
   status_previous_action_hash: ActionHash
@@ -196,7 +203,7 @@ export async function unsuspendUser(
     zome_name: "administration",
     fn_name: "unsuspend_entity",
     payload: {
-      entity: AdministrationEntity.Users,
+      entity,
       entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
@@ -204,8 +211,9 @@ export async function unsuspendUser(
   });
 }
 
-export async function unsuspendUserIfTimePassed(
+export async function unsuspendEntityIfTimePassed(
   cell: CallableCell,
+  entity: AdministrationEntity,
   entity_original_action_hash: ActionHash,
   status_original_action_hash: ActionHash,
   status_previous_action_hash: ActionHash
@@ -214,7 +222,7 @@ export async function unsuspendUserIfTimePassed(
     zome_name: "administration",
     fn_name: "unsuspend_entity_if_time_passed",
     payload: {
-      entity: AdministrationEntity.Users,
+      entity,
       entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,

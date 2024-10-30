@@ -5,11 +5,10 @@ export type OrganizationStatus = 'pending' | 'accepted' | 'rejected';
 export type Organization = {
   name: string;
   description: string;
-  picture?: Uint8Array;
+  logo?: Uint8Array;
   status?: OrganizationStatus;
   members: ActionHash[];
-  admins: ActionHash[];
-  projects: ActionHash[];
+  coordinators: ActionHash[];
 };
 
 class OrganizationsStore {

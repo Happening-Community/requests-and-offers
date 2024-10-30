@@ -4,11 +4,7 @@ import TestUserPicture from "./assets/favicon.png";
 import { Scenario, Player, dhtSync } from "@holochain/tryorama";
 import { Record } from "@holochain/client";
 
-import {
-  decodeRecords,
-  imagePathToArrayBuffer,
-  runScenarioWithTwoAgents,
-} from "../utils.js";
+import { imagePathToArrayBuffer, runScenarioWithTwoAgents } from "../utils.js";
 import {
   createUser,
   getAgentUser,
@@ -17,9 +13,10 @@ import {
   User,
 } from "../users/common";
 import {
-  getLatestStatusRecordForUser,
+  AdministrationEntity,
+  getLatestStatusRecordForEntity,
   registerNetworkAdministrator,
-  updateUserStatus,
+  updateEntityStatus,
 } from "../administration/common";
 import {
   addCoordinatorToOrganization,
@@ -92,11 +89,16 @@ test("create and manage Organization", async () => {
       ).target;
 
       const bobLatestStatusActionHash = (
-        await getLatestStatusRecordForUser(alice.cells[0], bobUserLink.target)
+        await getLatestStatusRecordForEntity(
+          alice.cells[0],
+          AdministrationEntity.Users,
+          bobUserLink.target
+        )
       ).signed_action.hashed.hash;
 
-      await updateUserStatus(
+      await updateEntityStatus(
         alice.cells[0],
+        AdministrationEntity.Users,
         bobUserLink.target,
         bobLatestStatusActionHash,
         bobStatusOriginalActionHash,
@@ -258,11 +260,16 @@ test("create and manage Organization", async () => {
       ).target;
 
       const aliceLatestStatusActionHash = (
-        await getLatestStatusRecordForUser(alice.cells[0], aliceUserLink.target)
+        await getLatestStatusRecordForEntity(
+          alice.cells[0],
+          AdministrationEntity.Users,
+          aliceUserLink.target
+        )
       ).signed_action.hashed.hash;
 
-      await updateUserStatus(
+      await updateEntityStatus(
         alice.cells[0],
+        AdministrationEntity.Users,
         aliceUserLink.target,
         aliceLatestStatusActionHash,
         aliceStatusOriginalActionHash,
@@ -315,8 +322,9 @@ test("create and manage Organization", async () => {
         );
 
       const bobOrganizationLatestStatusActionHash =
-        await getLatestStatusRecordForUser(
+        await getLatestStatusRecordForEntity(
           bob.cells[0],
+          AdministrationEntity.Organizations,
           bobOrganizationOriginalActionHash
         );
     }
