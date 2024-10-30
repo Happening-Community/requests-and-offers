@@ -35,7 +35,7 @@ export async function getOrganizationStatusLink(
 ): Promise<Link | null> {
   return cell.callZome({
     zome_name: "users_organizations",
-    fn_name: "get_user_status_link",
+    fn_name: "get_organization_status_link",
     payload: organization_original_action_hash,
   });
 }

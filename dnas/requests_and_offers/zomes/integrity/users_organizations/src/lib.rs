@@ -119,9 +119,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             )))
           }
           EntryTypes::Organization(_original_organization) => {
-            return Ok(ValidateCallbackResult::Invalid(String::from(
-              "Organization cannot be deleted",
-            )))
+            return Ok(ValidateCallbackResult::Valid)
           }
         }
       }

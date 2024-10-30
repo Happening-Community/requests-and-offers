@@ -380,3 +380,16 @@ pub fn unsuspend_entity(input: UpdateInput) -> ExternResult<bool> {
 
   Ok(update_entity_status(update_status_input).is_ok())
 }
+
+#[hdk_extern]
+pub fn delete_status(original_action_hash: ActionHash) -> ExternResult<bool> {
+  let links = get_links(
+    GetLinksInputBuilder::try_new(original_action_hash.clone(), LinkTypes::AllStatuses)?.build(),
+  )?;
+  for link in links {
+    delete_link(link.create_link_hash.clone())?;
+  }
+
+  delete_entry(original_action_hash)?;
+  Ok(true)
+}

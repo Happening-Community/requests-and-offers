@@ -4,7 +4,7 @@ use utils::{delete_links, EntityActionHash, OrganizationUser};
 use WasmErrorInner::*;
 
 use crate::{
-  administration::get_all_organizations,
+  administration::get_organization_status_link,
   external_calls::{check_if_entity_is_accepted, create_status},
   user::{get_agent_user, get_latest_user},
 };
@@ -50,6 +50,13 @@ pub fn create_organization(organization: Organization) -> ExternResult<Record> {
     organization_hash.clone(),
     created_status_record.action_address().clone(),
     LinkTypes::OrganizationStatus,
+    (),
+  )?;
+
+  create_link(
+    user_links[0].target.clone(),
+    organization_hash.clone(),
+    LinkTypes::UserOrganizations,
     (),
   )?;
 
@@ -372,20 +379,35 @@ pub fn leave_organization(original_action_hash: ActionHash) -> ExternResult<bool
 
   delete_link(user_organizations_link.unwrap().create_link_hash)?;
 
-  let organization_members_link = get_links(
+  let organization_members_links = get_links(
     GetLinksInputBuilder::try_new(original_action_hash.clone(), LinkTypes::OrganizationMembers)?
       .build(),
-  )?
-  .into_iter()
-  .find(|link| link.target.clone().into_action_hash().unwrap() == agent_user_action_hash);
+  )?;
 
-  if organization_members_link.is_none() {
+  let organization_member_link = organization_members_links
+    .clone()
+    .into_iter()
+    .find(|link| link.target.clone().into_action_hash().unwrap() == agent_user_action_hash);
+
+  if organization_member_link.is_none() {
     return Err(wasm_error!(Guest(
       "The agent is not a member of this organization".to_string()
     )));
   }
 
-  delete_link(organization_members_link.unwrap().create_link_hash)?;
+  delete_link(organization_member_link.unwrap().create_link_hash)?;
+
+  let organization_user = OrganizationUser {
+    organization_original_action_hash: original_action_hash.clone(),
+    user_original_action_hash: agent_user_action_hash,
+  };
+
+  if is_organization_coordinator(organization_user.clone())? {
+    match organization_members_links.len() {
+      1 => delete_organization(original_action_hash.clone())?,
+      _ => remove_organization_coordinator(organization_user)?,
+    };
+  }
 
   Ok(true)
 }
@@ -498,6 +520,42 @@ pub fn delete_organization(organization_original_action_hash: ActionHash) -> Ext
     return Err(wasm_error!(Guest(
       "Only coordinators can delete organizations".to_string()
     )));
+  }
+
+  let members_links = get_organization_members_links(organization_original_action_hash.clone())?;
+
+  for link in members_links {
+    let user_organizations_links =
+      get_user_organizations_links(link.target.clone().into_action_hash().unwrap())?;
+
+    let this_user_organizations_link = user_organizations_links.into_iter().find(|link| {
+      link.target.clone().into_action_hash().unwrap() == organization_original_action_hash
+    });
+
+    if let Some(link) = this_user_organizations_link {
+      delete_link(link.create_link_hash)?;
+    }
+  }
+
+  let all_organizations_links = get_links(
+    GetLinksInputBuilder::try_new(
+      Path::from("organizations").path_entry_hash()?,
+      LinkTypes::AllOrganizations,
+    )?
+    .build(),
+  )?;
+  let this_all_organizations_link = all_organizations_links.into_iter().find(|link| {
+    link.target.clone().into_action_hash().unwrap() == organization_original_action_hash
+  });
+
+  if let Some(link) = this_all_organizations_link {
+    delete_link(link.create_link_hash)?;
+  }
+
+  let organization_status_links =
+    get_organization_status_link(organization_original_action_hash.clone())?;
+  if let Some(link) = organization_status_links {
+    delete_link(link.create_link_hash)?;
   }
 
   delete_links(

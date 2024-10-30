@@ -45,9 +45,7 @@ pub fn validate_delete_organization(
   _original_action: EntryCreationAction,
   _original_organization: Organization,
 ) -> ExternResult<ValidateCallbackResult> {
-  Ok(ValidateCallbackResult::Invalid(String::from(
-    "Organization profile cannot be deleted",
-  )))
+  Ok(ValidateCallbackResult::Valid)
 }
 
 pub fn validate_create_link_organization_updates(

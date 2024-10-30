@@ -23,12 +23,15 @@ import {
   addMemberToOrganization,
   checkIfAgentIsOrganizationCoordinator,
   createOrganization,
+  deleteOrganization,
   getAcceptedOrganizationsLinks,
   getAllOrganizations,
   getLatestOrganization,
   getOrganizationCoordinatorsLinks,
   getOrganizationMembersLinks,
   getOrganizationStatusLink,
+  getUserOrganizationsLinks,
+  leaveOrganization,
   removeOrganizationCoordinator,
   removeOrganizationMember,
   sampleOrganization,
@@ -310,23 +313,124 @@ test("create and manage Organization", async () => {
       assert.lengthOf(acceptedOrganizationsLinks, 0);
 
       // Alice, as a network administrator, accept Alice's Organization and Bob's Organization
-      const bobOrganizationStatusOriginalActionHash =
+      const bobOrganizationStatusOriginalActionHash = (
         await getOrganizationStatusLink(
           bob.cells[0],
           bobOrganizationOriginalActionHash
-        );
-      const aliceOrganizationStatusOriginalActionHash =
+        )
+      ).target;
+      const aliceOrganizationStatusOriginalActionHash = (
         await getOrganizationStatusLink(
           alice.cells[0],
           aliceOrganizationOriginalActionHash
-        );
+        )
+      ).target;
 
-      const bobOrganizationLatestStatusActionHash =
+      const bobOrganizationLatestStatusActionHash = (
         await getLatestStatusRecordForEntity(
           bob.cells[0],
           AdministrationEntity.Organizations,
           bobOrganizationOriginalActionHash
-        );
+        )
+      ).signed_action.hashed.hash;
+
+      const aliceOrganizationLatestStatusActionHash = (
+        await getLatestStatusRecordForEntity(
+          alice.cells[0],
+          AdministrationEntity.Organizations,
+          aliceOrganizationOriginalActionHash
+        )
+      ).signed_action.hashed.hash;
+
+      await updateEntityStatus(
+        alice.cells[0],
+        AdministrationEntity.Organizations,
+        bobOrganizationOriginalActionHash,
+        bobOrganizationLatestStatusActionHash,
+        bobOrganizationStatusOriginalActionHash,
+        {
+          status_type: "accepted",
+        }
+      );
+
+      await updateEntityStatus(
+        alice.cells[0],
+        AdministrationEntity.Organizations,
+        aliceOrganizationOriginalActionHash,
+        aliceOrganizationLatestStatusActionHash,
+        aliceOrganizationStatusOriginalActionHash,
+        {
+          status_type: "accepted",
+        }
+      );
+
+      await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+      // Verify that the organizations are accepted
+      const acceptedOrganizations = await getAcceptedOrganizationsLinks(
+        alice.cells[0]
+      );
+      assert.lengthOf(acceptedOrganizations, 2);
+
+      // Alice add Bob as a member of the Organization
+      assert.ok(
+        await addMemberToOrganization(
+          alice.cells[0],
+          aliceOrganizationOriginalActionHash,
+          bobUserLink.target
+        )
+      );
+
+      await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+      // Bob leave Alice's Organization
+      assert.ok(
+        await leaveOrganization(
+          bob.cells[0],
+          aliceOrganizationOriginalActionHash
+        )
+      );
+
+      await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
+
+      // Verify that Bob is no longer a member of Alice's Organization
+      organizationMembers = await getOrganizationMembersLinks(
+        alice.cells[0],
+        aliceOrganizationOriginalActionHash
+      );
+      assert.lengthOf(organizationMembers, 1);
+
+      // Alice leave her Organization
+      assert.ok(
+        await leaveOrganization(
+          alice.cells[0],
+          aliceOrganizationOriginalActionHash
+        )
+      );
+
+      await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+      // Verify that Alice's Organization is deleted
+      assert.lengthOf(await getAllOrganizations(alice.cells[0]), 1);
+      assert.lengthOf(
+        await getUserOrganizationsLinks(alice.cells[0], aliceUserLink.target),
+        0
+      );
+
+      // Bob delete his Organization
+      assert.ok(
+        await deleteOrganization(
+          bob.cells[0],
+          bobOrganizationOriginalActionHash
+        )
+      );
+
+      // Verify that Bob's Organization is deleted
+      assert.lengthOf(await getAcceptedOrganizationsLinks(bob.cells[0]), 0);
+      assert.lengthOf(
+        await getUserOrganizationsLinks(bob.cells[0], bobUserLink.target),
+        0
+      );
     }
   );
 });
