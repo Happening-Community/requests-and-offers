@@ -2,7 +2,7 @@ use std::{fmt::Display, str::FromStr};
 
 use email_address::EmailAddress;
 use hdi::prelude::*;
-use utils::is_image;
+use utils::{errors::UtilsError, is_image};
 
 /// Represents a user Entry with various attributes such as name, nickname, bio, etc.
 #[hdk_entry_helper]
@@ -107,7 +107,9 @@ pub fn validate_create_link_user_updates(
   target_address: AnyLinkableHash,
   _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-  let action_hash = base_address.into_action_hash().unwrap();
+  let action_hash = base_address
+    .into_action_hash()
+    .ok_or(UtilsError::ActionHashNotFound("user"))?;
   let record = must_get_valid_record(action_hash)?;
   let _user: crate::User = record
     .entry()
@@ -117,7 +119,9 @@ pub fn validate_create_link_user_updates(
       "Linked action must reference an entry"
     ))))?;
   // Check the entry type for the given action hash
-  let action_hash = target_address.into_action_hash().unwrap();
+  let action_hash = target_address
+    .into_action_hash()
+    .ok_or(UtilsError::ActionHashNotFound("user"))?;
   let record = must_get_valid_record(action_hash)?;
   let _user: crate::User = record
     .entry()

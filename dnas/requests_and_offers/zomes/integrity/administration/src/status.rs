@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use chrono::Duration;
 use hdi::prelude::*;
+use utils::errors::UtilsError;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum StatusType {
@@ -180,7 +181,9 @@ pub fn validate_create_link_status_updates(
   target_address: AnyLinkableHash,
   _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-  let action_hash = base_address.into_action_hash().unwrap();
+  let action_hash = base_address
+    .into_action_hash()
+    .ok_or(UtilsError::ActionHashNotFound("status"))?;
   let record = must_get_valid_record(action_hash)?;
   let _status: crate::Status = record
     .entry()
@@ -190,7 +193,9 @@ pub fn validate_create_link_status_updates(
       "Linked action must reference an entry"
     ))))?;
   // Check the entry type for the given action hash
-  let action_hash = target_address.into_action_hash().unwrap();
+  let action_hash = target_address
+    .into_action_hash()
+    .ok_or(UtilsError::ActionHashNotFound("status"))?;
   let record = must_get_valid_record(action_hash)?;
   let _status: crate::Status = record
     .entry()

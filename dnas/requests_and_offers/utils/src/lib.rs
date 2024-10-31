@@ -1,7 +1,9 @@
 pub mod dna_properties;
+pub mod errors;
 pub mod types;
 
 pub use dna_properties::DnaProperties;
+use errors::UtilsError;
 pub use types::*;
 
 use std::io::Cursor;
@@ -44,9 +46,10 @@ pub fn get_all_revisions_for_entry(
     .into_iter()
     .map(|link| {
       get(
-        link.target.into_action_hash().ok_or(wasm_error!(Guest(
-          "No action hash associated with link".to_string()
-        )))?,
+        link
+          .target
+          .into_action_hash()
+          .ok_or(UtilsError::ActionHashNotFound("record"))?,
         GetOptions::default(),
       )
     })

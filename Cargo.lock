@@ -2656,7 +2656,6 @@ dependencies = [
  "chrono 0.3.0",
  "email_address",
  "hdi",
- "image",
  "serde",
  "utils",
 ]
@@ -2669,6 +2668,7 @@ dependencies = [
  "hdk",
  "image",
  "serde",
+ "thiserror",
 ]
 
 [[package]]

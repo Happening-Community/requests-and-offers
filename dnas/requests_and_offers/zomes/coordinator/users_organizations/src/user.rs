@@ -1,5 +1,6 @@
 use hdk::prelude::*;
 use users_organizations_integrity::*;
+use utils::errors::UtilsError;
 use WasmErrorInner::*;
 
 use crate::external_calls::create_status;
@@ -65,9 +66,7 @@ pub fn get_latest_user_record(original_action_hash: ActionHash) -> ExternResult<
       .target
       .clone()
       .into_action_hash()
-      .ok_or(wasm_error!(Guest(
-        "Could not find the latest User profile".to_string()
-      )))?,
+      .ok_or(UtilsError::ActionHashNotFound("user"))?,
     None => original_action_hash.clone(),
   };
   get(latest_user_hash, GetOptions::default())

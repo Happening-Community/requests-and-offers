@@ -2,7 +2,7 @@ use administration_integrity::*;
 use chrono::Duration;
 use hdk::prelude::*;
 use status::*;
-use utils::{get_all_revisions_for_entry, EntityActionHash, EntityAgent};
+use utils::{errors::UtilsError, get_all_revisions_for_entry, EntityActionHash, EntityAgent};
 use WasmErrorInner::*;
 
 use crate::administration::check_if_agent_is_administrator;
@@ -59,9 +59,7 @@ pub fn get_latest_status_record(original_action_hash: ActionHash) -> ExternResul
       .target
       .clone()
       .into_action_hash()
-      .ok_or(wasm_error!(Guest(
-        "Could not find the latest profile's Status".to_string()
-      )))?,
+      .ok_or(UtilsError::ActionHashNotFound("status"))?,
     None => original_action_hash.clone(),
   };
   get(latest_status_hash, GetOptions::default())
@@ -99,9 +97,7 @@ pub fn get_latest_status_record_for_entity(
         .clone()
         .target
         .into_action_hash()
-        .ok_or(wasm_error!(Guest(
-          "Could not find the latest profile's Status action hash".to_string()
-        )))?,
+        .ok_or(UtilsError::ActionHashNotFound("status"))?,
     )
   } else {
     Ok(None)
@@ -124,9 +120,7 @@ pub fn get_latest_status_for_entity(input: EntityActionHash) -> ExternResult<Opt
         .target
         .clone()
         .into_action_hash()
-        .ok_or(wasm_error!(Guest(
-          "Could not find the latest profile's Status action hash".to_string()
-        )))?,
+        .ok_or(UtilsError::ActionHashNotFound("status"))?,
     )?
   } else {
     None
@@ -334,9 +328,7 @@ pub fn unsuspend_entity_if_time_passed(input: UpdateInput) -> ExternResult<bool>
     .clone()
     .target
     .into_action_hash()
-    .ok_or(wasm_error!(Guest(
-      "Could not find the entity action hash".to_string()
-    )))?;
+    .ok_or(UtilsError::ActionHashNotFound("status"))?;
 
   let mut status = get_latest_status(status_action_hash)?.ok_or(wasm_error!(Guest(
     "Could not find the latest entity Status".to_string()
