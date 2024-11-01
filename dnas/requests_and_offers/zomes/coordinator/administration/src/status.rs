@@ -47,6 +47,23 @@ pub fn create_status(input: EntityActionHash) -> ExternResult<Record> {
 }
 
 #[hdk_extern]
+fn get_entity_status_link(input: EntityActionHash) -> ExternResult<Link> {
+  let links = get_links(
+    GetLinksInputBuilder::try_new(
+      input.entity_original_action_hash.clone(),
+      LinkTypes::EntityStatus,
+    )?
+    .build(),
+  )?;
+
+  let link = links.first().ok_or(wasm_error!(Guest(
+    "Could not find the entity's Status link".to_string()
+  )))?;
+
+  Ok(link.clone())
+}
+
+#[hdk_extern]
 pub fn get_latest_status_record(original_action_hash: ActionHash) -> ExternResult<Option<Record>> {
   let links = get_links(
     GetLinksInputBuilder::try_new(original_action_hash.clone(), LinkTypes::AllStatuses)?.build(),
@@ -374,14 +391,16 @@ pub fn unsuspend_entity(input: UpdateInput) -> ExternResult<bool> {
 }
 
 #[hdk_extern]
-pub fn delete_status(original_action_hash: ActionHash) -> ExternResult<bool> {
-  let links = get_links(
-    GetLinksInputBuilder::try_new(original_action_hash.clone(), LinkTypes::AllStatuses)?.build(),
-  )?;
-  for link in links {
-    delete_link(link.create_link_hash.clone())?;
-  }
+pub fn delete_status(input: EntityActionHash) -> ExternResult<bool> {
+  let link = get_entity_status_link(input.clone())?;
 
-  delete_entry(original_action_hash)?;
+  delete_accepted_entity_link(EntityActionHash {
+    entity_original_action_hash: input.entity_original_action_hash.clone(),
+    entity: input.entity.clone(),
+  })?;
+
+  delete_link(link.create_link_hash)?;
+  delete_entry(input.entity_original_action_hash)?;
+
   Ok(true)
 }

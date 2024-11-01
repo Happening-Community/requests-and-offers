@@ -35,9 +35,10 @@ import {
   removeOrganizationCoordinator,
   removeOrganizationMember,
   sampleOrganization,
+  updateOrganization,
 } from "./common";
 
-test("create and manage Organization", async () => {
+test("create and manage Organizations", async () => {
   await runScenarioWithTwoAgents(
     async (_scenario: Scenario, alice: Player, bob: Player) => {
       let sample: User;
@@ -73,7 +74,7 @@ test("create and manage Organization", async () => {
         process.cwd() + TestUserPicture
       );
       let sampleOrg = sampleOrganization({
-        name: "Bob's Organization",
+        name: "Organization",
         logo: new Uint8Array(buffer),
       });
 
@@ -151,6 +152,28 @@ test("create and manage Organization", async () => {
       );
 
       assert.deepEqual(organizationLinks[0].target, bobUserLink.target);
+
+      // Bob update the his Organization
+      sampleOrg = sampleOrganization({
+        name: "Bob's Organization",
+        logo: new Uint8Array(buffer),
+      });
+      await updateOrganization(
+        bob.cells[0],
+        bobOrganizationOriginalActionHash,
+        bobOrganizationOriginalActionHash,
+        sampleOrg
+      );
+      assert.ok(record);
+
+      await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
+
+      // Verify the Organization has been updated
+      organization = await getLatestOrganization(
+        bob.cells[0],
+        bobOrganizationOriginalActionHash
+      );
+      assert.equal(organization.name, sampleOrg.name);
 
       // Bob add Alice as a member of the Organization
       assert.ok(

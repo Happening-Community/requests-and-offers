@@ -29,3 +29,11 @@ pub fn create_status(user_original_action_hash: ActionHash) -> ExternResult<Reco
 pub fn check_if_entity_is_accepted(input: EntityActionHash) -> ExternResult<bool> {
   external_local_call("check_if_entity_is_accepted", "administration", input)
 }
+
+pub fn get_accepted_entities(entity: String) -> ExternResult<Vec<Link>> {
+  external_local_call("get_accepted_entities", "administration", entity)
+}
+
+pub fn delete_status(original_action_hash: EntityActionHash) -> ExternResult<bool> {
+  external_local_call("delete_status", "administration", original_action_hash)
+}

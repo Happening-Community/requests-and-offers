@@ -271,16 +271,16 @@ export function removeOrganizationCoordinator(
 
 export function updateOrganization(
   cell: CallableCell,
-  organization_original_action_hash: ActionHash,
-  organization_previous_action_hash: ActionHash,
+  original_action_hash: ActionHash,
+  previous_action_hash: ActionHash,
   updated_organization: Organization
 ): Promise<boolean> {
   return cell.callZome({
     zome_name: "users_organizations",
     fn_name: "update_organization",
     payload: {
-      organization_original_action_hash,
-      organization_previous_action_hash,
+      original_action_hash,
+      previous_action_hash,
       updated_organization,
     },
   });

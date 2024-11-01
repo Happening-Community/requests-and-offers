@@ -5,7 +5,9 @@ use WasmErrorInner::*;
 
 use crate::{
   administration::get_organization_status_link,
-  external_calls::{check_if_entity_is_accepted, create_status, get_accepted_entities},
+  external_calls::{
+    check_if_entity_is_accepted, create_status, delete_status, get_accepted_entities,
+  },
   user::{get_agent_user, get_latest_user},
 };
 
@@ -610,22 +612,26 @@ pub fn delete_organization(organization_original_action_hash: ActionHash) -> Ext
     LinkTypes::OrganizationCoordinators,
   )?;
 
+  let organization_status_link = get_accepted_entities(String::from("organizations"))?
+    .into_iter()
+    .find(|organization_status| {
+      organization_status
+        .target
+        .clone()
+        .into_action_hash()
+        .map_or(false, |hash| hash == organization_original_action_hash)
+    });
+
+  if let Some(link) = organization_status_link {
+    delete_link(link.create_link_hash)?;
+  }
+
+  delete_status(EntityActionHash {
+    entity_original_action_hash: organization_original_action_hash.clone(),
+    entity: String::from("organizations"),
+  })?;
+
   delete_entry(organization_original_action_hash.clone())?;
-
-  // let organization_status_link = get_accepted_entities(String::from("organizations"))?
-  //   .into_iter()
-  //   .find(|organization_status| {
-  //     organization_status
-  //       .target
-  //       .clone()
-  //       .into_action_hash()
-  //       .map_or(false, |hash| hash == organization_original_action_hash)
-  //   });
-
-  // if let Some(link) = organization_status_link {
-  //   delete_link(link.create_link_hash)?;
-  //   delete_status(link.target)
-  // }
 
   Ok(true)
 }
