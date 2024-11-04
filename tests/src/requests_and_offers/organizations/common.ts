@@ -1,8 +1,6 @@
 import { CallableCell } from "@holochain/tryorama";
-import { ActionHash, Record, Link, AgentPubKey } from "@holochain/client";
+import { ActionHash, Record, Link } from "@holochain/client";
 import { User } from "../users/common";
-
-export type UserType = "advocate" | "creator" | "Non Authorized";
 
 export type Organization = {
   name: string;
@@ -18,7 +16,7 @@ export function sampleOrganization(
 ): Organization {
   return {
     ...{
-      name: "User",
+      name: "Organization",
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       logo: null,
       email: "abc@abc.com",
