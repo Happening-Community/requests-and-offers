@@ -6,7 +6,7 @@
 
   let isLoading = $state(true);
 
-  const { organizations } = $derived(organizationsStore);
+  const { acceptedOrganizations } = $derived(organizationsStore);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -14,9 +14,9 @@
   ];
 
   onMount(async () => {
-    if (organizations.length === 0) {
+    if (acceptedOrganizations.length === 0) {
       const mockedOrganizations = await createMockedOrganizations(3);
-      organizationsStore.organizations = mockedOrganizations;
+      organizationsStore.acceptedOrganizations = mockedOrganizations;
     }
     isLoading = false;
   });
@@ -35,23 +35,23 @@
           <th class="text-center">Name</th>
           <th class="text-center">Description</th>
           <th class="text-center"># Members</th>
-          <th class="text-center"># Projects</th>
+          <th class="text-center">Email</th>
         </tr>
       </thead>
       <tbody>
-        {#each organizations as organization}
+        {#each acceptedOrganizations as organization}
           <tr>
             <td class="text-center">
               <Avatar
-                src={organization.picture
-                  ? URL.createObjectURL(new Blob([new Uint8Array(organization.picture)]))
+                src={organization.logo
+                  ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
                   : '/default_avatar.webp'}
               />
             </td>
             <td class="text-center">{organization.name}</td>
             <td class="text-center">{organization.description}</td>
             <td class="text-center">{organization.members.length}</td>
-            <td class="text-center">{organization.projects.length}</td>
+            <td class="text-center">{organization.email}</td>
           </tr>
         {/each}
       </tbody>

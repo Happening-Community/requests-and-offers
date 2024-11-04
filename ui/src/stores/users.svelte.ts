@@ -2,6 +2,7 @@ import { decodeRecords } from '@utils';
 import hc from '@services/HolochainClientService.svelte';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
 import administratorsStore, { type Status, type Revision } from './administrators.svelte';
+import type { Organization } from './organizations.svelte';
 
 export type UserType = 'creator' | 'advocate';
 
@@ -25,6 +26,7 @@ type UserAdditionalFields = {
   previous_action_hash?: ActionHash;
   status?: Status;
   status_history?: Revision[];
+  organizations?: Organization[];
 };
 
 export type User = UserInDHT & UserAdditionalFields;
