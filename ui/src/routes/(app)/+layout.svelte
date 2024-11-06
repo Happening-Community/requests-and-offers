@@ -21,23 +21,6 @@
   ];
 </script>
 
-<!-- <AppShell>
-  <svelte:fragment slot="header">
-    <NavBar />
-  </svelte:fragment>
-
-  <main
-    class="container mx-auto flex min-h-screen flex-col items-center justify-center px-5 pb-10 pt-40"
-  >
-    {#if !hc.isConnected}
-      <p>Not connected yet.</p>
-      <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
-    {:else}
-      {@render children()}
-    {/if}
-  </main>
-</AppShell> -->
-
 <div class="grid grid-rows-[auto_1fr_auto]">
   <!-- Header -->
   <NavBar />

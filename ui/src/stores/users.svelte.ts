@@ -52,11 +52,13 @@ class UsersStore {
   async getLatestUser(original_action_hash: ActionHash): Promise<User | null> {
     const record = await this.getLatestUserRecord(original_action_hash);
     const myStatus = await administratorsStore.getLatestStatusForUser(original_action_hash);
+    const organizations = await this.getUserOrganizations(original_action_hash);
 
     return record
       ? {
           ...decodeRecords([record])[0],
           status: myStatus,
+          organizations,
           original_action_hash: original_action_hash,
           previous_action_hash: record.signed_action.hashed.hash
         }
@@ -131,6 +133,22 @@ class UsersStore {
     this.AcceptedUsers = recordsContents;
 
     return recordsContents;
+  }
+
+  async getUserOrganizationsLinks(user_original_action_hash: ActionHash): Promise<Link[]> {
+    return (await hc.callZome(
+      'users_organizations',
+      'get_user_organizations_links',
+      user_original_action_hash
+    )) as Link[];
+  }
+
+  async getUserOrganizations(user_original_action_hash: ActionHash): Promise<Organization[]> {
+    return (await hc.callZome(
+      'users_organizations',
+      'get_user_organizations',
+      user_original_action_hash
+    )) as Organization[];
   }
 
   async updateMyProfile(updated_user: User): Promise<Record> {

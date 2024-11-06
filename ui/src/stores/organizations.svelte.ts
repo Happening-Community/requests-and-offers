@@ -26,7 +26,7 @@ export type Organization = OrganizationInDHT & OrganizationAdditionalFields;
 class OrganizationsStore {
   acceptedOrganizations: Organization[] = $state([]);
 
-  async getOrganizationsStatus(): Promise<Link | null> {
+  async getOrganizationStatusLink(): Promise<Link | null> {
     return (await hc.callZome(
       'users_organizations',
       'get_organizations_status',
@@ -51,7 +51,18 @@ class OrganizationsStore {
   }
 
   async getAcceptedOrganizationsLinks(): Promise<Link[]> {
-    return (await hc.callZome('users_organizations', 'get_accepted_organizations', null)) as Link[];
+    const acceptedOrganizationsLinks = (await hc.callZome(
+      'users_organizations',
+      'get_organization_status_link',
+      null
+    )) as Link[];
+
+    for (const link of acceptedOrganizationsLinks) {
+      const organization = await this.getLatestOrganization(link.target);
+      if (organization) this.acceptedOrganizations.push(organization);
+    }
+
+    return acceptedOrganizationsLinks;
   }
 
   async getLatestOrganizationRecord(original_action_hash: ActionHash): Promise<Record | null> {
@@ -106,22 +117,6 @@ class OrganizationsStore {
       organization_original_action_hash,
       user_original_action_hash
     })) as boolean;
-  }
-
-  async getUserOrganizationsLinks(user_original_action_hash: ActionHash): Promise<Link[]> {
-    return (await hc.callZome(
-      'users_organizations',
-      'get_user_organizations_links',
-      user_original_action_hash
-    )) as Link[];
-  }
-
-  async getUserOrganizations(user_original_action_hash: ActionHash): Promise<Organization[]> {
-    return (await hc.callZome(
-      'users_organizations',
-      'get_user_organizations',
-      user_original_action_hash
-    )) as Organization[];
   }
 
   async addCoordinatorToOrganization(

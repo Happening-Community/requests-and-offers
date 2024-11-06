@@ -14,10 +14,9 @@
   ];
 
   onMount(async () => {
-    if (acceptedOrganizations.length === 0) {
-      const mockedOrganizations = await createMockedOrganizations(3);
-      organizationsStore.acceptedOrganizations = mockedOrganizations;
-    }
+    await organizationsStore.getAcceptedOrganizationsLinks();
+    console.log('acceptedOrganizations', acceptedOrganizations);
+
     isLoading = false;
   });
 </script>
