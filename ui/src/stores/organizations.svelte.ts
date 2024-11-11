@@ -52,9 +52,9 @@ class OrganizationsStore {
 
   async getAcceptedOrganizationsLinks(): Promise<Link[]> {
     const acceptedOrganizationsLinks = (await hc.callZome(
-      'users_organizations',
-      'get_organization_status_link',
-      null
+      'administration',
+      'get_accepted_entities',
+      'organizations'
     )) as Link[];
 
     for (const link of acceptedOrganizationsLinks) {

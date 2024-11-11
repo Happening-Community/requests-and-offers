@@ -38,11 +38,13 @@ export async function createMockedOrganizations(count: number = 1): Promise<Orga
     organizations.push({
       name: faker.company.name(),
       description: faker.company.catchPhrase(),
-      picture: await fetchImageAndConvertToUInt8Array('https://picsum.photos/200/300'),
+      email: faker.internet.email(),
+      urls: [faker.internet.url()],
+      location: faker.location.city(),
+      logo: await fetchImageAndConvertToUInt8Array('https://picsum.photos/200/300'),
       status: 'pending',
       members: [],
-      admins: [],
-      projects: []
+      coordinators: []
     });
   }
 

@@ -4,13 +4,12 @@
   ('@stores/organizations.svelte');
   import projectsStore from '@stores/projects.svelte';
 
-  const { allUsers, administrators } = $derived(administratorsStore);
-  const { organizations } = organizationsStore;
+  const { allUsers, allOrganizations, administrators } = $derived(administratorsStore);
   const { projects } = projectsStore;
 
   let pendingUsers = $derived(allUsers.filter((p) => p.status?.status_type === 'pending'));
-  let pendingOrganizations = $state(organizations.filter((o) => o.status === 'pending'));
-  let pendingprojects = $state(projects.filter((p) => p.status === 'pending'));
+  let pendingOrganizations = $derived(allOrganizations.filter((o) => o.status === 'pending'));
+  let pendingprojects = $derived(projects.filter((p) => p.status === 'pending'));
 </script>
 
 <section class="space-y-8">

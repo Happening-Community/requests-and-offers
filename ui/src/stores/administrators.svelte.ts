@@ -5,6 +5,7 @@ import { decodeRecords } from '@utils';
 import type { User } from './users.svelte';
 import usersStore from './users.svelte';
 import { decode } from '@msgpack/msgpack';
+import type { Organization } from './organizations.svelte';
 
 export type StatusType =
   | 'pending'
@@ -38,6 +39,7 @@ enum AdministrationEntity {
 
 class AdministratorsStore {
   allUsers: User[] = $state([]);
+  allOrganizations: Organization[] = $state([]);
   administrators: User[] = $state([]);
   nonAdministrators: User[] = $state([]);
   allStatusesHistory: Revision[] = $state([]);
@@ -79,6 +81,20 @@ class AdministratorsStore {
     this.allUsers = recordsContents;
 
     return recordsContents;
+  }
+
+  async getAllOrganizations(): Promise<Organization[]> {
+    const organizations = (await hc.callZome(
+      'users_organizations',
+      'get_all_organizations',
+      null
+    )) as Organization[];
+
+    console.log('organizations', organizations);
+
+    this.allOrganizations = organizations;
+
+    return organizations;
   }
 
   async registerNetworkAdministrator(

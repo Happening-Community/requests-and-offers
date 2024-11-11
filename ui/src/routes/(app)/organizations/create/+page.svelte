@@ -1,0 +1,239 @@
+<script lang="ts">
+  import moment from 'moment-timezone';
+  import { FileDropzone, InputChip, Avatar, getModalStore } from '@skeletonlabs/skeleton';
+  import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
+  import usersStore, { type User, type UserType } from '@stores/users.svelte';
+  import { goto } from '$app/navigation';
+  import { createMockedOrganizations, createMockedUsers } from '@mocks';
+  import { onMount } from 'svelte';
+  import AlertModal from '@lib/dialogs/AlertModal.svelte';
+  import type { AlertModalMeta } from '@lib/types';
+  import type { Organization } from '@/stores/organizations.svelte';
+  import organizationsStore from '@/stores/organizations.svelte';
+
+  type FormattedTimezone = {
+    name: string;
+    formatted: string;
+    offset: number;
+  };
+
+  const alertModalComponent: ModalComponent = { ref: AlertModal };
+  const alertModal = (meta: AlertModalMeta): ModalSettings => {
+    return {
+      type: 'component',
+      component: alertModalComponent,
+      meta
+    };
+  };
+
+  const modalStore = getModalStore();
+
+  const welcomeAndNextStepsMessage = (name: string) => `
+         <img src="/hAppeningsLogoWsun2.webp" alt="hAppenings Community Logo" class="w-28" />
+          
+          <h2 class="text-xl font-semibold text-center">Welcome to hCRON!</h2>
+          
+          <p class="text-lg text-center">Hello ${name}, we're thrilled to have you join our community!</p>
+          
+          <div class="space-y-4">
+            <div class="p-4 rounded-lg border-l-4 border-blue-500">
+              <h3 class="font-bold text-lg text-tertiary-500">Important Next Steps:</h3>
+              <ul class="list-disc pl-5 mt-2 space-y-2 text-left">
+                <li>A network administrator will contact you via email and platform message shortly.</li>
+                <li>You'll be invited to schedule a meeting for identity verification.</li>
+                <li>After successful verification, your status will update to "accepted".</li>
+              </ul>
+            </div>
+            
+            <p class="text-sm">Once accepted, you'll gain full access to participate in our vibrant community!</p>
+          </div>
+        `;
+
+  let form: HTMLFormElement;
+  let timezones = moment.tz.names();
+  let organizationLogo: Blob | null = $state(null);
+  let files: FileList | undefined = $state();
+  let fileMessage: string = $state('');
+  let filteredTimezones: string[] = $state([]);
+  let formattedTimezones: FormattedTimezone[] = $state([]);
+  let search = $state('');
+
+  function formatTimezones(timezones: string[]): FormattedTimezone[] {
+    return timezones.map((timezone) => {
+      const offset = moment.tz(timezone).utcOffset();
+      const hours = Math.floor(Math.abs(offset) / 60);
+      const minutes = Math.abs(offset) % 60;
+      const sign = offset >= 0 ? '+' : '-';
+
+      const formatted = `GMT${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${timezone}`;
+
+      return {
+        name: timezone,
+        formatted,
+        offset
+      };
+    });
+  }
+
+  $effect(() => {
+    search
+      ? (formattedTimezones = formatTimezones(filteredTimezones))
+      : (formattedTimezones = formatTimezones(timezones));
+  });
+
+  $effect(() => {
+    formattedTimezones.sort((a, b) => {
+      return a.offset - b.offset;
+    });
+  });
+
+  async function onLogoFileChange() {
+    fileMessage = `${files![0].name}`;
+    organizationLogo = new Blob([new Uint8Array(await files![0].arrayBuffer())]);
+  }
+
+  function RemoveOrganizationLogo() {
+    organizationLogo = null;
+    fileMessage = '';
+    const pictureInput = form.querySelector('input[name="picture"]') as HTMLInputElement;
+    if (pictureInput) {
+      pictureInput.value = '';
+    }
+  }
+
+  async function mockOrganization() {
+    try {
+      let organization: Organization = (await createMockedOrganizations())[0];
+      const record = await organizationsStore.createOrganization(organization);
+      console.log('record', record);
+
+      modalStore.trigger(
+        alertModal({
+          id: 'welcome-and-next-steps',
+          message: welcomeAndNextStepsMessage(organization.name),
+          confirmLabel: 'Ok !'
+        })
+      );
+
+      goto('/user');
+    } catch (error) {
+      console.error('error :', error);
+    }
+  }
+
+  async function submitForm(event: SubmitEvent) {
+    event.preventDefault();
+    const data = new FormData(event.target as HTMLFormElement);
+    const logo = (await (data.get('logo') as File).arrayBuffer()) as Uint8Array;
+
+    const organization: Organization = {
+      name: data.get('name') as string,
+      description: data.get('description') as string,
+      logo: logo.byteLength > 0 ? new Uint8Array(logo) : undefined,
+      email: data.get('email') as string,
+      urls: data.getAll('urls') as string[],
+      location: data.get('location') as string,
+      members: [],
+      coordinators: []
+    };
+
+    console.log('organization', organization);
+
+    try {
+      const record = await organizationsStore.createOrganization(organization);
+      console.log('record', record);
+
+      modalStore.trigger(
+        alertModal({
+          id: 'welcome-and-next-steps',
+          message: welcomeAndNextStepsMessage(organization.name)
+        })
+      );
+
+      goto('/user');
+    } catch (error) {
+      console.error('error :', error);
+    }
+  }
+</script>
+
+<section class="flex w-4/5 flex-col gap-10 md:w-3/4 lg:w-1/2">
+  <h2 class="h2">Create new Organization</h2>
+  <form
+    class="flex flex-col gap-4"
+    enctype="multipart/form-data"
+    onsubmit={submitForm}
+    bind:this={form}
+  >
+    <p>*required fields</p>
+    <label class="label text-lg">
+      Name* :<input type="text" class="input" name="name" required />
+    </label>
+
+    <label class="label text-lg">
+      Description :
+      <textarea class="textarea" name="description"></textarea>
+    </label>
+
+    <p class="label text-lg">Organization's logo :</p>
+    <FileDropzone name="logo" bind:files onchange={onLogoFileChange} accept="image/*" />
+    <div class="flex items-center justify-between">
+      <p class="italic">{fileMessage}</p>
+      {#if files && organizationLogo}
+        <div>
+          <Avatar src={URL.createObjectURL(organizationLogo)} />
+          <button class="cursor-pointer underline" onclick={RemoveOrganizationLogo}>
+            Remove
+          </button>
+        </div>
+      {/if}
+    </div>
+
+    <label class="label text-lg">
+      Email* :
+      <input type="email" class="input" name="email" required />
+    </label>
+
+    <legend class="border-surface-500 flex flex-col gap-2 rounded-lg border-2 p-4">
+      <p class="label text-lg font-bold">URLs</p>
+      <label class="label text-lg">
+        Website :
+        <input type="text" class="input" name="urls" />
+      </label>
+
+      <label class="label text-lg">
+        X :
+        <input type="text" class="input" name="urls" />
+      </label>
+
+      <label class="label text-lg">
+        GitHub :
+        <input type="text" class="input" name="urls" />
+      </label>
+
+      <label class="label text-lg">
+        Other :
+        <input type="text" class="input" name="urls" />
+      </label>
+    </legend>
+
+    <label class="label text-lg">
+      Location :
+      <input type="text" class="input" name="location" />
+    </label>
+
+    <div class="flex justify-around">
+      <button type="submit" class="btn variant-filled-primary w-fit self-center">
+        Create Organization
+      </button>
+
+      <button
+        type="button"
+        class="btn variant-filled-tertiary w-fit self-center"
+        onclick={mockOrganization}
+      >
+        Create Mocked Organization
+      </button>
+    </div>
+  </form>
+</section>

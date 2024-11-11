@@ -5,7 +5,7 @@
   import usersStore, { type User, type UserType } from '@stores/users.svelte';
   import { goto } from '$app/navigation';
   import { createMockedUsers } from '@mocks';
-  import { createRawSnippet, onMount, type Snippet } from 'svelte';
+  import { onMount } from 'svelte';
   import AlertModal from '@lib/dialogs/AlertModal.svelte';
   import type { AlertModalMeta } from '@lib/types';
 
@@ -105,7 +105,7 @@
     }
   }
 
-  async function mockUsers() {
+  async function mockUser() {
     try {
       let user: User = (await createMockedUsers())[0];
       await usersStore.createUser(user);
@@ -267,7 +267,7 @@
       <button
         type="button"
         class="btn variant-filled-tertiary w-fit self-center"
-        onclick={mockUsers}
+        onclick={mockUser}
       >
         Create Mocked User
       </button>

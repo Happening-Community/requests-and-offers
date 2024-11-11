@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { ActionHash } from '@holochain/client';
-  import { createMockedOrganizations } from '@mocks';
   import {
     Avatar,
     ConicGradient,
@@ -12,8 +11,9 @@
   import organizationsStore, { type Organization } from '@stores/organizations.svelte';
   import { onMount } from 'svelte';
   import UserDetailsModal from '@lib/modals/UserDetailsModal.svelte';
+  import administratorsStore from '@/stores/administrators.svelte';
 
-  const { organizations } = $derived(organizationsStore);
+  const { allOrganizations } = $derived(administratorsStore);
 
   let isLoading = $state(true);
   let organizationsHashes: ActionHash[] = $state([]);
@@ -41,18 +41,16 @@
   ];
 
   onMount(async () => {
-    if (organizations.length === 0) {
-      const mockedOrganizations = await createMockedOrganizations(3);
-      organizationsStore.organizations = mockedOrganizations;
-    }
+    await organizationsStore.getAllOrganizations();
+    console.log('allOrganizations', allOrganizations);
 
-    pendingOrganizations = organizations.filter(
+    pendingOrganizations = allOrganizations.filter(
       (organization) => organization.status === 'pending'
     );
-    acceptedOrganizations = organizations.filter(
+    acceptedOrganizations = allOrganizations.filter(
       (organization) => organization.status === 'accepted'
     );
-    rejectedOrganizations = organizations.filter(
+    rejectedOrganizations = allOrganizations.filter(
       (organization) => organization.status === 'rejected'
     );
 
@@ -62,7 +60,7 @@
 
 <section class="flex flex-col gap-10">
   <h1 class="h1 text-center">Organizations management</h1>
-  {#if isLoading && organizations.length === 0}
+  {#if isLoading && allOrganizations.length === 0}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {/if}
   <div class="flex flex-col gap-4 lg:flex-row lg:gap-0 lg:divide-x-2">
@@ -78,16 +76,16 @@
             </tr>
           </thead>
           <tbody>
-            {#each pendingOrganizations as user, i}
+            {#each pendingOrganizations as organization, i}
               <tr>
                 <td>
                   <Avatar
-                    src={user.picture
-                      ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
+                    src={organization.logo
+                      ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
                       : '/default_avatar.webp'}
                   />
                 </td>
-                <td>{user.name}</td>
+                <td>{organization.name}</td>
 
                 <td>
                   <button
@@ -117,16 +115,16 @@
             </tr>
           </thead>
           <tbody>
-            {#each acceptedOrganizations as user, i}
+            {#each acceptedOrganizations as organization, i}
               <tr>
                 <td>
                   <Avatar
-                    src={user.picture
-                      ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
+                    src={organization.logo
+                      ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
                       : '/default_avatar.webp'}
                   />
                 </td>
-                <td>{user.name}</td>
+                <td>{organization.name}</td>
                 <td>
                   <button
                     class="btn variant-filled-secondary"
