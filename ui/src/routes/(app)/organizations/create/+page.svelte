@@ -11,6 +11,8 @@
   import type { Organization } from '@/stores/organizations.svelte';
   import organizationsStore from '@/stores/organizations.svelte';
 
+  $inspect('My organizations', usersStore.myProfile?.organizations);
+
   type FormattedTimezone = {
     name: string;
     formatted: string;
@@ -105,17 +107,21 @@
     try {
       let organization: Organization = (await createMockedOrganizations())[0];
       const record = await organizationsStore.createOrganization(organization);
-      console.log('record', record);
 
-      modalStore.trigger(
-        alertModal({
-          id: 'welcome-and-next-steps',
-          message: welcomeAndNextStepsMessage(organization.name),
-          confirmLabel: 'Ok !'
-        })
+      const organizationData = await organizationsStore.getLatestOrganization(
+        record.signed_action.hashed.hash
       );
 
-      goto('/user');
+      await usersStore.getMyProfile();
+
+      // modalStore.trigger(
+      //   alertModal({
+      //     id: 'welcome-and-next-steps',
+      //     message: welcomeAndNextStepsMessage(organization.name)
+      //   })
+      // );
+
+      // goto('/user');
     } catch (error) {
       console.error('error :', error);
     }
@@ -143,14 +149,20 @@
       const record = await organizationsStore.createOrganization(organization);
       console.log('record', record);
 
-      modalStore.trigger(
-        alertModal({
-          id: 'welcome-and-next-steps',
-          message: welcomeAndNextStepsMessage(organization.name)
-        })
+      const organizationData = await organizationsStore.getLatestOrganization(
+        record.signed_action.hashed.hash
       );
 
-      goto('/user');
+      console.log('organizationData', organizationData);
+
+      // modalStore.trigger(
+      //   alertModal({
+      //     id: 'welcome-and-next-steps',
+      //     message: welcomeAndNextStepsMessage(organization.name)
+      //   })
+      // );
+
+      // goto('/user');
     } catch (error) {
       console.error('error :', error);
     }

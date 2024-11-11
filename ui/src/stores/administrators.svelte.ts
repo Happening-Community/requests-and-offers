@@ -32,9 +32,10 @@ export type Revision = {
   timestamp: number;
 };
 
-enum AdministrationEntity {
+export enum AdministrationEntity {
   Network = 'network',
-  Users = 'users'
+  Users = 'users',
+  Organizations = 'organizations'
 }
 
 class AdministratorsStore {
@@ -68,7 +69,10 @@ class AdministratorsStore {
 
     for (let i = 0; i < usersRecords.length; i++) {
       const user = decodeRecords([usersRecords[i]])[0];
-      const status = await this.getLatestStatusForUser(usersLinks[i].target);
+      const status = await this.getLatestStatusForEntity(
+        usersLinks[i].target,
+        AdministrationEntity.Users
+      );
 
       recordsContents.push({
         ...user,
@@ -175,18 +179,22 @@ class AdministratorsStore {
     return nonAdministratorsUsers;
   }
 
-  async getLatestStatusRecordForUser(
-    entity_original_action_hash: ActionHash
+  async getLatestStatusRecordForEntity(
+    entity_original_action_hash: ActionHash,
+    entity: AdministrationEntity
   ): Promise<Record | null> {
     return (await hc.callZome('administration', 'get_latest_status_record_for_entity', {
-      entity: AdministrationEntity.Users,
+      entity,
       entity_original_action_hash
     })) as Record | null;
   }
 
-  async getLatestStatusForUser(entity_original_action_hash: ActionHash): Promise<Status | null> {
+  async getLatestStatusForEntity(
+    entity_original_action_hash: ActionHash,
+    entity: AdministrationEntity
+  ): Promise<Status | null> {
     return (await hc.callZome('administration', 'get_latest_status_for_entity', {
-      entity: AdministrationEntity.Users,
+      entity,
       entity_original_action_hash
     })) as Status | null;
   }
@@ -206,13 +214,13 @@ class AdministratorsStore {
     const revisions: Revision[] = [];
     // const user = await usersStore.getLatestUser(status_original_action_hash);
 
-    const recordsForUser = (await hc.callZome(
+    const recordsForEntity = (await hc.callZome(
       'administration',
       'get_all_revisions_for_status',
       status_original_action_hash
     )) as Record[];
 
-    for (const record of recordsForUser) {
+    for (const record of recordsForEntity) {
       const timestamp = record.signed_action.hashed.content.timestamp / 1000;
       const status = decode((record.entry as any).Present.entry) as Status;
       const suspended_until = new Date(status.suspended_until!).getTime();
@@ -245,9 +253,9 @@ class AdministratorsStore {
       const user = await usersStore.getLatestUser(userLink.target);
       const statusLink = await this.getUserStatusLink(userLink.target);
       if (user && statusLink) {
-        const revisionsForUser = await this.getAllRevisionsForStatus(statusLink.target, user);
+        const revisionsForEntity = await this.getAllRevisionsForStatus(statusLink.target, user);
 
-        for (const revision of revisionsForUser) {
+        for (const revision of revisionsForEntity) {
           revisions.push(revision);
         }
       }

@@ -150,8 +150,8 @@ pub fn add_member_to_organization(input: OrganizationUser) -> ExternResult<bool>
 }
 
 #[hdk_extern]
-pub fn invite_member_to_organization(input: OrganizationUser) -> ExternResult<bool> {
-  unimplemented!()
+pub fn invite_member_to_organization(_input: OrganizationUser) -> ExternResult<bool> {
+  todo!("invite_member_to_organization");
 }
 
 #[hdk_extern]
@@ -275,8 +275,8 @@ pub fn add_coordinator_to_organization(input: OrganizationUser) -> ExternResult<
 }
 
 #[hdk_extern]
-pub fn invite_coordinator_to_organization(input: OrganizationUser) -> ExternResult<bool> {
-  unimplemented!()
+pub fn invite_coordinator_to_organization(_input: OrganizationUser) -> ExternResult<bool> {
+  todo!("invite_coordinator_to_organization");
 }
 
 #[hdk_extern]

@@ -45,13 +45,13 @@
     console.log('allOrganizations', allOrganizations);
 
     pendingOrganizations = allOrganizations.filter(
-      (organization) => organization.status === 'pending'
+      (organization) => organization.status?.status_type === 'pending'
     );
     acceptedOrganizations = allOrganizations.filter(
-      (organization) => organization.status === 'accepted'
+      (organization) => organization.status?.status_type === 'accepted'
     );
     rejectedOrganizations = allOrganizations.filter(
-      (organization) => organization.status === 'rejected'
+      (organization) => organization.status?.status_type === 'rejected'
     );
 
     isLoading = false;

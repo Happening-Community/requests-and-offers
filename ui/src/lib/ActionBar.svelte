@@ -1,6 +1,10 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import administratorsStore, { type Revision, type Status } from '@/stores/administrators.svelte';
+  import administratorsStore, {
+    AdministrationEntity,
+    type Revision,
+    type Status
+  } from '@/stores/administrators.svelte';
   import type { User } from '@/stores/users.svelte';
   import { queueAndReverseModal } from '@/utils';
   import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
@@ -213,8 +217,9 @@
     const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
       user?.original_action_hash!
     ))!.target;
-    const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForUser(
-      user?.original_action_hash!
+    const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForEntity(
+      user?.original_action_hash!,
+      AdministrationEntity.Users
     ))!.signed_action.hashed.hash;
 
     await administratorsStore.updateUserStatus(
@@ -238,8 +243,9 @@
     const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
       user?.original_action_hash!
     ))!.target;
-    const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForUser(
-      user?.original_action_hash!
+    const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForEntity(
+      user?.original_action_hash!,
+      AdministrationEntity.Users
     ))!.signed_action.hashed.hash;
 
     await administratorsStore.suspendUserIndefinitely(
@@ -262,8 +268,9 @@
     const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
       user?.original_action_hash!
     ))!.target;
-    const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForUser(
-      user?.original_action_hash!
+    const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForEntity(
+      user?.original_action_hash!,
+      AdministrationEntity.Users
     ))!.signed_action.hashed.hash;
 
     await administratorsStore.suspendUserTemporarily(

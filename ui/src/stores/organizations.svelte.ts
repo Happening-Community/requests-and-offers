@@ -1,8 +1,9 @@
 import hc from '@/services/HolochainClientService.svelte';
 import type { ActionHash, Link, Record } from '@holochain/client';
 import type { User } from './users.svelte';
-
-export type OrganizationStatus = 'pending' | 'accepted' | 'rejected';
+import type { Status } from './administrators.svelte';
+import administratorsStore, { AdministrationEntity } from './administrators.svelte';
+import { decodeRecords } from '@/utils';
 
 export type OrganizationInDHT = {
   name: string;
@@ -16,7 +17,7 @@ export type OrganizationInDHT = {
 export type OrganizationAdditionalFields = {
   members: ActionHash[];
   coordinators: ActionHash[];
-  status?: OrganizationStatus;
+  status?: Status;
   original_action_hash?: ActionHash;
   previous_action_hash?: ActionHash;
 };
@@ -26,12 +27,29 @@ export type Organization = OrganizationInDHT & OrganizationAdditionalFields;
 class OrganizationsStore {
   acceptedOrganizations: Organization[] = $state([]);
 
-  async getOrganizationStatusLink(): Promise<Link | null> {
+  async getOrganizationStatusLink(
+    organization_original_action_hash: ActionHash
+  ): Promise<Link | null> {
     return (await hc.callZome(
       'users_organizations',
-      'get_organizations_status',
-      null
+      'get_organization_status_link',
+      organization_original_action_hash
     )) as Link | null;
+  }
+
+  async getOrganizationStatus(
+    organization_original_action_hash: ActionHash
+  ): Promise<Status | null> {
+    const link = await this.getOrganizationStatusLink(organization_original_action_hash);
+
+    if (!link) return null;
+
+    const status = await administratorsStore.getLatestStatusForEntity(
+      link.target,
+      AdministrationEntity.Organizations
+    );
+
+    return status;
   }
 
   async createOrganization(organization: Organization): Promise<Record> {
@@ -59,7 +77,11 @@ class OrganizationsStore {
 
     for (const link of acceptedOrganizationsLinks) {
       const organization = await this.getLatestOrganization(link.target);
-      if (organization) this.acceptedOrganizations.push(organization);
+      if (organization) {
+        const status = await this.getOrganizationStatus(link.target);
+        organization.status = status!;
+        this.acceptedOrganizations.push(organization);
+      }
     }
 
     return acceptedOrganizationsLinks;
@@ -74,11 +96,17 @@ class OrganizationsStore {
   }
 
   async getLatestOrganization(original_action_hash: ActionHash): Promise<Organization | null> {
-    return (await hc.callZome(
-      'users_organizations',
-      'get_latest_organization',
-      original_action_hash
-    )) as Organization | null;
+    const record = await this.getLatestOrganizationRecord(original_action_hash);
+    const status = await this.getOrganizationStatus(original_action_hash);
+
+    return record
+      ? {
+          ...decodeRecords([record])[0],
+          original_action_hash,
+          previous_action_hash: record.signed_action.hashed.hash,
+          status
+        }
+      : null;
   }
 
   async addMemberToOrganization(

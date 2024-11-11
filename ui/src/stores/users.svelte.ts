@@ -1,8 +1,13 @@
 import { decodeRecords } from '@utils';
 import hc from '@services/HolochainClientService.svelte';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
-import administratorsStore, { type Status, type Revision } from './administrators.svelte';
+import administratorsStore, {
+  type Status,
+  type Revision,
+  AdministrationEntity
+} from './administrators.svelte';
 import type { Organization } from './organizations.svelte';
+import organizationsStore from './organizations.svelte';
 
 export type UserType = 'creator' | 'advocate';
 
@@ -49,17 +54,28 @@ class UsersStore {
     return record;
   }
 
-  async getLatestUser(original_action_hash: ActionHash): Promise<User | null> {
-    const record = await this.getLatestUserRecord(original_action_hash);
-    const myStatus = await administratorsStore.getLatestStatusForUser(original_action_hash);
-    const organizations = await this.getUserOrganizations(original_action_hash);
+  async getLatestUser(user_original_action_hash: ActionHash): Promise<User | null> {
+    const record = await this.getLatestUserRecord(user_original_action_hash);
+    const myStatus = await administratorsStore.getLatestStatusForEntity(
+      user_original_action_hash,
+      AdministrationEntity.Users
+    );
+
+    const organizations = await this.getUserOrganizations(user_original_action_hash);
+
+    for (const organization of organizations) {
+      const status = await organizationsStore.getOrganizationStatus(
+        organization.original_action_hash!
+      );
+      if (status) organization.status = status;
+    }
 
     return record
       ? {
           ...decodeRecords([record])[0],
           status: myStatus,
           organizations,
-          original_action_hash: original_action_hash,
+          original_action_hash: user_original_action_hash,
           previous_action_hash: record.signed_action.hashed.hash
         }
       : null;
@@ -117,8 +133,9 @@ class UsersStore {
     for (let i = 0; i < records.length; i++) {
       const user = decodeRecords([records[i]])[0];
 
-      const status = await administratorsStore.getLatestStatusForUser(
-        records[i].signed_action.hashed.hash
+      const status = await administratorsStore.getLatestStatusForEntity(
+        records[i].signed_action.hashed.hash,
+        AdministrationEntity.Users
       );
 
       recordsContents.push({
@@ -144,11 +161,25 @@ class UsersStore {
   }
 
   async getUserOrganizations(user_original_action_hash: ActionHash): Promise<Organization[]> {
-    return (await hc.callZome(
-      'users_organizations',
-      'get_user_organizations',
-      user_original_action_hash
-    )) as Organization[];
+    const organizationsLinks = await this.getUserOrganizationsLinks(user_original_action_hash);
+
+    const organizations: Organization[] = [];
+
+    for (const link of organizationsLinks) {
+      const record = await organizationsStore.getLatestOrganizationRecord(link.target);
+
+      if (!record) continue;
+
+      const status = await organizationsStore.getOrganizationStatus(link.target);
+      organizations.push({
+        ...decodeRecords([record])[0],
+        original_action_hash: link.target,
+        previous_action_hash: record.signed_action.hashed.hash,
+        status
+      });
+    }
+
+    return organizations;
   }
 
   async updateMyProfile(updated_user: User): Promise<Record> {
