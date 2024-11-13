@@ -25,7 +25,7 @@ import {
   createOrganization,
   deleteOrganization,
   getAcceptedOrganizationsLinks,
-  getAllOrganizations,
+  getAllOrganizationsLinks,
   getLatestOrganization,
   getOrganizationCoordinatorsLinks,
   getOrganizationMembersLinks,
@@ -323,11 +323,13 @@ test("create and manage Organizations", async () => {
       assert.deepEqual(organizationMembers[0].target, aliceUserLink.target);
 
       // Alice can get all the Organizations because she is a network administrator
-      const allOrganizationsLinks = await getAllOrganizations(alice.cells[0]);
+      const allOrganizationsLinks = await getAllOrganizationsLinks(
+        alice.cells[0]
+      );
       assert.lengthOf(allOrganizationsLinks, 2);
 
       // Verify that Bob can not get all the Organizations because he is not a network administrator
-      await expect(getAllOrganizations(bob.cells[0])).rejects.toThrow();
+      await expect(getAllOrganizationsLinks(bob.cells[0])).rejects.toThrow();
 
       // Verify that there is no accepted Organization
       const acceptedOrganizationsLinks = await getAcceptedOrganizationsLinks(
@@ -434,7 +436,7 @@ test("create and manage Organizations", async () => {
       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
       // Verify that Alice's Organization is deleted
-      assert.lengthOf(await getAllOrganizations(alice.cells[0]), 1);
+      assert.lengthOf(await getAllOrganizationsLinks(alice.cells[0]), 1);
       assert.lengthOf(
         await getUserOrganizationsLinks(alice.cells[0], aliceUserLink.target),
         0

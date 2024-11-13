@@ -49,10 +49,10 @@ export function createOrganization(
   });
 }
 
-export function getAllOrganizations(cell: CallableCell): Promise<Link[]> {
+export function getAllOrganizationsLinks(cell: CallableCell): Promise<Link[]> {
   return cell.callZome({
     zome_name: "users_organizations",
-    fn_name: "get_all_organizations",
+    fn_name: "get_all_organizations_links",
     payload: null,
   });
 }
