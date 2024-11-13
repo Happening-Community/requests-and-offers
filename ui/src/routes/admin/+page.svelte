@@ -1,15 +1,35 @@
-<script>
+<script lang="ts">
+  import type { User } from '@/stores/users.svelte';
   import administratorsStore from '@stores/administrators.svelte';
-  import organizationsStore from '@stores/organizations.svelte';
+  import { type Organization } from '@stores/organizations.svelte';
   ('@stores/organizations.svelte');
-  import projectsStore from '@stores/projects.svelte';
+  import projectsStore, { type Project } from '@stores/projects.svelte';
+  import { onMount } from 'svelte';
 
   const { allUsers, allOrganizations, administrators } = $derived(administratorsStore);
   const { projects } = projectsStore;
 
-  let pendingUsers = $derived(allUsers.filter((p) => p.status?.status_type === 'pending'));
-  let pendingOrganizations = $derived(allOrganizations.filter((o) => o.status === 'pending'));
-  let pendingprojects = $derived(projects.filter((p) => p.status === 'pending'));
+  let pendingUsers: User[] = $state([]);
+  let pendingprojects: Project[] = $state([]);
+  let pendingOrganizations: Organization[] = $state([]);
+
+  onMount(async () => {
+    for (let user of allUsers) {
+      if (!user.status) continue;
+      const status = await administratorsStore.getLatestStatus(user.status);
+
+      if (status!.status_type === 'pending') pendingUsers.push(user);
+    }
+
+    pendingprojects = projects.filter((Project) => Project.status === 'pending');
+
+    for (const organization of allOrganizations) {
+      const status = await administratorsStore.getLatestStatus(organization.status!);
+      if (status === null) continue;
+
+      if (status.status_type === 'pending') pendingOrganizations.push(organization);
+    }
+  });
 </script>
 
 <section class="space-y-8">
