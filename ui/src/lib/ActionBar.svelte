@@ -29,7 +29,10 @@
   let userStatus: Status | null = $state(null);
 
   onMount(async () => {
-    userStatus = await administratorsStore.getLatestStatus(user.status!);
+    userStatus = await administratorsStore.getLatestStatusForEntity(
+      user.original_action_hash!,
+      AdministrationEntity.Users
+    );
     console.log('userStatus', userStatus);
   });
 

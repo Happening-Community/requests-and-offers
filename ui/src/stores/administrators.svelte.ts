@@ -72,7 +72,10 @@ class AdministratorsStore {
       const user: User = decodeRecords([usersRecords[i]])[0];
       const statusLink = (await this.getUserStatusLink(usersLinks[i].target))?.target;
 
-      const status = await this.getLatestStatus(statusLink!);
+      const status = await this.getLatestStatusForEntity(
+        usersLinks[i].target,
+        AdministrationEntity.Users
+      );
 
       recordsContents.push({
         ...user,
@@ -82,6 +85,7 @@ class AdministratorsStore {
         previous_action_hash: usersRecords[i].signed_action.hashed.hash
       });
     }
+
     this.allUsers = recordsContents;
 
     return recordsContents;

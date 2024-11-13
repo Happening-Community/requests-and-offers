@@ -2,10 +2,11 @@
   import type { User } from '@/stores/users.svelte';
   import UsersTable from '@lib/tables/UsersTable.svelte';
   import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
-  import administratorsStore from '@stores/administrators.svelte';
+  import administratorsStore, { AdministrationEntity } from '@stores/administrators.svelte';
   import { onMount } from 'svelte';
 
   const { allUsers } = $derived(administratorsStore);
+
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
     { color: 'rgb(var(--color-secondary-500))', start: 75, end: 50 }
@@ -22,20 +23,29 @@
   onMount(async () => {
     await administratorsStore.getAllUsers();
 
+    isLoading = false;
+  });
+
+  $effect(() => {
+    pendingUsers = [];
+    AcceptedEntity = [];
+    rejectedUsers = [];
+    temporarilySuspendedUsers = [];
+    indefinitelySuspendedUsers = [];
+
     for (let user of allUsers) {
       if (!user.status) continue;
-      const status = await administratorsStore.getLatestStatus(user.status!);
-
-      console.log('status', status);
-
-      if (status!.status_type === 'pending') pendingUsers.push(user);
-      if (status!.status_type === 'accepted') AcceptedEntity.push(user);
-      if (status!.status_type === 'rejected') rejectedUsers.push(user);
-      if (status!.status_type === 'suspended temporarily') temporarilySuspendedUsers.push(user);
-      if (status!.status_type === 'suspended indefinitely') indefinitelySuspendedUsers.push(user);
+      administratorsStore
+        .getLatestStatusForEntity(user.original_action_hash!, AdministrationEntity.Users)
+        .then((status) => {
+          if (status!.status_type === 'pending') pendingUsers.push(user);
+          if (status!.status_type === 'accepted') AcceptedEntity.push(user);
+          if (status!.status_type === 'rejected') rejectedUsers.push(user);
+          if (status!.status_type === 'suspended temporarily') temporarilySuspendedUsers.push(user);
+          if (status!.status_type === 'suspended indefinitely')
+            indefinitelySuspendedUsers.push(user);
+        });
     }
-
-    isLoading = false;
   });
 </script>
 

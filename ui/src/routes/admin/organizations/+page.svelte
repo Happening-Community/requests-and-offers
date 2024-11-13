@@ -11,7 +11,7 @@
   import { type Organization } from '@stores/organizations.svelte';
   import { onMount } from 'svelte';
   import UserDetailsModal from '@lib/modals/UserDetailsModal.svelte';
-  import administratorsStore from '@/stores/administrators.svelte';
+  import administratorsStore, { AdministrationEntity } from '@/stores/administrators.svelte';
 
   const { allOrganizations } = $derived(administratorsStore);
 
@@ -42,18 +42,29 @@
 
   onMount(async () => {
     await administratorsStore.getAllOrganizations();
-    console.log('allOrganizations', allOrganizations);
-
-    for (const organization of allOrganizations) {
-      const status = await administratorsStore.getLatestStatus(organization.status!);
-      if (status === null) continue;
-
-      if (status.status_type === 'pending') pendingOrganizations.push(organization);
-      if (status.status_type === 'accepted') acceptedOrganizations.push(organization);
-      if (status.status_type === 'rejected') rejectedOrganizations.push(organization);
-    }
 
     isLoading = false;
+  });
+
+  $effect(() => {
+    pendingOrganizations = [];
+    acceptedOrganizations = [];
+    rejectedOrganizations = [];
+
+    for (const organization of allOrganizations) {
+      administratorsStore
+        .getLatestStatusForEntity(
+          organization.original_action_hash!,
+          AdministrationEntity.Organizations
+        )
+        .then((status) => {
+          if (status === null) return;
+
+          if (status.status_type === 'pending') pendingOrganizations.push(organization);
+          if (status.status_type === 'accepted') acceptedOrganizations.push(organization);
+          if (status.status_type === 'rejected') rejectedOrganizations.push(organization);
+        });
+    }
   });
 </script>
 

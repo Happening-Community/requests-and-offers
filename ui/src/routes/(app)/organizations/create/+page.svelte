@@ -30,17 +30,17 @@
   const welcomeAndNextStepsMessage = (name: string) => `
          <img src="/hAppeningsLogoWsun2.webp" alt="hAppenings Community Logo" class="w-28" />
           
-          <h2 class="text-xl font-semibold text-center">Welcome to hCRON!</h2>
+          <h2 class="text-xl font-semibold text-center">Your organization has been created!</h2>
           
-          <p class="text-lg text-center">Hello ${name}, we're thrilled to have you join our community!</p>
-          
+          <p class="text-lg text-center">Your organization ${name}, has been successfully created!</p>
+                    
           <div class="space-y-4">
             <div class="p-4 rounded-lg border-l-4 border-blue-500">
               <h3 class="font-bold text-lg text-tertiary-500">Important Next Steps:</h3>
               <ul class="list-disc pl-5 mt-2 space-y-2 text-left">
                 <li>A network administrator will contact you via email and platform message shortly.</li>
                 <li>You'll be invited to schedule a meeting for identity verification.</li>
-                <li>After successful verification, your status will update to "accepted".</li>
+                <li>After successful verification, the status of your organization will update to "accepted".</li>
               </ul>
             </div>
             

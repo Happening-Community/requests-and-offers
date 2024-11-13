@@ -4,7 +4,10 @@
   import { onMount } from 'svelte';
   import ActionBar from '../ActionBar.svelte';
   import type { User } from '@/stores/users.svelte';
-  import administratorsStore, { type Status } from '@/stores/administrators.svelte';
+  import administratorsStore, {
+    AdministrationEntity,
+    type Status
+  } from '@/stores/administrators.svelte';
 
   const modalStore = getModalStore();
   const user: User = $modalStore[0].meta.user;
@@ -18,7 +21,10 @@
     userPictureUrl = user?.picture
       ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
       : '/default_avatar.webp';
-    userStatus = await administratorsStore.getLatestStatus(user.status!);
+    userStatus = await administratorsStore.getLatestStatusForEntity(
+      user.original_action_hash!,
+      AdministrationEntity.Users
+    );
 
     if (user && userStatus!.suspended_until) {
       isSuspendedTemporarily = true;
