@@ -37,7 +37,7 @@
   {#if user}
     {#if $page.url.pathname.startsWith('/admin')}
       <div class="mb-10">
-        <ActionBar {user} />
+        <ActionBar entity={user} />
       </div>
     {/if}
 

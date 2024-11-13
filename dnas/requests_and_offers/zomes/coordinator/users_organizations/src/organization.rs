@@ -20,19 +20,6 @@ pub fn create_organization(organization: Organization) -> ExternResult<Record> {
     )));
   }
 
-  if !check_if_entity_is_accepted(EntityActionHash {
-    entity: "users".to_string(),
-    entity_original_action_hash: user_links[0]
-      .target
-      .clone()
-      .into_action_hash()
-      .ok_or(UtilsError::ActionHashNotFound("user"))?,
-  })? {
-    return Err(wasm_error!(Guest(
-      "Your User profile is not accepted".to_string()
-    )));
-  }
-
   let organization_hash = create_entry(&EntryTypes::Organization(organization.clone()))?;
   let record = get(organization_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(Guest(
     "Could not find the newly created Organization profile".to_string()

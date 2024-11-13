@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { ActionHash } from '@holochain/client';
   import {
     Avatar,
     ConicGradient,
@@ -10,27 +9,25 @@
   } from '@skeletonlabs/skeleton';
   import { type Organization } from '@stores/organizations.svelte';
   import { onMount } from 'svelte';
-  import UserDetailsModal from '@lib/modals/UserDetailsModal.svelte';
   import administratorsStore, { AdministrationEntity } from '@/stores/administrators.svelte';
+  import OrganizationDetailsModal from '@/lib/modals/OrganizationDetailsModal.svelte';
 
   const { allOrganizations } = $derived(administratorsStore);
 
   let isLoading = $state(true);
-  let organizationsHashes: ActionHash[] = $state([]);
 
   let pendingOrganizations: Organization[] = $state([]);
   let acceptedOrganizations: Organization[] = $state([]);
   let rejectedOrganizations: Organization[] = $state([]);
 
   const modalStore = getModalStore();
-  const modalComponent: ModalComponent = { ref: UserDetailsModal };
-  const modal = (id: number, hash: ActionHash): ModalSettings => {
+  const modalComponent: ModalComponent = { ref: OrganizationDetailsModal };
+  const modal = (organization: Organization): ModalSettings => {
     return {
       type: 'component',
       component: modalComponent,
       meta: {
-        id,
-        hash
+        organization
       }
     };
   };
@@ -42,7 +39,6 @@
 
   onMount(async () => {
     await administratorsStore.getAllOrganizations();
-
     isLoading = false;
   });
 
@@ -100,7 +96,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    onclick={() => modalStore.trigger(modal(i, organizationsHashes[i]))}
+                    onclick={() => modalStore.trigger(modal(organization))}
                   >
                     View
                   </button>
@@ -138,7 +134,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    onclick={() => modalStore.trigger(modal(i, organizationsHashes[i]))}
+                    onclick={() => modalStore.trigger(modal(organization))}
                   >
                     View
                   </button>

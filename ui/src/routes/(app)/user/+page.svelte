@@ -144,7 +144,7 @@
       {#if myProfile.location}
         <p><b>Location :</b> {myProfile.location}</p>
       {/if}
-      {#if organizations}
+      {#if organizations.length > 0}
         <h3 class="h3">My Organizations</h3>
         <table class="table-hover table drop-shadow-lg">
           <thead>

@@ -14,11 +14,12 @@
   import StatusHistoryModal from './modals/StatusHistoryModal.svelte';
   import usersStore from '@/stores/users.svelte';
   import { onMount } from 'svelte';
+  import type { Organization } from '@/stores/organizations.svelte';
 
   type Props = {
-    user: User;
+    entity: User | Organization;
   };
-  const { user }: Props = $props();
+  const { entity }: Props = $props();
 
   const modalStore = getModalStore();
   const { administrators } = $derived(administratorsStore);
@@ -30,7 +31,7 @@
 
   onMount(async () => {
     userStatus = await administratorsStore.getLatestStatusForEntity(
-      user.original_action_hash!,
+      entity.original_action_hash!,
       AdministrationEntity.Users
     );
     console.log('userStatus', userStatus);
@@ -196,17 +197,17 @@
   }
 
   async function handleStatusHistoryModal() {
-    const userStatus = await administratorsStore.getUserStatusLink(user!.original_action_hash!);
+    const userStatus = await administratorsStore.getUserStatusLink(entity!.original_action_hash!);
     const statusHistory = await administratorsStore.getAllRevisionsForStatus(
       userStatus!.target,
-      user
+      entity as User
     );
 
     queueAndReverseModal(statusHistoryModal(statusHistory), modalStore);
   }
 
   async function updateStatus(status: Status) {
-    if (!user) return;
+    if (!entity) return;
 
     let statusMessage = '';
     switch (status.status_type) {
@@ -225,15 +226,15 @@
     }
 
     const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
-      user?.original_action_hash!
+      entity?.original_action_hash!
     ))!.target;
     const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForEntity(
-      user?.original_action_hash!,
+      entity?.original_action_hash!,
       AdministrationEntity.Users
     ))!.signed_action.hashed.hash;
 
     await administratorsStore.updateUserStatus(
-      user.original_action_hash!,
+      entity.original_action_hash!,
       statusOriginalActionHash,
       latestStatusActionHash,
       status
@@ -244,22 +245,22 @@
   }
 
   async function handleSuspendIndefinitely(data: FormData) {
-    if (!user) return;
+    if (!entity) return;
 
     const reason = String(data.get('reason'));
 
     if (!reason) return;
 
     const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
-      user?.original_action_hash!
+      entity?.original_action_hash!
     ))!.target;
     const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForEntity(
-      user?.original_action_hash!,
+      entity?.original_action_hash!,
       AdministrationEntity.Users
     ))!.signed_action.hashed.hash;
 
     await administratorsStore.suspendUserIndefinitely(
-      user.original_action_hash!,
+      entity.original_action_hash!,
       statusOriginalActionHash,
       latestStatusActionHash,
       reason
@@ -270,21 +271,21 @@
   }
 
   async function handleSuspendTemporarily(data: FormData) {
-    if (!user) return;
+    if (!entity) return;
 
     let suspendedDays = Number(data.get('duration'));
     const reason = String(data.get('reason'));
 
     const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
-      user?.original_action_hash!
+      entity?.original_action_hash!
     ))!.target;
     const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForEntity(
-      user?.original_action_hash!,
+      entity?.original_action_hash!,
       AdministrationEntity.Users
     ))!.signed_action.hashed.hash;
 
     await administratorsStore.suspendUserTemporarily(
-      user.original_action_hash!,
+      entity.original_action_hash!,
       statusOriginalActionHash,
       latestStatusActionHash,
       reason,
@@ -297,12 +298,12 @@
   }
 
   async function removeAdministrator() {
-    if (!user) return;
+    if (!entity) return;
 
-    const userAgents = await usersStore.getUserAgents(user.original_action_hash!);
+    const userAgents = await usersStore.getUserAgents(entity.original_action_hash!);
     if (!userAgents.length) return;
 
-    await administratorsStore.removeAdministrator(user.original_action_hash!, userAgents);
+    await administratorsStore.removeAdministrator(entity.original_action_hash!, userAgents);
     await administratorsStore.getAllAdministrators();
   }
 </script>
