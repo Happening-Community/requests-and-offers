@@ -4,6 +4,7 @@
   import { onMount } from 'svelte';
   import ActionBar from '../ActionBar.svelte';
   import type { User } from '@/stores/users.svelte';
+  import administratorsStore, { type Status } from '@/stores/administrators.svelte';
 
   const modalStore = getModalStore();
   const user: User = $modalStore[0].meta.user;
@@ -11,15 +12,17 @@
   let userPictureUrl = $state('');
   let suspensionDate = $state('');
   let isSuspendedTemporarily = $state(false);
+  let userStatus: Status | null = $state(null);
 
   onMount(async () => {
     userPictureUrl = user?.picture
       ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
       : '/default_avatar.webp';
+    userStatus = await administratorsStore.getLatestStatus(user.status!);
 
-    if (user && user.status!.suspended_until) {
+    if (user && userStatus!.suspended_until) {
       isSuspendedTemporarily = true;
-      suspensionDate = new Date(user.status!.suspended_until).toLocaleString();
+      suspensionDate = new Date(userStatus!.suspended_until).toLocaleString();
     }
   });
 </script>
@@ -38,13 +41,13 @@
       <p>
         <b>Status :</b>
         {#if !suspensionDate}
-          {user.status?.status_type}
+          {userStatus?.status_type}
         {:else}
           suspended until <br /> {suspensionDate}
         {/if}
       </p>
-      {#if user.status?.status_type.startsWith('suspended')}
-        <p><b>Reason :</b> {user.status?.reason}</p>
+      {#if userStatus?.status_type.startsWith('suspended')}
+        <p><b>Reason :</b> {userStatus?.reason}</p>
       {/if}
     {/if}
     <div onload={() => URL.revokeObjectURL(userPictureUrl)}>

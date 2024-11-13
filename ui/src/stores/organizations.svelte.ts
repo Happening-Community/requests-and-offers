@@ -17,7 +17,7 @@ export type OrganizationInDHT = {
 export type OrganizationAdditionalFields = {
   members: ActionHash[];
   coordinators: ActionHash[];
-  status?: Status;
+  status?: ActionHash;
   original_action_hash?: ActionHash;
   previous_action_hash?: ActionHash;
 };
@@ -60,14 +60,6 @@ class OrganizationsStore {
     )) as Record;
   }
 
-  async getAllOrganizations(): Promise<Organization[]> {
-    return (await hc.callZome(
-      'users_organizations',
-      'get_all_organizations',
-      null
-    )) as Organization[];
-  }
-
   async getAcceptedOrganizationsLinks(): Promise<Link[]> {
     const acceptedOrganizationsLinks = (await hc.callZome(
       'administration',
@@ -77,11 +69,9 @@ class OrganizationsStore {
 
     for (const link of acceptedOrganizationsLinks) {
       const organization = await this.getLatestOrganization(link.target);
-      if (organization) {
-        const status = await this.getOrganizationStatus(link.target);
-        organization.status = status!;
-        this.acceptedOrganizations.push(organization);
-      }
+      if (!organization) continue;
+
+      this.acceptedOrganizations.push(organization);
     }
 
     return acceptedOrganizationsLinks;
@@ -97,14 +87,22 @@ class OrganizationsStore {
 
   async getLatestOrganization(original_action_hash: ActionHash): Promise<Organization | null> {
     const record = await this.getLatestOrganizationRecord(original_action_hash);
-    const status = await this.getOrganizationStatus(original_action_hash);
+    const status = (await this.getOrganizationStatusLink(original_action_hash))?.target;
+    const members = (await this.getOrganizationMembersLinks(original_action_hash))?.map(
+      (l) => l.target
+    );
+    const coordinators = (await this.getOrganizationCoordinatorsLinks(original_action_hash))?.map(
+      (l) => l.target
+    );
 
     return record
       ? {
           ...decodeRecords([record])[0],
           original_action_hash,
           previous_action_hash: record.signed_action.hashed.hash,
-          status
+          status,
+          members,
+          coordinators
         }
       : null;
   }

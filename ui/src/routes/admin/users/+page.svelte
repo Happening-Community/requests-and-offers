@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { User } from '@/stores/users.svelte';
   import UsersTable from '@lib/tables/UsersTable.svelte';
   import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
   import administratorsStore from '@stores/administrators.svelte';
@@ -12,20 +13,27 @@
 
   let isLoading = $state(true);
 
-  let pendingUsers = $derived(allUsers.filter((user) => user.status?.status_type === 'pending'));
-  let AcceptedEntity = $derived(allUsers.filter((user) => user.status?.status_type === 'accepted'));
-  let rejectedUsers = $derived(allUsers.filter((user) => user.status?.status_type === 'rejected'));
-  let temporarilySuspendedUsers = $derived(
-    allUsers
-      .filter((user) => user.status?.status_type === 'suspended temporarily')
-      .sort((a, b) => a.remaining_time! - b.remaining_time!)
-  );
-  let indefinitelySuspendedUsers = $derived(
-    allUsers.filter((user) => user.status?.status_type === 'suspended indefinitely')
-  );
+  let pendingUsers: User[] = $state([]);
+  let AcceptedEntity: User[] = $state([]);
+  let rejectedUsers: User[] = $state([]);
+  let temporarilySuspendedUsers: User[] = $state([]);
+  let indefinitelySuspendedUsers: User[] = $state([]);
 
   onMount(async () => {
     await administratorsStore.getAllUsers();
+
+    for (let user of allUsers) {
+      if (!user.status) continue;
+      const status = await administratorsStore.getLatestStatus(user.status!);
+
+      console.log('status', status);
+
+      if (status!.status_type === 'pending') pendingUsers.push(user);
+      if (status!.status_type === 'accepted') AcceptedEntity.push(user);
+      if (status!.status_type === 'rejected') rejectedUsers.push(user);
+      if (status!.status_type === 'suspended temporarily') temporarilySuspendedUsers.push(user);
+      if (status!.status_type === 'suspended indefinitely') indefinitelySuspendedUsers.push(user);
+    }
 
     isLoading = false;
   });

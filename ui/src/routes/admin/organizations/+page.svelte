@@ -8,7 +8,7 @@
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import organizationsStore, { type Organization } from '@stores/organizations.svelte';
+  import { type Organization } from '@stores/organizations.svelte';
   import { onMount } from 'svelte';
   import UserDetailsModal from '@lib/modals/UserDetailsModal.svelte';
   import administratorsStore from '@/stores/administrators.svelte';
@@ -41,18 +41,17 @@
   ];
 
   onMount(async () => {
-    await organizationsStore.getAllOrganizations();
+    await administratorsStore.getAllOrganizations();
     console.log('allOrganizations', allOrganizations);
 
-    pendingOrganizations = allOrganizations.filter(
-      (organization) => organization.status?.status_type === 'pending'
-    );
-    acceptedOrganizations = allOrganizations.filter(
-      (organization) => organization.status?.status_type === 'accepted'
-    );
-    rejectedOrganizations = allOrganizations.filter(
-      (organization) => organization.status?.status_type === 'rejected'
-    );
+    for (const organization of allOrganizations) {
+      const status = await administratorsStore.getLatestStatus(organization.status!);
+      if (status === null) continue;
+
+      if (status.status_type === 'pending') pendingOrganizations.push(organization);
+      if (status.status_type === 'accepted') acceptedOrganizations.push(organization);
+      if (status.status_type === 'rejected') rejectedOrganizations.push(organization);
+    }
 
     isLoading = false;
   });

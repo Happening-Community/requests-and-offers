@@ -13,6 +13,7 @@
   import ConfirmModal from './dialogs/ConfirmModal.svelte';
   import StatusHistoryModal from './modals/StatusHistoryModal.svelte';
   import usersStore from '@/stores/users.svelte';
+  import { onMount } from 'svelte';
 
   type Props = {
     user: User;
@@ -25,11 +26,17 @@
   let suspensionDate = $state('');
   let isTheOnlyAdmin = $derived(administrators.length === 1);
   let isSuspendedTemporarily = $state(false);
+  let userStatus: Status | null = $state(null);
+
+  onMount(async () => {
+    userStatus = await administratorsStore.getLatestStatus(user.status!);
+    console.log('userStatus', userStatus);
+  });
 
   $effect(() => {
-    if (user && user.status!.suspended_until) {
+    if (userStatus && userStatus.suspended_until) {
       isSuspendedTemporarily = true;
-      suspensionDate = new Date(user.status!.suspended_until).toLocaleString();
+      suspensionDate = new Date(userStatus!.suspended_until).toLocaleString();
     }
   });
 
@@ -281,7 +288,7 @@
       suspendedDays
     );
     await administratorsStore.getAllUsers();
-    suspensionDate = new Date(user?.status?.suspended_until!).toLocaleString();
+    suspensionDate = new Date(userStatus!.suspended_until!).toLocaleString();
     suspendedDays = 0;
     modalStore.close();
   }
@@ -302,38 +309,22 @@
     <button class="btn variant-filled-tertiary rounded-lg" onclick={handleStatusHistoryModal}>
       View Status History
     </button>
-    {#if user?.status?.status_type === 'pending' || user?.status?.status_type === 'rejected'}
-      <button class="btn variant-filled-tertiary rounded-lg" onclick={handleAcceptModal}>
-        Accept
-      </button>
-      {#if user?.status?.status_type === 'pending'}
-        <button class="btn variant-filled-error rounded-lg" onclick={handleRejectModal}>
-          Reject
+    {#if userStatus}
+      {#if userStatus!.status_type === 'pending' || userStatus!.status_type === 'rejected'}
+        <button class="btn variant-filled-tertiary rounded-lg" onclick={handleAcceptModal}>
+          Accept
         </button>
-      {/if}
-    {:else if user?.status?.status_type === 'accepted'}
-      <button
-        class="btn variant-filled-error rounded-lg"
-        onclick={() => handlePromptModal('temporarily')}
-      >
-        Suspend Temporarily
-      </button>
-      <button
-        class="btn variant-filled-error rounded-lg"
-        onclick={() => handlePromptModal('indefinitely')}
-      >
-        Suspend Indefinitely
-      </button>
-    {:else if user?.status?.status_type.startsWith('suspended')}
-      <button class="btn variant-filled-tertiary rounded-lg" onclick={handleUnsuspendModal}>
-        Unsuspend
-      </button>
-      {#if isSuspendedTemporarily}
+        {#if userStatus!.status_type === 'pending'}
+          <button class="btn variant-filled-error rounded-lg" onclick={handleRejectModal}>
+            Reject
+          </button>
+        {/if}
+      {:else if userStatus!.status_type === 'accepted'}
         <button
           class="btn variant-filled-error rounded-lg"
           onclick={() => handlePromptModal('temporarily')}
         >
-          Change suspension
+          Suspend Temporarily
         </button>
         <button
           class="btn variant-filled-error rounded-lg"
@@ -341,13 +332,31 @@
         >
           Suspend Indefinitely
         </button>
-      {:else}
-        <button
-          class="btn variant-filled-error rounded-lg"
-          onclick={() => handlePromptModal('temporarily')}
-        >
-          Suspend for a period
+      {:else if userStatus!.status_type.startsWith('suspended')}
+        <button class="btn variant-filled-tertiary rounded-lg" onclick={handleUnsuspendModal}>
+          Unsuspend
         </button>
+        {#if isSuspendedTemporarily}
+          <button
+            class="btn variant-filled-error rounded-lg"
+            onclick={() => handlePromptModal('temporarily')}
+          >
+            Change suspension
+          </button>
+          <button
+            class="btn variant-filled-error rounded-lg"
+            onclick={() => handlePromptModal('indefinitely')}
+          >
+            Suspend Indefinitely
+          </button>
+        {:else}
+          <button
+            class="btn variant-filled-error rounded-lg"
+            onclick={() => handlePromptModal('temporarily')}
+          >
+            Suspend for a period
+          </button>
+        {/if}
       {/if}
     {/if}
   {/if}

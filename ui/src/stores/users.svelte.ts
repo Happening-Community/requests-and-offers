@@ -1,11 +1,7 @@
 import { decodeRecords } from '@utils';
 import hc from '@services/HolochainClientService.svelte';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
-import administratorsStore, {
-  type Status,
-  type Revision,
-  AdministrationEntity
-} from './administrators.svelte';
+import administratorsStore, { type Revision, AdministrationEntity } from './administrators.svelte';
 import type { Organization } from './organizations.svelte';
 import organizationsStore from './organizations.svelte';
 
@@ -29,9 +25,9 @@ type UserAdditionalFields = {
   remaining_time?: number;
   original_action_hash?: ActionHash;
   previous_action_hash?: ActionHash;
-  status?: Status;
+  status?: ActionHash;
   status_history?: Revision[];
-  organizations?: Organization[];
+  organizations?: ActionHash[];
 };
 
 export type User = UserInDHT & UserAdditionalFields;
@@ -56,25 +52,18 @@ class UsersStore {
 
   async getLatestUser(user_original_action_hash: ActionHash): Promise<User | null> {
     const record = await this.getLatestUserRecord(user_original_action_hash);
-    const myStatus = await administratorsStore.getLatestStatusForEntity(
+    const myStatus = await administratorsStore.getLatestStatusRecordForEntity(
       user_original_action_hash,
       AdministrationEntity.Users
     );
 
-    const organizations = await this.getUserOrganizations(user_original_action_hash);
-
-    for (const organization of organizations) {
-      const status = await organizationsStore.getOrganizationStatus(
-        organization.original_action_hash!
-      );
-      if (status) organization.status = status;
-    }
+    const organizationsLinks = await this.getUserOrganizationsLinks(user_original_action_hash);
 
     return record
       ? {
           ...decodeRecords([record])[0],
-          status: myStatus,
-          organizations,
+          status: myStatus?.signed_action.hashed.hash,
+          organizations: organizationsLinks.map((l) => l.target),
           original_action_hash: user_original_action_hash,
           previous_action_hash: record.signed_action.hashed.hash
         }
@@ -171,11 +160,16 @@ class UsersStore {
       if (!record) continue;
 
       const status = await organizationsStore.getOrganizationStatus(link.target);
+      const members = await organizationsStore.getOrganizationMembersLinks(link.target);
+      const coordinators = await organizationsStore.getOrganizationCoordinatorsLinks(link.target);
+
       organizations.push({
         ...decodeRecords([record])[0],
         original_action_hash: link.target,
         previous_action_hash: record.signed_action.hashed.hash,
-        status
+        status,
+        members,
+        coordinators
       });
     }
 

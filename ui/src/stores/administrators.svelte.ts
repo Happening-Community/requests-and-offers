@@ -6,6 +6,7 @@ import type { User } from './users.svelte';
 import usersStore from './users.svelte';
 import { decode } from '@msgpack/msgpack';
 import type { Organization } from './organizations.svelte';
+import organizationsStore from './organizations.svelte';
 
 export type StatusType =
   | 'pending'
@@ -68,16 +69,15 @@ class AdministratorsStore {
     const recordsContents: User[] = [];
 
     for (let i = 0; i < usersRecords.length; i++) {
-      const user = decodeRecords([usersRecords[i]])[0];
-      const status = await this.getLatestStatusForEntity(
-        usersLinks[i].target,
-        AdministrationEntity.Users
-      );
+      const user: User = decodeRecords([usersRecords[i]])[0];
+      const statusLink = (await this.getUserStatusLink(usersLinks[i].target))?.target;
+
+      const status = await this.getLatestStatus(statusLink!);
 
       recordsContents.push({
         ...user,
-        status,
-        remaining_time: status ? this.getRemainingSuspensionTime(status) : 0,
+        status: statusLink,
+        remaining_time: status ? this.getRemainingSuspensionTime(status)! : 0,
         original_action_hash: usersLinks[i].target,
         previous_action_hash: usersRecords[i].signed_action.hashed.hash
       });
@@ -87,14 +87,23 @@ class AdministratorsStore {
     return recordsContents;
   }
 
-  async getAllOrganizations(): Promise<Organization[]> {
-    const organizations = (await hc.callZome(
+  async getAllOrganizationsLinks(): Promise<Link[]> {
+    return (await hc.callZome(
       'users_organizations',
-      'get_all_organizations',
+      'get_all_organizations_links',
       null
-    )) as Organization[];
+    )) as Link[];
+  }
 
-    console.log('organizations', organizations);
+  async getAllOrganizations(): Promise<Organization[]> {
+    const organizationsLinks = await this.getAllOrganizationsLinks();
+
+    const organizations: Organization[] = [];
+
+    for (const link of organizationsLinks) {
+      const organization = await organizationsStore.getLatestOrganization(link.target);
+      if (organization) organizations.push(organization);
+    }
 
     this.allOrganizations = organizations;
 
@@ -177,6 +186,14 @@ class AdministratorsStore {
     this.nonAdministrators = nonAdministratorsUsers;
 
     return nonAdministratorsUsers;
+  }
+
+  async getLatestStatus(original_action_hash: ActionHash): Promise<Status | null> {
+    return (await hc.callZome(
+      'administration',
+      'get_latest_status',
+      original_action_hash
+    )) as Status | null;
   }
 
   async getLatestStatusRecordForEntity(

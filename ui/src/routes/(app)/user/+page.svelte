@@ -8,8 +8,10 @@
   import NavButton from '@lib/NavButton.svelte';
   import { onMount } from 'svelte';
   import usersStore from '@stores/users.svelte';
-  import administratorsStore, { type Revision } from '@stores/administrators.svelte';
+  import administratorsStore, { type Revision, type Status } from '@stores/administrators.svelte';
   import StatusHistoryModal from '@lib/modals/StatusHistoryModal.svelte';
+  import type { Organization } from '@/stores/organizations.svelte';
+  import organizationsStore from '@/stores/organizations.svelte';
 
   const modalStore = getModalStore();
   const { myProfile } = $derived(usersStore);
@@ -22,13 +24,21 @@
 
   let suspensionDate = $state('');
   let isExpired = $state(false);
+  let status: Status | null = $state(null);
+  let organizations: Organization[] = $state([]);
 
   onMount(async () => {
     await usersStore.getMyProfile();
+    status = await administratorsStore.getLatestStatus(myProfile!.status!);
+
+    for (const link of myProfile!.organizations!) {
+      const organization = await organizationsStore.getLatestOrganization(link);
+      if (organization) organizations.push(organization);
+    }
 
     if (myProfile) {
-      if (myProfile.status!.suspended_until) {
-        const date = new Date(myProfile.status!.suspended_until);
+      if (status!.suspended_until) {
+        const date = new Date(status!.suspended_until);
         const dateString = date.toString();
         const now = new Date();
 
@@ -82,21 +92,21 @@
       <h3 class="h3 text-wrap text-center">
         <b>Status :</b>
         <span
-          class:text-primary-500={myProfile.status?.status_type === 'pending'}
-          class:text-error-500={myProfile.status?.status_type === 'rejected' ||
-            myProfile.status?.status_type === 'suspended indefinitely'}
-          class:text-green-400={myProfile.status?.status_type === 'accepted'}
-          class:text-warning-500={myProfile.status?.status_type === `suspended temporarily`}
+          class:text-primary-500={status?.status_type === 'pending'}
+          class:text-error-500={status?.status_type === 'rejected' ||
+            status?.status_type === 'suspended indefinitely'}
+          class:text-green-400={status?.status_type === 'accepted'}
+          class:text-warning-500={status?.status_type === `suspended temporarily`}
         >
           {#if !suspensionDate}
-            {myProfile.status?.status_type}
+            {status?.status_type}
           {:else}
             {isExpired ? 'In review' : 'suspended temporarily'}
           {/if}
         </span>
       </h3>
-      {#if myProfile.status?.status_type.startsWith('suspended')}
-        <p class=" text-wrap text-center"><b>Reason :</b> {myProfile.status?.reason}</p>
+      {#if status?.status_type.startsWith('suspended')}
+        <p class=" text-wrap text-center"><b>Reason :</b> {status?.reason}</p>
         {#if suspensionDate}
           <p class=" text-wrap text-center">
             <b>Suspended until :</b>
@@ -126,6 +136,29 @@
       {/if}
       {#if myProfile.location}
         <p><b>Location :</b> {myProfile.location}</p>
+      {/if}
+      {#if organizations}
+        <h3 class="h3">My Organizations</h3>
+        <table class="table-hover table drop-shadow-lg">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Location</th>
+              <th># Members</th>
+            </tr></thead
+          >
+          <tbody>
+            {#each organizations as organization}
+              <tr>
+                <td>{organization.name}</td>
+                <td>{organization.description}</td>
+                <td>{organization.location}</td>
+                <td>{organization.members.length}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
       {/if}
     </div>
   {/if}

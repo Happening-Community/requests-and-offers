@@ -1,17 +1,14 @@
 <script lang="ts">
   import moment from 'moment-timezone';
-  import { FileDropzone, InputChip, Avatar, getModalStore } from '@skeletonlabs/skeleton';
+  import { FileDropzone, Avatar, getModalStore } from '@skeletonlabs/skeleton';
   import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
-  import usersStore, { type User, type UserType } from '@stores/users.svelte';
+  import usersStore from '@stores/users.svelte';
   import { goto } from '$app/navigation';
-  import { createMockedOrganizations, createMockedUsers } from '@mocks';
-  import { onMount } from 'svelte';
+  import { createMockedOrganizations } from '@mocks';
   import AlertModal from '@lib/dialogs/AlertModal.svelte';
   import type { AlertModalMeta } from '@lib/types';
   import type { Organization } from '@/stores/organizations.svelte';
   import organizationsStore from '@/stores/organizations.svelte';
-
-  $inspect('My organizations', usersStore.myProfile?.organizations);
 
   type FormattedTimezone = {
     name: string;
@@ -112,16 +109,18 @@
         record.signed_action.hashed.hash
       );
 
+      console.log('organizationData', organizationData);
+
       await usersStore.getMyProfile();
 
-      // modalStore.trigger(
-      //   alertModal({
-      //     id: 'welcome-and-next-steps',
-      //     message: welcomeAndNextStepsMessage(organization.name)
-      //   })
-      // );
+      modalStore.trigger(
+        alertModal({
+          id: 'welcome-and-next-steps',
+          message: welcomeAndNextStepsMessage(organization.name)
+        })
+      );
 
-      // goto('/user');
+      goto('/user');
     } catch (error) {
       console.error('error :', error);
     }

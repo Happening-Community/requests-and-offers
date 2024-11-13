@@ -29,7 +29,7 @@ pub fn get_user_status_link(user_original_action_hash: ActionHash) -> ExternResu
 }
 
 #[hdk_extern]
-pub fn get_all_organizations(_: ()) -> ExternResult<Vec<Link>> {
+pub fn get_all_organizations_links(_: ()) -> ExternResult<Vec<Link>> {
   if !check_if_agent_is_administrator("network", agent_info()?.agent_initial_pubkey)? {
     return Err(wasm_error!(Guest(
       "Only administrators can retrieve all organizations".to_string()
