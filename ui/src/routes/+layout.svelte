@@ -28,18 +28,17 @@
 
   onMount(async () => {
     await hc.connectClient();
-    await usersStore.refresh();
     const record = await hc.callZome('misc', 'ping', null);
 
-    if (currentUser) {
-      const agentPubKey = (await hc.getAppInfo())?.agent_pub_key;
-      if (agentPubKey) {
-        await administrationStore.getAllNetworkAdministrators();
-        administrationStore.agentIsAdministrator = administrationStore.administrators.some(
-          (admin) => admin.original_action_hash === agentPubKey
-        );
-      }
+    const agentPubKey = (await hc.getAppInfo())?.agent_pub_key;
+    if (agentPubKey) {
+      await administrationStore.getAllNetworkAdministrators();
+      administrationStore.agentIsAdministrator = administrationStore.administrators.some(
+        (admin) => admin.original_action_hash === agentPubKey
+      );
     }
+
+    await usersStore.refresh();
 
     console.log('Ping response:', record);
     console.log('agentIsAdministrator :', agentIsAdministrator);

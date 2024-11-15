@@ -66,10 +66,14 @@ class AdministrationStore {
   }
 
   async getAllNetworkAdministrators(): Promise<UIUser[]> {
-    const adminLinks = await AdministrationService.getAllAdministrators(
+    const adminLinks = await AdministrationService.getAllAdministratorsLinks(
       AdministrationEntity.Network
     );
-    const allUsers = await usersStore.getAllUsers();
+
+    // If the current agent is an administrator, use getAllUsers, otherwise use getAcceptedUsers
+    const allUsers = this.agentIsAdministrator
+      ? await usersStore.getAllUsers()
+      : await usersStore.getAcceptedUsers();
 
     const admins = allUsers.filter((user) =>
       adminLinks.some((link) => link.target.toString() === user.original_action_hash?.toString())

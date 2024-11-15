@@ -90,8 +90,8 @@ export class AdministrationService {
     })) as boolean;
   }
 
-  static async getAllAdministrators(entity: string): Promise<Link[]> {
-    return (await hc.callZome('administration', 'get_all_administrators', entity)) as Link[];
+  static async getAllAdministratorsLinks(entity: string): Promise<Link[]> {
+    return (await hc.callZome('administration', 'get_all_administrators_links', entity)) as Link[];
   }
 
   static async getAllRevisionsForStatus(original_status_hash: ActionHash): Promise<Record[]> {

@@ -145,10 +145,10 @@ class UsersStore {
   }
 
   async refresh(): Promise<void> {
-    await this.getAllUsers();
     if (this.currentUser) {
       await this.refreshCurrentUser();
     }
+    await this.getAcceptedUsers();
   }
 
   async getUserAgents(actionHash: ActionHash): Promise<AgentPubKey[]> {
