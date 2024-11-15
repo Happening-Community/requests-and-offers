@@ -39,7 +39,7 @@ class UsersStore {
     for (const link of links) {
       const user = await this.getLatestUser(link.target);
       if (user) {
-        const statusLink = await UsersService.getUserStatusLink(link.target);
+        const statusLink = await this.getUserStatusLink(link.target);
         if (statusLink) {
           user.status = statusLink.target;
         }
@@ -121,7 +121,7 @@ class UsersStore {
     for (const link of links) {
       const user = await this.getLatestUser(link.target);
       if (user) {
-        const statusLink = await UsersService.getUserStatusLink(link.target);
+        const statusLink = await this.getUserStatusLink(link.target);
         if (statusLink) {
           user.status = statusLink.target;
         }
@@ -131,6 +131,10 @@ class UsersStore {
 
     this.acceptedUsers = users;
     return users;
+  }
+
+  async getUserStatusLink(userHash: ActionHash) {
+    return await UsersService.getUserStatusLink(userHash);
   }
 
   // Helper methods

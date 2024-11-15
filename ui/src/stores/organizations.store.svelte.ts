@@ -7,6 +7,7 @@ import usersStore from './users.store.svelte';
 
 class OrganizationsStore {
   allOrganizations: UIOrganization[] = $state([]);
+  acceptedOrganizations: UIOrganization[] = $state([]);
   currentOrganization: UIOrganization | null = $state(null);
 
   async createOrganization(organization: OrganizationInDHT): Promise<Record> {
@@ -167,7 +168,16 @@ class OrganizationsStore {
 
   async getAcceptedOrganizations(): Promise<UIOrganization[]> {
     const links = await OrganizationsService.getAcceptedOrganizationsLinks();
-    return this.getOrganizationsByActionHashes(links.map((link) => link.target));
+    const organizations = await Promise.all(
+      links.map(async (link) => {
+        const organization = await this.getLatestOrganization(link.target);
+        return organization;
+      })
+    );
+
+    this.acceptedOrganizations = organizations.filter((org): org is UIOrganization => org !== null);
+
+    return this.acceptedOrganizations;
   }
 
   // Helper methods

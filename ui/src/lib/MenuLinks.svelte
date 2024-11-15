@@ -1,17 +1,9 @@
 <script lang="ts">
-  import { page } from '$app/stores';
   import usersStore from '@/stores/users.store.svelte';
-  import { onMount } from 'svelte';
-  import type { UIUser } from '@/types/ui';
   import MenuLink from './MenuLink.svelte';
   import administrationStore from '@stores/administration.store.svelte';
 
-  let currentUser: UIUser | null = $state(null);
-
-  onMount(async () => {
-    currentUser = await usersStore.getCurrentUser();
-  });
-
+  const { currentUser } = $derived(usersStore);
   const { agentIsAdministrator } = $derived(administrationStore);
 </script>
 

@@ -1,15 +1,14 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import usersStore from '@/stores/users.svelte';
+  import usersStore from '@/stores/users.store.svelte';
   import { Avatar, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
   import organizationsStore from '@stores/organizations.store.svelte';
   import { onMount } from 'svelte';
-  import type { UIOrganization } from '@/types/ui';
 
   let isLoading = $state(true);
 
   const { acceptedOrganizations } = $derived(organizationsStore);
-  const { myProfile } = $derived(usersStore);
+  const { currentUser } = $derived(usersStore);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -17,8 +16,8 @@
   ];
 
   onMount(async () => {
-    await organizationsStore.getAcceptedOrganizationsLinks();
-    await usersStore.getMyProfile();
+    await organizationsStore.getAcceptedOrganizations();
+    await usersStore.refreshCurrentUser();
 
     console.log('acceptedOrganizations', acceptedOrganizations);
 
@@ -33,7 +32,7 @@
 <section class="flex flex-col gap-8">
   <h1 class="h1 text-center">Organizations</h1>
 
-  {#if myProfile}
+  {#if currentUser}
     <button
       onclick={() => goto('/organizations/create')}
       class="btn variant-filled-primary w-fit self-center">Create Organization</button

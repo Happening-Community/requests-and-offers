@@ -94,6 +94,10 @@ export class AdministrationService {
     return (await hc.callZome('administration', 'get_all_administrators', entity)) as Link[];
   }
 
+  static async getAllRevisionsForStatus(original_status_hash: ActionHash): Promise<Record[]> {
+    return (await hc.callZome('administration', 'get_all_revisions_for_status', original_status_hash)) as Record[];
+  }
+
   static async updateEntityStatus(
     entity_type: AdministrationEntity,
     entity_original_action_hash: ActionHash,

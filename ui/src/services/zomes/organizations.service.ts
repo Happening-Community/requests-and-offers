@@ -11,7 +11,9 @@ export class OrganizationsService {
     )) as Record;
   }
 
-  static async getLatestOrganizationRecord(original_action_hash: ActionHash): Promise<Record | null> {
+  static async getLatestOrganizationRecord(
+    original_action_hash: ActionHash
+  ): Promise<Record | null> {
     return (await hc.callZome(
       'users_organizations',
       'get_latest_organization_record',

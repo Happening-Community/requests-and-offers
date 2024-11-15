@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getModalStore } from '@skeletonlabs/skeleton';
-  import { queueAndReverseModal } from '@/utils';
   import type { UIOrganization } from '@/types/ui';
   import type { UIUser } from '@/types/ui';
   import administrationStore from '@/stores/administration.store.svelte';
   import usersStore from '@/stores/users.store.svelte';
   import organizationsStore from '@/stores/organizations.store.svelte';
-  import projectsStore from '@stores/projects.svelte';
+  import projectsStore, { type Project } from '@stores/projects.svelte';
+  import { AdministrationEntity } from '@/types/holochain';
+  import { decodeRecords } from '@/utils';
 
   const { administrators } = $derived(administrationStore);
   const { projects } = projectsStore;
@@ -17,7 +17,6 @@
   let pendingUsers: UIUser[] = $state([]);
   let pendingprojects: Project[] = $state([]);
   let pendingOrganizations: UIOrganization[] = $state([]);
-  const modalStore = getModalStore();
 
   onMount(async () => {
     await administrationStore.initialize();
@@ -28,11 +27,12 @@
     // Process pending users
     pendingUsers = users.filter(async (user) => {
       if (!user.status) return false;
-      const status = await administrationStore.getLatestStatusForEntity(
+      const record = await administrationStore.getLatestStatusForEntity(
         user.original_action_hash!,
         AdministrationEntity.Users
       );
-      return status?.status_type === 'pending';
+
+      return record ? decodeRecords([record])[0] : null;
     });
 
     // Process pending projects
@@ -40,11 +40,11 @@
 
     // Process pending organizations
     pendingOrganizations = organizations.filter(async (organization) => {
-      const status = await administrationStore.getLatestStatusForEntity(
+      const record = await administrationStore.getLatestStatusForEntity(
         organization.original_action_hash!,
         AdministrationEntity.Organizations
       );
-      return status?.status_type === 'pending';
+      return record ? decodeRecords([record])[0] : null;
     });
   });
 </script>

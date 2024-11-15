@@ -1,8 +1,11 @@
 <script lang="ts">
-  import type { User } from '@/stores/users.svelte';
+  import usersStore from '@/stores/users.store.svelte';
+  import { AdministrationEntity } from '@/types/holochain';
+  import type { UIUser } from '@/types/ui';
+  import { decodeRecords } from '@/utils';
   import UsersTable from '@lib/tables/UsersTable.svelte';
   import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
-  import administrationStore, { AdministrationEntity } from '@stores/administration.store.svelte';
+  import administrationStore from '@stores/administration.store.svelte';
   import { onMount } from 'svelte';
 
   const { allUsers } = $derived(administrationStore);
@@ -14,14 +17,14 @@
 
   let isLoading = $state(true);
 
-  let pendingUsers: User[] = $state([]);
-  let AcceptedEntity: User[] = $state([]);
-  let rejectedUsers: User[] = $state([]);
-  let temporarilySuspendedUsers: User[] = $state([]);
-  let indefinitelySuspendedUsers: User[] = $state([]);
+  let pendingUsers: UIUser[] = $state([]);
+  let AcceptedEntity: UIUser[] = $state([]);
+  let rejectedUsers: UIUser[] = $state([]);
+  let temporarilySuspendedUsers: UIUser[] = $state([]);
+  let indefinitelySuspendedUsers: UIUser[] = $state([]);
 
   onMount(async () => {
-    await administrationStore.getAllUsers();
+    await usersStore.getAllUsers();
 
     isLoading = false;
   });
@@ -37,7 +40,10 @@
       if (!user.status) continue;
       administrationStore
         .getLatestStatusForEntity(user.original_action_hash!, AdministrationEntity.Users)
-        .then((status) => {
+        .then((record) => {
+          if (!record) return;
+          const status = decodeRecords([record])[0];
+
           if (status!.status_type === 'pending') pendingUsers.push(user);
           if (status!.status_type === 'accepted') AcceptedEntity.push(user);
           if (status!.status_type === 'rejected') rejectedUsers.push(user);

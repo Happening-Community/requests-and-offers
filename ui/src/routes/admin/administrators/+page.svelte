@@ -19,7 +19,7 @@
   $inspect('administrators:', administrators);
 
   onMount(async () => {
-    await administrationStore.getAllAdministrators();
+    await administrationStore.getAllNetworkAdministrators();
 
     isLoading = false;
   });

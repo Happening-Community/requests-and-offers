@@ -1,48 +1,51 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getModalStore, Avatar, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
-  import { queueAndReverseModal } from '@/utils';
-  import type { UIOrganization } from '@/types/ui';
-  import type { UIUser } from '@/types/ui';
+  import {
+    getModalStore,
+    Avatar,
+    type ModalComponent,
+    type ModalSettings
+  } from '@skeletonlabs/skeleton';
+  import type { Revision, UIOrganization, UIStatus } from '@/types/ui';
   import usersStore from '@/stores/users.store.svelte';
-  import administrationStore, {
-    AdministrationEntity,
-    type Revision,
-    type Status
-  } from '@stores/administration.store.svelte';
+  import administrationStore from '@stores/administration.store.svelte';
   import organizationsStore from '@/stores/organizations.store.svelte';
   import StatusHistoryModal from '@lib/modals/StatusHistoryModal.svelte';
   import NavButton from '@lib/NavButton.svelte';
+  import { decodeRecords } from '@/utils';
+  import { AdministrationEntity } from '@/types/holochain';
 
   const modalStore = getModalStore();
-  const { myProfile } = $derived(usersStore);
+  const { currentUser } = $derived(usersStore);
 
   let userPictureUrl = $derived(
-    myProfile?.picture
-      ? URL.createObjectURL(new Blob([new Uint8Array(myProfile.picture)]))
+    currentUser?.picture
+      ? URL.createObjectURL(new Blob([new Uint8Array(currentUser.picture)]))
       : '/default_avatar.webp'
   );
 
   let suspensionDate = $state('');
   let isExpired = $state(false);
-  let status: Status | null = $state(null);
+  let status: UIStatus | null = $state(null);
   let organizations: UIOrganization[] = $state([]);
   let myOrganizations: UIOrganization[] = $state([]);
   let myCoordinatedOrganizations: UIOrganization[] = $state([]);
 
   onMount(async () => {
-    await usersStore.getMyProfile();
-    status = await administrationStore.getLatestStatusForEntity(
-      myProfile!.original_action_hash!,
+    await usersStore.refreshCurrentUser();
+    const record = await administrationStore.getLatestStatusForEntity(
+      currentUser!.original_action_hash!,
       AdministrationEntity.Users
     );
 
-    for (const link of myProfile!.organizations!) {
+    status = record ? decodeRecords([record])[0] : null;
+
+    for (const link of currentUser!.organizations!) {
       const organization = await organizationsStore.getLatestOrganization(link);
       if (organization) organizations.push(organization);
     }
 
-    if (myProfile) {
+    if (currentUser) {
       if (status!.suspended_until) {
         const date = new Date(status!.suspended_until);
         const dateString = date.toString();
@@ -54,9 +57,10 @@
       }
     }
 
-    const currentUser = await usersStore.getCurrentUser();
     if (currentUser) {
-      myOrganizations = await organizationsStore.getUserOrganizations(currentUser.original_action_hash!);
+      myOrganizations = await organizationsStore.getUserOrganizations(
+        currentUser.original_action_hash!
+      );
       myCoordinatedOrganizations = await organizationsStore.getUserCoordinatedOrganizations(
         currentUser.original_action_hash!
       );
@@ -75,12 +79,9 @@
   };
 
   async function handleStatusHistoryModal() {
-    const userStatus = await administrationStore.getUserStatusLink(
-      myProfile!.original_action_hash!
-    );
+    const userStatusLink = await usersStore.getUserStatusLink(currentUser!.original_action_hash!);
     const statusHistory = await administrationStore.getAllRevisionsForStatus(
-      userStatus!.target,
-      myProfile!
+      userStatusLink!.target
     );
 
     modalStore.trigger(statusHistoryModal(statusHistory));
@@ -89,20 +90,20 @@
 </script>
 
 <section class="flex flex-col items-center">
-  {#if !myProfile}
+  {#if !currentUser}
     <p class="mb-4 text-center text-xl">It looks like you don't have a user profile yet !</p>
     <NavButton href="/user/create">Create Profile</NavButton>
   {:else}
     <div class="mb-10 flex flex-col items-center gap-5">
       <h2 class="h2">
-        Welcome <span class="text-primary-500 font-bold">{myProfile.name}</span> !
+        Welcome <span class="text-primary-500 font-bold">{currentUser.name}</span> !
       </h2>
       <a href="/user/edit" class="btn variant-filled-primary w-fit text-white">Edit profile</a>
     </div>
     <div
       class="border-surface-600 bg-surface-400 flex w-4/5 min-w-96 flex-col items-center gap-5 rounded-xl border-8 p-5 drop-shadow-xl"
     >
-      <h3 class="h3"><b>Nickname :</b> {myProfile.nickname}</h3>
+      <h3 class="h3"><b>Nickname :</b> {currentUser.nickname}</h3>
       <h3 class="h3 text-wrap text-center">
         <b>Status :</b>
         <span
@@ -136,20 +137,20 @@
       <div onload={() => URL.revokeObjectURL(userPictureUrl)}>
         <Avatar src={userPictureUrl} width="w-64" background="none" />
       </div>
-      <p class="text-center">{myProfile.bio}</p>
-      <p><b>Type :</b> {myProfile.user_type}</p>
-      {#if myProfile.skills?.length}
-        <p class="text-center"><b>Skills :</b> {myProfile.skills?.join(', ')}</p>
+      <p class="text-center">{currentUser.bio}</p>
+      <p><b>Type :</b> {currentUser.user_type}</p>
+      {#if currentUser.skills?.length}
+        <p class="text-center"><b>Skills :</b> {currentUser.skills?.join(', ')}</p>
       {/if}
-      <p><b>Email :</b> {myProfile.email}</p>
-      {#if myProfile.phone}
-        <p><b>Phone number :</b> {myProfile.phone}</p>
+      <p><b>Email :</b> {currentUser.email}</p>
+      {#if currentUser.phone}
+        <p><b>Phone number :</b> {currentUser.phone}</p>
       {/if}
-      {#if myProfile.time_zone}
-        <p><b>Timezone :</b> {myProfile.time_zone}</p>
+      {#if currentUser.time_zone}
+        <p><b>Timezone :</b> {currentUser.time_zone}</p>
       {/if}
-      {#if myProfile.location}
-        <p><b>Location :</b> {myProfile.location}</p>
+      {#if currentUser.location}
+        <p><b>Location :</b> {currentUser.location}</p>
       {/if}
       {#if organizations.length > 0}
         <h3 class="h3">My Organizations</h3>

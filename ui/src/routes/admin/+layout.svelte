@@ -1,17 +1,13 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import AdminSideBar from '@lib/AdminSideBar.svelte';
-  import NavBar from '@lib/NavBar.svelte';
+  import AdminSideBar from '$lib/AdminSideBar.svelte';
+  import NavBar from '$lib/NavBar.svelte';
   import hc from '@services/HolochainClientService.svelte';
   import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
   import administrationStore from '@stores/administration.store.svelte';
   import { onMount } from 'svelte';
 
-  type Props = {
-    children: any;
-  };
-
-  const { children }: Props = $props();
+  const { children } = $props();
 
   const { agentIsAdministrator } = $derived(administrationStore);
 

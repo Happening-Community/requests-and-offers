@@ -101,6 +101,14 @@ class AdministrationStore {
     await AdministrationService.createStatus(status);
   }
 
+  async getAllRevisionsForStatus(original_status_hash: ActionHash): Promise<Revision[]> {
+    const records = await AdministrationService.getAllRevisionsForStatus(original_status_hash);
+    return decodeRecords(records).map((record) => ({
+      ...record,
+      entry: this.convertToUIStatus(record.entry as StatusInDHT, record.timestamp)
+    }));
+  }
+
   async getLatestStatus(original_action_hash: ActionHash): Promise<UIStatus | null> {
     const record = await AdministrationService.getLatestStatusRecord(original_action_hash);
     if (!record) return null;

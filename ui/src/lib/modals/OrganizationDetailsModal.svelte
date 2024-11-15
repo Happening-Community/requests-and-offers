@@ -1,20 +1,19 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
+  import { Avatar, getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
   import { onMount } from 'svelte';
   import ActionBar from '../ActionBar.svelte';
-  import type { UIOrganization } from '@/types/ui';
-  import administrationStore, {
-    AdministrationEntity,
-    type Status
-  } from '@/stores/administration.store.svelte';
+  import type { UIOrganization, UIStatus } from '@/types/ui';
+  import administrationStore from '@/stores/administration.store.svelte';
+  import { AdministrationEntity } from '@/types/holochain';
+  import { decodeRecords } from '@/utils';
 
   const modalStore = getModalStore();
   const organization: UIOrganization = $modalStore[0].meta.organization;
 
   let organizationPictureUrl = $state('');
   let suspensionDate = $state('');
-  let organizationStatus: Status | null = $state(null);
+  let organizationStatus: UIStatus | null = $state(null);
 
   onMount(async () => {
     console.log('organization', organization);
@@ -22,10 +21,11 @@
     organizationPictureUrl = organization?.logo
       ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
       : '/default_avatar.webp';
-    organizationStatus = await administrationStore.getLatestStatusForEntity(
+    const record = await administrationStore.getLatestStatusForEntity(
       organization.original_action_hash!,
       AdministrationEntity.Organizations
     );
+    organizationStatus = decodeRecords([record!])[0];
   });
 </script>
 
