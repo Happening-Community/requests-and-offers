@@ -1,11 +1,10 @@
-import type { Organization } from '@stores/organizations.svelte';
-import type { UserType, User } from '@stores/users.svelte';
 import { SimpleFaker, faker } from '@faker-js/faker';
 import { fetchImageAndConvertToUInt8Array, getRandomNumber } from '@utils';
 import type { Project } from '@stores/projects.svelte';
+import type { OrganizationInDHT, UserInDHT, UserType } from '@/types/holochain';
 
-export async function createMockedUsers(count: number = 1): Promise<User[]> {
-  const users: User[] = [];
+export async function createMockedUsers(count: number = 1): Promise<UserInDHT[]> {
+  const users: UserInDHT[] = [];
 
   const fakedUserType = new SimpleFaker().helpers.arrayElements<UserType>(
     ['creator', 'advocate'],
@@ -23,16 +22,15 @@ export async function createMockedUsers(count: number = 1): Promise<User[]> {
       email: faker.internet.email(),
       phone: '123456789',
       time_zone: 'Europe/Paris',
-      location: 'Paris, France',
-      status: undefined
+      location: 'Paris, France'
     });
   }
 
   return users;
 }
 
-export async function createMockedOrganizations(count: number = 1): Promise<Organization[]> {
-  const organizations: Organization[] = [];
+export async function createMockedOrganizations(count: number = 1): Promise<OrganizationInDHT[]> {
+  const organizations: OrganizationInDHT[] = [];
 
   for (let i = 0; i < count; i++) {
     organizations.push({
@@ -41,9 +39,7 @@ export async function createMockedOrganizations(count: number = 1): Promise<Orga
       email: faker.internet.email(),
       urls: Array.from({ length: 3 }, () => faker.internet.url()),
       location: faker.location.city(),
-      logo: await fetchImageAndConvertToUInt8Array('https://picsum.photos/200/300'),
-      members: [],
-      coordinators: []
+      logo: await fetchImageAndConvertToUInt8Array('https://picsum.photos/200/300')
     });
   }
 

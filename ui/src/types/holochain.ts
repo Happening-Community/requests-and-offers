@@ -1,5 +1,3 @@
-import type { ActionHash, AgentPubKey } from '@holochain/client';
-
 export type UserType = 'creator' | 'advocate';
 
 export type StatusType =

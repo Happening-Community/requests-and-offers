@@ -1,46 +1,48 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import administrationStore, {
-    AdministrationEntity,
-    type Revision,
-    type Status
-  } from '@/stores/administrators.svelte';
-  import type { User } from '@/stores/users.svelte';
-  import { queueAndReverseModal } from '@/utils';
+  import administrationStore from '@/stores/administration.store.svelte';
+  import { AdministrationEntity, type StatusInDHT } from '@/types/holochain';
+  import type { Revision, UIUser } from '@/types/ui';
+  import type { UIOrganization } from '@/types/ui';
+  import { decodeRecords, queueAndReverseModal } from '@/utils';
   import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
   import type { ConfirmModalMeta, PromptModalMeta } from './types';
   import PromptModal from './dialogs/PromptModal.svelte';
   import ConfirmModal from './dialogs/ConfirmModal.svelte';
   import StatusHistoryModal from './modals/StatusHistoryModal.svelte';
-  import usersStore from '@/stores/users.svelte';
   import { onMount } from 'svelte';
-  import type { Organization } from '@/stores/organizations.svelte';
+  import { en } from '@faker-js/faker';
 
   type Props = {
-    entity: User | Organization;
+    entity: UIUser | UIOrganization;
   };
   const { entity }: Props = $props();
 
   const modalStore = getModalStore();
   const { administrators } = $derived(administrationStore);
+  const entityType =
+    'agents' in entity ? AdministrationEntity.Users : AdministrationEntity.Organizations;
 
   let suspensionDate = $state('');
   let isTheOnlyAdmin = $derived(administrators.length === 1);
   let isSuspendedTemporarily = $state(false);
-  let userStatus: Status | null = $state(null);
+  let userStatus: StatusInDHT | null = $state(null);
 
   onMount(async () => {
-    userStatus = await administrationStore.getLatestStatusForEntity(
-      entity.original_action_hash!,
-      AdministrationEntity.Users
-    );
-    console.log('userStatus', userStatus);
+    if (entity?.original_action_hash) {
+      const userStatusRecord = await administrationStore.getLatestStatusForEntity(
+        entity.original_action_hash,
+        AdministrationEntity.Users
+      );
+      userStatus = decodeRecords([userStatusRecord!])[0];
+      console.log('userStatus', userStatus);
+    }
   });
 
   $effect(() => {
-    if (userStatus && userStatus.suspended_until) {
+    if (userStatus?.suspended_until) {
       isSuspendedTemporarily = true;
-      suspensionDate = new Date(userStatus!.suspended_until).toLocaleString();
+      suspensionDate = new Date(userStatus.suspended_until).toLocaleString();
     }
   });
 
@@ -197,181 +199,153 @@
   }
 
   async function handleStatusHistoryModal() {
-    const userStatus = await administrationStore.getUserStatusLink(entity!.original_action_hash!);
-    const statusHistory = await administrationStore.getAllRevisionsForStatus(
-      userStatus!.target,
-      entity as User
+    if (!entity?.original_action_hash) return;
+
+    const revisions = await administrationStore.getAllStatusesForEntity(
+      entity.original_action_hash,
+      AdministrationEntity.Users
     );
 
-    queueAndReverseModal(statusHistoryModal(statusHistory), modalStore);
+    queueAndReverseModal(statusHistoryModal(revisions), modalStore);
   }
 
-  async function updateStatus(status: Status) {
-    if (!entity) return;
+  async function updateStatus(status: StatusInDHT) {
+    if (!entity?.original_action_hash || !entity.previous_action_hash) return;
 
-    let statusMessage = '';
-    switch (status.status_type) {
-      case 'accepted':
-        statusMessage = 'accept';
-        break;
-      case 'rejected':
-        statusMessage = 'reject';
-        break;
-      case 'suspended indefinitely':
-        statusMessage = 'suspend indefinitely';
-        break;
-      case 'suspended temporarily':
-        statusMessage = 'suspend temporarily';
-        break;
-    }
-
-    const statusOriginalActionHash = (await administrationStore.getUserStatusLink(
-      entity?.original_action_hash!
-    ))!.target;
-    const latestStatusActionHash = (await administrationStore.getLatestStatusRecordForEntity(
-      entity?.original_action_hash!,
-      AdministrationEntity.Users
-    ))!.signed_action.hashed.hash;
+    const latestStatusRecord = await administrationStore.getLatestStatusForEntity(
+      entity.original_action_hash,
+      entityType
+    );
+    if (!latestStatusRecord) return;
 
     await administrationStore.updateUserStatus(
-      entity.original_action_hash!,
-      statusOriginalActionHash,
-      latestStatusActionHash,
+      entity.original_action_hash,
+      entity.previous_action_hash,
+      latestStatusRecord.signed_action.hashed.hash,
       status
     );
-    await administrationStore.getAllUsers();
+
+    if (entityType === AdministrationEntity.Users) await administrationStore.refreshUsers();
+    else await administrationStore.refreshOrganizations();
 
     modalStore.close();
   }
 
   async function handleSuspendIndefinitely(data: FormData) {
-    if (!entity) return;
+    if (!entity?.original_action_hash || !entity.previous_action_hash) return;
 
-    const reason = String(data.get('reason'));
+    const reason = data.get('reason');
+    if (!reason || typeof reason !== 'string') return;
 
-    if (!reason) return;
-
-    const statusOriginalActionHash = (await administrationStore.getUserStatusLink(
-      entity?.original_action_hash!
-    ))!.target;
-    const latestStatusActionHash = (await administrationStore.getLatestStatusRecordForEntity(
-      entity?.original_action_hash!,
+    const latestStatus = await administrationStore.getLatestStatusForEntity(
+      entity.original_action_hash,
       AdministrationEntity.Users
-    ))!.signed_action.hashed.hash;
+    );
+    if (!latestStatus) return;
 
     await administrationStore.suspendUserIndefinitely(
-      entity.original_action_hash!,
-      statusOriginalActionHash,
-      latestStatusActionHash,
+      entity.original_action_hash,
+      entity.previous_action_hash,
+      latestStatus.signed_action.hashed.hash,
       reason
     );
 
-    await administrationStore.getAllUsers();
+    if (entityType === AdministrationEntity.Users) await administrationStore.refreshUsers();
+    else await administrationStore.refreshOrganizations();
+
     modalStore.close();
   }
 
   async function handleSuspendTemporarily(data: FormData) {
-    if (!entity) return;
+    if (!entity?.original_action_hash || !entity.previous_action_hash) return;
 
-    let suspendedDays = Number(data.get('duration'));
-    const reason = String(data.get('reason'));
+    const duration = data.get('duration');
+    const reason = data.get('reason');
 
-    const statusOriginalActionHash = (await administrationStore.getUserStatusLink(
-      entity?.original_action_hash!
-    ))!.target;
-    const latestStatusActionHash = (await administrationStore.getLatestStatusRecordForEntity(
-      entity?.original_action_hash!,
+    if (!duration || !reason || typeof reason !== 'string') return;
+
+    const suspendedDays = Number(duration);
+    if (isNaN(suspendedDays)) return;
+
+    const latestStatus = await administrationStore.getLatestStatusForEntity(
+      entity.original_action_hash,
       AdministrationEntity.Users
-    ))!.signed_action.hashed.hash;
+    );
+    if (!latestStatus) return;
 
     await administrationStore.suspendUserTemporarily(
-      entity.original_action_hash!,
-      statusOriginalActionHash,
-      latestStatusActionHash,
+      entity.original_action_hash,
+      entity.previous_action_hash,
+      latestStatus.signed_action.hashed.hash,
       reason,
       suspendedDays
     );
-    await administrationStore.getAllUsers();
-    suspensionDate = new Date(userStatus!.suspended_until!).toLocaleString();
-    suspendedDays = 0;
+
+    if (entityType === AdministrationEntity.Users) await administrationStore.refreshUsers();
+    else await administrationStore.refreshOrganizations();
+
+    if (userStatus?.suspended_until) {
+      suspensionDate = new Date(userStatus.suspended_until).toLocaleString();
+    }
     modalStore.close();
   }
 
   async function removeAdministrator() {
-    if (!entity) return;
-
-    const userAgents = await usersStore.getUserAgents(entity.original_action_hash!);
-    if (!userAgents.length) return;
-
-    await administrationStore.removeAdministrator(entity.original_action_hash!, userAgents);
-    await administrationStore.getAllAdministrators();
+    if (!entity?.original_action_hash) return;
+    await administrationStore.removeNetworkAdministrator(entity.original_action_hash);
+    await administrationStore.getAllNetworkAdministrators();
   }
 </script>
 
 <div class="flex flex-wrap items-center justify-center gap-4">
   {#if $page.url.pathname === '/admin/users'}
     <button class="btn variant-filled-tertiary rounded-lg" onclick={handleStatusHistoryModal}>
-      View Status History
+      Status History
     </button>
-    {#if userStatus}
-      {#if userStatus!.status_type === 'pending' || userStatus!.status_type === 'rejected'}
-        <button class="btn variant-filled-tertiary rounded-lg" onclick={handleAcceptModal}>
-          Accept
-        </button>
-        {#if userStatus!.status_type === 'pending'}
-          <button class="btn variant-filled-error rounded-lg" onclick={handleRejectModal}>
-            Reject
-          </button>
-        {/if}
-      {:else if userStatus!.status_type === 'accepted'}
-        <button
-          class="btn variant-filled-error rounded-lg"
-          onclick={() => handlePromptModal('temporarily')}
-        >
-          Suspend Temporarily
-        </button>
-        <button
-          class="btn variant-filled-error rounded-lg"
-          onclick={() => handlePromptModal('indefinitely')}
-        >
-          Suspend Indefinitely
-        </button>
-      {:else if userStatus!.status_type.startsWith('suspended')}
-        <button class="btn variant-filled-tertiary rounded-lg" onclick={handleUnsuspendModal}>
-          Unsuspend
-        </button>
-        {#if isSuspendedTemporarily}
-          <button
-            class="btn variant-filled-error rounded-lg"
-            onclick={() => handlePromptModal('temporarily')}
-          >
-            Change suspension
-          </button>
-          <button
-            class="btn variant-filled-error rounded-lg"
-            onclick={() => handlePromptModal('indefinitely')}
-          >
-            Suspend Indefinitely
-          </button>
-        {:else}
-          <button
-            class="btn variant-filled-error rounded-lg"
-            onclick={() => handlePromptModal('temporarily')}
-          >
-            Suspend for a period
-          </button>
-        {/if}
-      {/if}
+
+    {#if userStatus?.status_type !== 'suspended indefinitely' && userStatus?.status_type !== 'suspended temporarily'}
+      <button
+        class="btn variant-filled-warning rounded-lg"
+        onclick={() => handlePromptModal('temporarily')}
+      >
+        Suspend Temporarily
+      </button>
+
+      <button
+        class="btn variant-filled-error rounded-lg"
+        onclick={() => handlePromptModal('indefinitely')}
+      >
+        Suspend Indefinitely
+      </button>
     {/if}
-  {/if}
-  {#if $page.url.pathname === '/admin/administrators'}
-    <button
-      class="btn variant-filled-error rounded-lg"
-      onclick={handleRemoveAdminModal}
-      disabled={isTheOnlyAdmin}
-      title={isTheOnlyAdmin ? 'Can not remove last admin' : ''}
-    >
-      Remove Admin
-    </button>
+
+    {#if userStatus?.status_type === 'suspended indefinitely' || userStatus?.status_type === 'suspended temporarily'}
+      <button class="btn variant-filled-success rounded-lg" onclick={handleUnsuspendModal}>
+        Unsuspend
+      </button>
+    {/if}
+
+    {#if userStatus?.status_type === 'suspended temporarily'}
+      <p>Suspended until {suspensionDate}</p>
+    {/if}
+
+    {#if userStatus?.status_type === 'pending'}
+      <button class="btn variant-filled-success rounded-lg" onclick={handleAcceptModal}>
+        Accept
+      </button>
+
+      <button class="btn variant-filled-error rounded-lg" onclick={handleRejectModal}>Reject</button
+      >
+    {/if}
+
+    {#if administrators.some((admin) => admin.original_action_hash === entity.original_action_hash)}
+      <button
+        class="btn variant-filled-error rounded-lg"
+        onclick={handleRemoveAdminModal}
+        disabled={isTheOnlyAdmin}
+      >
+        Remove Administrator
+      </button>
+    {/if}
   {/if}
 </div>

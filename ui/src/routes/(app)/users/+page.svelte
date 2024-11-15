@@ -2,10 +2,10 @@
   import NavButton from '@lib/NavButton.svelte';
   import UsersTable from '@lib/tables/UsersTable.svelte';
   import { type ConicStop, ConicGradient } from '@skeletonlabs/skeleton';
-  import usersStore from '@stores/users.svelte';
+  import usersStore from '@stores/users.store.svelte';
   import { onMount } from 'svelte';
 
-  const { myProfile, AcceptedUsers } = $derived(usersStore);
+  const { currentUser, acceptedUsers } = $derived(usersStore);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -23,16 +23,16 @@
 <section class="flex flex-col gap-4">
   <div class="flex gap-4">
     <h2 class="h2">Users</h2>
-    {#if !myProfile}
+    {#if !currentUser}
       <NavButton href="/user/create">Create Profile</NavButton>
     {/if}
   </div>
-  {#if AcceptedUsers.length}
-    <UsersTable users={AcceptedUsers} />
+  {#if acceptedUsers.length}
+    <UsersTable users={acceptedUsers} />
   {:else}
     <p class="h3 text-error-500">No users found.</p>
   {/if}
-  {#if isLoading && AcceptedUsers.length === 0}
+  {#if isLoading && acceptedUsers.length === 0}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {/if}
 </section>

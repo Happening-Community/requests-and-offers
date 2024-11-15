@@ -1,32 +1,26 @@
 <script lang="ts">
   import ConfirmModal from '@lib/dialogs/ConfirmModal.svelte';
   import type { ConfirmModalMeta } from '@lib/types';
-  import {
-    Avatar,
-    ConicGradient,
-    getModalStore,
-    type ConicStop,
-    type ModalComponent,
-    type ModalSettings
-  } from '@skeletonlabs/skeleton';
-  import administrationStore from '@stores/administration.store';
-  import usersStore, { type User } from '@stores/users.svelte';
+  import { Avatar, ConicGradient, getModalStore } from '@skeletonlabs/skeleton';
+  import type { UIUser } from '@/types/ui';
+  import administrationStore from '@stores/administration.store.svelte';
+  import usersStore from '@/stores/users.store.svelte';
   import { queueAndReverseModal } from '@utils';
   import { onMount } from 'svelte';
 
   const { administrators, nonAdministrators } = $derived(administrationStore);
 
-  let filteredUsers: User[] = $state([]);
+  let filteredUsers: UIUser[] = $state([]);
   let searchInput = $state('');
   let isLoading = $state(true);
 
-  const conicStops: ConicStop[] = [
+  const conicStops: any[] = [
     { color: 'transparent', start: 0, end: 0 },
     { color: 'rgb(var(--color-secondary-500))', start: 75, end: 50 }
   ];
 
   onMount(async () => {
-    await administrationStore.getNonAdministratorUsers();
+    await administrationStore.fetchAllUsers();
     filteredUsers = nonAdministrators;
 
     isLoading = false;
@@ -41,8 +35,8 @@
     cancelLabel: 'No'
   };
 
-  const confirmModalComponent: ModalComponent = { ref: ConfirmModal };
-  const confirmModal = (meta: ConfirmModalMeta, user: User): ModalSettings => {
+  const confirmModalComponent: any = { ref: ConfirmModal };
+  const confirmModal = (meta: ConfirmModalMeta, user: UIUser): any => {
     return {
       type: 'component',
       component: confirmModalComponent,
@@ -69,7 +63,7 @@
     };
   };
 
-  async function addAdministrator(user: User) {
+  async function addAdministrator(user: UIUser) {
     queueAndReverseModal(confirmModal(addAdministratorConfirmationModalMeta, user), modalStore);
   }
 

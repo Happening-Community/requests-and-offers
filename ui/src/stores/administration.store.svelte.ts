@@ -1,15 +1,37 @@
-import type { ActionHash, AgentPubKey } from '@holochain/client';
+import type { ActionHash, AgentPubKey, Record } from '@holochain/client';
 import { decodeRecords } from '@utils';
-import type { UIStatus, Revision, UIUser } from '@/types/ui';
+import type { UIStatus, Revision, UIUser, UIOrganization } from '@/types/ui';
 import { AdministrationEntity, type StatusInDHT } from '@/types/holochain';
 import { AdministrationService } from '@/services/zomes/administration.service';
-import usersStore from './users.store';
+import usersStore from './users.store.svelte';
+import organizationsStore from './organizations.store.svelte';
 
 class AdministrationStore {
   allStatusesHistory: Revision[] = $state([]);
   administrators: UIUser[] = $state([]);
   nonAdministrators: UIUser[] = $state([]);
   agentIsAdministrator = $state(false);
+  allUsers: UIUser[] = $state([]);
+  allOrganizations: UIOrganization[] = $state([]);
+
+  async initialize() {
+    await Promise.all([
+      this.fetchAllUsers(),
+      this.fetchAllOrganizations(),
+      this.getAllRevisionsForAllUsers()
+    ]);
+  }
+
+  async fetchAllUsers() {
+    this.allUsers = await usersStore.getAllUsers();
+    await this.getAllNetworkAdministrators(); // This will update administrators and nonAdministrators
+    return this.allUsers;
+  }
+
+  async fetchAllOrganizations() {
+    this.allOrganizations = await organizationsStore.getAllOrganizations();
+    return this.allOrganizations;
+  }
 
   // Network administrator methods
   async registerNetworkAdministrator(
@@ -90,15 +112,12 @@ class AdministrationStore {
   async getLatestStatusForEntity(
     entity_original_action_hash: ActionHash,
     entity_type: AdministrationEntity
-  ): Promise<UIStatus | null> {
+  ): Promise<Record | null> {
     const record = await AdministrationService.getLatestStatusRecordForEntity(
       entity_original_action_hash,
       entity_type
     );
-    if (!record) return null;
-
-    const status = decodeRecords([record])[0] as StatusInDHT;
-    return this.convertToUIStatus(status);
+    return record;
   }
 
   async getAllStatusesForEntity(
@@ -144,6 +163,38 @@ class AdministrationStore {
 
     revisions.sort((a, b) => b.timestamp - a.timestamp);
     this.allStatusesHistory = revisions;
+    return revisions;
+  }
+
+  // Organization status management methods
+  async updateOrganizationStatus(
+    entity_original_action_hash: ActionHash,
+    status_original_action_hash: ActionHash,
+    status_previous_action_hash: ActionHash,
+    new_status: StatusInDHT
+  ): Promise<boolean> {
+    return await AdministrationService.updateEntityStatus(
+      AdministrationEntity.Organizations,
+      entity_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
+      new_status
+    );
+  }
+
+  async getAllRevisionsForAllOrganizations(): Promise<Revision[]> {
+    const revisions: Revision[] = [];
+
+    for (const organization of this.allOrganizations) {
+      if (!organization.original_action_hash) continue;
+      const statusRevisions = await this.getAllStatusesForEntity(
+        organization.original_action_hash,
+        AdministrationEntity.Organizations
+      );
+      revisions.push(...statusRevisions);
+    }
+
+    revisions.sort((a, b) => b.timestamp - a.timestamp);
     return revisions;
   }
 
@@ -219,6 +270,21 @@ class AdministrationStore {
     if (!status.suspended_until) return null;
     const remaining = status.suspended_until - Date.now();
     return remaining > 0 ? remaining : null;
+  }
+
+  // Helper methods
+  async refreshAll() {
+    await this.initialize();
+  }
+
+  async refreshUsers() {
+    await this.fetchAllUsers();
+    await this.getAllRevisionsForAllUsers();
+  }
+
+  async refreshOrganizations() {
+    await this.fetchAllOrganizations();
+    await this.getAllRevisionsForAllOrganizations();
   }
 }
 

@@ -1,67 +1,46 @@
 <script lang="ts">
-  import {
-    Avatar,
-    ConicGradient,
-    getModalStore,
-    type ConicStop,
-    type ModalComponent,
-    type ModalSettings
-  } from '@skeletonlabs/skeleton';
-  import { type Organization } from '@stores/organizations.svelte';
   import { onMount } from 'svelte';
-  import administrationStore, { AdministrationEntity } from '@/stores/administrators.svelte';
+  import { getModalStore } from '@skeletonlabs/skeleton';
   import OrganizationDetailsModal from '@/lib/modals/OrganizationDetailsModal.svelte';
+  import { queueAndReverseModal } from '@/utils';
+  import administrationStore, {
+    AdministrationEntity,
+    type Status
+  } from '@/stores/administration.store.svelte';
+  import type { UIOrganization } from '@/types/ui';
+  import organizationsStore from '@/stores/organizations.store.svelte';
 
-  const { allOrganizations } = $derived(administrationStore);
-
-  let isLoading = $state(true);
-
-  let pendingOrganizations: Organization[] = $state([]);
-  let acceptedOrganizations: Organization[] = $state([]);
-  let rejectedOrganizations: Organization[] = $state([]);
-
+  let organizations: UIOrganization[] = $state([]);
+  let organizationStatuses: Map<string, Status> = $state(new Map());
   const modalStore = getModalStore();
-  const modalComponent: ModalComponent = { ref: OrganizationDetailsModal };
-  const modal = (organization: Organization): ModalSettings => {
-    return {
-      type: 'component',
-      component: modalComponent,
-      meta: {
-        organization
-      }
-    };
-  };
-
-  const conicStops: ConicStop[] = [
-    { color: 'transparent', start: 0, end: 0 },
-    { color: 'rgb(var(--color-secondary-500))', start: 75, end: 50 }
-  ];
 
   onMount(async () => {
-    await administrationStore.getAllOrganizations();
-    isLoading = false;
-  });
-
-  $effect(() => {
-    pendingOrganizations = [];
-    acceptedOrganizations = [];
-    rejectedOrganizations = [];
-
-    for (const organization of allOrganizations) {
-      administrationStore
-        .getLatestStatusForEntity(
-          organization.original_action_hash!,
-          AdministrationEntity.Organizations
-        )
-        .then((status) => {
-          if (status === null) return;
-
-          if (status.status_type === 'pending') pendingOrganizations.push(organization);
-          if (status.status_type === 'accepted') acceptedOrganizations.push(organization);
-          if (status.status_type === 'rejected') rejectedOrganizations.push(organization);
-        });
+    organizations = await organizationsStore.getAllOrganizations();
+    for (const organization of organizations) {
+      const status = await administrationStore.getLatestStatusForEntity(
+        organization.original_action_hash!,
+        AdministrationEntity.Organizations
+      );
+      if (status) {
+        organizationStatuses.set(organization.original_action_hash!.toString(), status);
+      }
     }
   });
+
+  function handleOrganizationClick(organization: UIOrganization) {
+    queueAndReverseModal(
+      {
+        type: 'component',
+        component: {
+          ref: OrganizationDetailsModal,
+          props: {
+            organization
+          }
+        }
+      },
+      modalStore
+    );
+  }
 </script>
 
 <section class="flex flex-col gap-10">
@@ -96,7 +75,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    onclick={() => modalStore.trigger(modal(organization))}
+                    onclick={() => handleOrganizationClick(organization)}
                   >
                     View
                   </button>
@@ -134,7 +113,7 @@
                 <td>
                   <button
                     class="btn variant-filled-secondary"
-                    onclick={() => modalStore.trigger(modal(organization))}
+                    onclick={() => handleOrganizationClick(organization)}
                   >
                     View
                   </button>

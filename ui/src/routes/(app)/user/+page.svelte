@@ -1,21 +1,18 @@
 <script lang="ts">
-  import {
-    Avatar,
-    getModalStore,
-    type ModalComponent,
-    type ModalSettings
-  } from '@skeletonlabs/skeleton';
-  import NavButton from '@lib/NavButton.svelte';
   import { onMount } from 'svelte';
-  import usersStore from '@stores/users.svelte';
+  import { getModalStore, Avatar, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
+  import { queueAndReverseModal } from '@/utils';
+  import type { UIOrganization } from '@/types/ui';
+  import type { UIUser } from '@/types/ui';
+  import usersStore from '@/stores/users.store.svelte';
   import administrationStore, {
     AdministrationEntity,
     type Revision,
     type Status
-  } from '@stores/administration.store';
+  } from '@stores/administration.store.svelte';
+  import organizationsStore from '@/stores/organizations.store.svelte';
   import StatusHistoryModal from '@lib/modals/StatusHistoryModal.svelte';
-  import type { Organization } from '@/stores/organizations.svelte';
-  import organizationsStore from '@/stores/organizations.svelte';
+  import NavButton from '@lib/NavButton.svelte';
 
   const modalStore = getModalStore();
   const { myProfile } = $derived(usersStore);
@@ -29,7 +26,9 @@
   let suspensionDate = $state('');
   let isExpired = $state(false);
   let status: Status | null = $state(null);
-  let organizations: Organization[] = $state([]);
+  let organizations: UIOrganization[] = $state([]);
+  let myOrganizations: UIOrganization[] = $state([]);
+  let myCoordinatedOrganizations: UIOrganization[] = $state([]);
 
   onMount(async () => {
     await usersStore.getMyProfile();
@@ -53,6 +52,14 @@
 
         suspensionDate = dateString.substring(0, dateString.indexOf(' ', 15));
       }
+    }
+
+    const currentUser = await usersStore.getCurrentUser();
+    if (currentUser) {
+      myOrganizations = await organizationsStore.getUserOrganizations(currentUser.original_action_hash!);
+      myCoordinatedOrganizations = await organizationsStore.getUserCoordinatedOrganizations(
+        currentUser.original_action_hash!
+      );
     }
   });
 
@@ -157,6 +164,52 @@
           >
           <tbody>
             {#each organizations as organization}
+              <tr>
+                <td>{organization.name}</td>
+                <td>{organization.description}</td>
+                <td>{organization.location}</td>
+                <td>{organization.members.length}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      {/if}
+      {#if myOrganizations.length > 0}
+        <h3 class="h3">My Organizations</h3>
+        <table class="table-hover table drop-shadow-lg">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Location</th>
+              <th># Members</th>
+            </tr></thead
+          >
+          <tbody>
+            {#each myOrganizations as organization}
+              <tr>
+                <td>{organization.name}</td>
+                <td>{organization.description}</td>
+                <td>{organization.location}</td>
+                <td>{organization.members.length}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      {/if}
+      {#if myCoordinatedOrganizations.length > 0}
+        <h3 class="h3">My Coordinated Organizations</h3>
+        <table class="table-hover table drop-shadow-lg">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Location</th>
+              <th># Members</th>
+            </tr></thead
+          >
+          <tbody>
+            {#each myCoordinatedOrganizations as organization}
               <tr>
                 <td>{organization.name}</td>
                 <td>{organization.description}</td>

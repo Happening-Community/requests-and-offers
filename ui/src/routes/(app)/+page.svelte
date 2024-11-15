@@ -2,7 +2,7 @@
   import usersStore from '@stores/users.svelte';
   import type { Record } from '@holochain/client';
   import NavButton from '@lib/NavButton.svelte';
-  import administrationStore from '@stores/administration.store';
+  import administrationStore from '@stores/administration.store.svelte';
 
   const { myProfile } = $derived(usersStore);
   const { agentIsAdministrator } = $derived(administrationStore);

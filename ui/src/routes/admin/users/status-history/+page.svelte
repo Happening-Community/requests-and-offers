@@ -1,6 +1,6 @@
 <script lang="ts">
   import StatusTable from '@lib/tables/StatusTable.svelte';
-  import administrationStore from '@stores/administration.store';
+  import administrationStore from '@stores/administration.store.svelte';
   import { onMount } from 'svelte';
 
   onMount(async () => {

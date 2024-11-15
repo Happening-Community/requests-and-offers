@@ -2,8 +2,9 @@
   import { goto } from '$app/navigation';
   import usersStore from '@/stores/users.svelte';
   import { Avatar, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
-  import organizationsStore from '@stores/organizations.svelte';
+  import organizationsStore from '@stores/organizations.store.svelte';
   import { onMount } from 'svelte';
+  import type { UIOrganization } from '@/types/ui';
 
   let isLoading = $state(true);
 

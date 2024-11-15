@@ -2,7 +2,7 @@
   import type { User } from '@/stores/users.svelte';
   import UsersTable from '@lib/tables/UsersTable.svelte';
   import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
-  import administrationStore, { AdministrationEntity } from '@stores/administration.store';
+  import administrationStore, { AdministrationEntity } from '@stores/administration.store.svelte';
   import { onMount } from 'svelte';
 
   const { allUsers } = $derived(administrationStore);

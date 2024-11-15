@@ -5,18 +5,20 @@
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import type { User } from '@stores/users.svelte';
-  import UserDetailsModal from '../modals/UserDetailsModal.svelte';
+  import UserDetailsModal from '@/lib/modals/UserDetailsModal.svelte';
+  import { queueAndReverseModal } from '@/utils';
+  import type { UIUser } from '@/types/ui';
+  import type { UserType } from '@/types/holochain';
 
   type Props = {
-    users: User[];
+    users: UIUser[];
   };
 
   const { users }: Props = $props();
 
   const modalStore = getModalStore();
   const modalComponent: ModalComponent = { ref: UserDetailsModal };
-  const modal = (user: User): ModalSettings => {
+  const modal = (user: UIUser): ModalSettings => {
     return {
       type: 'component',
       component: modalComponent,

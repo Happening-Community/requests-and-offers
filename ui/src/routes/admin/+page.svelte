@@ -1,40 +1,51 @@
 <script lang="ts">
-  import type { User } from '@/stores/users.svelte';
-  import { AdministrationEntity } from '@/types/holochain';
-  import administrationStore from '@stores/administration.store';
-  import { type Organization } from '@stores/organizations.svelte';
-  import projectsStore, { type Project } from '@stores/projects.svelte';
   import { onMount } from 'svelte';
+  import { getModalStore } from '@skeletonlabs/skeleton';
+  import { queueAndReverseModal } from '@/utils';
+  import type { UIOrganization } from '@/types/ui';
+  import type { UIUser } from '@/types/ui';
+  import administrationStore from '@/stores/administration.store.svelte';
+  import usersStore from '@/stores/users.store.svelte';
+  import organizationsStore from '@/stores/organizations.store.svelte';
+  import projectsStore from '@stores/projects.svelte';
 
-  const { allUsers, allOrganizations, administrators } = $derived(administrationStore);
+  const { administrators } = $derived(administrationStore);
   const { projects } = projectsStore;
 
-  let pendingUsers: User[] = $state([]);
+  let users: UIUser[] = $state([]);
+  let organizations: UIOrganization[] = $state([]);
+  let pendingUsers: UIUser[] = $state([]);
   let pendingprojects: Project[] = $state([]);
-  let pendingOrganizations: Organization[] = $state([]);
+  let pendingOrganizations: UIOrganization[] = $state([]);
+  const modalStore = getModalStore();
 
   onMount(async () => {
-    for (let user of allUsers) {
-      if (!user.status) continue;
+    await administrationStore.initialize();
+
+    users = await usersStore.getAllUsers();
+    organizations = await organizationsStore.getAllOrganizations();
+
+    // Process pending users
+    pendingUsers = users.filter(async (user) => {
+      if (!user.status) return false;
       const status = await administrationStore.getLatestStatusForEntity(
         user.original_action_hash!,
         AdministrationEntity.Users
       );
+      return status?.status_type === 'pending';
+    });
 
-      if (status!.status_type === 'pending') pendingUsers.push(user);
-    }
+    // Process pending projects
+    pendingprojects = projects.filter((project) => project.status === 'pending');
 
-    pendingprojects = projects.filter((Project) => Project.status === 'pending');
-
-    for (const organization of allOrganizations) {
+    // Process pending organizations
+    pendingOrganizations = organizations.filter(async (organization) => {
       const status = await administrationStore.getLatestStatusForEntity(
         organization.original_action_hash!,
         AdministrationEntity.Organizations
       );
-      if (status === null) continue;
-
-      if (status.status_type === 'pending') pendingOrganizations.push(organization);
-    }
+      return status?.status_type === 'pending';
+    });
   });
 </script>
 

@@ -2,12 +2,13 @@
   import moment from 'moment-timezone';
   import { FileDropzone, InputChip, Avatar, getModalStore } from '@skeletonlabs/skeleton';
   import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
-  import usersStore, { type User, type UserType } from '@stores/users.svelte';
+  import usersStore from '@stores/users.store.svelte';
   import { goto } from '$app/navigation';
   import { createMockedUsers } from '@mocks';
   import { onMount } from 'svelte';
   import AlertModal from '@lib/dialogs/AlertModal.svelte';
   import type { AlertModalMeta } from '@lib/types';
+  import type { UserInDHT, UserType } from '@/types/holochain';
 
   type FormattedTimezone = {
     name: string;
@@ -24,7 +25,7 @@
     };
   };
 
-  const { myProfile } = $derived(usersStore);
+  const { currentUser } = $derived(usersStore);
   const modalStore = getModalStore();
 
   const welcomeAndNextStepsMessage = (name: string) => `
@@ -107,9 +108,9 @@
 
   async function mockUser() {
     try {
-      let user: User = (await createMockedUsers())[0];
+      let user: UserInDHT = (await createMockedUsers())[0];
       await usersStore.createUser(user);
-      await usersStore.getMyProfile();
+      await usersStore.refreshCurrentUser();
 
       modalStore.trigger(
         alertModal({
@@ -130,7 +131,7 @@
     const data = new FormData(event.target as HTMLFormElement);
     const picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
 
-    const user: User = {
+    const user: UserInDHT = {
       name: data.get('name') as string,
       nickname: data.get('nickname') as string,
       bio: data.get('bio') as string,
@@ -145,7 +146,7 @@
 
     try {
       await usersStore.createUser(user);
-      await usersStore.getMyProfile();
+      await usersStore.refreshCurrentUser();
 
       modalStore.trigger(
         alertModal({
@@ -161,7 +162,7 @@
   }
 
   onMount(async () => {
-    if (myProfile) {
+    if (currentUser) {
       goto('/user');
     }
   });

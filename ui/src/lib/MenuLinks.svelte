@@ -1,14 +1,22 @@
 <script lang="ts">
-  import usersStore from '@stores/users.svelte';
+  import { page } from '$app/stores';
+  import usersStore from '@/stores/users.store.svelte';
+  import { onMount } from 'svelte';
+  import type { UIUser } from '@/types/ui';
   import MenuLink from './MenuLink.svelte';
-  import administrationStore from '@stores/administration.store';
+  import administrationStore from '@stores/administration.store.svelte';
 
-  const { myProfile } = $derived(usersStore);
+  let currentUser: UIUser | null = $state(null);
+
+  onMount(async () => {
+    currentUser = await usersStore.getCurrentUser();
+  });
+
   const { agentIsAdministrator } = $derived(administrationStore);
 </script>
 
 <div class="flex flex-col gap-3">
-  {#if myProfile}
+  {#if currentUser}
     <MenuLink href="/user">My profile</MenuLink>
   {:else}
     <MenuLink href="/user/create">Create Profile</MenuLink>

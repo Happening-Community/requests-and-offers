@@ -4,7 +4,7 @@
   import NavBar from '@lib/NavBar.svelte';
   import hc from '@services/HolochainClientService.svelte';
   import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
-  import administrationStore from '@stores/administration.store';
+  import administrationStore from '@stores/administration.store.svelte';
   import { onMount } from 'svelte';
 
   type Props = {

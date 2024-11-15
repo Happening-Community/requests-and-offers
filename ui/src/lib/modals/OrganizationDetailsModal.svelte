@@ -1,16 +1,16 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { Avatar, getModalStore } from '@skeletonlabs/skeleton';
+  import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
   import { onMount } from 'svelte';
   import ActionBar from '../ActionBar.svelte';
-  import type { Organization } from '@/stores/organizations.svelte';
+  import type { UIOrganization } from '@/types/ui';
   import administrationStore, {
     AdministrationEntity,
     type Status
-  } from '@/stores/administrators.svelte';
+  } from '@/stores/administration.store.svelte';
 
   const modalStore = getModalStore();
-  const organization: Organization = $modalStore[0].meta.organization;
+  const organization: UIOrganization = $modalStore[0].meta.organization;
 
   let organizationPictureUrl = $state('');
   let suspensionDate = $state('');

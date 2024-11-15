@@ -1,14 +1,20 @@
 <script lang="ts">
-  import moment from 'moment-timezone';
-  import { FileDropzone, Avatar, getModalStore } from '@skeletonlabs/skeleton';
-  import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
-  import usersStore from '@stores/users.svelte';
   import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+  import { page } from '$app/stores';
+  import { getModalStore } from '@skeletonlabs/skeleton';
+  import ConfirmModal from '@/lib/dialogs/ConfirmModal.svelte';
   import { createMockedOrganizations } from '@mocks';
+  import { queueAndReverseModal } from '@/utils';
+  import type { UIOrganization } from '@/types/ui';
+  import organizationsStore from '@/stores/organizations.store.svelte';
+  import type { OrganizationInDHT } from '@/types/holochain';
+  import moment from 'moment-timezone';
+  import { FileDropzone, Avatar } from '@skeletonlabs/skeleton';
+  import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
   import AlertModal from '@lib/dialogs/AlertModal.svelte';
   import type { AlertModalMeta } from '@lib/types';
-  import type { Organization } from '@/stores/organizations.svelte';
-  import organizationsStore from '@/stores/organizations.svelte';
+  import usersStore from '@stores/users.store.svelte';
 
   type FormattedTimezone = {
     name: string;
@@ -102,7 +108,7 @@
 
   async function mockOrganization() {
     try {
-      let organization: Organization = (await createMockedOrganizations())[0];
+      let organization: OrganizationInDHT = (await createMockedOrganizations())[0];
       const record = await organizationsStore.createOrganization(organization);
 
       const organizationData = await organizationsStore.getLatestOrganization(
@@ -111,7 +117,7 @@
 
       console.log('organizationData', organizationData);
 
-      await usersStore.getMyProfile();
+      await usersStore.refreshCurrentUser();
 
       modalStore.trigger(
         alertModal({
@@ -131,15 +137,13 @@
     const data = new FormData(event.target as HTMLFormElement);
     const logo = (await (data.get('logo') as File).arrayBuffer()) as Uint8Array;
 
-    const organization: Organization = {
+    const organization: OrganizationInDHT = {
       name: data.get('name') as string,
       description: data.get('description') as string,
       logo: logo.byteLength > 0 ? new Uint8Array(logo) : undefined,
       email: data.get('email') as string,
       urls: data.getAll('urls') as string[],
-      location: data.get('location') as string,
-      members: [],
-      coordinators: []
+      location: data.get('location') as string
     };
 
     console.log('organization', organization);
@@ -154,14 +158,14 @@
 
       console.log('organizationData', organizationData);
 
-      // modalStore.trigger(
-      //   alertModal({
-      //     id: 'welcome-and-next-steps',
-      //     message: welcomeAndNextStepsMessage(organization.name)
-      //   })
-      // );
+      modalStore.trigger(
+        alertModal({
+          id: 'welcome-and-next-steps',
+          message: welcomeAndNextStepsMessage(organization.name)
+        })
+      );
 
-      // goto('/user');
+      goto('/user');
     } catch (error) {
       console.error('error :', error);
     }

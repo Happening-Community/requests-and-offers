@@ -3,28 +3,28 @@
   import { Avatar, getModalStore } from '@skeletonlabs/skeleton';
   import { onMount } from 'svelte';
   import ActionBar from '../ActionBar.svelte';
-  import type { User } from '@/stores/users.svelte';
-  import administrationStore, {
-    AdministrationEntity,
-    type Status
-  } from '@/stores/administrators.svelte';
+  import type { UIUser, UIStatus } from '@/types/ui';
+  import administrationStore from '@/stores/administration.store.svelte';
+  import { AdministrationEntity } from '@/types/holochain';
+  import { decodeRecords } from '@/utils';
 
   const modalStore = getModalStore();
-  const user: User = $modalStore[0].meta.user;
+  const user: UIUser = $modalStore[0].meta.user;
 
   let userPictureUrl = $state('');
   let suspensionDate = $state('');
   let isSuspendedTemporarily = $state(false);
-  let userStatus: Status | null = $state(null);
+  let userStatus: UIStatus | null = $state(null);
 
   onMount(async () => {
     userPictureUrl = user?.picture
       ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
       : '/default_avatar.webp';
-    userStatus = await administrationStore.getLatestStatusForEntity(
+    const userStatusRecord = await administrationStore.getLatestStatusForEntity(
       user.original_action_hash!,
       AdministrationEntity.Users
     );
+    userStatus = userStatusRecord ? decodeRecords([userStatusRecord])[0] : null;
 
     if (user && userStatus!.suspended_until) {
       isSuspendedTemporarily = true;

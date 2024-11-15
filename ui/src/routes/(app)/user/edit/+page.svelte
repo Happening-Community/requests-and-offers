@@ -4,7 +4,8 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import NavButton from '@lib/NavButton.svelte';
-  import usersStore, { type User, type UserType } from '@stores/users.svelte';
+  import usersStore from '@stores/users.store.svelte';
+  import type { UserInDHT, UserType } from '@/types/holochain';
 
   type FormattedTimezone = {
     name: string;
@@ -12,7 +13,7 @@
     offset: number;
   };
 
-  const { myProfile } = $derived(usersStore);
+  const { currentUser } = $derived(usersStore);
 
   let form: HTMLFormElement | undefined = $state();
   let timezones = moment.tz.names();
@@ -72,11 +73,11 @@
       pictureInput.value = '';
     }
 
-    usersStore.myProfile!.picture = undefined;
+    usersStore.currentUser!.picture = undefined;
   }
 
   onMount(async () => {
-    if (myProfile?.picture) userPicture = new Blob([myProfile?.picture]);
+    if (currentUser?.picture) userPicture = new Blob([currentUser?.picture]);
   });
 
   async function submitForm(event: SubmitEvent) {
@@ -85,11 +86,11 @@
     const data = new FormData(form);
     const picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
 
-    const user: User = {
+    const user: UserInDHT = {
       name: data.get('name') as string,
       nickname: data.get('nickname') as string,
       bio: data.get('bio') as string,
-      picture: picture.byteLength > 0 ? new Uint8Array(picture) : myProfile?.picture,
+      picture: picture.byteLength > 0 ? new Uint8Array(picture) : currentUser?.picture,
       user_type: data.get('user_type') as UserType,
       skills: data.getAll('skills') as string[],
       email: data.get('email') as string,
@@ -99,8 +100,8 @@
     };
 
     try {
-      await usersStore.updateMyProfile(user);
-      await usersStore.getMyProfile();
+      await usersStore.updateCurrentUser(user);
+      await usersStore.refreshCurrentUser();
 
       goto('/user');
     } catch (error) {
@@ -110,7 +111,7 @@
 </script>
 
 <section class="flex w-1/2 flex-col gap-10">
-  {#if !myProfile}
+  {#if !currentUser}
     <p class="mb-4 text-center text-xl">It looks like you don't have a profile yet !</p>
     <NavButton href="/user/create">Create Profile</NavButton>
   {:else}
@@ -125,17 +126,17 @@
     >
       <p>*required fields</p>
       <label class="label text-lg">
-        Name* :<input type="text" class="input" name="name" value={myProfile.name} required />
+        Name* :<input type="text" class="input" name="name" value={currentUser.name} required />
       </label>
 
       <label class="label text-lg">
         Nickname* :
-        <input type="text" class="input" name="nickname" value={myProfile.nickname} required />
+        <input type="text" class="input" name="nickname" value={currentUser.nickname} required />
       </label>
 
       <label class="label text-lg">
         Bio :
-        <textarea class="textarea h-52" name="bio">{myProfile.bio}</textarea>
+        <textarea class="textarea h-52" name="bio">{currentUser.bio}</textarea>
       </label>
 
       <p class="label text-lg">User picture :</p>
@@ -166,7 +167,7 @@
               type="radio"
               name="user_type"
               value="advocate"
-              checked={myProfile.user_type === 'advocate'}
+              checked={currentUser.user_type === 'advocate'}
               required
             />
             Advocate
@@ -176,7 +177,7 @@
               type="radio"
               name="user_type"
               value="creator"
-              checked={myProfile.user_type === 'creator'}
+              checked={currentUser.user_type === 'creator'}
               required
             />
             Creator
@@ -189,7 +190,7 @@
         <!-- TODO:When skills indexation done, use Autocomplete Input Chip Skeleton component for skills selection -->
         <InputChip
           id="skills"
-          value={myProfile.skills}
+          value={currentUser.skills}
           name="skills"
           placeholder="Write a skill and press enter"
           chips="variant-filled-secondary"
@@ -198,12 +199,12 @@
 
       <label class="label text-lg">
         Email* :
-        <input type="email" class="input" name="email" value={myProfile.email} required />
+        <input type="email" class="input" name="email" value={currentUser.email} required />
       </label>
 
       <label class="label text-lg">
         Phone number :
-        <input type="text" class="input" name="phone" value={myProfile.phone} />
+        <input type="text" class="input" name="phone" value={currentUser.phone} />
       </label>
 
       <label class="label text-lg">
@@ -217,7 +218,7 @@
         />
         <select name="timezone" id="timezone" class="select">
           {#each formattedTimezones as tz}
-            <option class="" value={tz.name} selected={tz.name === myProfile.time_zone}>
+            <option class="" value={tz.name} selected={tz.name === currentUser.time_zone}>
               {tz.formatted}
             </option>
           {/each}
@@ -226,7 +227,7 @@
 
       <label class="label text-lg">
         Location :
-        <input type="text" class="input" name="location" value={myProfile.location} />
+        <input type="text" class="input" name="location" value={currentUser.location} />
       </label>
 
       <button
