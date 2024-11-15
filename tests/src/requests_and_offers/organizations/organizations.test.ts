@@ -51,6 +51,21 @@ test("create and manage Organizations", async () => {
 
       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
+      // Bob tries to create an Organization without having a user profile
+      const buffer = await imagePathToArrayBuffer(
+        process.cwd() + TestUserPicture
+      );
+      let sampleOrg = sampleOrganization({
+        name: "Organization",
+        logo: new Uint8Array(buffer),
+      });
+
+      await expect(
+        createOrganization(bob.cells[0], sampleOrg)
+      ).rejects.toThrow();
+
+      await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
       // Bob creates a User
       sample = sampleUser({
         name: "Bob",
@@ -67,21 +82,6 @@ test("create and manage Organizations", async () => {
       await registerNetworkAdministrator(alice.cells[0], aliceUserLink.target, [
         alice.agentPubKey,
       ]);
-      await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-
-      // Bob create an Organization without being an accepted user
-      const buffer = await imagePathToArrayBuffer(
-        process.cwd() + TestUserPicture
-      );
-      let sampleOrg = sampleOrganization({
-        name: "Organization",
-        logo: new Uint8Array(buffer),
-      });
-
-      await expect(
-        createOrganization(bob.cells[0], sampleOrg)
-      ).rejects.toThrow();
-
       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
       // Alice accept Bob
