@@ -1,12 +1,12 @@
 <script lang="ts">
   import type { User } from '@/stores/users.svelte';
-  import administratorsStore, { AdministrationEntity } from '@stores/administrators.svelte';
+  import { AdministrationEntity } from '@/types/holochain';
+  import administrationStore from '@stores/administration.store';
   import { type Organization } from '@stores/organizations.svelte';
-  ('@stores/organizations.svelte');
   import projectsStore, { type Project } from '@stores/projects.svelte';
   import { onMount } from 'svelte';
 
-  const { allUsers, allOrganizations, administrators } = $derived(administratorsStore);
+  const { allUsers, allOrganizations, administrators } = $derived(administrationStore);
   const { projects } = projectsStore;
 
   let pendingUsers: User[] = $state([]);
@@ -16,7 +16,7 @@
   onMount(async () => {
     for (let user of allUsers) {
       if (!user.status) continue;
-      const status = await administratorsStore.getLatestStatusForEntity(
+      const status = await administrationStore.getLatestStatusForEntity(
         user.original_action_hash!,
         AdministrationEntity.Users
       );
@@ -27,7 +27,7 @@
     pendingprojects = projects.filter((Project) => Project.status === 'pending');
 
     for (const organization of allOrganizations) {
-      const status = await administratorsStore.getLatestStatusForEntity(
+      const status = await administrationStore.getLatestStatusForEntity(
         organization.original_action_hash!,
         AdministrationEntity.Organizations
       );

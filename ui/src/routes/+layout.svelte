@@ -7,7 +7,7 @@
   import { initializeStores } from '@skeletonlabs/skeleton';
   import { goto } from '$app/navigation';
   import MenuDrawer from '@lib/drawers/MenuDrawer.svelte';
-  import administratorsStore from '@stores/administrators.svelte';
+  import administrationStore from '@stores/administration.store';
   import { page } from '$app/stores';
   import AdminMenuDrawer from '@lib/drawers/AdminMenuDrawer.svelte';
   import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
@@ -20,7 +20,7 @@
   const { children } = $props() as Props;
 
   const { myProfile } = $derived(usersStore);
-  const { agentIsAdministrator } = $derived(administratorsStore);
+  const { agentIsAdministrator } = $derived(administrationStore);
 
   storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
@@ -33,7 +33,7 @@
     await usersStore.getMyProfile();
 
     if (myProfile) {
-      await administratorsStore.checkIfAgentIsAdministrator(
+      await administrationStore.checkIfAgentIsAdministrator(
         (await hc.getAppInfo())?.agent_pub_key!
       );
     }
@@ -62,10 +62,10 @@
       let confirmation = confirm('Register Admin ?');
       if (confirmation && myProfile.original_action_hash) {
         const agentPubkey = (await hc.getAppInfo())?.agent_pub_key!;
-        await administratorsStore.registerNetworkAdministrator(myProfile.original_action_hash, [
+        await administrationStore.registerNetworkAdministrator(myProfile.original_action_hash, [
           agentPubkey
         ]);
-        await administratorsStore.checkIfAgentIsAdministrator(agentPubkey);
+        await administrationStore.checkIfAgentIsAdministrator(agentPubkey);
       }
     }
   }

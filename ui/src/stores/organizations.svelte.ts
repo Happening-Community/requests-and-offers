@@ -1,8 +1,8 @@
 import hc from '@/services/HolochainClientService.svelte';
 import type { ActionHash, Link, Record } from '@holochain/client';
 import type { User } from './users.svelte';
-import type { Status } from './administrators.svelte';
-import administratorsStore, { AdministrationEntity } from './administrators.svelte';
+import type { Status } from '@/types/holochain';
+import administrationStore, { AdministrationEntity } from '@/types/holochain';
 import { decodeRecords } from '@/utils';
 
 export type OrganizationInDHT = {
@@ -44,7 +44,7 @@ class OrganizationsStore {
 
     if (!link) return null;
 
-    const status = await administratorsStore.getLatestStatusForEntity(
+    const status = await administrationStore.getLatestStatusForEntity(
       link.target,
       AdministrationEntity.Organizations
     );

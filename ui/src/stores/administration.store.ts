@@ -1,0 +1,226 @@
+import type { ActionHash, AgentPubKey } from '@holochain/client';
+import { decodeRecords } from '@utils';
+import type { UIStatus, Revision, UIUser } from '@/types/ui';
+import { AdministrationEntity, type StatusInDHT } from '@/types/holochain';
+import { AdministrationService } from '@/services/zomes/administration.service';
+import usersStore from './users.store';
+
+class AdministrationStore {
+  allStatusesHistory: Revision[] = $state([]);
+  administrators: UIUser[] = $state([]);
+  nonAdministrators: UIUser[] = $state([]);
+  agentIsAdministrator = $state(false);
+
+  // Network administrator methods
+  async registerNetworkAdministrator(
+    entity_original_action_hash: ActionHash,
+    agent_pubkeys: AgentPubKey[]
+  ): Promise<boolean> {
+    return await AdministrationService.registerAdministrator(
+      AdministrationEntity.Network,
+      entity_original_action_hash,
+      agent_pubkeys
+    );
+  }
+
+  async addNetworkAdministrator(agent_pubkey: AgentPubKey): Promise<boolean> {
+    return await AdministrationService.addAdministrator(AdministrationEntity.Network, agent_pubkey);
+  }
+
+  async removeNetworkAdministrator(agent_pubkey: AgentPubKey): Promise<boolean> {
+    return await AdministrationService.removeAdministrator(
+      AdministrationEntity.Network,
+      agent_pubkey
+    );
+  }
+
+  async isNetworkAdministrator(agent_pubkey: AgentPubKey): Promise<boolean> {
+    const isAdmin = await AdministrationService.isAdministrator(
+      AdministrationEntity.Network,
+      agent_pubkey
+    );
+    this.agentIsAdministrator = isAdmin;
+    return isAdmin;
+  }
+
+  async getAllNetworkAdministrators(): Promise<UIUser[]> {
+    const adminLinks = await AdministrationService.getAllAdministrators(
+      AdministrationEntity.Network
+    );
+    const allUsers = await usersStore.getAllUsers();
+
+    const admins = allUsers.filter((user) =>
+      adminLinks.some((link) => link.target.toString() === user.original_action_hash?.toString())
+    );
+
+    this.administrators = admins;
+    this.nonAdministrators = allUsers.filter(
+      (user) =>
+        !admins.some(
+          (admin) =>
+            admin.original_action_hash?.toString() === user.original_action_hash?.toString()
+        )
+    );
+
+    return admins;
+  }
+
+  // Status management methods
+  private convertToUIStatus(status: StatusInDHT, timestamp?: number): UIStatus {
+    return {
+      ...status,
+      duration: status.suspended_until
+        ? status.suspended_until - (timestamp || Date.now())
+        : undefined
+    };
+  }
+
+  async createStatus(status: StatusInDHT): Promise<void> {
+    await AdministrationService.createStatus(status);
+  }
+
+  async getLatestStatus(original_action_hash: ActionHash): Promise<UIStatus | null> {
+    const record = await AdministrationService.getLatestStatusRecord(original_action_hash);
+    if (!record) return null;
+
+    const status = decodeRecords([record])[0] as StatusInDHT;
+    return this.convertToUIStatus(status);
+  }
+
+  async getLatestStatusForEntity(
+    entity_original_action_hash: ActionHash,
+    entity_type: AdministrationEntity
+  ): Promise<UIStatus | null> {
+    const record = await AdministrationService.getLatestStatusRecordForEntity(
+      entity_original_action_hash,
+      entity_type
+    );
+    if (!record) return null;
+
+    const status = decodeRecords([record])[0] as StatusInDHT;
+    return this.convertToUIStatus(status);
+  }
+
+  async getAllStatusesForEntity(
+    entity_original_action_hash: ActionHash,
+    entity_type: AdministrationEntity
+  ): Promise<Revision[]> {
+    const records = await AdministrationService.getAllStatusesForEntity(
+      entity_original_action_hash,
+      entity_type
+    );
+
+    const revisions: Revision[] = [];
+
+    for (const record of records) {
+      const status = decodeRecords([record])[0] as StatusInDHT;
+      const user = await usersStore.getLatestUser(record.signed_action.hashed.hash);
+      if (!user) continue;
+
+      const timestamp = record.signed_action.hashed.content.timestamp;
+      revisions.push({
+        user,
+        status: this.convertToUIStatus(status, timestamp),
+        timestamp
+      });
+    }
+
+    this.allStatusesHistory = revisions;
+    return revisions;
+  }
+
+  async getAllRevisionsForAllUsers(): Promise<Revision[]> {
+    const allUsers = await usersStore.getAllUsers();
+    const revisions: Revision[] = [];
+
+    for (const user of allUsers) {
+      if (!user.original_action_hash) continue;
+      const statusRevisions = await this.getAllStatusesForEntity(
+        user.original_action_hash,
+        AdministrationEntity.Users
+      );
+      revisions.push(...statusRevisions);
+    }
+
+    revisions.sort((a, b) => b.timestamp - a.timestamp);
+    this.allStatusesHistory = revisions;
+    return revisions;
+  }
+
+  // User status management methods
+  async updateUserStatus(
+    entity_original_action_hash: ActionHash,
+    status_original_action_hash: ActionHash,
+    status_previous_action_hash: ActionHash,
+    new_status: StatusInDHT
+  ): Promise<boolean> {
+    return await AdministrationService.updateEntityStatus(
+      AdministrationEntity.Users,
+      entity_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
+      new_status
+    );
+  }
+
+  async suspendUserIndefinitely(
+    entity_original_action_hash: ActionHash,
+    status_original_action_hash: ActionHash,
+    status_previous_action_hash: ActionHash,
+    reason: string
+  ): Promise<boolean> {
+    return await this.updateUserStatus(
+      entity_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
+      {
+        status_type: 'suspended indefinitely',
+        reason
+      }
+    );
+  }
+
+  async suspendUserTemporarily(
+    entity_original_action_hash: ActionHash,
+    status_original_action_hash: ActionHash,
+    status_previous_action_hash: ActionHash,
+    reason: string,
+    duration_in_days: number
+  ): Promise<boolean> {
+    const suspended_until = Date.now() + duration_in_days * 24 * 60 * 60 * 1000;
+    return await this.updateUserStatus(
+      entity_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
+      {
+        status_type: 'suspended temporarily',
+        reason,
+        suspended_until
+      }
+    );
+  }
+
+  async unsuspendUser(
+    entity_original_action_hash: ActionHash,
+    status_original_action_hash: ActionHash,
+    status_previous_action_hash: ActionHash
+  ): Promise<boolean> {
+    return await this.updateUserStatus(
+      entity_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
+      {
+        status_type: 'accepted'
+      }
+    );
+  }
+
+  getRemainingSuspensionTime(status: UIStatus): number | null {
+    if (!status.suspended_until) return null;
+    const remaining = status.suspended_until - Date.now();
+    return remaining > 0 ? remaining : null;
+  }
+}
+
+const administrationStore = new AdministrationStore();
+export default administrationStore;

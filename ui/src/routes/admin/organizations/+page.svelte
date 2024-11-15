@@ -9,10 +9,10 @@
   } from '@skeletonlabs/skeleton';
   import { type Organization } from '@stores/organizations.svelte';
   import { onMount } from 'svelte';
-  import administratorsStore, { AdministrationEntity } from '@/stores/administrators.svelte';
+  import administrationStore, { AdministrationEntity } from '@/stores/administrators.svelte';
   import OrganizationDetailsModal from '@/lib/modals/OrganizationDetailsModal.svelte';
 
-  const { allOrganizations } = $derived(administratorsStore);
+  const { allOrganizations } = $derived(administrationStore);
 
   let isLoading = $state(true);
 
@@ -38,7 +38,7 @@
   ];
 
   onMount(async () => {
-    await administratorsStore.getAllOrganizations();
+    await administrationStore.getAllOrganizations();
     isLoading = false;
   });
 
@@ -48,7 +48,7 @@
     rejectedOrganizations = [];
 
     for (const organization of allOrganizations) {
-      administratorsStore
+      administrationStore
         .getLatestStatusForEntity(
           organization.original_action_hash!,
           AdministrationEntity.Organizations

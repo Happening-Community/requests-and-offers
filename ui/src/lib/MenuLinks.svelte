@@ -1,10 +1,10 @@
 <script lang="ts">
   import usersStore from '@stores/users.svelte';
   import MenuLink from './MenuLink.svelte';
-  import administratorsStore from '@stores/administrators.svelte';
+  import administrationStore from '@stores/administration.store';
 
   const { myProfile } = $derived(usersStore);
-  const { agentIsAdministrator } = $derived(administratorsStore);
+  const { agentIsAdministrator } = $derived(administrationStore);
 </script>
 
 <div class="flex flex-col gap-3">

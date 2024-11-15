@@ -1,7 +1,7 @@
 import { decodeRecords } from '@utils';
 import hc from '@services/HolochainClientService.svelte';
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
-import administratorsStore, { type Revision, AdministrationEntity } from './administrators.svelte';
+import administrationStore, { type Revision, AdministrationEntity } from '@/types/holochain';
 import type { Organization } from './organizations.svelte';
 import organizationsStore from './organizations.svelte';
 
@@ -52,7 +52,7 @@ class UsersStore {
 
   async getLatestUser(user_original_action_hash: ActionHash): Promise<User | null> {
     const record = await this.getLatestUserRecord(user_original_action_hash);
-    const myStatus = await administratorsStore.getLatestStatusRecordForEntity(
+    const myStatus = await administrationStore.getLatestStatusRecordForEntity(
       user_original_action_hash,
       AdministrationEntity.Users
     );
@@ -122,7 +122,7 @@ class UsersStore {
     for (let i = 0; i < records.length; i++) {
       const user = decodeRecords([records[i]])[0];
 
-      const status = await administratorsStore.getLatestStatusForEntity(
+      const status = await administrationStore.getLatestStatusForEntity(
         records[i].signed_action.hashed.hash,
         AdministrationEntity.Users
       );
@@ -130,7 +130,7 @@ class UsersStore {
       recordsContents.push({
         ...user,
         status,
-        remaining_time: status && administratorsStore.getRemainingSuspensionTime(status!),
+        remaining_time: status && administrationStore.getRemainingSuspensionTime(status!),
         original_action_hash: links[i].target,
         previous_action_hash: records[i].signed_action.hashed.hash
       });

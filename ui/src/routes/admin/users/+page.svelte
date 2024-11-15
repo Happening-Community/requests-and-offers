@@ -2,10 +2,10 @@
   import type { User } from '@/stores/users.svelte';
   import UsersTable from '@lib/tables/UsersTable.svelte';
   import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
-  import administratorsStore, { AdministrationEntity } from '@stores/administrators.svelte';
+  import administrationStore, { AdministrationEntity } from '@stores/administration.store';
   import { onMount } from 'svelte';
 
-  const { allUsers } = $derived(administratorsStore);
+  const { allUsers } = $derived(administrationStore);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -21,7 +21,7 @@
   let indefinitelySuspendedUsers: User[] = $state([]);
 
   onMount(async () => {
-    await administratorsStore.getAllUsers();
+    await administrationStore.getAllUsers();
 
     isLoading = false;
   });
@@ -35,7 +35,7 @@
 
     for (let user of allUsers) {
       if (!user.status) continue;
-      administratorsStore
+      administrationStore
         .getLatestStatusForEntity(user.original_action_hash!, AdministrationEntity.Users)
         .then((status) => {
           if (status!.status_type === 'pending') pendingUsers.push(user);

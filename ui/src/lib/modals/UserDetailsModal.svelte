@@ -4,7 +4,7 @@
   import { onMount } from 'svelte';
   import ActionBar from '../ActionBar.svelte';
   import type { User } from '@/stores/users.svelte';
-  import administratorsStore, {
+  import administrationStore, {
     AdministrationEntity,
     type Status
   } from '@/stores/administrators.svelte';
@@ -21,7 +21,7 @@
     userPictureUrl = user?.picture
       ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
       : '/default_avatar.webp';
-    userStatus = await administratorsStore.getLatestStatusForEntity(
+    userStatus = await administrationStore.getLatestStatusForEntity(
       user.original_action_hash!,
       AdministrationEntity.Users
     );

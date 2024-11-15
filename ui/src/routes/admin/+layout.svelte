@@ -4,7 +4,7 @@
   import NavBar from '@lib/NavBar.svelte';
   import hc from '@services/HolochainClientService.svelte';
   import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
-  import administratorsStore from '@stores/administrators.svelte';
+  import administrationStore from '@stores/administration.store';
   import { onMount } from 'svelte';
 
   type Props = {
@@ -13,7 +13,7 @@
 
   const { children }: Props = $props();
 
-  const { agentIsAdministrator } = $derived(administratorsStore);
+  const { agentIsAdministrator } = $derived(administrationStore);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },

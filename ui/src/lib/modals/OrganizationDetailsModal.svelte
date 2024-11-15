@@ -4,7 +4,7 @@
   import { onMount } from 'svelte';
   import ActionBar from '../ActionBar.svelte';
   import type { Organization } from '@/stores/organizations.svelte';
-  import administratorsStore, {
+  import administrationStore, {
     AdministrationEntity,
     type Status
   } from '@/stores/administrators.svelte';
@@ -22,7 +22,7 @@
     organizationPictureUrl = organization?.logo
       ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
       : '/default_avatar.webp';
-    organizationStatus = await administratorsStore.getLatestStatusForEntity(
+    organizationStatus = await administrationStore.getLatestStatusForEntity(
       organization.original_action_hash!,
       AdministrationEntity.Organizations
     );

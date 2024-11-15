@@ -5,9 +5,7 @@ use WasmErrorInner::*;
 
 use crate::{
   administration::get_organization_status_link,
-  external_calls::{
-    check_if_entity_is_accepted, create_status, delete_status, get_accepted_entities,
-  },
+  external_calls::{create_status, delete_status, get_accepted_entities},
   user::{get_agent_user, get_latest_user},
 };
 

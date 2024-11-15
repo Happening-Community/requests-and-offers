@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Revision } from '@stores/administrators.svelte';
+  import type { Revision } from '@stores/administration.store';
   import { onMount } from 'svelte';
 
   type Props = {

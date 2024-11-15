@@ -2,10 +2,10 @@
   import usersStore from '@stores/users.svelte';
   import type { Record } from '@holochain/client';
   import NavButton from '@lib/NavButton.svelte';
-  import administratorsStore from '@stores/administrators.svelte';
+  import administrationStore from '@stores/administration.store';
 
   const { myProfile } = $derived(usersStore);
-  const { agentIsAdministrator } = $derived(administratorsStore);
+  const { agentIsAdministrator } = $derived(administrationStore);
 </script>
 
 <section class="flex flex-col items-center">

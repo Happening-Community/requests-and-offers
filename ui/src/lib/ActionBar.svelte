@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import administratorsStore, {
+  import administrationStore, {
     AdministrationEntity,
     type Revision,
     type Status
@@ -22,7 +22,7 @@
   const { entity }: Props = $props();
 
   const modalStore = getModalStore();
-  const { administrators } = $derived(administratorsStore);
+  const { administrators } = $derived(administrationStore);
 
   let suspensionDate = $state('');
   let isTheOnlyAdmin = $derived(administrators.length === 1);
@@ -30,7 +30,7 @@
   let userStatus: Status | null = $state(null);
 
   onMount(async () => {
-    userStatus = await administratorsStore.getLatestStatusForEntity(
+    userStatus = await administrationStore.getLatestStatusForEntity(
       entity.original_action_hash!,
       AdministrationEntity.Users
     );
@@ -197,8 +197,8 @@
   }
 
   async function handleStatusHistoryModal() {
-    const userStatus = await administratorsStore.getUserStatusLink(entity!.original_action_hash!);
-    const statusHistory = await administratorsStore.getAllRevisionsForStatus(
+    const userStatus = await administrationStore.getUserStatusLink(entity!.original_action_hash!);
+    const statusHistory = await administrationStore.getAllRevisionsForStatus(
       userStatus!.target,
       entity as User
     );
@@ -225,21 +225,21 @@
         break;
     }
 
-    const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
+    const statusOriginalActionHash = (await administrationStore.getUserStatusLink(
       entity?.original_action_hash!
     ))!.target;
-    const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForEntity(
+    const latestStatusActionHash = (await administrationStore.getLatestStatusRecordForEntity(
       entity?.original_action_hash!,
       AdministrationEntity.Users
     ))!.signed_action.hashed.hash;
 
-    await administratorsStore.updateUserStatus(
+    await administrationStore.updateUserStatus(
       entity.original_action_hash!,
       statusOriginalActionHash,
       latestStatusActionHash,
       status
     );
-    await administratorsStore.getAllUsers();
+    await administrationStore.getAllUsers();
 
     modalStore.close();
   }
@@ -251,22 +251,22 @@
 
     if (!reason) return;
 
-    const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
+    const statusOriginalActionHash = (await administrationStore.getUserStatusLink(
       entity?.original_action_hash!
     ))!.target;
-    const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForEntity(
+    const latestStatusActionHash = (await administrationStore.getLatestStatusRecordForEntity(
       entity?.original_action_hash!,
       AdministrationEntity.Users
     ))!.signed_action.hashed.hash;
 
-    await administratorsStore.suspendUserIndefinitely(
+    await administrationStore.suspendUserIndefinitely(
       entity.original_action_hash!,
       statusOriginalActionHash,
       latestStatusActionHash,
       reason
     );
 
-    await administratorsStore.getAllUsers();
+    await administrationStore.getAllUsers();
     modalStore.close();
   }
 
@@ -276,22 +276,22 @@
     let suspendedDays = Number(data.get('duration'));
     const reason = String(data.get('reason'));
 
-    const statusOriginalActionHash = (await administratorsStore.getUserStatusLink(
+    const statusOriginalActionHash = (await administrationStore.getUserStatusLink(
       entity?.original_action_hash!
     ))!.target;
-    const latestStatusActionHash = (await administratorsStore.getLatestStatusRecordForEntity(
+    const latestStatusActionHash = (await administrationStore.getLatestStatusRecordForEntity(
       entity?.original_action_hash!,
       AdministrationEntity.Users
     ))!.signed_action.hashed.hash;
 
-    await administratorsStore.suspendUserTemporarily(
+    await administrationStore.suspendUserTemporarily(
       entity.original_action_hash!,
       statusOriginalActionHash,
       latestStatusActionHash,
       reason,
       suspendedDays
     );
-    await administratorsStore.getAllUsers();
+    await administrationStore.getAllUsers();
     suspensionDate = new Date(userStatus!.suspended_until!).toLocaleString();
     suspendedDays = 0;
     modalStore.close();
@@ -303,8 +303,8 @@
     const userAgents = await usersStore.getUserAgents(entity.original_action_hash!);
     if (!userAgents.length) return;
 
-    await administratorsStore.removeAdministrator(entity.original_action_hash!, userAgents);
-    await administratorsStore.getAllAdministrators();
+    await administrationStore.removeAdministrator(entity.original_action_hash!, userAgents);
+    await administrationStore.getAllAdministrators();
   }
 </script>
 

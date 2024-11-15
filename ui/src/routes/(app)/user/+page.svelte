@@ -8,11 +8,11 @@
   import NavButton from '@lib/NavButton.svelte';
   import { onMount } from 'svelte';
   import usersStore from '@stores/users.svelte';
-  import administratorsStore, {
+  import administrationStore, {
     AdministrationEntity,
     type Revision,
     type Status
-  } from '@stores/administrators.svelte';
+  } from '@stores/administration.store';
   import StatusHistoryModal from '@lib/modals/StatusHistoryModal.svelte';
   import type { Organization } from '@/stores/organizations.svelte';
   import organizationsStore from '@/stores/organizations.svelte';
@@ -33,7 +33,7 @@
 
   onMount(async () => {
     await usersStore.getMyProfile();
-    status = await administratorsStore.getLatestStatusForEntity(
+    status = await administrationStore.getLatestStatusForEntity(
       myProfile!.original_action_hash!,
       AdministrationEntity.Users
     );
@@ -68,10 +68,10 @@
   };
 
   async function handleStatusHistoryModal() {
-    const userStatus = await administratorsStore.getUserStatusLink(
+    const userStatus = await administrationStore.getUserStatusLink(
       myProfile!.original_action_hash!
     );
-    const statusHistory = await administratorsStore.getAllRevisionsForStatus(
+    const statusHistory = await administrationStore.getAllRevisionsForStatus(
       userStatus!.target,
       myProfile!
     );

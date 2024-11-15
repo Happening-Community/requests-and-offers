@@ -1,11 +1,11 @@
 <script lang="ts">
   import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
   import { onMount } from 'svelte';
-  import administratorsStore from '@stores/administrators.svelte';
+  import administrationStore from '@stores/administration.store';
   import AddAdministratorModal from '@lib/modals/AddAdministratorModal.svelte';
   import UsersTable from '@lib/tables/UsersTable.svelte';
 
-  const { administrators } = $derived(administratorsStore);
+  const { administrators } = $derived(administrationStore);
 
   const modalStore = getModalStore();
   const addAdministratorModalComponent: ModalComponent = { ref: AddAdministratorModal };
@@ -19,7 +19,7 @@
   $inspect('administrators:', administrators);
 
   onMount(async () => {
-    await administratorsStore.getAllAdministrators();
+    await administrationStore.getAllAdministrators();
 
     isLoading = false;
   });

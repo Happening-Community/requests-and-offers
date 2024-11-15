@@ -9,12 +9,12 @@
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import administratorsStore from '@stores/administrators.svelte';
+  import administrationStore from '@stores/administration.store';
   import usersStore, { type User } from '@stores/users.svelte';
   import { queueAndReverseModal } from '@utils';
   import { onMount } from 'svelte';
 
-  const { administrators, nonAdministrators } = $derived(administratorsStore);
+  const { administrators, nonAdministrators } = $derived(administrationStore);
 
   let filteredUsers: User[] = $state([]);
   let searchInput = $state('');
@@ -26,7 +26,7 @@
   ];
 
   onMount(async () => {
-    await administratorsStore.getNonAdministratorUsers();
+    await administrationStore.getNonAdministratorUsers();
     filteredUsers = nonAdministrators;
 
     isLoading = false;
@@ -57,11 +57,11 @@
               modalStore.close();
               return;
             }
-            await administratorsStore.registerNetworkAdministrator(
+            await administrationStore.registerNetworkAdministrator(
               user.original_action_hash!,
               userAgents
             );
-            administratorsStore.administrators = [...administrators, user];
+            administrationStore.administrators = [...administrators, user];
           } catch (error) {}
           modalStore.close();
         }
