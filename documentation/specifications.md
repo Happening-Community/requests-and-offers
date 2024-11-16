@@ -18,140 +18,169 @@ This application is specifically tailored for the participants in the Holochain 
 
 ## 4. Core Features
 
-### 4.1 User Profile
+### 4.1 User Management
 
-- **User Creation**: Users can create and retrieve their profile, categorized as "advocate" or "creator".
-- **User Retrieval**: Users can retrieve their profile on other devices using credentials.
-- **User Linking**: Users can be linked to agents, organizations, requests, offers, and projects.
-- **Custom Holochain Zome**: A custom zome is used for managing user profiles within the application.
-- **hREA agents**: User profiles are linked to hREA agents.
+#### 4.1.1 User Profile
+- Creation and authentication of user profiles
+- Profile categorization as "advocate" or "creator"
+- Multi-device profile access using credentials
+- Integration with hREA agents
+- Custom Holochain zome for profile management
 
-### 4.1.1 User Entry
+#### 4.1.2 Profile Links
+Users can be linked to:
+- Agents
+- Organizations
+- Requests
+- Offers
+- Projects
+- Skills
 
-The `User` entry represents the user profile and its associated agents within the hAppenings.community. An agent can be a single user or a device associated with a user, allowing for the sharing of profiles across multiple devices. This entry includes various fields to capture essential information about the user, facilitating personalized experiences and targeted interactions within the community.
+#### 4.1.3 User Entry Structure
+The `User` entry represents profiles within hAppenings.community, supporting:
+- Single user profiles
+- Multi-device profile sharing
+- Personalized experiences
+- Community interactions
 
+##### Links
+- **UserUpdates**: User create header → update headers
+- **UserAgents**: User → agent (index of associated agents)
+- **AllUsers**: Link to `users` anchor (global user index)
+- **MyUser**: Current agent → user
+- **UserRequests**: User → requests (index)
+- **UserOffers**: User → offers (index)
+- **UserProjects**: User → projects (index)
+- **UserOrganizations**: User → organizations (index)
+- **UserSkills**: User → skills (index)
 
-
-#### 4.1.1.1 Links
-
-  - **UserUpdates**: A link from the user create header to the user update headers.
-  - **UserAgents**: A link from the user to an agent. It is an index of all the agents that have the user.
-  - **AllUsers**: A link to the `users` anchor. It is an index of all the users.
-  - **MyUser**: A link from the current agent to the user.
-  - **UserRequests**: A link from the user to a request. It is an index of all the requests that the user made.
-  - **UserOffers**: A link from the user to an offer. It is an index of all the offers that the user made.
-  - **UserProjects**: A link from the user to a project. It is an index of all the projects the user participates in.
-  - **UserOrganizations**: A link from the user to an organization. It is an index of all the organizations that the user participates in.
-  - **UserSkills**: A link from the user to a skill. It is an index of all the skills that have the user.
-  
 ### 4.2 Projects and Organizations
 
-- **Project and Organization Creation**: Users can create projects and organizations, with projects owned by organizations. Projects have specific requirements and status.
-![Project status](images/project-status.png)
+#### 4.2.1 Projects
+Projects are organizations `classifiedAs` `Project` in hREA.
 
-#### 4.2.1 Project Entry
+##### Project Features
+- Creation by organizations or users
+- Specific requirements and status tracking
+- Team member management
+- Category classification
 
-The `Project` entry represents a project and its associated agents, including team members. Projects have specific requirements and status. Projects can be created by organizations or by users.
+##### Project Links
+- **AllProjects**: Link to `projects` anchor
+- **ProjectCoordinators**: Project → coordinators
+- **ProjectContributors**: Project → contributors
+- **ProjectCategories**: Project → categories
+- **ProjectRequests**: Project → requests
+- **ProjectOffers**: Project → offers
 
-In hREA, projects are organizations `classifiedAs` `Project`.
+#### 4.2.2 Organizations
+Organizations are agents `classifiedAs` `Organization` in hREA.
 
-##### 4.2.1.1 Links
+##### Organization Features
+- User-created entities
+- Project management capabilities
+- Member management
+- Category classification
 
-- **AllProjects**: A link to the `projects` anchor.
-- **ProjectCoordinators**: A link from the project's to a user. It is an index of all the coordinators.
-- **ProjectContributors**: A link from the project's to a user. It is an index of all the project contributors.
-- **ProjectCategories**: A link from the project's to a category. It is an index of all the categories.
-- **ProjectRequests**: A link from the project's to a request. It is an index of all the requests made by the project.
-- **ProjectOffers**: A link from the project's to an offer. It is an index of all the offers made to the project.
+##### Organization Links
+- **AllOrganizations**: Link to `organizations` anchor
+- **OrganizationCoordinators**: Organization → coordinators
+- **OrganizationMembers**: Organization → members
+- **OrganizationProjects**: Organization → projects
+- **OrganizationCategories**: Organization → categories
+- **OrganizationRequests**: Organization → requests
+- **OrganizationOffers**: Organization → offers
 
-#### 4.2.2 Organization Entry
+#### 4.2.3 Coordinator Management
 
-The `Organization` entry represents an organization and its associated users and projects. Organizations are created by users.
+##### Responsibilities
+- Project/Organization representation
+- Organization/Project profile management
+- Member invitation and approval
+- Request/Offer management on behalf of the organization/project
 
-In hREA, organization are agents `classifiedAs` `Organization`.
-
-##### 4.2.2.1 Links
-
-- **AllOrganizations**: A link to the `organizations` anchor.
-- **OrganizationCoordinators**: A link from the organization's to a user. It is an index of all the coordinators of the organization.
-- **OrganizationMembers**: A link from the organization's to a user. It is an index of all the members of the organization.
-- **OrganizationProjects**: A link from the organization's to a project. It is an index of all the projects under the organization.
-- **OrganizationCategories**: A link from the organization's to a category. It is an index of all the categories under the organization.
-- **OrganizationRequests**: A link from the organization's to a request. It is an index of all the requests made by the organization.
-- **OrganizationOffers**: A link from the organization's to an offer. It is an index of all the offers made to the organization.
-
-#### 4.2.3 Project/Organization Coordinators
-
-Projects and Organizations coordinators are integral to the operation and governance of projects and organizations within the network. They serve as the responsibles for the management and representation of their respective projects or organizations.
-
-##### 4.2.3.1 Onboarding and Approval
-
-- Projects and organizations coordinators are individuals or groups designated to represent a project or organization within the network. They are onboarded and approved by the network's administrators to participate in the network, taking on the role of coordinators of projects or organizations.
-- The projects and organizations coordinators can then fill out the project or organization profile and invite others to participate in the project or organization.
-- Users can ask to join a project or organization.
-
-##### 4.2.3.2 Project/Organization Profile
-
-- Projects and organizations coordinators has their own profile. It includes their skills, location, type, etc.
-
-##### 4.2.3.3 Offers and Requests
-
-- Projects and organizations coordinators can make offers and requests for themselves or on behalf of their projects or organizations, such as fundraising, editing support, or testing of hApp.
+##### Coordinator Features
+- Network administrator approval required
+- Organization/Project profile customization (description, type, skills needed, etc.)
+- Request/Offer creation capabilities for the organization/project
+- Member invitation and approval management
 
 ### 4.3 Requests and Offers
 
-- **hREA Integration**: Utilizes hREA for managing economic activities, including tracking resources, facilitating agreements, and matching needs.
-- **Request Creation**: Users can create requests, linked to specific projects, organizations and skills.
-- **Offer Creation**: Organizations, projects and users can create offers, linked to specific requests and projects.
-- In hREA, requests and offers are `intents` and `proposals`.
-- For each exchange, there needs to be a mechanism for each party to agree that the exchange is complete. This could be integrated into the Request and Offer management sections of the application, allowing users to confirm the completion of an exchange directly within the application. This could be implemented as a confirmation step in the exchange process, ensuring that both parties have the opportunity to confirm the completion before the exchange is finalized.
+#### 4.3.1 Core Functionality
+- hREA integration for economic activities
+- Request creation linked to projects/organizations/skills
+- Offer creation linked to requests/projects
+- Implementation as hREA `intents` and `proposals`
+
+#### 4.3.2 Exchange Completion
+- Bilateral confirmation mechanism
+- In-app completion verification
+- Exchange finalization process
 
 ### 4.4 Skills and Categories
 
-- **Skills**: Users can create skills, which are used to filter users, requests and offers.
-- **Categories**: Administrators can create categories, which are used to organize projects, requests and offers.
+#### 4.4.1 Skills
+Skills are implemented as Resource Specifications in hREA.
 
-![Types of project](images/types-of-projects.png)
+##### Skill Features
+- Created through offers
+- User profile integration
+- Project/Request/Offer association
 
-![Types of support requested](images/types-of-support-requested.png)
+##### Skill Links
+- **AllSkills**: Global skills index
+- **SkillUsers**: Skill → users
+- **SkillProjects**: Skill → projects
+- **SkillRequests**: Skill → requests
+- **SkillOffers**: Skill → offers
 
-#### 4.4.1 Skill Entry
+#### 4.4.2 Categories
+Categories are Resource Specifications `classifiedAs` `{category}` in hREA.
 
-The `Skill` entry represents the skills associated with the users, projects, requests and offers. This in an anchor that contains a `String` that is the skill name.
+##### Category Features
+- Administrator-created
+- Project organization
+- Offer classification
+- Organization categorization (derived from projects)
 
-In hREA, skills are Resource Specifications. They can be created only by offers and requests. A user need to create an offer that is the list of its skills to be able to display it in its profile.
-
-#### 4.4.1.1 Links
-
-- **AllSkills**: A link to the `skills` anchor. It is an index of all the skills.
-- **SkillUsers**: A link from the skill to a user. It is an index of all the users that have the skill.
-- **SkillProjects**: A link from the skill to a project. It is an index of all the projects that have the skill.
-- **SkillRequests**: A link from the skill to a request. It is an index of all the requests that have the skill.
-- **SkillOffers**: A link from the skill to an offer. It is an index of all the offers that have the skill.
-
-#### 4.4.2 Category Entry
-
-The `Category` entry represents the categories associated with projects and offers. This in an anchor that contains a `String` that is the category name. 
-
-The `Category` of an organization is the collection of the `Category` of its projects.
-
-In hREA, categories are Resource Specifications `classifiedAs` `{category}`.
-
-#### 4.4.2.1 Links
-
-- **AllCategories**: A link to the `categories` anchor. It is an index of all the categories.
-- **CategoryProjects**: A link from the category to a project. It is an index of all the projects that have the category.
-- **CategoryOffers**: A link from the category to an offer. It is an index of all the offers related to the category.
+##### Category Links
+- **AllCategories**: Global category index
+- **CategoryProjects**: Category → projects
+- **CategoryOffers**: Category → offers
 
 ### 4.5 Search Functionality
 
-Each page has a search functionality.
+#### 4.5.1 Search Capabilities
+Each major section includes search functionality:
 
-- **Search Users**: Users can search users by name, skills, categories, location, organizations and projects.
-- **Search Organizations**: Users can search organizations by name, categories, projects.
-- **Search Projects**: Users can search projects by name, skills, categories and organizations.
-- **Search Requests**: Users can search requests by name, skills, categories, projects, organizations and users.
-- **Search Offers**: Users can search offers by name, skills, categories, projects, organizations and users.
+##### User Search
+- Name
+- Skills
+- Categories
+- Location
+- Organizations
+- Projects
+
+##### Project Search
+- Name
+- Category
+- Organization
+- Status
+- Skills required
+
+##### Organization Search
+- Name
+- Category
+- Members
+- Projects
+
+##### Request/Offer Search
+- Type
+- Category
+- Skills
+- Status
+- Associated project/organization
 
 ### 4.6 Network Administration and Moderation Functionalities
 
