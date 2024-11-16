@@ -161,9 +161,19 @@ class OrganizationsStore {
     return this.getOrganizationsByActionHashes(links.map((link) => link.target));
   }
 
-  async getUserCoordinatedOrganizations(userActionHash: ActionHash): Promise<UIOrganization[]> {
-    const links = await OrganizationsService.getUserCoordinatedOrganizationsLinks(userActionHash);
-    return this.getOrganizationsByActionHashes(links.map((link) => link.target));
+  async getUserCoordinatedOrganizations(
+    userOriginalActionHash: ActionHash
+  ): Promise<UIOrganization[]> {
+    const links = await OrganizationsService.getUserOrganizationsLinks(userOriginalActionHash);
+
+    return this.getOrganizationsByActionHashes(
+      links
+        .filter((link) => link.target)
+        .map((link) => link.target)
+        .filter((link) => link)
+    ).filter((org) =>
+      org.coordinators.some((coordinator) => coordinator === userOriginalActionHash)
+    );
   }
 
   async getAcceptedOrganizations(): Promise<UIOrganization[]> {

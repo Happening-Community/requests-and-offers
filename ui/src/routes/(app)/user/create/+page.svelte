@@ -120,6 +120,7 @@
         })
       );
 
+      usersStore.setCurrentUser(user);
       goto('/user');
     } catch (error) {
       console.error('error :', error);

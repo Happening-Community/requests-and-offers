@@ -23,7 +23,7 @@ export type UserInDHT = {
 export type StatusInDHT = {
   status_type: StatusType;
   reason?: string;
-  suspended_until?: number;
+  suspended_until?: string;
 };
 
 export type OrganizationInDHT = {

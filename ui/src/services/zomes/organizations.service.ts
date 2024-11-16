@@ -103,16 +103,6 @@ export class OrganizationsService {
     )) as Link[];
   }
 
-  static async getUserCoordinatedOrganizationsLinks(
-    user_original_action_hash: ActionHash
-  ): Promise<Link[]> {
-    return (await hc.callZome(
-      'users_organizations',
-      'get_user_coordinated_organizations_links',
-      user_original_action_hash
-    )) as Link[];
-  }
-
   static async getAcceptedOrganizationsLinks(): Promise<Link[]> {
     return (await hc.callZome(
       'administration',

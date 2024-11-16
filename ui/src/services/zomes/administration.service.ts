@@ -49,19 +49,33 @@ export class AdministrationService {
   }
 
   static async registerAdministrator(
-    entity: string,
+    entity: AdministrationEntity,
     entity_original_action_hash: ActionHash,
     agent_pubkeys: AgentPubKey[]
   ): Promise<boolean> {
-    return (await hc.callZome('administration', 'register_administrator', {
-      entity,
-      entity_original_action_hash,
-      agent_pubkeys
-    })) as boolean;
+    try {
+      console.log('Registering administrator with:', {
+        entity,
+        entity_original_action_hash,
+        agent_pubkeys
+      });
+
+      const result = await hc.callZome('administration', 'register_administrator', {
+        entity,
+        entity_original_action_hash,
+        agent_pubkeys
+      });
+
+      console.log('Register administrator result:', result);
+      return result as boolean;
+    } catch (error) {
+      console.error('Error registering administrator:', error);
+      throw error;
+    }
   }
 
   static async addAdministrator(
-    entity: string,
+    entity: AdministrationEntity,
     agent_pubkey: AgentPubKey
   ): Promise<boolean> {
     return (await hc.callZome('administration', 'add_administrator', {
@@ -70,32 +84,30 @@ export class AdministrationService {
     })) as boolean;
   }
 
-  static async removeAdministrator(
-    entity: string,
-    agent_pubkey: AgentPubKey
-  ): Promise<boolean> {
+  static async removeAdministrator(entity: string, agent_pubkey: AgentPubKey): Promise<boolean> {
     return (await hc.callZome('administration', 'remove_administrator', {
       entity,
       agent_pubkey
     })) as boolean;
   }
 
-  static async isAdministrator(
-    entity: string,
-    agent_pubkey: AgentPubKey
-  ): Promise<boolean> {
+  static async isAdministrator(entity: string, agent_pubkey: AgentPubKey): Promise<boolean> {
     return (await hc.callZome('administration', 'is_administrator', {
       entity,
       agent_pubkey
     })) as boolean;
   }
 
-  static async getAllAdministratorsLinks(entity: string): Promise<Link[]> {
+  static async getAllAdministratorsLinks(entity: AdministrationEntity): Promise<Link[]> {
     return (await hc.callZome('administration', 'get_all_administrators_links', entity)) as Link[];
   }
 
   static async getAllRevisionsForStatus(original_status_hash: ActionHash): Promise<Record[]> {
-    return (await hc.callZome('administration', 'get_all_revisions_for_status', original_status_hash)) as Record[];
+    return (await hc.callZome(
+      'administration',
+      'get_all_revisions_for_status',
+      original_status_hash
+    )) as Record[];
   }
 
   static async updateEntityStatus(

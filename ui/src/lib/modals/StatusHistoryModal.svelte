@@ -1,18 +1,23 @@
 <script>
   import StatusTable from '@lib/tables/StatusTable.svelte';
   import { getModalStore } from '@skeletonlabs/skeleton';
+  import { onMount } from 'svelte';
 
   const modalStore = getModalStore();
-  const username = $modalStore[0].meta.statusHistory[0].user.name;
+
+  onMount(() => {
+    console.log('modalStore', $modalStore);
+  });
+
+  const statusHistory = $modalStore[0]?.meta?.statusHistory || [];
+  const username = $modalStore[0]?.meta?.username;
 </script>
 
 <article class="hcron-modal">
   <div class="static mb-8 space-y-10">
-    <h2 class="h2 text-center">
-      Status History for {username}
-    </h2>
+    <h2 class="h2 text-center">{username}</h2>
 
-    <StatusTable statusHistory={$modalStore[0].meta.statusHistory} />
+    <StatusTable {statusHistory} {username} />
   </div>
 
   <button

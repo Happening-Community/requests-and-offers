@@ -38,11 +38,26 @@ class AdministrationStore {
     entity_original_action_hash: ActionHash,
     agent_pubkeys: AgentPubKey[]
   ): Promise<boolean> {
-    return await AdministrationService.registerAdministrator(
-      AdministrationEntity.Network,
-      entity_original_action_hash,
-      agent_pubkeys
-    );
+    try {
+      const result = await AdministrationService.registerAdministrator(
+        AdministrationEntity.Network,
+        entity_original_action_hash,
+        agent_pubkeys
+      );
+
+      if (result) {
+        console.log('Successfully registered network administrator');
+        // Refresh the administrators list
+        await this.getAllNetworkAdministrators();
+      } else {
+        console.warn('Failed to register network administrator');
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Error in registerNetworkAdministrator:', error);
+      throw error;
+    }
   }
 
   async addNetworkAdministrator(agent_pubkey: AgentPubKey): Promise<boolean> {
@@ -93,11 +108,16 @@ class AdministrationStore {
 
   // Status management methods
   private convertToUIStatus(status: StatusInDHT, timestamp?: number): UIStatus {
+    let duration: number | undefined;
+
+    if (status?.suspended_until) {
+      const suspendedUntil = new Date(status.suspended_until).getTime();
+      duration = suspendedUntil - (timestamp || Date.now());
+    }
+
     return {
       ...status,
-      duration: status.suspended_until
-        ? status.suspended_until - (timestamp || Date.now())
-        : undefined
+      duration
     };
   }
 
@@ -107,10 +127,21 @@ class AdministrationStore {
 
   async getAllRevisionsForStatus(original_status_hash: ActionHash): Promise<Revision[]> {
     const records = await AdministrationService.getAllRevisionsForStatus(original_status_hash);
-    return decodeRecords(records).map((record) => ({
-      ...record,
-      entry: this.convertToUIStatus(record.entry as StatusInDHT, record.timestamp)
-    }));
+    const revisions: Revision[] = [];
+
+    for (const record of records) {
+      const status = decodeRecords([record])[0] as StatusInDHT;
+      const user = await usersStore.getLatestUser(record.signed_action.hashed.hash);
+      if (!user) continue;
+
+      revisions.push({
+        user,
+        status: this.convertToUIStatus(status, record.signed_action.hashed.content.timestamp),
+        timestamp: record.signed_action.hashed.content.timestamp
+      });
+    }
+
+    return revisions;
   }
 
   async getLatestStatus(original_action_hash: ActionHash): Promise<UIStatus | null> {
@@ -258,7 +289,7 @@ class AdministrationStore {
       {
         status_type: 'suspended temporarily',
         reason,
-        suspended_until
+        suspended_until: suspended_until.toString()
       }
     );
   }
@@ -280,7 +311,7 @@ class AdministrationStore {
 
   getRemainingSuspensionTime(status: UIStatus): number | null {
     if (!status.suspended_until) return null;
-    const remaining = status.suspended_until - Date.now();
+    const remaining = Number(status.suspended_until) - Date.now();
     return remaining > 0 ? remaining : null;
   }
 

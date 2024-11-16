@@ -16,6 +16,7 @@
 
   onMount(async () => {
     await usersStore.getAcceptedUsers();
+
     isLoading = false;
   });
 </script>

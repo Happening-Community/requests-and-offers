@@ -3,6 +3,7 @@ import { decodeRecords } from '@utils';
 import type { UIUser } from '@/types/ui';
 import type { UserInDHT } from '@/types/holochain';
 import { UsersService } from '@/services/zomes/users.service';
+import hc from '@services/HolochainClientService.svelte';
 
 class UsersStore {
   allUsers: UIUser[] = $state([]);
@@ -84,22 +85,37 @@ class UsersStore {
   }
 
   async refreshCurrentUser(): Promise<UIUser | null> {
-    if (!this.currentUser?.original_action_hash) return null;
-    return this.refreshUser(this.currentUser.original_action_hash);
+    const agentPubKey = (await hc.getAppInfo())?.agent_pub_key;
+    if (!agentPubKey) return null;
+
+    const links = await UsersService.getAgentUser(agentPubKey);
+    if (links.length === 0) return null;
+
+    const record = await UsersService.getLatestUserRecord(links[0].target);
+    if (!record) return null;
+
+    this.currentUser = {
+      ...decodeRecords([record])[0],
+      original_action_hash: record.signed_action.hashed.hash,
+      previous_action_hash: record.signed_action.hashed.hash
+    };
+
+    return this.refreshUser(record.signed_action.hashed.hash);
   }
 
   async updateCurrentUser(user: UserInDHT): Promise<UIUser | null> {
-    if (!this.currentUser?.original_action_hash || !this.currentUser?.previous_action_hash)
-      return null;
+    const userOriginalActionHash = this.currentUser?.original_action_hash;
+    const userPrevious_action_hash = this.currentUser?.previous_action_hash;
+    if (!userOriginalActionHash || !userPrevious_action_hash) return null;
 
     const record = await UsersService.updateUser(
-      this.currentUser.original_action_hash,
-      this.currentUser.previous_action_hash,
+      userOriginalActionHash,
+      userPrevious_action_hash,
       user
     );
     const updatedUser: UIUser = {
       ...decodeRecords([record])[0],
-      original_action_hash: this.currentUser.original_action_hash,
+      original_action_hash: userOriginalActionHash,
       previous_action_hash: record.signed_action.hashed.hash
     };
 
@@ -145,9 +161,7 @@ class UsersStore {
   }
 
   async refresh(): Promise<void> {
-    if (this.currentUser) {
-      await this.refreshCurrentUser();
-    }
+    await this.refreshCurrentUser();
     await this.getAcceptedUsers();
   }
 

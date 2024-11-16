@@ -6,7 +6,7 @@
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import type { Revision, UIOrganization, UIStatus } from '@/types/ui';
+  import type { Revision, UIOrganization, UIStatus, UIUser } from '@/types/ui';
   import usersStore from '@/stores/users.store.svelte';
   import administrationStore from '@stores/administration.store.svelte';
   import organizationsStore from '@/stores/organizations.store.svelte';
@@ -33,28 +33,29 @@
 
   onMount(async () => {
     await usersStore.refreshCurrentUser();
+
+    if (!currentUser) return;
+
     const record = await administrationStore.getLatestStatusForEntity(
-      currentUser!.original_action_hash!,
+      currentUser.original_action_hash!,
       AdministrationEntity.Users
     );
 
     status = record ? decodeRecords([record])[0] : null;
 
-    for (const link of currentUser!.organizations!) {
+    for (const link of currentUser.organizations || []) {
       const organization = await organizationsStore.getLatestOrganization(link);
       if (organization) organizations.push(organization);
     }
 
-    if (currentUser) {
-      if (status!.suspended_until) {
-        const date = new Date(status!.suspended_until);
-        const dateString = date.toString();
-        const now = new Date();
+    if (status?.suspended_until) {
+      const date = new Date(status.suspended_until);
+      const dateString = date.toString();
+      const now = new Date();
 
-        isExpired = date < now;
+      isExpired = date < now;
 
-        suspensionDate = dateString.substring(0, dateString.indexOf(' ', 15));
-      }
+      suspensionDate = dateString.substring(0, dateString.indexOf(' ', 15));
     }
 
     if (currentUser) {
@@ -73,6 +74,7 @@
       type: 'component',
       component: statusHistoryModalComponent,
       meta: {
+        username: currentUser?.name || 'Unknown User',
         statusHistory
       }
     };

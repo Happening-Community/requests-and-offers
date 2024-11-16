@@ -1,20 +1,21 @@
 <script lang="ts">
   import type { Revision } from '@/types/ui';
-  import { onMount } from 'svelte';
+  import { use } from 'chai';
 
   type Props = {
+    username: string;
     statusHistory: Revision[];
   };
 
-  const { statusHistory }: Props = $props();
+  const { username, statusHistory }: Props = $props();
 
   let allStatusesColors: string[] = $state([]);
 
   $effect(() => {
     console.log('statusHistory', statusHistory);
 
-    allStatusesColors = statusHistory.map((status) => {
-      switch (status.status.status_type) {
+    allStatusesColors = (statusHistory || []).map((status) => {
+      switch (status?.status?.status_type) {
         case 'pending':
           return 'primary-400';
         case 'rejected':
@@ -24,6 +25,8 @@
           return 'green-400';
         case 'suspended temporarily':
           return 'warning-500';
+        default:
+          return 'surface-400';
       }
     });
 
@@ -33,10 +36,9 @@
   });
 
   function formatDurationInDays(duration: number): string {
+    if (!duration) return 'N/A';
     const totalDays = duration / 1000 / 60 / 60 / 24;
-
     const roundedDays = Math.ceil(totalDays);
-
     return `${roundedDays}d`;
   }
 </script>
@@ -56,15 +58,15 @@
     </thead>
 
     <tbody>
-      {#each statusHistory as Revision, i}
-        <tr class="text-{allStatusesColors[i]}">
-          <td>{new Date(Revision.timestamp).toLocaleString()}</td>
-          <td>{Revision.user.name}</td>
-          <td>{Revision.status.status_type}</td>
-          <td>{Revision.status.reason || 'N/A'}</td>
+      {#each statusHistory || [] as revision, i}
+        <tr class="text-{allStatusesColors[i] || 'surface-400'}">
+          <td>{revision?.timestamp ? new Date(revision.timestamp).toLocaleString() : 'N/A'}</td>
+          <td>{username || 'N/A'}</td>
+          <td>{revision?.status?.status_type || 'N/A'}</td>
+          <td>{revision?.status?.reason || 'N/A'}</td>
           <td>
-            {#if Revision.status.duration}
-              {formatDurationInDays(Revision.status.duration)}
+            {#if revision?.status?.duration}
+              {formatDurationInDays(revision.status.duration)}
             {:else}
               N/A
             {/if}

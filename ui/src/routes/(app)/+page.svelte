@@ -6,6 +6,8 @@
 
   const { currentUser } = $derived(usersStore);
   const { agentIsAdministrator } = $derived(administrationStore);
+
+  $inspect('currentUser:', currentUser);
 </script>
 
 <section class="flex flex-col items-center">
