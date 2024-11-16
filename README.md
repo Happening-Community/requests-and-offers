@@ -1,95 +1,156 @@
-# Request And Offers
+# Requests and Offers
 
-Requests And Offers is a hAppenings.community project to facilitate exchange between Holochain creators, developers, advocates, projects and organizations! 
-It's an agent-centric, distributed marketplace of requests and offers built with Holochain.
+A hAppenings.community project facilitating exchange between Holochain creators, developers, advocates, projects, and organizations. 
+Built with Holochain, it provides an agent-centric, distributed marketplace for requests and offers.
 
+## Quick Links
+
+- [Community Website](https://happenings.community/)
 - [Litepaper](https://happenings-community.gitbook.io/)
-- [Specifications](documentation/specifications.md)
-- Zomes documentation
-    - [Users zome](documentation/zomes/users.md)
-    - [Administration zome](documentation/zomes/administration.md)
-
-## Environment Setup
-
-> PREREQUISITE: set up the [holochain development environment](https://developer.holochain.org/docs/install/).
-
-Enter the nix shell by running this in the root folder of the repository: 
-
-```bash
-nix develop
-pnpm install
-```
-
-**Run all the other instructions in this README from inside this nix develop, otherwise they won't work**.
-
-## Running 2 agents
- 
-```bash
-pnpm start
-```
-
-This will create a network of 2 nodes connected to their UI.
-It will also bring up the Holochain Playground for advanced introspection of the conductors.
-
-## Running another number of agents
-
-```bash
-AGENTS=1 pnpm start
-```
-
-It is possible to create a network with a different number of nodes by changing the AGENTS variable.
-
-## Running the tests
-
-```bash
-pnpm test
-```
-This command run all the holochain backend tests and the ui tests.
-
-```bash
-pnpm test:ui
-```
-This one run the sveltekit ui tests.
-
-```bash
-pnpm test:misc
-```
-This one run the miscellaneous tests.
-
-```bash
-pnpm test:users
-```
-This one run the users tests of the users_organizations zome.
-
-```bash
-pnpm test:administration
-```
-This one run the administration zome tests.
-
-```bash
-pnpm test:organizations
-```
-This one run the organizations tests of the users_organizations zome.
-
-## Packaging
-
-To package the web happ:
-``` bash
-pnpm run package
-```
-
-You'll have the `requests_and_offers.webhapp` in `workdir`. This is what you should distribute so that the Holochain Launcher can install it.
-You will also have its subcomponent `requests_and_offers.happ` in the same folder`.
+- [Discord Community](https://discord.gg/happening)
 
 ## Documentation
 
-This repository is using these tools:
-- [NPM Workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces/): npm v7's built-in monorepo capabilities.
-- [hc](https://github.com/holochain/holochain/tree/develop/crates/hc): Holochain CLI to easily manage Holochain development instances.
-- [@holochain/tryorama](https://www.npmjs.com/package/@holochain/tryorama): test framework.
-- [@holochain/client](https://www.npmjs.com/package/@holochain/client): client library to connect to Holochain from the UI.
-- [@holochain-playground/cli](https://www.npmjs.com/package/@holochain-playground/cli): introspection tooling to understand what's going on in the Holochain nodes.
+📚 **[Full Documentation](documentation/README.md)**
+
+### Key Documentation Sections
+
+- **[Guides](documentation/guides/README.md)**
+  - [Getting Started](documentation/guides/getting-started.md)
+  - [Installation](documentation/guides/installation.md)
+  - [Contributing](documentation/guides/contributing.md)
+
+- **[Technical Documentation](documentation/technical/README.md)**
+  - [Architecture Overview](documentation/technical/README.md)
+  - [hREA Integration](documentation/technical/architecture/hrea-integration.md)
+  - [Zome Documentation](documentation/technical/zomes/README.md)
+    - [Users Organizations](documentation/technical/zomes/users.md)
+    - [Administration](documentation/technical/zomes/administration.md)
+
+- **[Specifications](documentation/specifications/README.md)**
+  - [MVP Requirements](documentation/specifications/mvp.md)
+  - [Feature Specifications](documentation/specifications/features.md)
+  - [User Roles](documentation/specifications/roles.md)
+  - [Technical Architecture](documentation/specifications/technical.md)
+  - [Use Cases](documentation/specifications/use-cases.md)
+
+## Quick Start
+
+### Prerequisites
+
+- [Holochain Development Environment](https://developer.holochain.org/docs/install/)
+- Node.js 16+
+- pnpm 9.7.0+
+
+### Setup
+
+```bash
+# Clone repository
+git clone https://github.com/Happening-Community/requests-and-offers.git
+cd requests-and-offers
+
+# Enter nix shell
+nix develop
+
+# Install dependencies
+pnpm install
+```
+
+### Development
+
+```bash
+# Start with 2 agents (default)
+pnpm start
+
+# Start with custom number of agents
+AGENTS=3 pnpm start
+
+# Start with Tauri (desktop app)
+pnpm start:tauri
+```
+
+This will:
+- Create a network of agents
+- Start the UI for each agent
+- Launch the Holochain Playground for conductor introspection
+
+### Testing
+
+```bash
+# Run all tests
+pnpm test
+
+# Frontend tests
+pnpm test:ui
+
+# Individual zome tests
+pnpm test:misc           # Misc functionality
+pnpm test:users          # Users Organizations
+pnpm test:administration # Administration
+pnpm test:organizations  # Organizations
+pnpm test:status        # Status module
+```
+
+### Building
+
+```bash
+# Build zomes
+pnpm build:zomes
+
+# Build complete hApp
+pnpm build:happ
+
+# Package for distribution
+pnpm package
+```
+
+## Project Structure
+
+```
+requests-and-offers/
+├── dnas/                    # Holochain DNA
+│   └── requests_and_offers/
+│       └── zomes/          # DNA zomes
+│           ├── coordinator/ # Coordinator zomes
+│           └── integrity/  # Integrity zomes
+├── ui/                     # SvelteKit frontend
+│   ├── src/
+│   │   ├── lib/           # Shared components
+│   │   ├── routes/        # SvelteKit routes
+│   │   ├── services/      # Holochain services
+│   │   └── stores/        # State management
+├── tests/                  # Tryorama tests
+└── documentation/         # Project documentation
+    ├── guides/           # Development guides
+    ├── specifications/   # Project specifications
+    └── technical/       # Technical documentation
+```
+
+## Feature Development
+
+See our [Contributing Guide](documentation/guides/contributing.md) for detailed development workflow:
+
+1. **DNA Development**
+   - Implement zome functionality
+   - Write Tryorama tests
+   - Document entry and link types
+
+2. **Service Layer**
+   - Create Holochain services
+   - Implement store management
+   - Handle state updates
+
+3. **UI Implementation**
+   - Build reusable components
+   - Create feature pages
+   - Integrate with stores
+
+## Community
+
+- Join our [Discord](https://discord.gg/happening)
+- Visit [hAppenings Community](https://happenings.community/)
+- Follow development on [GitHub](https://github.com/Happening-Community/requests-and-offers)
 
 ## License
 
-[Cryptographic Autonomy License version 1.0](LICENSE.md)
+This project is licensed under [Cryptographic Autonomy License version 1.0](LICENSE.md)
