@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Revision } from '@/types/ui';
-  import { use } from 'chai';
 
   type Props = {
     username: string;
@@ -12,8 +11,6 @@
   let allStatusesColors: string[] = $state([]);
 
   $effect(() => {
-    console.log('statusHistory', statusHistory);
-
     allStatusesColors = (statusHistory || []).map((status) => {
       switch (status?.status?.status_type) {
         case 'pending':

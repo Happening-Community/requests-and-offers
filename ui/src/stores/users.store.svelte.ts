@@ -106,6 +106,7 @@ class UsersStore {
   async updateCurrentUser(user: UserInDHT): Promise<UIUser | null> {
     const userOriginalActionHash = this.currentUser?.original_action_hash;
     const userPrevious_action_hash = this.currentUser?.previous_action_hash;
+
     if (!userOriginalActionHash || !userPrevious_action_hash) return null;
 
     const record = await UsersService.updateUser(
@@ -115,6 +116,7 @@ class UsersStore {
     );
     const updatedUser: UIUser = {
       ...decodeRecords([record])[0],
+      status: this.currentUser?.status,
       original_action_hash: userOriginalActionHash,
       previous_action_hash: record.signed_action.hashed.hash
     };
