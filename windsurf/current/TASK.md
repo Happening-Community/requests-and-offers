@@ -25,8 +25,12 @@
 
 ## Components to Review
 ### 1. Main Routes (App)
-- [ ] Home (`/routes/(app)/+page.svelte`)
-- [ ] Requests (`/routes/(app)/requests/+page.svelte`)
+- [x] Home (`/routes/(app)/+page.svelte`)
+- [x] Requests (`/routes/(app)/requests/+page.svelte`)
+  - [x] Added basic error handling
+  - [x] Implemented loading states
+  - [x] Prepared for future store integration
+  - [x] Centered page title
 - [ ] Offers (`/routes/(app)/offers/+page.svelte`)
 - [ ] Projects (`/routes/(app)/projects/+page.svelte`)
 - [ ] Organizations
