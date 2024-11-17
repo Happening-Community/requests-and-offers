@@ -31,7 +31,11 @@
   - [x] Implemented loading states
   - [x] Prepared for future store integration
   - [x] Centered page title
-- [ ] Offers (`/routes/(app)/offers/+page.svelte`)
+- [x] Offers (`/routes/(app)/offers/+page.svelte`)
+  - [x] Added basic error handling
+  - [x] Implemented loading states
+  - [x] Prepared for future store integration
+  - [x] Centered page title
 - [ ] Projects (`/routes/(app)/projects/+page.svelte`)
 - [ ] Organizations
   - [x] List (`/routes/(app)/organizations/+page.svelte`)
