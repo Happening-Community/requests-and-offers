@@ -14,10 +14,7 @@
     <StatusTable {statusHistory} {username} />
   </div>
 
-  <button
-    class="btn variant-filled-secondary w-fit self-center"
-    on:click={() => modalStore.close()}
-  >
+  <button class="btn variant-filled-secondary w-fit self-center" onclick={() => modalStore.close()}>
     Close
   </button>
 </article>

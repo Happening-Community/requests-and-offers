@@ -47,7 +47,7 @@
             <td>
               <button
                 class="btn variant-filled-secondary"
-                on:click={() => handleViewOrganization(organization)}
+                onclick={() => handleViewOrganization(organization)}
               >
                 View
               </button>
