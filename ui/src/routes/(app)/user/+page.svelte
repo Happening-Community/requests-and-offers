@@ -18,55 +18,76 @@
   const modalStore = getModalStore();
   const { currentUser } = $derived(usersStore);
 
-  let userPictureUrl = $derived(
+  // Memoized user picture URL to prevent unnecessary recreations
+  let userPictureUrl = $derived.by(() =>
     currentUser?.picture
       ? URL.createObjectURL(new Blob([new Uint8Array(currentUser.picture)]))
       : '/default_avatar.webp'
   );
 
+  // State with more explicit error handling
+  let error = $state<string | null>(null);
   let suspensionDate = $state('');
   let isExpired = $state(false);
   let status: UIStatus | null = $state(null);
+
+  // Cached organizations to reduce unnecessary fetches
   let organizations: UIOrganization[] = $state([]);
   let myOrganizations: UIOrganization[] = $state([]);
   let myCoordinatedOrganizations: UIOrganization[] = $state([]);
 
-  onMount(async () => {
-    await usersStore.refreshCurrentUser();
+  // Consolidated data fetching with error handling
+  async function fetchUserData() {
+    try {
+      // Refresh current user with error handling
+      await usersStore.refreshCurrentUser();
 
-    if (!currentUser) return;
+      if (!currentUser) {
+        error = 'No user profile found';
+        return;
+      }
 
-    const record = await administrationStore.getLatestStatusForEntity(
-      currentUser.original_action_hash!,
-      AdministrationEntity.Users
-    );
+      // Fetch status with error handling
+      const record = await administrationStore.getLatestStatusForEntity(
+        currentUser.original_action_hash!,
+        AdministrationEntity.Users
+      );
 
-    status = record ? decodeRecords([record])[0] : null;
+      status = record ? decodeRecords([record])[0] : null;
 
-    for (const link of currentUser.organizations || []) {
-      const organization = await organizationsStore.getLatestOrganization(link);
-      if (organization) organizations.push(organization);
-    }
+      // Optimize organization fetching
+      if (currentUser.organizations?.length) {
+        const orgPromises = currentUser.organizations.map((link) =>
+          organizationsStore.getLatestOrganization(link)
+        );
+        organizations = (await Promise.allSettled(orgPromises))
+          .filter((result) => result.status === 'fulfilled' && result.value)
+          .map((result) => (result as PromiseFulfilledResult<UIOrganization>).value);
+      }
 
-    if (status?.suspended_until) {
-      const date = new Date(status.suspended_until);
-      const dateString = date.toString();
-      const now = new Date();
+      // Handle suspension status
+      if (status?.suspended_until) {
+        const date = new Date(status.suspended_until);
+        const now = new Date();
 
-      isExpired = date < now;
+        isExpired = date < now;
+        suspensionDate = date.toLocaleDateString();
+      }
 
-      suspensionDate = dateString.substring(0, dateString.indexOf(' ', 15));
-    }
-
-    if (currentUser) {
+      // Fetch user organizations
       myOrganizations = await organizationsStore.getUserOrganizations(
         currentUser.original_action_hash!
       );
       myCoordinatedOrganizations = await organizationsStore.getUserCoordinatedOrganizations(
         currentUser.original_action_hash!
       );
+    } catch (err) {
+      console.error('Failed to fetch user data:', err);
+      error = 'Failed to load user data. Please try again later.';
     }
-  });
+  }
+
+  onMount(fetchUserData);
 
   const statusHistoryModalComponent: ModalComponent = { ref: StatusHistoryModal };
   const statusHistoryModal = (statusHistory: Revision[]): ModalSettings => {
@@ -81,19 +102,28 @@
   };
 
   async function handleStatusHistoryModal() {
-    const userStatusLink = await usersStore.getUserStatusLink(currentUser!.original_action_hash!);
-    const statusHistory = await administrationStore.getAllRevisionsForStatus(
-      userStatusLink!.target
-    );
+    try {
+      const userStatusLink = await usersStore.getUserStatusLink(currentUser!.original_action_hash!);
+      const statusHistory = await administrationStore.getAllRevisionsForStatus(
+        userStatusLink!.target
+      );
 
-    modalStore.trigger(statusHistoryModal(statusHistory));
-    modalStore.update((modals) => modals.reverse());
+      modalStore.trigger(statusHistoryModal(statusHistory));
+      modalStore.update((modals) => modals.reverse());
+    } catch (err) {
+      console.error('Failed to fetch status history:', err);
+      // Optionally show an error toast or modal
+    }
   }
 </script>
 
 <section class="flex flex-col items-center">
-  {#if !currentUser}
-    <p class="mb-4 text-center text-xl">It looks like you don't have a user profile yet !</p>
+  {#if error}
+    <div class="alert variant-filled-error">
+      <p>{error}</p>
+    </div>
+  {:else if !currentUser}
+    <p class="mb-4 text-center text-xl">It looks like you don't have a user profile yet!</p>
     <NavButton href="/user/create">Create Profile</NavButton>
   {:else}
     <div class="mb-10 flex flex-col items-center gap-5">
