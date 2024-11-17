@@ -9,11 +9,6 @@ pub enum UtilsError {
 
 impl From<UtilsError> for WasmError {
   fn from(err: UtilsError) -> Self {
-    match err {
-      UtilsError::ActionHashNotFound(entity) => wasm_error!(Guest(format!(
-        "Could not find the {}'s action hash",
-        entity
-      ))),
-    }
+    wasm_error!(Guest(err.to_string()))
   }
 }
