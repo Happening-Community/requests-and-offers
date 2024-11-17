@@ -1,35 +1,50 @@
-# Templates Directory
+# Windsurf Workspace Templates
 
-This directory contains templates for various aspects of the project.
+Part of the [Windsurf Workspace](../README.md) for systematic software development.
 
-## Structure
+## 🎯 Template Purpose
+Templates provide standardized starting points for:
+- Documentation
+- Feature development
+- AI-assisted task management
+- Consistent project communication
 
-### 📚 Documentation (`docs/`)
-- `holochain-api.md` - Template for Holochain zome API documentation
-- `technical.md` - Template for general technical documentation
+## 📂 Directory Structure
 
-### 🎯 Features (`features/`)
-- `holochain-feature.md` - Template for Holochain feature development
+### 📚 Documentation Templates
+- `docs/holochain-api.md`: Holochain zome API documentation
+- `docs/technical.md`: Technical documentation guidelines
+- `docs/architecture.md`: System architecture documentation
 
-### 💬 Prompts (`prompts/`)
-- `task.md` - Template for AI task interactions
+### 🚀 Development Templates
+- `features/holochain-feature.md`: Feature development guide
+- `component-refactoring.md`: UI component refactoring template
+- `performance-optimization.md`: Performance improvement template
 
-## Usage
+### 💬 Interaction Templates
+- `prompts/task.md`: AI task interaction protocol
+- `prompts/code-review.md`: Code review interaction guide
 
-### Documentation
-```markdown
-"Create new API documentation using:
-Template: @[templates/docs/holochain-api.md]"
-```
+## 🧭 Workspace Integration
 
-### Feature Development
-```markdown
-"Start new feature using:
-Template: @[templates/features/holochain-feature.md]"
-```
+### Recommended Workflow
+1. Select appropriate template
+2. Customize for specific use case
+3. Document in [@[current/TASK.md]](../current/TASK.md)
+4. Capture insights in [@[patterns/]](../patterns/)
 
-### AI Interaction
-```markdown
-"New task using:
-Template: @[templates/prompts/task.md]"
-```
+## 🔍 Quick Reference
+- **Main Workspace**: [@[../README.md]](../README.md)
+- **Current Task**: [@[../current/TASK.md]](../current/TASK.md)
+- **Refactoring Patterns**: [@[../patterns/ui-refactoring.md]](../patterns/ui-refactoring.md)
+
+## 💡 Best Practices
+- Use templates as starting points
+- Adapt to specific project needs
+- Maintain consistency
+- Continuously improve templates
+
+## 🚧 Template Development
+- Regular review and updates
+- Incorporate team feedback
+- Align with project evolution
