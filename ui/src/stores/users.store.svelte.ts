@@ -73,10 +73,6 @@ class UsersStore {
       u.original_action_hash?.toString() === original_action_hash.toString() ? user : u
     );
 
-    if (this.currentUser?.original_action_hash?.toString() === original_action_hash.toString()) {
-      this.currentUser = user;
-    }
-
     return user;
   }
 
@@ -94,8 +90,11 @@ class UsersStore {
     const record = await UsersService.getLatestUserRecord(links[0].target);
     if (!record) return null;
 
+    const statusLink = await UsersService.getUserStatusLink(links[0].target);
+
     this.currentUser = {
       ...decodeRecords([record])[0],
+      status: statusLink?.target,
       original_action_hash: record.signed_action.hashed.hash,
       previous_action_hash: record.signed_action.hashed.hash
     };
@@ -114,6 +113,7 @@ class UsersStore {
       userPrevious_action_hash,
       user
     );
+
     const updatedUser: UIUser = {
       ...decodeRecords([record])[0],
       status: this.currentUser?.status,
@@ -121,7 +121,6 @@ class UsersStore {
       previous_action_hash: record.signed_action.hashed.hash
     };
 
-    // Update the current user and the users list
     this.currentUser = updatedUser;
     this.allUsers = this.allUsers.map((u) =>
       u.original_action_hash?.toString() === this.currentUser?.original_action_hash?.toString()

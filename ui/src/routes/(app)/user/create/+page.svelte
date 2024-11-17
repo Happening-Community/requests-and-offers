@@ -17,37 +17,34 @@
   };
 
   const alertModalComponent: ModalComponent = { ref: AlertModal };
-  const alertModal = (meta: AlertModalMeta): ModalSettings => {
-    return {
-      type: 'component',
-      component: alertModalComponent,
-      meta
-    };
-  };
+  const alertModal = (meta: AlertModalMeta): ModalSettings => ({
+    type: 'component',
+    component: alertModalComponent,
+    meta
+  });
 
   const { currentUser } = $derived(usersStore);
   const modalStore = getModalStore();
 
+  let isLoading = $state(false);
+  let error = $state<string | null>(null);
+
   const welcomeAndNextStepsMessage = (name: string) => `
-       <img src="/hAppeningsLogoWsun2.webp" alt="hAppenings Community Logo" class="w-28" />
-        
-        <h2 class="text-xl font-semibold text-center">Welcome to hCRON!</h2>
-        
-        <p class="text-lg text-center">Hello ${name}, we're thrilled to have you join our community!</p>
-        
-        <div class="space-y-4">
-          <div class="p-4 rounded-lg border-l-4 border-blue-500">
-            <h3 class="font-bold text-lg text-tertiary-500">Important Next Steps:</h3>
-            <ul class="list-disc pl-5 mt-2 space-y-2 text-left">
-              <li>A network administrator will contact you via email and platform message shortly.</li>
-              <li>You'll be invited to schedule a meeting for identity verification.</li>
-              <li>After successful verification, your status will update to "accepted".</li>
-            </ul>
-          </div>
-          
-          <p class="text-sm">Once accepted, you'll gain full access to participate in our vibrant community!</p>
-        </div>
-      `;
+    <img src="/hAppeningsLogoWsun2.webp" alt="hAppenings Community Logo" class="w-28" />
+    <h2 class="text-xl font-semibold text-center">Welcome to hCRON!</h2>
+    <p class="text-lg text-center">Hello ${name}, we're thrilled to have you join our community!</p>
+    <div class="space-y-4">
+      <div class="p-4 rounded-lg border-l-4 border-blue-500">
+        <h3 class="font-bold text-lg text-tertiary-500">Important Next Steps:</h3>
+        <ul class="list-disc pl-5 mt-2 space-y-2 text-left">
+          <li>A network administrator will contact you via email and platform message shortly.</li>
+          <li>You'll be invited to schedule a meeting for identity verification.</li>
+          <li>After successful verification, your status will update to "accepted".</li>
+        </ul>
+      </div>
+      <p class="text-sm">Once accepted, you'll gain full access to participate in our vibrant community!</p>
+    </div>
+  `;
 
   let form: HTMLFormElement;
   let timezones = moment.tz.names();
@@ -67,11 +64,7 @@
 
       const formatted = `GMT${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${timezone}`;
 
-      return {
-        name: timezone,
-        formatted,
-        offset
-      };
+      return { name: timezone, formatted, offset };
     });
   }
 
@@ -82,9 +75,7 @@
   });
 
   $effect(() => {
-    formattedTimezones.sort((a, b) => {
-      return a.offset - b.offset;
-    });
+    formattedTimezones.sort((a, b) => a.offset - b.offset);
   });
 
   function filterTimezones(event: any) {
@@ -106,9 +97,8 @@
     }
   }
 
-  async function mockUser() {
+  async function createUser(user: UserInDHT) {
     try {
-      let user: UserInDHT = (await createMockedUsers())[0];
       await usersStore.createUser(user);
       await usersStore.refreshCurrentUser();
 
@@ -122,13 +112,31 @@
 
       usersStore.setCurrentUser(user);
       goto('/user');
-    } catch (error) {
-      console.error('error :', error);
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to create user profile';
+      console.error('User creation error:', err);
+    }
+  }
+
+  async function mockUser() {
+    isLoading = true;
+    error = null;
+    try {
+      let user: UserInDHT = (await createMockedUsers())[0];
+      await createUser(user);
+    } catch (err) {
+      error = 'Failed to create mocked user';
+      console.error('Mocked user creation error:', err);
+    } finally {
+      isLoading = false;
     }
   }
 
   async function submitForm(event: SubmitEvent) {
     event.preventDefault();
+    isLoading = true;
+    error = null;
+
     const data = new FormData(event.target as HTMLFormElement);
     const picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
 
@@ -146,19 +154,12 @@
     };
 
     try {
-      await usersStore.createUser(user);
-      await usersStore.refreshCurrentUser();
-
-      modalStore.trigger(
-        alertModal({
-          id: 'welcome-and-next-steps',
-          message: welcomeAndNextStepsMessage(user.name)
-        })
-      );
-
-      goto('/user');
-    } catch (error) {
-      console.error('error :', error);
+      await createUser(user);
+    } catch (err) {
+      error = 'Failed to submit user profile';
+      console.error('User submission error:', err);
+    } finally {
+      isLoading = false;
     }
   }
 
@@ -171,6 +172,19 @@
 
 <section class="flex w-4/5 flex-col gap-10 md:w-3/4 lg:w-1/2">
   <h2 class="h2">Create User Profile</h2>
+
+  {#if error}
+    <div class="alert variant-filled-error">
+      <p>{error}</p>
+      <button
+        class="btn btn-sm variant-soft"
+        onclick={() => {
+          error = null;
+        }}>Dismiss</button
+      >
+    </div>
+  {/if}
+
   <form
     class="flex flex-col gap-4"
     enctype="multipart/form-data"
@@ -221,7 +235,6 @@
 
     <div class="flex flex-col gap-2 lg:flex-row lg:gap-6">
       <p class="label w-16 text-lg">Skills :</p>
-      <!-- TODO:When skills indexation done, use Autocomplete Input Chip Skeleton component for skills selection -->
       <InputChip
         id="skills"
         name="skills"
@@ -242,7 +255,6 @@
 
     <label class="label text-lg">
       Time Zone :
-      <!-- TODO: Use Autocomplete Skeleton component for timezone selection -->
       <input
         type="text"
         placeholder="Search timezones..."
@@ -262,16 +274,29 @@
     </label>
 
     <div class="flex justify-around">
-      <button type="submit" class="btn variant-filled-primary w-fit self-center">
-        Create Profile
+      <button
+        type="submit"
+        class="btn variant-filled-primary w-fit self-center"
+        disabled={isLoading}
+      >
+        {#if isLoading}
+          Creating Profile...
+        {:else}
+          Create Profile
+        {/if}
       </button>
 
       <button
         type="button"
         class="btn variant-filled-tertiary w-fit self-center"
         onclick={mockUser}
+        disabled={isLoading}
       >
-        Create Mocked User
+        {#if isLoading}
+          Creating...
+        {:else}
+          Create Mocked User
+        {/if}
       </button>
     </div>
   </form>

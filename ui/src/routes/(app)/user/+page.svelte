@@ -12,8 +12,6 @@
   import organizationsStore from '@/stores/organizations.store.svelte';
   import StatusHistoryModal from '@lib/modals/StatusHistoryModal.svelte';
   import NavButton from '@lib/NavButton.svelte';
-  import { decodeRecords } from '@/utils';
-  import { AdministrationEntity } from '@/types/holochain';
 
   const modalStore = getModalStore();
   const { currentUser } = $derived(usersStore);
@@ -36,24 +34,25 @@
   let myOrganizations: UIOrganization[] = $state([]);
   let myCoordinatedOrganizations: UIOrganization[] = $state([]);
 
+  $inspect('Current user:', currentUser);
   // Consolidated data fetching with error handling
   async function fetchUserData() {
+    console.log('Fetching user data...');
+
     try {
       // Refresh current user with error handling
       await usersStore.refreshCurrentUser();
 
+      // Update the current user and the users list
       if (!currentUser) {
         error = 'No user profile found';
         return;
       }
 
       // Fetch status with error handling
-      const record = await administrationStore.getLatestStatusForEntity(
-        currentUser.original_action_hash!,
-        AdministrationEntity.Users
-      );
+      status = await administrationStore.getLatestStatus(currentUser.status!);
 
-      status = record ? decodeRecords([record])[0] : null;
+      console.log('Status:', status);
 
       // Optimize organization fetching
       if (currentUser.organizations?.length) {

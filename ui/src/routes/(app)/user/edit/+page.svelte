@@ -1,11 +1,13 @@
 <script lang="ts">
   import moment from 'moment-timezone';
-  import { Avatar, FileDropzone, InputChip } from '@skeletonlabs/skeleton';
+  import { Avatar, FileDropzone, InputChip, getModalStore } from '@skeletonlabs/skeleton';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import NavButton from '@lib/NavButton.svelte';
   import usersStore from '@stores/users.store.svelte';
   import type { UserInDHT, UserType } from '@/types/holochain';
+  import AlertModal from '@lib/dialogs/AlertModal.svelte';
+  import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
 
   type FormattedTimezone = {
     name: string;
@@ -14,6 +16,14 @@
   };
 
   const { currentUser } = $derived(usersStore);
+  const modalStore = getModalStore();
+
+  const alertModalComponent: ModalComponent = { ref: AlertModal };
+  const alertModal = (meta: any): ModalSettings => ({
+    type: 'component',
+    component: alertModalComponent,
+    meta
+  });
 
   let form: HTMLFormElement | undefined = $state();
   let timezones = moment.tz.names();
@@ -24,6 +34,8 @@
   let fileMessage: string = $state('');
   let search = $state('');
   let isChanged = $state(false);
+  let isLoading = $state(false);
+  let error = $state<string | null>(null);
 
   function formatTimezones(timezones: string[]): FormattedTimezone[] {
     return timezones.map((timezone) => {
@@ -34,11 +46,7 @@
 
       const formatted = `GMT${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${timezone}`;
 
-      return {
-        name: timezone,
-        formatted,
-        offset
-      };
+      return { name: timezone, formatted, offset };
     });
   }
 
@@ -49,9 +57,7 @@
   });
 
   $effect(() => {
-    formattedTimezones.sort((a, b) => {
-      return a.offset - b.offset;
-    });
+    formattedTimezones.sort((a, b) => a.offset - b.offset);
   });
 
   function filterTimezones(event: any) {
@@ -62,6 +68,7 @@
   async function onPictureFileChange() {
     fileMessage = `${files![0].name}`;
     userPicture = new Blob([new Uint8Array(await files![0].arrayBuffer())]);
+    isChanged = true;
   }
 
   function RemoveUserPicture() {
@@ -79,6 +86,31 @@
   onMount(async () => {
     if (currentUser?.picture) userPicture = new Blob([currentUser?.picture]);
   });
+
+  async function updateUser(user: UserInDHT) {
+    try {
+      isLoading = true;
+      error = null;
+
+      await usersStore.updateCurrentUser(user);
+      await usersStore.refreshCurrentUser();
+
+      modalStore.trigger(
+        alertModal({
+          id: 'profile-updated',
+          message: 'Your profile has been successfully updated!',
+          confirmLabel: 'Ok'
+        })
+      );
+
+      goto('/user');
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to update user profile';
+      console.error('User update error:', err);
+    } finally {
+      isLoading = false;
+    }
+  }
 
   async function submitForm(event: SubmitEvent) {
     event.preventDefault();
@@ -99,14 +131,7 @@
       location: data.get('location') as string
     };
 
-    try {
-      await usersStore.updateCurrentUser(user);
-      await usersStore.refreshCurrentUser();
-
-      goto('/user');
-    } catch (error) {
-      console.error('error :', error);
-    }
+    await updateUser(user);
   }
 </script>
 
@@ -116,6 +141,20 @@
     <NavButton href="/user/create">Create Profile</NavButton>
   {:else}
     <h2 class="h2">Edit User</h2>
+
+    {#if error}
+      <div class="alert variant-filled-error">
+        <p>{error}</p>
+        <button
+          class="btn btn-sm variant-soft"
+          onclick={() => {
+            error = null;
+          }}
+        >
+          Dismiss
+        </button>
+      </div>
+    {/if}
 
     <form
       class="flex flex-col gap-4"
@@ -187,7 +226,6 @@
 
       <div class="flex gap-2">
         <p class="label w-16 text-lg">Skills :</p>
-        <!-- TODO:When skills indexation done, use Autocomplete Input Chip Skeleton component for skills selection -->
         <InputChip
           id="skills"
           value={currentUser.skills}
@@ -209,7 +247,6 @@
 
       <label class="label text-lg">
         Time Zone :
-        <!-- TODO: Use Autocomplete Skeleton component for timezone selection -->
         <input
           type="text"
           placeholder="Search timezones..."
@@ -233,9 +270,13 @@
       <button
         type="submit"
         class="btn variant-filled-primary w-fit self-center"
-        disabled={!isChanged}
+        disabled={!isChanged || isLoading}
       >
-        Update Profile
+        {#if isLoading}
+          Updating Profile...
+        {:else}
+          Update Profile
+        {/if}
       </button>
     </form>
   {/if}
