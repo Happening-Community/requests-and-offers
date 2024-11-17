@@ -35,7 +35,6 @@
         AdministrationEntity.Users
       );
       userStatus = decodeRecords([userStatusRecord!])[0];
-      console.log('userStatus', userStatus);
     }
   });
 

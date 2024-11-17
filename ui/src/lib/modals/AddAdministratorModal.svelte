@@ -45,7 +45,6 @@
         if (r) {
           try {
             const userAgents = await usersStore.getUserAgents(user.original_action_hash!);
-            console.log('userAgents', userAgents);
 
             if (!userAgents.length) {
               modalStore.close();

@@ -37,8 +37,6 @@
   $inspect('Current user:', currentUser);
   // Consolidated data fetching with error handling
   async function fetchUserData() {
-    console.log('Fetching user data...');
-
     try {
       // Refresh current user with error handling
       await usersStore.refreshCurrentUser();
@@ -51,8 +49,6 @@
 
       // Fetch status with error handling
       status = await administrationStore.getLatestStatus(currentUser.status!);
-
-      console.log('Status:', status);
 
       // Optimize organization fetching
       if (currentUser.organizations?.length) {
@@ -86,7 +82,9 @@
     }
   }
 
-  onMount(fetchUserData);
+  onMount(() => {
+    fetchUserData();
+  });
 
   const statusHistoryModalComponent: ModalComponent = { ref: StatusHistoryModal };
   const statusHistoryModal = (statusHistory: Revision[]): ModalSettings => {

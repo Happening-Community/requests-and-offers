@@ -60,22 +60,6 @@ class UsersStore {
     );
   }
 
-  async refreshUser(original_action_hash: ActionHash): Promise<UIUser | null> {
-    const user = await this.getLatestUser(original_action_hash);
-    if (!user) return null;
-
-    const statusLink = await UsersService.getUserStatusLink(original_action_hash);
-    if (statusLink) {
-      user.status = statusLink.target;
-    }
-
-    this.allUsers = this.allUsers.map((u) =>
-      u.original_action_hash?.toString() === original_action_hash.toString() ? user : u
-    );
-
-    return user;
-  }
-
   async setCurrentUser(user: UIUser) {
     this.currentUser = user;
   }
@@ -95,22 +79,28 @@ class UsersStore {
     this.currentUser = {
       ...decodeRecords([record])[0],
       status: statusLink?.target,
-      original_action_hash: record.signed_action.hashed.hash,
+      original_action_hash: links[0].target,
       previous_action_hash: record.signed_action.hashed.hash
     };
 
-    return this.refreshUser(record.signed_action.hashed.hash);
+    this.allUsers = this.allUsers.map((u) =>
+      u.original_action_hash?.toString() === this.currentUser?.original_action_hash?.toString()
+        ? this.currentUser!
+        : u
+    );
+
+    return this.currentUser;
   }
 
   async updateCurrentUser(user: UserInDHT): Promise<UIUser | null> {
     const userOriginalActionHash = this.currentUser?.original_action_hash;
-    const userPrevious_action_hash = this.currentUser?.previous_action_hash;
+    const userPreviousActionHash = this.currentUser?.previous_action_hash;
 
-    if (!userOriginalActionHash || !userPrevious_action_hash) return null;
+    if (!userOriginalActionHash || !userPreviousActionHash) return null;
 
     const record = await UsersService.updateUser(
       userOriginalActionHash,
-      userPrevious_action_hash,
+      userPreviousActionHash,
       user
     );
 
@@ -121,10 +111,10 @@ class UsersStore {
       previous_action_hash: record.signed_action.hashed.hash
     };
 
-    this.currentUser = updatedUser;
+    this.setCurrentUser(updatedUser);
     this.allUsers = this.allUsers.map((u) =>
       u.original_action_hash?.toString() === this.currentUser?.original_action_hash?.toString()
-        ? updatedUser
+        ? this.currentUser!
         : u
     );
 

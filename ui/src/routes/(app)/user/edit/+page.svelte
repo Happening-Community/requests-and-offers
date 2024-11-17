@@ -93,7 +93,6 @@
       error = null;
 
       await usersStore.updateCurrentUser(user);
-      await usersStore.refreshCurrentUser();
 
       modalStore.trigger(
         alertModal({

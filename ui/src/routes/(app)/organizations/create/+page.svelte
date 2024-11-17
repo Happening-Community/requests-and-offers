@@ -115,8 +115,6 @@
         record.signed_action.hashed.hash
       );
 
-      console.log('organizationData', organizationData);
-
       await usersStore.refreshCurrentUser();
 
       modalStore.trigger(
@@ -146,17 +144,12 @@
       location: data.get('location') as string
     };
 
-    console.log('organization', organization);
-
     try {
       const record = await organizationsStore.createOrganization(organization);
-      console.log('record', record);
 
       const organizationData = await organizationsStore.getLatestOrganization(
         record.signed_action.hashed.hash
       );
-
-      console.log('organizationData', organizationData);
 
       modalStore.trigger(
         alertModal({

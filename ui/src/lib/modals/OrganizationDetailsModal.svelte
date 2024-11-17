@@ -16,8 +16,6 @@
   let organizationStatus: UIStatus | null = $state(null);
 
   onMount(async () => {
-    console.log('organization', organization);
-
     organizationPictureUrl = organization?.logo
       ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
       : '/default_avatar.webp';

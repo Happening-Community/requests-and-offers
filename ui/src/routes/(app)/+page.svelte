@@ -8,10 +8,7 @@
 
   let error: string | null = $state(null);
 
-  $effect(() => {
-    console.log('Current user:', currentUser);
-    console.log('Is administrator:', agentIsAdministrator);
-  });
+  $inspect('Is administrator:', agentIsAdministrator);
 </script>
 
 <section class="flex flex-col items-center">
