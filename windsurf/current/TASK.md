@@ -19,6 +19,17 @@
 - [x] Enhanced user experience with error states
 
 ## Recent Changes
+### UI and Component Improvements
+- [x] Refactored Organizations Create page
+  - Added comprehensive error handling
+  - Implemented loading states
+  - Centralized organization creation logic
+- [x] Updated OrganizationsTable component
+  - Centered and styled table title
+- [x] Integrated OrganizationsTable in User Profile page
+  - Replaced manual table rendering with reusable component
+  - Simplified organization display logic
+
 ### User Store and Zome Improvements
 - Fixed user profile update and refresh mechanism
 - Corrected link handling in user store and zome
@@ -34,27 +45,13 @@
 ### 1. Main Routes (App)
 - [x] Home (`/routes/(app)/+page.svelte`)
 - [x] Requests (`/routes/(app)/requests/+page.svelte`)
-  - [x] Added basic error handling
-  - [x] Implemented loading states
-  - [x] Prepared for future store integration
-  - [x] Centered page title
 - [x] Offers (`/routes/(app)/offers/+page.svelte`)
-  - [x] Added basic error handling
-  - [x] Implemented loading states
-  - [x] Prepared for future store integration
-  - [x] Centered page title
 - [x] Projects (`/routes/(app)/projects/+page.svelte`)
-  - [x] Added basic error handling
-  - [x] Implemented loading states
-  - [x] Prepared for future store integration
-  - [x] Centered page title
-  - [x] Removed mocked data and complex loading logic
-- [ ] Organizations
+- [x] Organizations
   - [x] List (`/routes/(app)/organizations/+page.svelte`)
-  - [ ] Create (`/routes/(app)/organizations/create/+page.svelte`)
+  - [x] Create (`/routes/(app)/organizations/create/+page.svelte`)
 - [x] User Management
   - [x] Profile (`/routes/(app)/user/+page.svelte`)
-    - [x] Simplified status history modal retrieval
   - [x] Create (`/routes/(app)/user/create/+page.svelte`)
   - [x] Edit (`/routes/(app)/user/edit/+page.svelte`)
 
@@ -75,7 +72,7 @@
 - [ ] Status History (`/lib/modals/StatusHistoryModal.svelte`)
 
 #### Tables
-- [ ] Organizations Table (`/lib/tables/OrganizationsTable.svelte`)
+- [x] Organizations Table (`/lib/tables/OrganizationsTable.svelte`)
 - [ ] Users Table (`/lib/tables/UsersTable.svelte`)
 - [ ] Status Table (`/lib/tables/StatusTable.svelte`)
 
@@ -91,6 +88,7 @@
 - Optimize reactive state management
 - Add comprehensive error messaging
 - Remove unnecessary comments
+- Create reusable components for common UI patterns
 
 ## Next Components to Review
 1. Admin Dashboard

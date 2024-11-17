@@ -1,96 +1,51 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
-  import { page } from '$app/stores';
-  import { getModalStore } from '@skeletonlabs/skeleton';
-  import ConfirmModal from '@/lib/dialogs/ConfirmModal.svelte';
-  import { createMockedOrganizations } from '@mocks';
-  import { queueAndReverseModal } from '@/utils';
-  import type { UIOrganization } from '@/types/ui';
-  import organizationsStore from '@/stores/organizations.store.svelte';
-  import type { OrganizationInDHT } from '@/types/holochain';
-  import moment from 'moment-timezone';
-  import { FileDropzone, Avatar } from '@skeletonlabs/skeleton';
+  import { FileDropzone, Avatar, getModalStore } from '@skeletonlabs/skeleton';
   import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
+  import organizationsStore from '@/stores/organizations.store.svelte';
+  import { createMockedOrganizations } from '@mocks';
+  import type { OrganizationInDHT } from '@/types/holochain';
   import AlertModal from '@lib/dialogs/AlertModal.svelte';
   import type { AlertModalMeta } from '@lib/types';
   import usersStore from '@stores/users.store.svelte';
 
-  type FormattedTimezone = {
-    name: string;
-    formatted: string;
-    offset: number;
-  };
-
   const alertModalComponent: ModalComponent = { ref: AlertModal };
-  const alertModal = (meta: AlertModalMeta): ModalSettings => {
-    return {
-      type: 'component',
-      component: alertModalComponent,
-      meta
-    };
-  };
+  const alertModal = (meta: AlertModalMeta): ModalSettings => ({
+    type: 'component',
+    component: alertModalComponent,
+    meta
+  });
 
   const modalStore = getModalStore();
 
+  let isLoading = $state(false);
+  let error = $state<string | null>(null);
+
   const welcomeAndNextStepsMessage = (name: string) => `
-         <img src="/hAppeningsLogoWsun2.webp" alt="hAppenings Community Logo" class="w-28" />
+    <img src="/hAppeningsLogoWsun2.webp" alt="hAppenings Community Logo" class="w-28" />
+    
+    <h2 class="text-xl font-semibold text-center">Your organization has been created!</h2>
+    
+    <p class="text-lg text-center">Your organization ${name}, has been successfully created!</p>
           
-          <h2 class="text-xl font-semibold text-center">Your organization has been created!</h2>
-          
-          <p class="text-lg text-center">Your organization ${name}, has been successfully created!</p>
-                    
-          <div class="space-y-4">
-            <div class="p-4 rounded-lg border-l-4 border-blue-500">
-              <h3 class="font-bold text-lg text-tertiary-500">Important Next Steps:</h3>
-              <ul class="list-disc pl-5 mt-2 space-y-2 text-left">
-                <li>A network administrator will contact you via email and platform message shortly.</li>
-                <li>You'll be invited to schedule a meeting for identity verification.</li>
-                <li>After successful verification, the status of your organization will update to "accepted".</li>
-              </ul>
-            </div>
-            
-            <p class="text-sm">Once accepted, you'll gain full access to participate in our vibrant community!</p>
-          </div>
-        `;
+    <div class="space-y-4">
+      <div class="p-4 rounded-lg border-l-4 border-blue-500">
+        <h3 class="font-bold text-lg text-tertiary-500">Important Next Steps:</h3>
+        <ul class="list-disc pl-5 mt-2 space-y-2 text-left">
+          <li>A network administrator will contact you via email and platform message shortly.</li>
+          <li>You'll be invited to schedule a meeting for identity verification.</li>
+          <li>After successful verification, the status of your organization will update to "accepted".</li>
+        </ul>
+      </div>
+      
+      <p class="text-sm">Once accepted, you'll gain full access to participate in our vibrant community!</p>
+    </div>
+  `;
 
   let form: HTMLFormElement;
-  let timezones = moment.tz.names();
   let organizationLogo: Blob | null = $state(null);
   let files: FileList | undefined = $state();
   let fileMessage: string = $state('');
-  let filteredTimezones: string[] = $state([]);
-  let formattedTimezones: FormattedTimezone[] = $state([]);
-  let search = $state('');
-
-  function formatTimezones(timezones: string[]): FormattedTimezone[] {
-    return timezones.map((timezone) => {
-      const offset = moment.tz(timezone).utcOffset();
-      const hours = Math.floor(Math.abs(offset) / 60);
-      const minutes = Math.abs(offset) % 60;
-      const sign = offset >= 0 ? '+' : '-';
-
-      const formatted = `GMT${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${timezone}`;
-
-      return {
-        name: timezone,
-        formatted,
-        offset
-      };
-    });
-  }
-
-  $effect(() => {
-    search
-      ? (formattedTimezones = formatTimezones(filteredTimezones))
-      : (formattedTimezones = formatTimezones(timezones));
-  });
-
-  $effect(() => {
-    formattedTimezones.sort((a, b) => {
-      return a.offset - b.offset;
-    });
-  });
 
   async function onLogoFileChange() {
     fileMessage = `${files![0].name}`;
@@ -100,38 +55,54 @@
   function RemoveOrganizationLogo() {
     organizationLogo = null;
     fileMessage = '';
-    const pictureInput = form.querySelector('input[name="picture"]') as HTMLInputElement;
+    const pictureInput = form.querySelector('input[name="logo"]') as HTMLInputElement;
     if (pictureInput) {
       pictureInput.value = '';
     }
   }
 
-  async function mockOrganization() {
+  async function createOrganization(organization: OrganizationInDHT) {
     try {
-      let organization: OrganizationInDHT = (await createMockedOrganizations())[0];
       const record = await organizationsStore.createOrganization(organization);
 
-      const organizationData = await organizationsStore.getLatestOrganization(
-        record.signed_action.hashed.hash
-      );
+      await organizationsStore.getLatestOrganization(record.signed_action.hashed.hash);
 
       await usersStore.refreshCurrentUser();
 
       modalStore.trigger(
         alertModal({
           id: 'welcome-and-next-steps',
-          message: welcomeAndNextStepsMessage(organization.name)
+          message: welcomeAndNextStepsMessage(organization.name),
+          confirmLabel: 'Ok !'
         })
       );
 
       goto('/user');
-    } catch (error) {
-      console.error('error :', error);
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to create organization';
+      console.error('Organization creation error:', err);
+    }
+  }
+
+  async function mockOrganization() {
+    isLoading = true;
+    error = null;
+    try {
+      let organization: OrganizationInDHT = (await createMockedOrganizations())[0];
+      await createOrganization(organization);
+    } catch (err) {
+      error = 'Failed to create mocked organization';
+      console.error('Mocked organization creation error:', err);
+    } finally {
+      isLoading = false;
     }
   }
 
   async function submitForm(event: SubmitEvent) {
     event.preventDefault();
+    isLoading = true;
+    error = null;
+
     const data = new FormData(event.target as HTMLFormElement);
     const logo = (await (data.get('logo') as File).arrayBuffer()) as Uint8Array;
 
@@ -145,28 +116,31 @@
     };
 
     try {
-      const record = await organizationsStore.createOrganization(organization);
-
-      const organizationData = await organizationsStore.getLatestOrganization(
-        record.signed_action.hashed.hash
-      );
-
-      modalStore.trigger(
-        alertModal({
-          id: 'welcome-and-next-steps',
-          message: welcomeAndNextStepsMessage(organization.name)
-        })
-      );
-
-      goto('/user');
-    } catch (error) {
-      console.error('error :', error);
+      await createOrganization(organization);
+    } catch (err) {
+      error = 'Failed to submit organization';
+      console.error('Organization submission error:', err);
+    } finally {
+      isLoading = false;
     }
   }
 </script>
 
 <section class="flex w-4/5 flex-col gap-10 md:w-3/4 lg:w-1/2">
   <h2 class="h2">Create new Organization</h2>
+
+  {#if error}
+    <div class="alert variant-filled-error">
+      <p>{error}</p>
+      <button
+        class="btn btn-sm variant-soft"
+        onclick={() => {
+          error = null;
+        }}>Dismiss</button
+      >
+    </div>
+  {/if}
+
   <form
     class="flex flex-col gap-4"
     enctype="multipart/form-data"
@@ -231,14 +205,23 @@
     </label>
 
     <div class="flex justify-around">
-      <button type="submit" class="btn variant-filled-primary w-fit self-center">
-        Create Organization
+      <button
+        type="submit"
+        class="btn variant-filled-primary w-fit self-center"
+        disabled={isLoading}
+      >
+        {#if isLoading}
+          Creating Organization...
+        {:else}
+          Create Organization
+        {/if}
       </button>
 
       <button
         type="button"
         class="btn variant-filled-tertiary w-fit self-center"
         onclick={mockOrganization}
+        disabled={isLoading}
       >
         Create Mocked Organization
       </button>

@@ -12,6 +12,7 @@
   import organizationsStore from '@/stores/organizations.store.svelte';
   import StatusHistoryModal from '@lib/modals/StatusHistoryModal.svelte';
   import NavButton from '@lib/NavButton.svelte';
+  import OrganizationsTable from '@/lib/tables/OrganizationsTable.svelte';
 
   const modalStore = getModalStore();
   const { currentUser } = $derived(usersStore);
@@ -30,7 +31,6 @@
   let status: UIStatus | null = $state(null);
 
   // Cached organizations to reduce unnecessary fetches
-  let organizations: UIOrganization[] = $state([]);
   let myOrganizations: UIOrganization[] = $state([]);
   let myCoordinatedOrganizations: UIOrganization[] = $state([]);
 
@@ -55,9 +55,6 @@
         const orgPromises = currentUser.organizations.map((link) =>
           organizationsStore.getLatestOrganization(link)
         );
-        organizations = (await Promise.allSettled(orgPromises))
-          .filter((result) => result.status === 'fulfilled' && result.value)
-          .map((result) => (result as PromiseFulfilledResult<UIOrganization>).value);
       }
 
       // Handle suspension status
@@ -180,74 +177,14 @@
       {#if currentUser.location}
         <p><b>Location :</b> {currentUser.location}</p>
       {/if}
-      {#if organizations.length > 0}
-        <h3 class="h3">My Organizations</h3>
-        <table class="table-hover table drop-shadow-lg">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Location</th>
-              <th># Members</th>
-            </tr></thead
-          >
-          <tbody>
-            {#each organizations as organization}
-              <tr>
-                <td>{organization.name}</td>
-                <td>{organization.description}</td>
-                <td>{organization.location}</td>
-                <td>{organization.members.length}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      {/if}
       {#if myOrganizations.length > 0}
-        <h3 class="h3">My Organizations</h3>
-        <table class="table-hover table drop-shadow-lg">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Location</th>
-              <th># Members</th>
-            </tr></thead
-          >
-          <tbody>
-            {#each myOrganizations as organization}
-              <tr>
-                <td>{organization.name}</td>
-                <td>{organization.description}</td>
-                <td>{organization.location}</td>
-                <td>{organization.members.length}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
+        <OrganizationsTable title="My Organizations" organizations={myOrganizations} />
       {/if}
       {#if myCoordinatedOrganizations.length > 0}
-        <h3 class="h3">My Coordinated Organizations</h3>
-        <table class="table-hover table drop-shadow-lg">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Location</th>
-              <th># Members</th>
-            </tr></thead
-          >
-          <tbody>
-            {#each myCoordinatedOrganizations as organization}
-              <tr>
-                <td>{organization.name}</td>
-                <td>{organization.description}</td>
-                <td>{organization.location}</td>
-                <td>{organization.members.length}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
+        <OrganizationsTable
+          title="My Coordinated Organizations"
+          organizations={myCoordinatedOrganizations}
+        />
       {/if}
     </div>
   {/if}

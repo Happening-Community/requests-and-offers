@@ -23,7 +23,7 @@
 </script>
 
 <div class="flex flex-col gap-4">
-  <h2 class="h3">{title}</h2>
+  <h2 class="h3 text-center font-semibold">{title}</h2>
   {#if organizations.length > 0}
     <table class="table-hover table drop-shadow-lg">
       <thead>
