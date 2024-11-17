@@ -10,6 +10,7 @@
 - [x] Fixed TypeScript type inference for `status` variable
 - [x] Replaced `$inspect` with `console.log`
 - [x] Removed unused imports (`decodeRecords`, `AdministrationEntity`)
+- [x] Simplified status history modal retrieval
 
 ### Organizations Page Refactoring
 - [x] Added comprehensive error handling
@@ -33,6 +34,7 @@
   - [x] Create (`/routes/(app)/organizations/create/+page.svelte`)
 - [x] User Management
   - [x] Profile (`/routes/(app)/user/+page.svelte`)
+    - [x] Simplified status history modal retrieval
   - [x] Create (`/routes/(app)/user/create/+page.svelte`)
   - [x] Edit (`/routes/(app)/user/edit/+page.svelte`)
 

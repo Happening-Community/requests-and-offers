@@ -102,9 +102,8 @@
 
   async function handleStatusHistoryModal() {
     try {
-      const userStatusLink = await usersStore.getUserStatusLink(currentUser!.original_action_hash!);
       const statusHistory = await administrationStore.getAllRevisionsForStatus(
-        userStatusLink!.target
+        currentUser?.status!
       );
 
       modalStore.trigger(statusHistoryModal(statusHistory));
