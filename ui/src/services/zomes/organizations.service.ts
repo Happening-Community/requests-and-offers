@@ -22,7 +22,11 @@ export class OrganizationsService {
   }
 
   static async getAllOrganizationsLinks(): Promise<Link[]> {
-    return (await hc.callZome('users_organizations', 'get_all_organizations', null)) as Link[];
+    return (await hc.callZome(
+      'users_organizations',
+      'get_all_organizations_links',
+      null
+    )) as Link[];
   }
 
   static async getOrganizationStatusLink(

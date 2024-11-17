@@ -91,13 +91,6 @@ export class AdministrationService {
     })) as boolean;
   }
 
-  static async isAdministrator(entity: string, agent_pubkey: AgentPubKey): Promise<boolean> {
-    return (await hc.callZome('administration', 'is_administrator', {
-      entity,
-      agent_pubkey
-    })) as boolean;
-  }
-
   static async getAllAdministratorsLinks(entity: AdministrationEntity): Promise<Link[]> {
     return (await hc.callZome('administration', 'get_all_administrators_links', entity)) as Link[];
   }
@@ -145,5 +138,12 @@ export class AdministrationService {
       entity_original_action_hash,
       agent_pubkeys
     );
+  }
+
+  static async checkIfAgentIsAdministrator(agent_pubkey: AgentPubKey): Promise<boolean> {
+    return (await hc.callZome('administration', 'check_if_agent_is_administrator', {
+      entity: AdministrationEntity.Network,
+      agent_pubkey
+    })) as boolean;
   }
 }

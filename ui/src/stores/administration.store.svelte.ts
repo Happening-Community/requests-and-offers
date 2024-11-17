@@ -5,6 +5,7 @@ import { AdministrationEntity, type StatusInDHT } from '@/types/holochain';
 import { AdministrationService } from '@/services/zomes/administration.service';
 import usersStore from './users.store.svelte';
 import organizationsStore from './organizations.store.svelte';
+import hc from '@/services/HolochainClientService.svelte';
 
 class AdministrationStore {
   allStatusesHistory: Revision[] = $state([]);
@@ -72,18 +73,16 @@ class AdministrationStore {
   }
 
   async isNetworkAdministrator(agent_pubkey: AgentPubKey): Promise<boolean> {
-    const isAdmin = await AdministrationService.isAdministrator(
-      AdministrationEntity.Network,
-      agent_pubkey
-    );
-    this.agentIsAdministrator = isAdmin;
-    return isAdmin;
+    return (this.agentIsAdministrator =
+      await AdministrationService.checkIfAgentIsAdministrator(agent_pubkey));
   }
 
   async getAllNetworkAdministrators(): Promise<UIUser[]> {
     const adminLinks = await AdministrationService.getAllAdministratorsLinks(
       AdministrationEntity.Network
     );
+
+    await this.checkIfAgentIsAdministrator((await hc.getAppInfo())!.agent_pub_key);
 
     // If the current agent is an administrator, use getAllUsers, otherwise use getAcceptedUsers
     const allUsers = this.agentIsAdministrator
@@ -104,6 +103,12 @@ class AdministrationStore {
     );
 
     return admins;
+  }
+
+  async checkIfAgentIsAdministrator(agent_pubkey: AgentPubKey): Promise<boolean> {
+    const isAdmin = await AdministrationService.checkIfAgentIsAdministrator(agent_pubkey);
+    this.agentIsAdministrator = isAdmin;
+    return isAdmin;
   }
 
   // Status management methods
