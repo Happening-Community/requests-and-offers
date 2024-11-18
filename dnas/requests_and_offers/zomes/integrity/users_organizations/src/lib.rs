@@ -1,4 +1,5 @@
 pub mod organization;
+mod tests;
 pub mod user;
 
 pub use organization::*;

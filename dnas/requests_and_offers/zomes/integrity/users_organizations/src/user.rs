@@ -57,6 +57,12 @@ impl FromStr for AllowedTypes {
 }
 
 pub fn validate_user(user: User) -> ExternResult<ValidateCallbackResult> {
+  if user.name.is_empty() {
+    return Ok(ValidateCallbackResult::Invalid(String::from(
+      "User name cannot be empty",
+    )));
+  }
+
   if AllowedTypes::from_str(user.user_type.as_str()).is_err() {
     return Ok(ValidateCallbackResult::Invalid(format!(
       "User Type must be '{}' or '{}'.",
@@ -73,7 +79,7 @@ pub fn validate_user(user: User) -> ExternResult<ValidateCallbackResult> {
     }
   }
 
-  if !EmailAddress::is_valid(&user.email) {
+  if !EmailAddress::is_valid(user.email.as_str()) {
     return Ok(ValidateCallbackResult::Invalid(String::from(
       "Email is not valid",
     )));
