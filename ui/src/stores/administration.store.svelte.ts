@@ -168,14 +168,14 @@ class AdministrationStore {
     return record;
   }
 
-  async getAllStatusesForEntity(
-    entity_original_action_hash: ActionHash,
-    entity_type: AdministrationEntity
-  ): Promise<Revision[]> {
-    const records = await AdministrationService.getAllStatusesForEntity(
-      entity_original_action_hash,
-      entity_type
+  async getAllStatusesForEntity(original_action_hash: ActionHash): Promise<Revision[]> {
+    const statusLink = await AdministrationService.getEntityStatusLink(
+      original_action_hash,
+      AdministrationEntity.Users
     );
+    if (!statusLink) return [];
+
+    const records = await AdministrationService.getAllRevisionsForStatus(statusLink.target);
 
     const revisions: Revision[] = [];
 
@@ -202,10 +202,7 @@ class AdministrationStore {
 
     for (const user of allUsers) {
       if (!user.original_action_hash) continue;
-      const statusRevisions = await this.getAllStatusesForEntity(
-        user.original_action_hash,
-        AdministrationEntity.Users
-      );
+      const statusRevisions = await this.getAllStatusesForEntity(user.original_action_hash);
       revisions.push(...statusRevisions);
     }
 
@@ -235,10 +232,7 @@ class AdministrationStore {
 
     for (const organization of this.allOrganizations) {
       if (!organization.original_action_hash) continue;
-      const statusRevisions = await this.getAllStatusesForEntity(
-        organization.original_action_hash,
-        AdministrationEntity.Organizations
-      );
+      const statusRevisions = await this.getAllStatusesForEntity(organization.original_action_hash);
       revisions.push(...statusRevisions);
     }
 

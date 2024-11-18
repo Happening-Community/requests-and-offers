@@ -64,13 +64,14 @@
       if (confirmation && currentUser.original_action_hash) {
         const agentPubKey = (await hc.getAppInfo())?.agent_pub_key;
         if (agentPubKey) {
-          await administrationStore.registerNetworkAdministrator(currentUser.original_action_hash, [
-            agentPubKey
-          ]);
-          await administrationStore.getAllNetworkAdministrators();
-          administrationStore.agentIsAdministrator = administrationStore.administrators.some(
-            (admin) => admin.original_action_hash === agentPubKey
+          const result = await administrationStore.registerNetworkAdministrator(
+            currentUser.original_action_hash,
+            [agentPubKey]
           );
+          if (result) {
+            await administrationStore.getAllNetworkAdministrators();
+            administrationStore.agentIsAdministrator = true;
+          }
         }
       }
     }
