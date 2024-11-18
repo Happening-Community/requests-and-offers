@@ -16,7 +16,7 @@ export type UIUser = UserInDHT & {
   remaining_time?: number;
   original_action_hash?: ActionHash;
   previous_action_hash?: ActionHash;
-  status?: ActionHash;
+  status?: UIStatus;
   status_history?: Revision[];
   organizations?: ActionHash[];
 };
@@ -24,7 +24,7 @@ export type UIUser = UserInDHT & {
 export type UIOrganization = OrganizationInDHT & {
   members: ActionHash[];
   coordinators: ActionHash[];
-  status?: ActionHash;
+  status?: UIStatus;
   original_action_hash?: ActionHash;
   previous_action_hash?: ActionHash;
 };

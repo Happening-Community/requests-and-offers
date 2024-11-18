@@ -1,9 +1,10 @@
 import type { ActionHash, AgentPubKey } from '@holochain/client';
 import { decodeRecords } from '@utils';
 import type { UIUser } from '@/types/ui';
-import type { UserInDHT } from '@/types/holochain';
 import { UsersService } from '@/services/zomes/users.service';
 import hc from '@services/HolochainClientService.svelte';
+import { AdministrationEntity, type UserInDHT } from '@/types/holochain';
+import administrationStore from './administration.store.svelte';
 
 class UsersStore {
   allUsers: UIUser[] = $state([]);
@@ -39,16 +40,20 @@ class UsersStore {
 
     for (const link of links) {
       const user = await this.getLatestUser(link.target);
-      if (user) {
-        const statusLink = await this.getUserStatusLink(link.target);
-        if (statusLink) {
-          user.status = statusLink.target;
-        }
-        users.push(user);
-      }
+      if (!user?.original_action_hash) continue;
+
+      const record = await administrationStore.getLatestStatusForEntity(
+        user.original_action_hash,
+        AdministrationEntity.Users
+      );
+      if (!record) continue;
+
+      user.status = decodeRecords([record])[0];
+      users.push(user);
     }
 
     this.allUsers = users;
+
     return users;
   }
 
@@ -129,14 +134,21 @@ class UsersStore {
       const user = await this.getLatestUser(link.target);
       if (user) {
         const statusLink = await this.getUserStatusLink(link.target);
-        if (statusLink) {
-          user.status = statusLink.target;
-        }
+        if (!statusLink) continue;
+
+        const status = await administrationStore.getLatestStatusForEntity(
+          statusLink.target,
+          AdministrationEntity.Users
+        );
+        if (!status) continue;
+
+        user.status = decodeRecords([status])[0];
         users.push(user);
       }
     }
 
     this.acceptedUsers = users;
+
     return users;
   }
 

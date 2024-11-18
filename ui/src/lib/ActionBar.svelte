@@ -11,7 +11,7 @@
   import ConfirmModal from './dialogs/ConfirmModal.svelte';
   import StatusHistoryModal from './modals/StatusHistoryModal.svelte';
   import { onMount } from 'svelte';
-  import { en } from '@faker-js/faker';
+  import usersStore from '@/stores/users.store.svelte';
 
   type Props = {
     entity: UIUser | UIOrganization;
@@ -123,7 +123,9 @@
               break;
           }
 
-          modalStore.close();
+          usersStore.getAllUsers().then(() => {
+            modalStore.close();
+          });
         }
       }
     };
@@ -201,8 +203,7 @@
     if (!entity?.original_action_hash) return;
 
     const revisions = await administrationStore.getAllStatusesForEntity(
-      entity.original_action_hash,
-      AdministrationEntity.Users
+      entity.original_action_hash
     );
 
     queueAndReverseModal(statusHistoryModal(revisions), modalStore);
