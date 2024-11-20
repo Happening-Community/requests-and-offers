@@ -136,17 +136,14 @@ class UsersStore {
 
     for (const link of links) {
       const user = await this.getLatestUser(link.target);
-      if (user) {
-        const statusLink = await this.getUserStatusLink(link.target);
-        if (!statusLink) continue;
-
-        const status = await administrationStore.getLatestStatusForEntity(
-          statusLink.target,
+      if (user?.original_action_hash) {
+        const record = await administrationStore.getLatestStatusForEntity(
+          user.original_action_hash,
           AdministrationEntity.Users
         );
-        if (!status) continue;
+        if (!record) continue;
 
-        user.status = decodeRecords([status])[0];
+        user.status = decodeRecords([record])[0];
         users.push(user);
       }
     }

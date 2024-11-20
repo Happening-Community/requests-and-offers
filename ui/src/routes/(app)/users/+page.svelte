@@ -22,8 +22,8 @@
 </script>
 
 <section class="flex flex-col gap-4">
-  <div class="flex gap-4">
-    <h2 class="h2">Users</h2>
+  <h2 class="h1 text-center">Users</h2>
+  <div class="flex w-full gap-4">
     {#if !currentUser}
       <NavButton href="/user/create">Create Profile</NavButton>
     {/if}
