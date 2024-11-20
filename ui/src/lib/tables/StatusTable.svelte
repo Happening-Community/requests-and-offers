@@ -2,11 +2,10 @@
   import type { Revision } from '@/types/ui';
 
   type Props = {
-    username: string;
     statusHistory: Revision[];
   };
 
-  const { username, statusHistory }: Props = $props();
+  const { statusHistory }: Props = $props();
 
   let allStatusesColors: string[] = $state([]);
 
@@ -58,7 +57,7 @@
       {#each statusHistory || [] as revision, i}
         <tr class="text-{allStatusesColors[i] || 'surface-400'}">
           <td>{revision?.timestamp ? new Date(revision.timestamp).toLocaleString() : 'N/A'}</td>
-          <td>{username || 'N/A'}</td>
+          <td>{revision?.user?.name || 'N/A'}</td>
           <td>{revision?.status?.status_type || 'N/A'}</td>
           <td>{revision?.status?.reason || 'N/A'}</td>
           <td>

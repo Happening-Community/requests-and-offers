@@ -95,7 +95,7 @@
      - User Details (`/lib/modals/UserDetailsModal.svelte`)
      - Organization Details (`/lib/modals/OrganizationDetailsModal.svelte`)
      - Add Administrator (`/lib/modals/AddAdministratorModal.svelte`)
-     - Status History (`/lib/modals/StatusHistoryModal.svelte`)
+     - [x] Status History (`/lib/modals/StatusHistoryModal.svelte`)
    - [ ] Tables
      - Users Table (`/lib/tables/UsersTable.svelte`)
      - Status Table (`/lib/tables/StatusTable.svelte`)

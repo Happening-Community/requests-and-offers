@@ -168,7 +168,7 @@ class AdministrationStore {
     return record;
   }
 
-  async getAllStatusesForEntity(original_action_hash: ActionHash): Promise<Revision[]> {
+  async getAllStatusesForEntity(original_action_hash: ActionHash): Promise<StatusInDHT[]> {
     const statusLink = await AdministrationService.getEntityStatusLink(
       original_action_hash,
       AdministrationEntity.Users
@@ -193,7 +193,7 @@ class AdministrationStore {
     }
 
     this.allStatusesHistory = revisions;
-    return revisions;
+    return revisions.map((revision) => revision.status);
   }
 
   async getAllRevisionsForAllUsers(): Promise<Revision[]> {
@@ -202,8 +202,22 @@ class AdministrationStore {
 
     for (const user of allUsers) {
       if (!user.original_action_hash) continue;
-      const statusRevisions = await this.getAllStatusesForEntity(user.original_action_hash);
-      revisions.push(...statusRevisions);
+      const statusLink = await AdministrationService.getEntityStatusLink(
+        user.original_action_hash,
+        AdministrationEntity.Users
+      );
+      if (!statusLink) continue;
+
+      const records = await AdministrationService.getAllRevisionsForStatus(statusLink.target);
+      for (const record of records) {
+        const status = decodeRecords([record])[0] as StatusInDHT;
+        const timestamp = record.signed_action.hashed.content.timestamp;
+        revisions.push({
+          user,
+          status: this.convertToUIStatus(status, timestamp),
+          timestamp
+        });
+      }
     }
 
     revisions.sort((a, b) => b.timestamp - a.timestamp);
@@ -232,8 +246,25 @@ class AdministrationStore {
 
     for (const organization of this.allOrganizations) {
       if (!organization.original_action_hash) continue;
-      const statusRevisions = await this.getAllStatusesForEntity(organization.original_action_hash);
-      revisions.push(...statusRevisions);
+      const statusLink = await AdministrationService.getEntityStatusLink(
+        organization.original_action_hash,
+        AdministrationEntity.Organizations
+      );
+      if (!statusLink) continue;
+
+      const records = await AdministrationService.getAllRevisionsForStatus(statusLink.target);
+      for (const record of records) {
+        const status = decodeRecords([record])[0] as StatusInDHT;
+        const user = await usersStore.getLatestUser(record.signed_action.hashed.hash);
+        if (!user) continue;
+
+        const timestamp = record.signed_action.hashed.content.timestamp;
+        revisions.push({
+          user,
+          status: this.convertToUIStatus(status, timestamp),
+          timestamp
+        });
+      }
     }
 
     revisions.sort((a, b) => b.timestamp - a.timestamp);

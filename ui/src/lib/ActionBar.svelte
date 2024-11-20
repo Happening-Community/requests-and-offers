@@ -25,7 +25,6 @@
 
   let suspensionDate = $state('');
   let isTheOnlyAdmin = $derived(administrators.length === 1);
-  let isSuspendedTemporarily = $state(false);
   let userStatus: StatusInDHT | null = $state(null);
 
   onMount(async () => {
@@ -40,7 +39,6 @@
 
   $effect(() => {
     if (userStatus?.suspended_until) {
-      isSuspendedTemporarily = true;
       suspensionDate = new Date(userStatus.suspended_until).toLocaleString();
     }
   });
@@ -303,7 +301,7 @@
       Status History
     </button>
 
-    {#if userStatus?.status_type !== 'suspended indefinitely' && userStatus?.status_type !== 'suspended temporarily'}
+    {#if userStatus?.status_type === 'accepted'}
       <button
         class="btn variant-filled-warning rounded-lg"
         onclick={() => handlePromptModal('temporarily')}
