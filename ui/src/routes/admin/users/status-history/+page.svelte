@@ -10,6 +10,24 @@
     const userRevisions = await administrationStore.getAllRevisionsForAllUsers();
     const orgRevisions = await administrationStore.getAllRevisionsForAllOrganizations();
 
+    console.log(
+      'User Revisions:',
+      userRevisions.map((r) => ({
+        timestamp: r.timestamp,
+        formattedDate: new Date(r.timestamp).toLocaleString(),
+        entity: r.entity.name
+      }))
+    );
+
+    console.log(
+      'Org Revisions:',
+      orgRevisions.map((r) => ({
+        timestamp: r.timestamp,
+        formattedDate: new Date(r.timestamp).toLocaleString(),
+        entity: r.entity.name
+      }))
+    );
+
     allRevisions = [...userRevisions, ...orgRevisions].sort((a, b) => b.timestamp - a.timestamp);
   });
 </script>
