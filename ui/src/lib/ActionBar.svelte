@@ -11,7 +11,6 @@
   import ConfirmModal from './dialogs/ConfirmModal.svelte';
   import StatusHistoryModal from './modals/StatusHistoryModal.svelte';
   import { onMount } from 'svelte';
-  import usersStore from '@/stores/users.store.svelte';
 
   type Props = {
     entity: UIUser | UIOrganization;
@@ -93,6 +92,10 @@
         if (meta.id === 'suspend-temporarily') handleSuspendTemporarily(response.data);
         else handleSuspendIndefinitely(response.data);
 
+        if (entityType === AdministrationEntity.Users) {
+          await administrationStore.refreshUsers();
+        }
+
         modalStore.close();
       }
     };
@@ -104,7 +107,7 @@
       type: 'component',
       component: confirmModalComponent,
       meta,
-      response(r) {
+      response: async (r) => {
         if (r) {
           switch (meta.id) {
             case 'unsuspend':
@@ -121,16 +124,21 @@
               break;
           }
 
-          usersStore.getAllUsers().then(() => {
-            modalStore.close();
-          });
+          if (entityType === AdministrationEntity.Users) {
+            await administrationStore.refreshUsers();
+          }
+
+          modalStore.close();
         }
       }
     };
   };
 
   const statusHistoryModalComponent: ModalComponent = { ref: StatusHistoryModal };
-  const statusHistoryModal = (meta: { statusHistory: Revision[]; title: string }): ModalSettings => {
+  const statusHistoryModal = (meta: {
+    statusHistory: Revision[];
+    title: string;
+  }): ModalSettings => {
     return {
       type: 'component',
       component: statusHistoryModalComponent,
@@ -202,7 +210,7 @@
       entity.original_action_hash
     );
 
-    const revisions: Revision[] = statusHistory.map(status => ({
+    const revisions: Revision[] = statusHistory.map((status) => ({
       status: {
         status_type: status.status_type,
         reason: status.reason,
@@ -212,10 +220,13 @@
       entity: entity
     }));
 
-    queueAndReverseModal(statusHistoryModal({
-      statusHistory: revisions,
-      title: `${entity.name} Status History`
-    }), modalStore);
+    queueAndReverseModal(
+      statusHistoryModal({
+        statusHistory: revisions,
+        title: `${entity.name} Status History`
+      }),
+      modalStore
+    );
   }
 
   async function updateStatus(status: StatusInDHT) {
@@ -234,10 +245,14 @@
       status
     );
 
-    if (entityType === AdministrationEntity.Users) await administrationStore.refreshUsers();
-    else await administrationStore.refreshOrganizations();
+    if (entityType === AdministrationEntity.Users) {
+      await administrationStore.refreshUsers();
 
-    modalStore.close();
+      modalStore.close();
+    } else {
+      await administrationStore.refreshOrganizations();
+      modalStore.close();
+    }
   }
 
   async function handleSuspendIndefinitely(data: FormData) {
@@ -259,10 +274,13 @@
       reason
     );
 
-    if (entityType === AdministrationEntity.Users) await administrationStore.refreshUsers();
-    else await administrationStore.refreshOrganizations();
-
-    modalStore.close();
+    if (entityType === AdministrationEntity.Users) {
+      await administrationStore.refreshUsers();
+      modalStore.close();
+    } else {
+      await administrationStore.refreshOrganizations();
+      modalStore.close();
+    }
   }
 
   async function handleSuspendTemporarily(data: FormData) {
@@ -290,13 +308,13 @@
       suspendedDays
     );
 
-    if (entityType === AdministrationEntity.Users) await administrationStore.refreshUsers();
-    else await administrationStore.refreshOrganizations();
-
-    if (userStatus?.suspended_until) {
-      suspensionDate = new Date(userStatus.suspended_until).toLocaleString();
+    if (entityType === AdministrationEntity.Users) {
+      await administrationStore.refreshUsers();
+      modalStore.close();
+    } else {
+      await administrationStore.refreshOrganizations();
+      modalStore.close();
     }
-    modalStore.close();
   }
 
   async function removeAdministrator() {

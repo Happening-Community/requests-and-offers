@@ -8,8 +8,12 @@
   import { AdministrationEntity } from '@/types/holochain';
   import { decodeRecords } from '@/utils';
 
+  type Props = {
+    organization: UIOrganization;
+  };
+
   const modalStore = getModalStore();
-  const organization: UIOrganization = $modalStore[0].meta.organization;
+  const { organization }: Props = $modalStore[0].meta;
 
   let organizationPictureUrl = $state('');
   let suspensionDate = $state('');

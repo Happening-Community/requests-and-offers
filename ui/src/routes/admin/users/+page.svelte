@@ -1,5 +1,6 @@
 <script lang="ts">
   import usersStore from '@/stores/users.store.svelte';
+  import type { UIUser } from '@/types/ui';
   import UsersTable from '@lib/tables/UsersTable.svelte';
   import { ConicGradient, type ConicStop, getToastStore } from '@skeletonlabs/skeleton';
   import { onMount } from 'svelte';
@@ -63,9 +64,7 @@
     }
   }
 
-  onMount(() => {
-    loadUsers();
-  });
+  onMount(loadUsers);
 </script>
 
 <section class="flex flex-col gap-10">

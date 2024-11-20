@@ -6,7 +6,6 @@
     type ModalSettings
   } from '@skeletonlabs/skeleton';
   import UserDetailsModal from '@/lib/modals/UserDetailsModal.svelte';
-  import { queueAndReverseModal } from '@/utils';
   import type { UIUser } from '@/types/ui';
 
   type Props = {

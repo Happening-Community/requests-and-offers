@@ -74,7 +74,9 @@
   - Improved revision generation with more context
   - Fixed timestamp conversion from microseconds to milliseconds
 - [x] Status History Management
-
+  - Improved status update handling in ActionBar
+  - Added proper refreshing of users list after status changes
+  - Enhanced type safety in modal components
 
 ## Refactoring Patterns and Guidelines
 

@@ -8,18 +8,22 @@
   import { AdministrationEntity } from '@/types/holochain';
   import { decodeRecords } from '@/utils';
 
+  type Props = {
+    user: UIUser;
+  };
+
   const modalStore = getModalStore();
-  const user: UIUser = $modalStore[0].meta.user;
+  const { user }: Props = $modalStore[0].meta;
 
   let userPictureUrl = $state('');
   let suspensionDate = $state('');
-  let isSuspendedTemporarily = $state(false);
   let userStatus: UIStatus | null = $state(null);
 
   onMount(async () => {
     userPictureUrl = user?.picture
       ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
       : '/default_avatar.webp';
+
     const userStatusRecord = await administrationStore.getLatestStatusForEntity(
       user.original_action_hash!,
       AdministrationEntity.Users
@@ -27,7 +31,6 @@
     userStatus = userStatusRecord ? decodeRecords([userStatusRecord])[0] : null;
 
     if (user && userStatus!.suspended_until) {
-      isSuspendedTemporarily = true;
       suspensionDate = new Date(userStatus!.suspended_until).toLocaleString();
     }
   });
