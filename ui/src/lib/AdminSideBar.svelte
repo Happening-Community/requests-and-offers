@@ -3,7 +3,7 @@
 </script>
 
 <div
-  class="bg-surface-900 flex h-full min-h-screen w-52 flex-col gap-5 border-2 border-b-0 border-slate-900 p-4 pt-36"
+  class="bg-surface-900 flex h-full min-h-screen w-52 flex-col gap-5 border-2 border-b-0 border-slate-900 p-4 pt-9"
 >
   <a
     href="/admin"

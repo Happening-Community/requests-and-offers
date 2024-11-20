@@ -24,7 +24,7 @@
   });
 </script>
 
-<div class="grid h-screen grid-rows-[auto_1fr_auto]">
+<div class="grid h-screen grid-rows-[auto_1fr]">
   <!-- Header -->
   <NavBar />
 
@@ -37,7 +37,7 @@
 
     <!-- Main Content -->
     <main
-      class="bg-surface-800 mx-auto flex w-full flex-col items-center justify-center px-5 pb-10 pt-40"
+      class="bg-surface-800 mx-auto flex w-full flex-col items-center justify-center px-5 pb-10"
     >
       {#if !hc.isConnected}
         <p>Not connected yet.</p>

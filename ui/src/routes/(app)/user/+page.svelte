@@ -47,9 +47,6 @@
         return;
       }
 
-      // Fetch status with error handling
-      status = await administrationStore.getLatestStatus(currentUser.status!);
-
       // Optimize organization fetching
       if (currentUser.organizations?.length) {
         const orgPromises = currentUser.organizations.map((link) =>
@@ -97,9 +94,10 @@
 
   async function handleStatusHistoryModal() {
     try {
-      const statusHistory = await administrationStore.getAllRevisionsForStatus(
-        currentUser?.status!
-      );
+      const statusLink = await usersStore.getUserStatusLink(currentUser?.original_action_hash!);
+      if (!statusLink) return;
+
+      const statusHistory = await administrationStore.getAllRevisionsForStatus(statusLink.target);
 
       modalStore.trigger(statusHistoryModal(statusHistory));
       modalStore.update((modals) => modals.reverse());
@@ -132,21 +130,21 @@
       <h3 class="h3 text-wrap text-center">
         <b>Status :</b>
         <span
-          class:text-primary-500={status?.status_type === 'pending'}
-          class:text-error-500={status?.status_type === 'rejected' ||
-            status?.status_type === 'suspended indefinitely'}
-          class:text-green-400={status?.status_type === 'accepted'}
-          class:text-warning-500={status?.status_type === `suspended temporarily`}
+          class:text-primary-500={currentUser!.status?.status_type === 'pending'}
+          class:text-error-500={currentUser!.status?.status_type === 'rejected' ||
+            currentUser!.status?.status_type === 'suspended indefinitely'}
+          class:text-green-400={currentUser!.status?.status_type === 'accepted'}
+          class:text-warning-500={currentUser!.status?.status_type === `suspended temporarily`}
         >
           {#if !suspensionDate}
-            {status?.status_type}
+            {currentUser!.status?.status_type}
           {:else}
             {isExpired ? 'In review' : 'suspended temporarily'}
           {/if}
         </span>
       </h3>
-      {#if status?.status_type.startsWith('suspended')}
-        <p class=" text-wrap text-center"><b>Reason :</b> {status?.reason}</p>
+      {#if currentUser?.status?.status_type && currentUser.status.status_type.startsWith('suspended')}
+        <p class=" text-wrap text-center"><b>Reason :</b> {currentUser.status.reason}</p>
         {#if suspensionDate}
           <p class=" text-wrap text-center">
             <b>Suspended until :</b>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AppShell, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
+  import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
   import NavBar from '@lib/NavBar.svelte';
   import { onMount } from 'svelte';
   import hc from '@services/HolochainClientService.svelte';
@@ -21,14 +21,10 @@
   ];
 </script>
 
-<div class="grid grid-rows-[auto_1fr_auto]">
-  <!-- Header -->
+<div class="grid min-h-screen grid-rows-[auto_1fr]">
   <NavBar />
 
-  <!-- Main Content -->
-  <main
-    class="container mx-auto flex min-h-screen flex-col items-center justify-center px-5 pb-10 pt-40"
-  >
+  <main class="flex flex-col items-center justify-center">
     {#if !hc.isConnected}
       <p>Not connected yet.</p>
       <ConicGradient stops={conicStops} spin>Loading</ConicGradient>

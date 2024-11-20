@@ -1,9 +1,11 @@
 import type { ActionHash, Record } from '@holochain/client';
 import { decodeRecords } from '@utils';
-import type { UIOrganization, UIUser } from '@/types/ui';
+import type { UIOrganization, UIUser, UIStatus } from '@/types/ui';
 import type { OrganizationInDHT } from '@/types/holochain';
+import { AdministrationEntity } from '@/types/holochain';
 import { OrganizationsService } from '@/services/zomes/organizations.service';
 import usersStore from './users.store.svelte';
+import administrationStore from './administration.store.svelte';
 
 class OrganizationsStore {
   allOrganizations: UIOrganization[] = $state([]);
@@ -57,7 +59,13 @@ class OrganizationsStore {
       if (organization) {
         const statusLink = await OrganizationsService.getOrganizationStatusLink(link.target);
         if (statusLink) {
-          organization.status = statusLink.target;
+          const status = await administrationStore.getLatestStatusForEntity(
+            statusLink.target,
+            AdministrationEntity.Organizations
+          );
+          if (status) {
+            organization.status = decodeRecords([status])[0] as UIStatus;
+          }
         }
         organizations.push(organization);
       }
@@ -81,7 +89,13 @@ class OrganizationsStore {
 
     const statusLink = await OrganizationsService.getOrganizationStatusLink(original_action_hash);
     if (statusLink) {
-      organization.status = statusLink.target;
+      const status = await administrationStore.getLatestStatusForEntity(
+        statusLink.target,
+        AdministrationEntity.Organizations
+      );
+      if (status) {
+        organization.status = decodeRecords([status])[0] as UIStatus;
+      }
     }
 
     this.allOrganizations = this.allOrganizations.map((org) =>

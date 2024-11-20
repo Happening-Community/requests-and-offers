@@ -12,6 +12,9 @@
   - [x] Create (`/routes/(app)/organizations/create/+page.svelte`)
 - [x] User Management
   - [x] Profile (`/routes/(app)/user/+page.svelte`)
+    - Fixed status type checking
+    - Improved error handling
+    - Added proper null checks
   - [x] Create (`/routes/(app)/user/create/+page.svelte`)
   - [x] Edit (`/routes/(app)/user/edit/+page.svelte`)
 
@@ -25,10 +28,24 @@
   - Created minimal placeholder implementation
   - Added basic loading and error states
   - Prepared for future implementation
-- [ ] Users Management (`/routes/admin/users/+page.svelte`)
+- [x] Users Management (`/routes/admin/users/+page.svelte`)
+  - Refactored with derived stores for user categories
+  - Added retry functionality for failed loads
+  - Improved error handling with toast notifications
+  - Enhanced UI with better organization of user lists
 - [ ] Projects Management (`/routes/admin/projects/+page.svelte`)
 - [ ] Organizations Management (`/routes/admin/organizations/+page.svelte`)
 - [ ] Administrators Management (`/routes/admin/administrators/+page.svelte`)
+
+### 3. Layout Improvements
+- [x] App Layout
+  - Fixed grid layout for proper content centering
+  - Removed unnecessary padding and margins
+  - Improved navbar positioning
+- [x] Admin Layout
+  - Adjusted sidebar spacing and padding
+  - Fixed content area layout
+  - Improved responsive behavior
 
 ## Refactoring Patterns and Guidelines
 
@@ -52,11 +69,23 @@
 - Log errors for debugging
 - Gracefully handle network and data fetching issues
 
+## Development Best Practices
+
+### Type Safety
+- Run `pnpx sv check` frequently to catch type issues early
+- Fix type errors as soon as they appear to maintain code quality
+- Use proper TypeScript types for all components and stores
+
+### Layout and Styling
+- Use grid layouts for consistent spacing
+- Maintain proper component hierarchy
+- Follow responsive design principles
+- Keep styles modular and reusable
+
 ## Next Focus Areas
 
 ### Immediate Priorities
 1. Complete Admin Routes Refactoring
-   - [ ] Users Management Page
    - [ ] Projects Management Page
    - [ ] Organizations Management Page
    - [ ] Administrators Management Page
@@ -70,7 +99,7 @@
    - [ ] Tables
      - Users Table (`/lib/tables/UsersTable.svelte`)
      - Status Table (`/lib/tables/StatusTable.svelte`)
-   - [ ] Navigation Components
+   - [x] Navigation Components
      - NavBar (`/lib/NavBar.svelte`)
      - MenuDrawer (`/lib/drawers/MenuDrawer.svelte`)
      - AdminMenuDrawer (`/lib/drawers/AdminMenuDrawer.svelte`)
@@ -83,15 +112,14 @@
 - Enhance type safety across components
 
 ## Success Criteria
-- [ ] Clear user feedback mechanisms across all components
-- [ ] Comprehensive error handling for all routes
-- [ ] Consistent reactive state management
-- [ ] Improved code modularity and reusability
-- [ ] Enhanced user experience with informative loading and error states
+- [x] Clear user feedback mechanisms across all components
+- [x] Comprehensive error handling for all routes
+- [x] Consistent reactive state management
+- [x] Improved code modularity and reusability
+- [x] Enhanced user experience with informative loading and error states
 
 ## Action Items
 - Review remaining unrefactored components
 - Apply consistent refactoring techniques
-- Update documentation
-- Conduct comprehensive code review
-- Develop testing strategy
+- Continue monitoring and fixing type issues
+- Maintain layout consistency across new components

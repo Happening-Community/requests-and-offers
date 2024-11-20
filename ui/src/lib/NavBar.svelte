@@ -15,7 +15,7 @@
   }
 </script>
 
-<nav class="bg-primary-500 absolute flex h-32 w-full items-center justify-between p-4">
+<nav class="bg-primary-500 flex h-32 w-full items-center justify-between p-4">
   <div class="flex w-full items-center justify-between">
     <a href="/" class="">
       <img src="/hAppeningsLogoWsun2.webp" alt="hAppenings Community Logo" class="w-28" />
