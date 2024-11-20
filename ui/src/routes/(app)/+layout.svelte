@@ -24,7 +24,7 @@
 <div class="grid min-h-screen grid-rows-[auto_1fr]">
   <NavBar />
 
-  <main class="flex flex-col items-center justify-center">
+  <main class="flex flex-col items-center justify-center py-10">
     {#if !hc.isConnected}
       <p>Not connected yet.</p>
       <ConicGradient stops={conicStops} spin>Loading</ConicGradient>

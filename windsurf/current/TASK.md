@@ -68,7 +68,10 @@
 - Add comprehensive error messaging
 - Remove unnecessary comments
 - Create reusable components for common UI patterns
-- Use frequently "pnpx sv check" from ui/ to report errors and warnings
+- Use systematicly "bunx sv check" from ui/ to report errors and warnings
+  - Run in ui/ after significant changes
+  - Fix type errors immediately
+  - Address all warnings to maintain code quality
 
 ### State Management
 - Implement consistent loading states
