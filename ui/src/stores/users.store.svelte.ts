@@ -76,16 +76,20 @@ class UsersStore {
     const links = await UsersService.getAgentUser(agentPubKey);
     if (links.length === 0) return null;
 
-    const record = await UsersService.getLatestUserRecord(links[0].target);
-    if (!record) return null;
+    const userRecord = await UsersService.getLatestUserRecord(links[0].target);
+    if (!userRecord) return null;
 
-    const statusLink = await UsersService.getUserStatusLink(links[0].target);
+    const statusRecord = await administrationStore.getLatestStatusForEntity(
+      links[0].target,
+      AdministrationEntity.Users
+    );
+    if (!statusRecord) return null;
 
     this.currentUser = {
-      ...decodeRecords([record])[0],
-      status: statusLink?.target,
+      ...decodeRecords([userRecord])[0],
+      status: decodeRecords([statusRecord])[0],
       original_action_hash: links[0].target,
-      previous_action_hash: record.signed_action.hashed.hash
+      previous_action_hash: userRecord.signed_action.hashed.hash
     };
 
     this.allUsers = this.allUsers.map((u) =>

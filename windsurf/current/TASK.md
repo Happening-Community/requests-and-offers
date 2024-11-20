@@ -47,6 +47,18 @@
   - Fixed content area layout
   - Improved responsive behavior
 
+### 4. Store Improvements
+- [x] Users Store (`/stores/users.store.svelte.ts`)
+  - Updated user fetching logic to include status directly
+  - Improved error handling for user and status retrieval
+- [x] Administration Store (`/stores/administration.store.svelte.ts`)
+  - Enhanced `getAllRevisionsForStatus` to support different entity types
+  - Improved revision generation with more context
+- [x] Status History Management
+  - Updated modal creation to pass full entity context
+  - Implemented more robust status history retrieval
+  - Added console logging for debugging status history
+
 ## Refactoring Patterns and Guidelines
 
 ### Code Quality Standards
@@ -56,6 +68,7 @@
 - Add comprehensive error messaging
 - Remove unnecessary comments
 - Create reusable components for common UI patterns
+- Use frequently "pnpx sv check" from ui/ to report errors and warnings
 
 ### State Management
 - Implement consistent loading states

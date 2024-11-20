@@ -6,9 +6,9 @@ export type UIStatus = StatusInDHT & {
 };
 
 export type Revision = {
-  user: UIUser;
   status: UIStatus;
   timestamp: number;
+  entity: UIUser | UIOrganization;
 };
 
 export type UIUser = UserInDHT & {

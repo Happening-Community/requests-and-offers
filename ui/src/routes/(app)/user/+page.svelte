@@ -28,7 +28,6 @@
   let error = $state<string | null>(null);
   let suspensionDate = $state('');
   let isExpired = $state(false);
-  let status: UIStatus | null = $state(null);
 
   // Cached organizations to reduce unnecessary fetches
   let myOrganizations: UIOrganization[] = $state([]);
@@ -55,8 +54,8 @@
       }
 
       // Handle suspension status
-      if (status?.suspended_until) {
-        const date = new Date(status.suspended_until);
+      if (currentUser.status?.suspended_until) {
+        const date = new Date(currentUser.status.suspended_until);
         const now = new Date();
 
         isExpired = date < now;
@@ -86,7 +85,6 @@
       type: 'component',
       component: statusHistoryModalComponent,
       meta: {
-        username: currentUser?.name || 'Unknown User',
         statusHistory
       }
     };
@@ -97,7 +95,12 @@
       const statusLink = await usersStore.getUserStatusLink(currentUser?.original_action_hash!);
       if (!statusLink) return;
 
-      const statusHistory = await administrationStore.getAllRevisionsForStatus(statusLink.target);
+      const statusHistory = await administrationStore.getAllRevisionsForStatus(
+        currentUser!,
+        statusLink.target
+      );
+
+      console.log('statusHistory :', statusHistory);
 
       modalStore.trigger(statusHistoryModal(statusHistory));
       modalStore.update((modals) => modals.reverse());

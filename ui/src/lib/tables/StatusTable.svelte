@@ -46,7 +46,7 @@
     <thead class="!bg-surface-800 dark:!bg-surface-700">
       <tr>
         <th class="px-2">Timestamp</th>
-        <th class="px-2">User</th>
+        <th class="px-2">Name</th>
         <th class="px-2">Status</th>
         <th class="px-2">Reason</th>
         <th class="px-2">Duration</th>
@@ -57,7 +57,7 @@
       {#each statusHistory || [] as revision, i}
         <tr class="text-{allStatusesColors[i] || 'surface-400'}">
           <td>{revision?.timestamp ? new Date(revision.timestamp).toLocaleString() : 'N/A'}</td>
-          <td>{revision?.user?.name || 'N/A'}</td>
+          <td class="capitalize">{revision?.entity?.name || 'N/A'}</td>
           <td>{revision?.status?.status_type || 'N/A'}</td>
           <td>{revision?.status?.reason || 'N/A'}</td>
           <td>

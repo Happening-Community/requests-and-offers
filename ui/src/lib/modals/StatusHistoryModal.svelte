@@ -1,23 +1,27 @@
-<script>
+<script lang="ts">
   import StatusTable from '@lib/tables/StatusTable.svelte';
   import { getModalStore } from '@skeletonlabs/skeleton';
+  import type { Revision } from '@/types/ui';
 
   const modalStore = getModalStore();
 
-  const { statusHistory, username } = $modalStore[0]?.meta;
+  interface ModalMeta {
+    statusHistory: Revision[];
+    title: string;
+  }
+
+  const meta = $modalStore[0]?.meta as ModalMeta;
+  const { statusHistory, title } = meta;
 </script>
 
 <article class="hcron-modal">
   <div class="static mb-8 space-y-10">
-    <h2 class="h2 text-center">{username}</h2>
+    <h2 class="h2 text-center">{title}</h2>
 
-    <StatusTable {statusHistory} {username} />
+    <StatusTable {statusHistory} />
   </div>
 
-  <button
-    class="btn variant-filled-secondary w-fit self-center"
-    on:click={() => modalStore.close()}
-  >
+  <button class="btn variant-filled-secondary w-fit self-center" onclick={() => modalStore.close()}>
     Close
   </button>
 </article>

@@ -130,20 +130,24 @@ class AdministrationStore {
     await AdministrationService.createStatus(status);
   }
 
-  async getAllRevisionsForStatus(original_status_hash: ActionHash): Promise<Revision[]> {
+  async getAllRevisionsForStatus(
+    uiEntity: UIOrganization | UIUser,
+    original_status_hash: ActionHash
+  ): Promise<Revision[]> {
     const records = await AdministrationService.getAllRevisionsForStatus(original_status_hash);
     const revisions: Revision[] = [];
 
     for (const record of records) {
       const status = decodeRecords([record])[0] as StatusInDHT;
-      const user = await usersStore.getLatestUser(record.signed_action.hashed.hash);
+      const user = await usersStore.getLatestUser(original_status_hash);
       if (!user) continue;
 
-      revisions.push({
-        user,
+      const revision: Revision = {
+        entity: uiEntity,
         status: this.convertToUIStatus(status, record.signed_action.hashed.content.timestamp),
         timestamp: record.signed_action.hashed.content.timestamp
-      });
+      };
+      revisions.push(revision);
     }
 
     return revisions;
@@ -184,12 +188,12 @@ class AdministrationStore {
       const user = await usersStore.getLatestUser(record.signed_action.hashed.hash);
       if (!user) continue;
 
-      const timestamp = record.signed_action.hashed.content.timestamp;
-      revisions.push({
-        user,
-        status: this.convertToUIStatus(status, timestamp),
-        timestamp
-      });
+      const revision: Revision = {
+        entity: user,
+        status: this.convertToUIStatus(status, record.signed_action.hashed.content.timestamp),
+        timestamp: record.signed_action.hashed.content.timestamp
+      };
+      revisions.push(revision);
     }
 
     this.allStatusesHistory = revisions;
@@ -212,11 +216,12 @@ class AdministrationStore {
       for (const record of records) {
         const status = decodeRecords([record])[0] as StatusInDHT;
         const timestamp = record.signed_action.hashed.content.timestamp;
-        revisions.push({
-          user,
+        const revision: Revision = {
+          entity: user,
           status: this.convertToUIStatus(status, timestamp),
           timestamp
-        });
+        };
+        revisions.push(revision);
       }
     }
 
@@ -255,15 +260,13 @@ class AdministrationStore {
       const records = await AdministrationService.getAllRevisionsForStatus(statusLink.target);
       for (const record of records) {
         const status = decodeRecords([record])[0] as StatusInDHT;
-        const user = await usersStore.getLatestUser(record.signed_action.hashed.hash);
-        if (!user) continue;
-
         const timestamp = record.signed_action.hashed.content.timestamp;
-        revisions.push({
-          user,
+        const revision: Revision = {
+          entity: organization,
           status: this.convertToUIStatus(status, timestamp),
           timestamp
-        });
+        };
+        revisions.push(revision);
       }
     }
 

@@ -130,13 +130,11 @@
   };
 
   const statusHistoryModalComponent: ModalComponent = { ref: StatusHistoryModal };
-  const statusHistoryModal = (statusHistory: Revision[]): ModalSettings => {
+  const statusHistoryModal = (meta: { statusHistory: Revision[]; title: string }): ModalSettings => {
     return {
       type: 'component',
       component: statusHistoryModalComponent,
-      meta: {
-        statusHistory
-      }
+      meta
     };
   };
 
@@ -200,11 +198,24 @@
   async function handleStatusHistoryModal() {
     if (!entity?.original_action_hash) return;
 
-    const revisions = await administrationStore.getAllStatusesForEntity(
+    const statusHistory = await administrationStore.getAllStatusesForEntity(
       entity.original_action_hash
     );
 
-    queueAndReverseModal(statusHistoryModal(revisions), modalStore);
+    const revisions: Revision[] = statusHistory.map(status => ({
+      status: {
+        status_type: status.status_type,
+        reason: status.reason,
+        suspended_until: status.suspended_until
+      },
+      timestamp: Date.now(),
+      entity: entity
+    }));
+
+    queueAndReverseModal(statusHistoryModal({
+      statusHistory: revisions,
+      title: `${entity.name} Status History`
+    }), modalStore);
   }
 
   async function updateStatus(status: StatusInDHT) {
