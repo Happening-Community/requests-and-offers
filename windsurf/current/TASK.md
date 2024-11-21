@@ -87,10 +87,6 @@
 - Add comprehensive error messaging
 - Remove unnecessary comments
 - Create reusable components for common UI patterns
-- Use systematicly "bunx sv check" from ui/ to report errors and warnings
-  - Run in ui/ after significant changes
-  - Fix type errors immediately
-  - Address all warnings to maintain code quality
 
 ### State Management
 - Implement consistent loading states
@@ -104,6 +100,19 @@
 - Log errors for debugging
 - Gracefully handle network and data fetching issues
 
+### Svelte 5 Migration
+- **Comprehensive Svelte 5 Adoption**
+  * Migrate all existing components from Svelte 4 to Svelte 5
+  * Leverage new Svelte 5 runes (`$state()`, `$derived()`, `$props()`)
+  * Remove legacy reactive declarations and lifecycle methods
+  * Update component script and markup syntax to Svelte 5 standards
+
+### Consistency Strategies
+- **Existing Work as Reference**
+  * Use recently refactored components and pages as templates
+  * Extract and document common refactoring approaches
+  * Create a consistent component structure template
+
 ## Development Best Practices
 
 ### Type Safety
@@ -116,6 +125,25 @@
 - Maintain proper component hierarchy
 - Follow responsive design principles
 - Keep styles modular and reusable
+
+### Component Design
+- **Standardization Techniques**
+  * Implement optional props with default values
+  * Use conditional rendering for optional elements
+  * Create consistent empty state handling
+  * Maintain uniform styling and layout approaches
+
+### Code Quality
+- **Consistency Checklist**
+  * Use Svelte 5 runes consistently
+  * Implement clear, descriptive prop types
+  * Add meaningful comments for complex logic
+  * Ensure components are small, focused, and reusable
+  * Follow a uniform error and loading state management strategy
+- Use systematicly "bunx sv check" from ui/ to report errors and warnings
+  * Run in ui/ after significant changes
+  * Fix type errors immediately
+  * Address all warnings to maintain code quality
 
 ## Development Workflow and Documentation
 
@@ -151,32 +179,31 @@
 - **Ideal**: Immediately after completing a task or making a significant change
 - **Critical**: Always update before switching between different project areas or tasks
 
-## Next Focus Areas
+## Next Steps
 
-### Immediate Priorities
-1. Complete Admin Routes Refactoring
-   - [x] Organizations Management Page
-   - [x] Administrators Management Page
+### 1. Modals Refinement
+- Review and standardize `UserDetailsModal.svelte`
+  * Ensure consistent layout and styling
+  * Implement uniform prop handling
+  * Add clear and consistent action buttons
+- Review and standardize `OrganizationDetailsModal.svelte`
+  * Match styling patterns from UserDetailsModal
+  * Implement consistent data display and interaction
+- Create a base modal template for future modals
+- Ensure smooth transitions and user experience
 
-2. Shared Components Refinement
-   - [ ] Modals
-     - User Details (`/lib/modals/UserDetailsModal.svelte`)
-     - Organization Details (`/lib/modals/OrganizationDetailsModal.svelte`)
-     - ~~Administrator Details Modal (New)~~ *Not needed - using existing UserDetailsModal*
-   - [ ] Tables
-     - Users Table (`/lib/tables/UsersTable.svelte`)
-     - Status Table (`/lib/tables/StatusTable.svelte`)
-   - [x] Navigation Components
-     - NavBar (`/lib/NavBar.svelte`)
-     - MenuDrawer (`/lib/drawers/MenuDrawer.svelte`)
-     - AdminMenuDrawer (`/lib/drawers/AdminMenuDrawer.svelte`)
-     - ActionBar (`/lib/ActionBar.svelte`)
-
-### Long-term Improvements
-- Implement comprehensive testing strategy
-- Document refactoring patterns
-- Review and optimize performance
-- Enhance type safety across components
+### 2. Type Definitions and Interfaces
+- Audit and consolidate type definitions in `@/types/ui.ts`
+  * Review existing interfaces for `UIUser`, `UIOrganization`
+  * Remove redundant or unused type definitions
+  * Add comprehensive type annotations
+- Create a centralized type management strategy
+  * Consider using type inheritance
+  * Implement strict type checking
+  * Add comprehensive type documentation
+- Ensure type consistency across all components
+  * Validate prop types in all table and modal components
+  * Add runtime type checking where necessary
 
 ## Success Criteria
 - [x] Clear user feedback mechanisms across all components

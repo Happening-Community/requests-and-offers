@@ -1,30 +1,28 @@
 <script lang="ts">
-  import {
-    Avatar,
-    getModalStore,
-    type ModalComponent,
-    type ModalSettings
+  import { 
+    Avatar, 
+    getModalStore, 
+    type ModalComponent 
   } from '@skeletonlabs/skeleton';
   import UserDetailsModal from '@/lib/modals/UserDetailsModal.svelte';
   import type { UIUser } from '@/types/ui';
 
   type Props = {
     users: UIUser[];
-    isLoading?: boolean;
-    error?: string | null;
+    title?: string;
   };
 
-  const { users, isLoading = false, error = null }: Props = $props();
+  const { users, title = 'Users' }: Props = $props();
 
   const modalStore = getModalStore();
   const modalComponent: ModalComponent = { ref: UserDetailsModal };
 
-  function createUserModal(user: UIUser): ModalSettings {
-    return {
+  function handleViewUser(user: UIUser) {
+    modalStore.trigger({
       type: 'component',
       component: modalComponent,
       meta: { user }
-    };
+    });
   }
 
   function formatRemainingTimeInDays(remainingTime?: number): string {
@@ -35,34 +33,28 @@
   }
 </script>
 
-<div class="relative overflow-x-auto" aria-label="Users Table">
-  {#if isLoading}
-    <div class="p-4 text-center" aria-live="polite">Loading users...</div>
-  {:else if error}
-    <div class="text-error-500 p-4 text-center" aria-live="assertive">
-      {error}
-    </div>
-  {:else if users.length === 0}
-    <div class="p-4 text-center" aria-live="polite">No users found.</div>
-  {:else}
-    <table
-      class="table-hover w-full text-center text-sm drop-shadow-lg sm:table md:text-left md:text-inherit"
-    >
+<div class="flex flex-col gap-4">
+  {#if title}
+    <h2 class="h3 text-center font-semibold">{title}</h2>
+  {/if}
+  
+  {#if users.length > 0}
+    <table class="table-hover table drop-shadow-lg">
       <thead>
         <tr>
-          <th class="p-5">Avatar</th>
-          <th class="p-5">Name</th>
-          <th class="p-5">Type</th>
+          <th>Avatar</th>
+          <th>Name</th>
+          <th>Type</th>
           {#if users.some((user) => user.remaining_time)}
-            <th class="p-5">Remaining time</th>
+            <th>Remaining time</th>
           {/if}
-          <th class="px-5">Actions</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        {#each users as user, i (user.original_action_hash)}
+        {#each users as user}
           <tr>
-            <td class="flex justify-center py-2">
+            <td>
               <Avatar
                 src={user.picture
                   ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
@@ -86,8 +78,7 @@
             <td>
               <button
                 class="btn variant-filled-secondary"
-                onclick={() => modalStore.trigger(createUserModal(user))}
-                aria-label={`View details for ${user.name}`}
+                onclick={() => handleViewUser(user)}
               >
                 View
               </button>
@@ -96,5 +87,7 @@
         {/each}
       </tbody>
     </table>
+  {:else}
+    <p class="text-center text-surface-500">No users found.</p>
   {/if}
 </div>

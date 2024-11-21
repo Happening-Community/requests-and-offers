@@ -5,10 +5,10 @@
 
   type Props = {
     organizations: UIOrganization[];
-    title: string;
+    title?: string;
   };
 
-  const { organizations, title }: Props = $props();
+  const { organizations, title = 'Organizations' }: Props = $props();
 
   const modalStore = getModalStore();
   const modalComponent: ModalComponent = { ref: OrganizationDetailsModal };
@@ -23,7 +23,9 @@
 </script>
 
 <div class="flex flex-col gap-4">
-  <h2 class="h3 text-center font-semibold">{title}</h2>
+  {#if title}
+    <h2 class="h3 text-center font-semibold">{title}</h2>
+  {/if}
   {#if organizations.length > 0}
     <table class="table-hover table drop-shadow-lg">
       <thead>
@@ -57,6 +59,6 @@
       </tbody>
     </table>
   {:else}
-    <p>No {title.toLowerCase()}</p>
+    <p class="text-surface-500 text-center">No {title.toLowerCase()} found.</p>
   {/if}
 </div>
