@@ -66,11 +66,13 @@ export class AdministrationService {
 
   static async addAdministrator(
     entity: AdministrationEntity,
-    agent_pubkey: AgentPubKey
+    entity_original_action_hash: ActionHash,
+    agent_pubkeys: AgentPubKey[]
   ): Promise<boolean> {
     return (await hc.callZome('administration', 'add_administrator', {
       entity,
-      agent_pubkey
+      entity_original_action_hash,
+      agent_pubkeys
     })) as boolean;
   }
 

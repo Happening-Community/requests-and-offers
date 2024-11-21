@@ -1,18 +1,22 @@
 <script lang="ts">
   import ConfirmModal from '@lib/dialogs/ConfirmModal.svelte';
   import type { ConfirmModalMeta } from '@lib/types';
-  import { Avatar, ConicGradient, getModalStore } from '@skeletonlabs/skeleton';
+  import { Avatar, ConicGradient, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
   import type { UIUser } from '@/types/ui';
   import administrationStore from '@stores/administration.store.svelte';
   import usersStore from '@/stores/users.store.svelte';
   import { queueAndReverseModal } from '@utils';
   import { onMount } from 'svelte';
 
+  const toastStore = getToastStore();
+
   const { administrators, nonAdministrators } = $derived(administrationStore);
+  const { currentUser } = $derived(usersStore);
 
   let filteredUsers: UIUser[] = $state([]);
   let searchInput = $state('');
   let isLoading = $state(true);
+  let isProcessing = $state(false);
 
   const conicStops: any[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -20,122 +24,134 @@
   ];
 
   onMount(async () => {
-    await administrationStore.fetchAllUsers();
-    filteredUsers = nonAdministrators;
-
-    isLoading = false;
+    try {
+      await administrationStore.fetchAllUsers();
+      filteredUsers = nonAdministrators;
+    } catch (error) {
+      toastStore.trigger({
+        message: 'Failed to fetch users. Please try again.',
+        background: 'variant-filled-error'
+      });
+    } finally {
+      isLoading = false;
+    }
   });
 
   const modalStore = getModalStore();
 
   const addAdministratorConfirmationModalMeta: ConfirmModalMeta = {
     id: 'confirm-add-administrator',
-    message: 'Do you really want to make this user an administrator ?',
+    message: 'Do you really want to make this user an administrator?',
     confirmLabel: 'Yes',
     cancelLabel: 'No'
   };
 
   const confirmModalComponent: any = { ref: ConfirmModal };
+
+  async function handleSearch() {
+    filteredUsers = nonAdministrators.filter(
+      (user) =>
+        user.name.toLowerCase().includes(searchInput.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchInput.toLowerCase())
+    );
+  }
+
   const confirmModal = (meta: ConfirmModalMeta, user: UIUser): any => {
     return {
       type: 'component',
       component: confirmModalComponent,
       meta,
       async response(r: boolean) {
-        if (r) {
-          try {
-            const userAgents = await usersStore.getUserAgents(user.original_action_hash!);
+        if (!r) return;
 
-            if (!userAgents.length) {
-              modalStore.close();
-              return;
-            }
-            await administrationStore.registerNetworkAdministrator(
-              user.original_action_hash!,
-              userAgents
-            );
-            administrationStore.administrators = [...administrators, user];
-          } catch (error) {}
+        isProcessing = true;
+        try {
+          if (!currentUser?.original_action_hash || !user.original_action_hash) return;
+
+          const userAgents = await usersStore.getUserAgents(user.original_action_hash!);
+
+          if (!userAgents.length) {
+            toastStore.trigger({
+              message: 'User agents not found',
+              background: 'variant-filled-error'
+            });
+            modalStore.close();
+            return;
+          }
+
+          await administrationStore.addNetworkAdministrator(userAgents, user.original_action_hash);
+          await administrationStore.fetchAllUsers();
+
+          toastStore.trigger({
+            message: 'Administrator added successfully',
+            background: 'variant-filled-success'
+          });
           modalStore.close();
+        } catch (error) {
+          toastStore.trigger({
+            message: 'Failed to add administrator. Please try again.',
+            background: 'variant-filled-error'
+          });
+        } finally {
+          isProcessing = false;
         }
       }
     };
   };
-
-  async function addAdministrator(user: UIUser) {
-    queueAndReverseModal(confirmModal(addAdministratorConfirmationModalMeta, user), modalStore);
-  }
-
-  function searchInputHandler(evt: Event) {
-    searchInput = (evt.target as HTMLInputElement).value;
-    filteredUsers = nonAdministrators.filter((user) =>
-      user.name.toLowerCase().includes(searchInput.toLowerCase())
-    );
-
-    if (filteredUsers.length === 0 && searchInput === '') {
-      filteredUsers = nonAdministrators;
-    }
-  }
 </script>
 
 <article class="hcron-modal">
-  <div class="static mb-8 space-y-4">
-    <h2 class="h2 text-center">Add an administrator</h2>
+  <header class="mb-4">
+    <h3 class="h3">Add Administrator</h3>
+    <div class="input-group input-group-divider mt-4 grid-cols-[auto_1fr_auto]">
+      <div class="input-group-shim">🔍</div>
+      <input
+        type="search"
+        placeholder="Search users..."
+        bind:value={searchInput}
+        oninput={handleSearch}
+      />
+    </div>
+  </header>
 
-    {#if nonAdministrators.length > 0}
-      <div>
-        <input
-          class="input"
-          type="text"
-          placeholder="Search by name"
-          bind:value={searchInput}
-          oninput={searchInputHandler}
-        />
-      </div>
-
-      {#if isLoading}
-        <div class="flex justify-center">
-          <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
-        </div>
-      {:else}
-        <table class="table-hover table">
-          <thead>
-            <tr>
-              <th>Avatar</th>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each filteredUsers as user, i}
-              <tr>
-                <td>
-                  <Avatar
-                    src={user.picture
-                      ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
-                      : '/default_avatar.webp'}
-                  />
-                </td>
-                <td>{user.name}</td>
-                <td>
-                  {user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1)}
-                </td>
-                <td>
-                  <button
-                    class="btn variant-filled-secondary"
-                    onclick={() => addAdministrator(user)}
-                  >
-                    Make admin
-                  </button>
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      {/if}
-    {:else}
-      <p class="pt-4 text-center">No non administrator users found.</p>
-    {/if}
-  </div>
+  {#if isLoading}
+    <div class="flex justify-center p-4">
+      <ConicGradient stops={conicStops} spin />
+    </div>
+  {:else if filteredUsers.length === 0}
+    <p class="text-surface-400 text-center">No users found</p>
+  {:else}
+    <section class="space-y-4">
+      {#each filteredUsers as user (user.original_action_hash)}
+        <button
+          type="button"
+          class="card !bg-surface-700 hover:!bg-surface-600 w-full cursor-pointer p-4 text-left"
+          onclick={() =>
+            queueAndReverseModal(
+              confirmModal(addAdministratorConfirmationModalMeta, user),
+              modalStore
+            )}
+        >
+          <div class="flex items-center gap-4">
+            <Avatar
+              src={user?.picture
+                ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
+                : '/default_avatar.webp'}
+              width="w-12"
+            />
+            <div class="flex-1">
+              <h4 class="font-bold">{user.name}</h4>
+              <p class="text-surface-400 text-sm">{user.email}</p>
+            </div>
+          </div>
+        </button>
+      {/each}
+    </section>
+  {/if}
 </article>
+
+<style lang="postcss">
+  .hcron-modal {
+    @apply p-4;
+  }
+</style>

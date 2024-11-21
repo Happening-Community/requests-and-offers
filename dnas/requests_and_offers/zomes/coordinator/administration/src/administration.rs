@@ -34,9 +34,9 @@ pub fn register_administrator(input: EntityActionHashAgents) -> ExternResult<boo
 
 #[hdk_extern]
 pub fn add_administrator(input: EntityActionHashAgents) -> ExternResult<bool> {
-  if !check_if_entity_is_administrator(EntityActionHash {
-    entity_original_action_hash: input.entity_original_action_hash.clone(),
+  if !check_if_agent_is_administrator(EntityAgent {
     entity: input.entity.clone(),
+    agent_pubkey: agent_info()?.agent_latest_pubkey,
   })? {
     return Err(wasm_error!(Guest(
       "Only administrators can add administrators".to_string()

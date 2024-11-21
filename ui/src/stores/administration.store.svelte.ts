@@ -61,8 +61,15 @@ class AdministrationStore {
     }
   }
 
-  async addNetworkAdministrator(agent_pubkey: AgentPubKey): Promise<boolean> {
-    return await AdministrationService.addAdministrator(AdministrationEntity.Network, agent_pubkey);
+  async addNetworkAdministrator(
+    agent_pubkeys: AgentPubKey[],
+    entity_original_action_hash: ActionHash
+  ): Promise<boolean> {
+    return await AdministrationService.addAdministrator(
+      AdministrationEntity.Network,
+      entity_original_action_hash,
+      agent_pubkeys
+    );
   }
 
   async removeNetworkAdministrator(agent_pubkey: AgentPubKey): Promise<boolean> {

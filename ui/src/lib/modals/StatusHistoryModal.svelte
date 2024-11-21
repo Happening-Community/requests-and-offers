@@ -16,7 +16,7 @@
 
 <article class="hcron-modal">
   <div class="static mb-8 space-y-10">
-    <h2 class="h2 text-center">{title}</h2>
+    <h2 class="h2 text-center">Status History</h2>
 
     <StatusTable {statusHistory} />
   </div>
