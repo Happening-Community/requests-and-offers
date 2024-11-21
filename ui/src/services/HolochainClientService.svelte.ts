@@ -8,7 +8,7 @@ class HolochainClientService {
   isConnected = $state(false);
 
   /**
-   * Connects the client to the Holochain network.
+   * Connects the client to the Host backend.
    */
   async connectClient() {
     this.client = await AppWebsocket.connect();
