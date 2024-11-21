@@ -8,7 +8,7 @@
     title?: string;
   };
 
-  const { organizations, title = 'Organizations' }: Props = $props();
+  const { organizations, title }: Props = $props();
 
   const modalStore = getModalStore();
   const modalComponent: ModalComponent = { ref: OrganizationDetailsModal };
@@ -59,6 +59,6 @@
       </tbody>
     </table>
   {:else}
-    <p class="text-surface-500 text-center">No {title.toLowerCase()} found.</p>
+    <p class="text-surface-500 text-center">No organizations found.</p>
   {/if}
 </div>

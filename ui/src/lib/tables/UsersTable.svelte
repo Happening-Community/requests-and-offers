@@ -1,9 +1,5 @@
 <script lang="ts">
-  import { 
-    Avatar, 
-    getModalStore, 
-    type ModalComponent 
-  } from '@skeletonlabs/skeleton';
+  import { Avatar, getModalStore, type ModalComponent } from '@skeletonlabs/skeleton';
   import UserDetailsModal from '@/lib/modals/UserDetailsModal.svelte';
   import type { UIUser } from '@/types/ui';
 
@@ -12,7 +8,7 @@
     title?: string;
   };
 
-  const { users, title = 'Users' }: Props = $props();
+  const { users, title }: Props = $props();
 
   const modalStore = getModalStore();
   const modalComponent: ModalComponent = { ref: UserDetailsModal };
@@ -37,7 +33,7 @@
   {#if title}
     <h2 class="h3 text-center font-semibold">{title}</h2>
   {/if}
-  
+
   {#if users.length > 0}
     <table class="table-hover table drop-shadow-lg">
       <thead>
@@ -76,10 +72,7 @@
               </td>
             {/if}
             <td>
-              <button
-                class="btn variant-filled-secondary"
-                onclick={() => handleViewUser(user)}
-              >
+              <button class="btn variant-filled-secondary" onclick={() => handleViewUser(user)}>
                 View
               </button>
             </td>
@@ -88,6 +81,6 @@
       </tbody>
     </table>
   {:else}
-    <p class="text-center text-surface-500">No users found.</p>
+    <p class="text-surface-500 text-center">No users found.</p>
   {/if}
 </div>

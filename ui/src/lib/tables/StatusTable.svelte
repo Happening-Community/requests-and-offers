@@ -6,7 +6,7 @@
     title?: string;
   };
 
-  const { statusHistory, title = 'Status History' }: Props = $props();
+  const { statusHistory, title }: Props = $props();
 
   let allStatusesColors: string[] = $state([]);
 
