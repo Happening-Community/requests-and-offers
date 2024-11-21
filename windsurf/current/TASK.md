@@ -182,15 +182,22 @@
 ## Next Steps
 
 ### 1. Modals Refinement
-- Review and standardize `UserDetailsModal.svelte`
-  * Ensure consistent layout and styling
-  * Implement uniform prop handling
-  * Add clear and consistent action buttons
-- Review and standardize `OrganizationDetailsModal.svelte`
-  * Match styling patterns from UserDetailsModal
-  * Implement consistent data display and interaction
-- Create a base modal template for future modals
-- Ensure smooth transitions and user experience
+- [x] Review and standardize `UserDetailsModal.svelte`
+  * Improved layout and styling with consistent spacing
+  * Added card-based sections for better organization
+  * Enhanced status display with dynamic chip styling
+  * Improved typography and visual hierarchy
+- [x] Review and standardize `OrganizationDetailsModal.svelte`
+  * Matched styling patterns from UserDetailsModal
+  * Implemented centered layout for better presentation
+  * Added consistent card sections for information display
+  * Enhanced status chip styling with dynamic states
+  * Improved links and email display with hover effects
+- [x] Create a base modal template for future modals
+  * Established consistent card styling with border
+  * Standardized spacing and padding
+  * Created uniform header section layout
+  * Implemented consistent status display pattern
 
 ### 2. Type Definitions and Interfaces
 - Audit and consolidate type definitions in `@/types/ui.ts`

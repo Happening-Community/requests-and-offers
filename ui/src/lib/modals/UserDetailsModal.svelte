@@ -15,70 +15,155 @@
   const modalStore = getModalStore();
   const { user }: Props = $modalStore[0].meta;
 
-  let userPictureUrl = $state('');
   let suspensionDate = $state('');
   let userStatus: UIStatus | null = $state(null);
 
-  onMount(async () => {
-    userPictureUrl = user?.picture
+  let userPictureUrl: string = $derived(
+    user?.picture
       ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
-      : '/default_avatar.webp';
+      : '/default_avatar.webp'
+  );
 
-    const userStatusRecord = await administrationStore.getLatestStatusForEntity(
-      user.original_action_hash!,
-      AdministrationEntity.Users
-    );
-    userStatus = userStatusRecord ? decodeRecords([userStatusRecord])[0] : null;
+  onMount(() => {
+    async function fetchDashboardData() {
+      if (!user.original_action_hash) return;
 
-    if (user && userStatus!.suspended_until) {
-      suspensionDate = new Date(userStatus!.suspended_until).toLocaleString();
+      const userStatusRecord = await administrationStore.getLatestStatusForEntity(
+        user.original_action_hash!,
+        AdministrationEntity.Users
+      );
+      userStatus = userStatusRecord ? decodeRecords([userStatusRecord])[0] : null;
+
+      if (userStatus?.suspended_until) {
+        suspensionDate = new Date(userStatus.suspended_until).toLocaleString();
+      }
     }
+
+    fetchDashboardData();
   });
 </script>
 
 <article class="hcron-modal">
   {#if user}
     {#if $page.url.pathname.startsWith('/admin')}
-      <div class="mb-10">
+      <div class="mb-6">
         <ActionBar entity={user} />
       </div>
     {/if}
 
-    <h2 class="h2 font-bold">{user.name}</h2>
-    <h3 class="h3"><b>Nickname :</b> {user.nickname}</h3>
-    {#if $page.url.pathname.startsWith('/admin')}
-      <p>
-        <b>Status :</b>
-        {#if !suspensionDate}
-          {userStatus?.status_type}
-        {:else}
-          suspended until <br /> {suspensionDate}
+    <!-- Header Section -->
+    <div class="mb-6 flex flex-col items-center gap-6">
+      <div onload={() => URL.revokeObjectURL(userPictureUrl)}>
+        <Avatar src={userPictureUrl} width="w-32" background="bg-surface-100-800-token" />
+      </div>
+      <div class="min-w-0 flex-1">
+        <h2 class="h2 mb-1 truncate font-bold">{user.name}</h2>
+        <p class="text-surface-600-300-token">@{user.nickname}</p>
+        {#if user.bio}
+          <p class="text-surface-700-200-token mt-3 leading-relaxed">{user.bio}</p>
         {/if}
-      </p>
-      {#if userStatus?.status_type.startsWith('suspended')}
-        <p><b>Reason :</b> {userStatus?.reason}</p>
-      {/if}
-    {/if}
-    <div onload={() => URL.revokeObjectURL(userPictureUrl)}>
-      <Avatar src={userPictureUrl} width="w-64" background="none" />
+      </div>
     </div>
-    <p>{user.bio}</p>
-    <p><b>Type :</b> {user.user_type}</p>
-    {#if user.skills?.length}
-      <p><b>Skills :</b> {user.skills?.join(', ')}</p>
+
+    <!-- Status Section (Admin Only) -->
+    {#if $page.url.pathname.startsWith('/admin')}
+      <div class="card mb-6 p-4">
+        <h3 class="h4 mb-3 font-semibold">Status Information</h3>
+        <div class="space-y-3">
+          <div class="flex items-center">
+            <span class="min-w-[120px] font-medium">Status:</span>
+            <span
+              class="chip"
+              class:variant-ghost-primary={user!.status?.status_type === 'pending'}
+              class:variant-ghost-error={user!.status?.status_type === 'rejected' ||
+                user!.status?.status_type === 'suspended indefinitely'}
+              class:variant-ghost-green={user!.status?.status_type === 'accepted'}
+              class:variant-ghost-warning={user!.status?.status_type === `suspended temporarily`}
+            >
+              {userStatus?.status_type || 'Active'}
+            </span>
+          </div>
+          {#if suspensionDate}
+            <div class="flex items-center">
+              <span class="min-w-[120px] font-medium">Suspended until:</span>
+              <span class="text-error-500">{suspensionDate}</span>
+            </div>
+          {/if}
+          {#if userStatus?.status_type?.startsWith('suspended') && userStatus?.reason}
+            <div class="flex items-start">
+              <span class="min-w-[120px] font-medium">Reason:</span>
+              <span class="text-surface-700-200-token">{userStatus.reason}</span>
+            </div>
+          {/if}
+        </div>
+      </div>
     {/if}
-    <p><b>Email :</b> {user.email}</p>
-    {#if user.phone}
-      <p><b>Phone number :</b> {user.phone}</p>
-    {/if}
-    {#if user.time_zone}
-      <p><b>Timezone :</b> {user.time_zone}</p>
-    {/if}
-    {#if user.location}
-      <p><b>Location :</b> {user.location}</p>
-    {/if}
+
+    <!-- Basic Information -->
+    <div class="space-y-6">
+      <div class="card p-4">
+        <h3 class="h4 mb-3 font-semibold">Basic Information</h3>
+        <div class="space-y-3">
+          <div class="flex items-center">
+            <span class="min-w-[120px] font-medium">Type:</span>
+            <span class="chip variant-ghost">{user.user_type}</span>
+          </div>
+          <div class="flex items-center">
+            <span class=" min-w-[120px] font-medium">Email:</span>
+            <span class="text-tertiary-500 hover:text-tertiary-600 cursor-pointer hover:underline"
+              >{user.email}</span
+            >
+          </div>
+          {#if user.phone}
+            <div class="flex items-center">
+              <span class="min-w-[120px] font-medium">Phone:</span>
+              <span>{user.phone}</span>
+            </div>
+          {/if}
+        </div>
+      </div>
+
+      <!-- Additional Information -->
+      {#if user.skills?.length || user.time_zone || user.location}
+        <div class="card p-4">
+          <h3 class="h4 mb-3 font-semibold">Additional Information</h3>
+          <div class="space-y-3">
+            {#if user.skills?.length}
+              <div class="flex items-start">
+                <span class="mt-1 min-w-[120px] font-medium">Skills:</span>
+                <div class="flex flex-wrap gap-2">
+                  {#each user.skills as skill}
+                    <span class="chip variant-soft">{skill}</span>
+                  {/each}
+                </div>
+              </div>
+            {/if}
+            {#if user.time_zone}
+              <div class="flex items-center">
+                <span class="min-w-[120px] font-medium">Timezone:</span>
+                <span>{user.time_zone}</span>
+              </div>
+            {/if}
+            {#if user.location}
+              <div class="flex items-center">
+                <span class="min-w-[120px] font-medium">Location:</span>
+                <span>{user.location}</span>
+              </div>
+            {/if}
+          </div>
+        </div>
+      {/if}
+    </div>
   {/if}
-  <button class="btn variant-filled-secondary mt-4 w-fit" onclick={() => modalStore.close()}>
-    Close
-  </button>
+
+  <!-- Footer -->
+  <div class="mt-6 flex justify-end">
+    <button class="btn variant-filled-surface" onclick={() => modalStore.close()}> Close </button>
+  </div>
 </article>
+
+<style lang="postcss">
+  .card {
+    @apply border-surface-600  rounded-container-token;
+  }
+</style>
