@@ -15,10 +15,6 @@ export class UsersService {
     )) as Record | null;
   }
 
-  static async getAllUsersLinks(): Promise<Link[]> {
-    return (await hc.callZome('users_organizations', 'get_all_users', null)) as Link[];
-  }
-
   static async getUserStatusLink(user_original_action_hash: ActionHash): Promise<Link | null> {
     return (await hc.callZome(
       'users_organizations',

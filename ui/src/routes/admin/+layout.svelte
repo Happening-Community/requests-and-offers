@@ -24,20 +24,20 @@
   });
 </script>
 
-<div class="grid h-screen grid-rows-[auto_1fr]">
+<div class="flex h-screen flex-col overflow-hidden">
   <!-- Header -->
   <NavBar />
 
-  <!-- Grid Columns -->
-  <div class="grid grid-cols-1 sm:grid-cols-[auto_1fr]">
-    <!-- Left Sidebar. -->
+  <!-- Content Container -->
+  <div class="flex flex-1 overflow-hidden">
+    <!-- Sidebar -->
     <div class="hidden sm:block">
       <AdminSideBar />
     </div>
 
     <!-- Main Content -->
     <main
-      class="bg-surface-800 mx-auto flex w-full flex-col items-center justify-center px-5 pb-10"
+      class="bg-surface-800 flex min-h-full w-full flex-1 flex-col items-center overflow-auto px-5 py-10"
     >
       {#if !hc.isConnected}
         <p>Not connected yet.</p>

@@ -16,15 +16,45 @@ class AdministrationStore {
   allOrganizations: UIOrganization[] = $state([]);
 
   async initialize() {
-    await Promise.all([
+    const results = await Promise.allSettled([
       this.fetchAllUsers(),
       this.fetchAllOrganizations(),
       this.getAllRevisionsForAllUsers()
     ]);
+
+    return results.map((result, index) => ({
+      operation: ['fetchAllUsers', 'fetchAllOrganizations', 'getAllRevisionsForAllUsers'][index],
+      status: result.status,
+      value: result.status === 'fulfilled' ? result.value : undefined,
+      error: result.status === 'rejected' ? result.reason : undefined
+    }));
+  }
+
+  async getAllUsers(): Promise<UIUser[]> {
+    const links = await AdministrationService.getAllUsersLinks();
+    const users: UIUser[] = [];
+
+    for (const link of links) {
+      const user = await usersStore.getLatestUser(link.target);
+      if (!user?.original_action_hash) continue;
+
+      const record = await administrationStore.getLatestStatusForEntity(
+        user.original_action_hash,
+        AdministrationEntity.Users
+      );
+      if (!record) continue;
+
+      user.status = decodeRecords([record])[0];
+      users.push(user);
+    }
+
+    this.allUsers = users;
+
+    return users;
   }
 
   async fetchAllUsers() {
-    this.allUsers = await usersStore.getAllUsers();
+    this.allUsers = await this.getAllUsers();
     await this.getAllNetworkAdministrators(); // This will update administrators and nonAdministrators
     return this.allUsers;
   }
@@ -93,7 +123,7 @@ class AdministrationStore {
 
     // If the current agent is an administrator, use getAllUsers, otherwise use getAcceptedUsers
     const allUsers = this.agentIsAdministrator
-      ? await usersStore.getAllUsers()
+      ? await this.getAllUsers()
       : await usersStore.getAcceptedUsers();
 
     const admins = allUsers.filter((user) =>
@@ -210,7 +240,7 @@ class AdministrationStore {
   }
 
   async getAllRevisionsForAllUsers(): Promise<Revision[]> {
-    const allUsers = await usersStore.getAllUsers();
+    const allUsers = await this.getAllUsers();
     const revisions: Revision[] = [];
 
     for (const user of allUsers) {

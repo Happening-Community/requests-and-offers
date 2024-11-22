@@ -2,12 +2,11 @@
   import { onMount } from 'svelte';
   import type { UIOrganization, UIUser } from '@/types/ui';
   import administrationStore from '@/stores/administration.store.svelte';
-  import usersStore from '@/stores/users.store.svelte';
-  import organizationsStore from '@/stores/organizations.store.svelte';
   import projectsStore, { type Project } from '@/stores/projects.svelte';
-  import { AdministrationEntity } from '@/types/holochain';
+  import { ConicGradient, type ConicStop, getToastStore } from '@skeletonlabs/skeleton';
 
-  // Reactive state management
+  const toastStore = getToastStore();
+
   let dashboardState = $state({
     isLoading: true,
     error: null as string | null,
@@ -19,70 +18,75 @@
     }
   });
 
-  // Fetch and process dashboard data with resilient error handling
   async function fetchDashboardData() {
+    dashboardState.isLoading = true;
+    dashboardState.error = null;
+
     try {
-      dashboardState.isLoading = true;
-      dashboardState.error = null;
+      const results = await administrationStore.initialize();
 
-      // Use Promise.allSettled for resilient data fetching
-      const [adminResult, usersResult, organizationsResult] = await Promise.allSettled([
-        administrationStore.initialize(),
-        usersStore.getAllUsers(),
-        organizationsStore.getAllOrganizations()
-      ]);
-
-      // Handle initialization errors
-      const handleSettledResult = (result: PromiseSettledResult<any>, entityName: string) => {
+      // Process results based on operation type
+      for (const result of results) {
         if (result.status === 'rejected') {
-          console.error(`Error fetching ${entityName}:`, result.reason);
-          return [];
+          console.error(`Error in ${result.operation}:`, result.error);
+          toastStore.trigger({
+            message: `Failed to load ${result.operation}. Some data may be incomplete.`,
+            background: 'variant-filled-warning',
+            autohide: true,
+            timeout: 5000
+          });
+          continue;
         }
-        return result.status === 'fulfilled' ? result.value : [];
-      };
 
-      // Process administrators
-      dashboardState.data.administrators = administrationStore.administrators;
+        switch (result.operation) {
+          case 'fetchAllUsers':
+            // Process administrators and pending users
+            dashboardState.data.administrators = administrationStore.administrators;
+            dashboardState.data.pendingUsers = (result.value as UIUser[]).filter(
+              (user) => user.status?.status_type === 'pending'
+            );
+            break;
 
-      // Process pending users with status filtering
-      const users = handleSettledResult(usersResult, 'users');
-      dashboardState.data.pendingUsers = await Promise.all(
-        users.filter(async (user: UIUser) => {
-          if (!user.original_action_hash) return false;
-          const statusRecord = await administrationStore.getLatestStatusForEntity(
-            user.original_action_hash,
-            AdministrationEntity.Users
-          );
-          return !!statusRecord;
-        })
-      );
+          case 'fetchAllOrganizations':
+            // Process pending organizations
+            dashboardState.data.pendingOrganizations = (result.value as UIOrganization[]).filter(
+              (org) => org.status?.status_type === 'pending'
+            );
+            break;
 
-      // Process pending organizations
-      const organizations = handleSettledResult(organizationsResult, 'organizations');
-      dashboardState.data.pendingOrganizations = await Promise.all(
-        organizations.filter(async (org: UIOrganization) => {
-          if (!org.original_action_hash) return false;
-          const statusRecord = await administrationStore.getLatestStatusForEntity(
-            org.original_action_hash,
-            AdministrationEntity.Organizations
-          );
-          return !!statusRecord;
-        })
-      );
+          case 'getAllRevisionsForAllUsers':
+            // We might want to do something with revisions in the future
+            break;
+        }
+      }
 
-      dashboardState.data.pendingProjects = projectsStore.projects;
-    } catch (error) {
-      dashboardState.error =
-        error instanceof Error
-          ? `Dashboard initialization failed: ${error.message}`
-          : 'An unexpected error occurred while loading dashboard data';
-      console.error('Dashboard data fetch error:', error);
+      // Fetch pending projects separately since they're not part of initialize
+      try {
+        dashboardState.data.pendingProjects = projectsStore.projects.filter(
+          (project) => project.status === 'pending'
+        );
+      } catch (e) {
+        console.error('Error fetching pending projects:', e);
+        toastStore.trigger({
+          message: 'Failed to load pending projects. Some data may be incomplete.',
+          background: 'variant-filled-warning',
+          autohide: true,
+          timeout: 5000
+        });
+      }
+    } catch (e) {
+      dashboardState.error = e instanceof Error ? e.message : 'Failed to load dashboard data';
+      toastStore.trigger({
+        message: 'Failed to load dashboard data. Please try again.',
+        background: 'variant-filled-error',
+        autohide: true,
+        timeout: 5000
+      });
     } finally {
       dashboardState.isLoading = false;
     }
   }
 
-  // Initial data fetch on component mount
   onMount(fetchDashboardData);
 </script>
 

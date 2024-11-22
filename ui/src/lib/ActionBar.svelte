@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import administrationStore from '@/stores/administration.store.svelte';
+  import usersStore from '@/stores/users.store.svelte'; // Add this line to import the users store
   import { AdministrationEntity, type StatusInDHT } from '@/types/holochain';
   import type { Revision, UIUser } from '@/types/ui';
   import type { UIOrganization } from '@/types/ui';
@@ -93,7 +94,7 @@
         else handleSuspendIndefinitely(response.data);
 
         if (entityType === AdministrationEntity.Users) {
-          await administrationStore.refreshUsers();
+          await administrationStore.fetchAllUsers();
         }
 
         modalStore.close();
@@ -125,7 +126,7 @@
           }
 
           if (entityType === AdministrationEntity.Users) {
-            await administrationStore.refreshUsers();
+            await administrationStore.fetchAllUsers();
           }
 
           modalStore.close();
@@ -246,8 +247,7 @@
     );
 
     if (entityType === AdministrationEntity.Users) {
-      await administrationStore.refreshUsers();
-
+      await administrationStore.fetchAllUsers();
       modalStore.close();
     } else {
       await administrationStore.refreshOrganizations();
@@ -275,7 +275,7 @@
     );
 
     if (entityType === AdministrationEntity.Users) {
-      await administrationStore.refreshUsers();
+      await administrationStore.fetchAllUsers();
       modalStore.close();
     } else {
       await administrationStore.refreshOrganizations();
@@ -309,7 +309,7 @@
     );
 
     if (entityType === AdministrationEntity.Users) {
-      await administrationStore.refreshUsers();
+      await administrationStore.fetchAllUsers();
       modalStore.close();
     } else {
       await administrationStore.refreshOrganizations();
@@ -343,6 +343,12 @@
         onclick={() => handlePromptModal('indefinitely')}
       >
         Suspend Indefinitely
+      </button>
+    {/if}
+
+    {#if userStatus?.status_type === 'rejected'}
+      <button class="btn variant-filled-success rounded-lg" onclick={handleAcceptModal}>
+        Accept
       </button>
     {/if}
 

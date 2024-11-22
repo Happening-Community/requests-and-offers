@@ -5,6 +5,10 @@ import { AdministrationEntity } from '@/types/holochain';
 import hc from '../HolochainClientService.svelte';
 
 export class AdministrationService {
+  static async getAllUsersLinks(): Promise<Link[]> {
+    return (await hc.callZome('users_organizations', 'get_all_users', null)) as Link[];
+  }
+
   static async createStatus(status: StatusInDHT): Promise<Record> {
     return (await hc.callZome('administration', 'create_status', status)) as Record;
   }

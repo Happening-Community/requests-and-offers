@@ -1,5 +1,6 @@
 <script lang="ts">
-  import usersStore from '@/stores/users.store.svelte';
+  import administrationStore from '@/stores/administration.store.svelte';
+  import type { UIUser } from '@/types/ui';
   import UsersTable from '@lib/tables/UsersTable.svelte';
   import { ConicGradient, type ConicStop, getToastStore } from '@skeletonlabs/skeleton';
   import { onMount } from 'svelte';
@@ -8,7 +9,7 @@
 
   let isLoading = $state(true);
   let error = $state<string | null>(null);
-  const { allUsers } = $derived(usersStore);
+  const { allUsers } = $derived(administrationStore);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -31,7 +32,6 @@
   const userCategories = $derived([
     { title: 'Pending Users', users: usersByStatus.pending, titleClass: 'text-primary-400' },
     { title: 'Accepted Users', users: usersByStatus.accepted, titleClass: 'text-green-600' },
-    { title: 'Rejected Users', users: usersByStatus.rejected, titleClass: 'text-red-600' },
     {
       title: 'Temporarily Suspended Users',
       users: usersByStatus.temporarilySuspended,
@@ -41,14 +41,15 @@
       title: 'Indefinitely Suspended Users',
       users: usersByStatus.indefinitelySuspended,
       titleClass: 'text-gray-600'
-    }
+    },
+    { title: 'Rejected Users', users: usersByStatus.rejected, titleClass: 'text-red-600' }
   ]);
 
   async function loadUsers() {
     try {
       isLoading = true;
       error = null;
-      await usersStore.getAllUsers();
+      await administrationStore.fetchAllUsers();
     } catch (e) {
       error = e instanceof Error ? e.message : 'Failed to load users';
       const t = {
@@ -88,17 +89,32 @@
       <span class="text-white">{error}</span>
     </div>
   {:else}
-    <div class="flex flex-col gap-4 lg:flex-row lg:justify-center lg:gap-0 lg:divide-x-2">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
       {#each userCategories as { title, users, titleClass }}
-        <div class="flex flex-col gap-4 lg:px-4">
-          <h2 class="h3 {titleClass}">{title}</h2>
-          {#if users.length > 0}
-            <UsersTable {users} />
-          {:else}
-            <p class="text-surface-500 text-center">No {title.toLowerCase()}</p>
-          {/if}
-        </div>
+        {@render usersTable(title, users, titleClass)}
       {/each}
     </div>
   {/if}
 </section>
+
+{#snippet usersTable(title: string, users: UIUser[], titleClass: string)}
+  {#if title === 'Rejected Users' || title === 'Indefinitely Suspended Users'}
+    <details class="flex flex-col gap-4 border-b-2 border-slate-900 pb-4">
+      <summary class="h3 {titleClass}">{title} ({users.length})</summary>
+      {#if users.length > 0}
+        <UsersTable {users} />
+      {:else}
+        <p class="text-surface-500 text-center">No {title.toLowerCase()}</p>
+      {/if}
+    </details>
+  {:else}
+    <div class="flex flex-col gap-4 border-b-2 border-slate-900 pb-4">
+      <h2 class="h3 {titleClass}">{title} ({users.length})</h2>
+      {#if users.length > 0}
+        <UsersTable {users} />
+      {:else}
+        <p class="text-surface-500 text-center">No {title.toLowerCase()}</p>
+      {/if}
+    </div>
+  {/if}
+{/snippet}

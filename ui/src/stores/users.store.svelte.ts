@@ -34,29 +34,6 @@ class UsersStore {
     };
   }
 
-  async getAllUsers(): Promise<UIUser[]> {
-    const links = await UsersService.getAllUsersLinks();
-    const users: UIUser[] = [];
-
-    for (const link of links) {
-      const user = await this.getLatestUser(link.target);
-      if (!user?.original_action_hash) continue;
-
-      const record = await administrationStore.getLatestStatusForEntity(
-        user.original_action_hash,
-        AdministrationEntity.Users
-      );
-      if (!record) continue;
-
-      user.status = decodeRecords([record])[0];
-      users.push(user);
-    }
-
-    this.allUsers = users;
-
-    return users;
-  }
-
   async getUserByActionHash(actionHash: ActionHash): Promise<UIUser | null> {
     return (
       this.allUsers.find(
