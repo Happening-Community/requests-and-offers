@@ -138,9 +138,3 @@
     <button class="btn variant-filled-surface" onclick={() => modalStore.close()}> Close </button>
   </div>
 </article>
-
-<style lang="postcss">
-  .card {
-    @apply border-surface-600 rounded-container-token;
-  }
-</style>

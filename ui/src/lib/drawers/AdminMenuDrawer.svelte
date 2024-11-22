@@ -1,6 +1,6 @@
 <script>
-  import AdminMenuLinks from '@lib/AdminMenuLinks.svelte';
   import { getDrawerStore } from '@skeletonlabs/skeleton';
+  import MenuLink from '../MenuLink.svelte';
 
   const drawerStore = getDrawerStore();
 </script>
@@ -19,5 +19,31 @@
     </a>
   </div>
 
-  <AdminMenuLinks />
+  <div class="flex flex-col gap-3">
+    <MenuLink href="/admin/administrators" className="variant-filled-secondary">
+      Administrators
+    </MenuLink>
+    <MenuLink href="/admin/users" className="variant-filled-secondary">Users</MenuLink>
+  </div>
+
+  <div class="flex flex-col gap-3">
+    <MenuLink href="/admin/organizations" className="variant-filled-secondary">
+      Organizations
+    </MenuLink>
+    <MenuLink href="/admin/projects" className="variant-filled-secondary">Projects</MenuLink>
+  </div>
+
+  <div class="flex flex-col gap-3">
+    <MenuLink href="/admin/requests" className="variant-filled-secondary">Requests</MenuLink>
+    <MenuLink href="/admin/offers" className="variant-filled-secondary">Offers</MenuLink>
+  </div>
+
+  <div class=" flex flex-col gap-3">
+    <MenuLink
+      href="/"
+      className="variant-ringed-secondary text-white hover:variant-filled-secondary"
+    >
+      User front-end
+    </MenuLink>
+  </div>
 </div>

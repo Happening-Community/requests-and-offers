@@ -90,7 +90,7 @@
   onMount(fetchDashboardData);
 </script>
 
-<section class="space-y-8">
+<section class="mt-24 space-y-8">
   <div class="absolute left-10 top-40 flex flex-col items-center gap-2 sm:left-56 sm:top-40">
     <a class="btn bg-secondary-500 text-slate-800 hover:text-black" href="/"> User front-end </a>
     <span>

@@ -1,8 +1,10 @@
 <script lang="ts">
   import Bars from './svg/bars.svelte';
   import { getDrawerStore, type DrawerSettings } from '@skeletonlabs/skeleton';
-  import MenuLinks from './MenuLinks.svelte';
+  import MenuLink from './MenuLink.svelte';
+  import usersStore from '@/stores/users.store.svelte';
 
+  const { currentUser } = $derived(usersStore);
   const drawerStore = getDrawerStore();
   const drawerSettings: DrawerSettings = {
     id: 'menu-drawer',
@@ -31,6 +33,21 @@
   </div>
 
   <div class="hidden flex-col justify-end gap-4 sm:flex-row lg:flex">
-    <MenuLinks />
+    <div class="flex flex-col gap-3">
+      {#if currentUser}
+        <MenuLink href="/user">My profile</MenuLink>
+      {:else}
+        <MenuLink href="/user/create">Create Profile</MenuLink>
+      {/if}
+      <MenuLink href="/users">All Users</MenuLink>
+    </div>
+    <div class="flex flex-col gap-3">
+      <MenuLink href="/organizations">Organizations</MenuLink>
+      <MenuLink href="/projects">Projects</MenuLink>
+    </div>
+    <div class="flex flex-col gap-3">
+      <MenuLink href="/requests">Requests</MenuLink>
+      <MenuLink href="/offers">Offers</MenuLink>
+    </div>
   </div>
 </nav>

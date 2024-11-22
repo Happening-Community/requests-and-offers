@@ -31,12 +31,12 @@
   <!-- Content Container -->
   <div class="flex flex-1 overflow-hidden">
     <!-- Sidebar -->
-    <div class="hidden sm:block h-full">
+    <div class="hidden h-full sm:block">
       <AdminSideBar />
     </div>
 
     <!-- Main Content -->
-    <main class="bg-surface-800 w-full flex-1 px-5 py-10 overflow-y-auto">
+    <main class="bg-surface-800 w-full flex-1 overflow-y-auto px-5 py-10">
       {#if !hc.isConnected}
         <p>Not connected yet.</p>
         <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
