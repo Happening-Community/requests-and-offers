@@ -121,10 +121,14 @@ class AdministrationStore {
 
     await this.checkIfAgentIsAdministrator((await hc.getAppInfo())!.agent_pub_key);
 
-    // If the current agent is an administrator, use getAllUsers, otherwise use getAcceptedUsers
-    const allUsers = this.agentIsAdministrator
-      ? await this.getAllUsers()
-      : await usersStore.getAcceptedUsers();
+    // If we already have all users loaded and the current agent is an administrator, use the cached users
+    let allUsers: UIUser[];
+    if (this.agentIsAdministrator && this.allUsers.length > 0) {
+      allUsers = this.allUsers;
+    } else {
+      // Otherwise, get only accepted users
+      allUsers = await usersStore.getAcceptedUsers();
+    }
 
     const admins = allUsers.filter((user) =>
       adminLinks.some((link) => link.target.toString() === user.original_action_hash?.toString())
@@ -276,13 +280,28 @@ class AdministrationStore {
     status_previous_action_hash: ActionHash,
     new_status: StatusInDHT
   ): Promise<boolean> {
-    return await AdministrationService.updateEntityStatus(
+    const success = await AdministrationService.updateEntityStatus(
       AdministrationEntity.Organizations,
       entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
       new_status
     );
+
+    if (success) {
+      // Update the specific organization's status in the store
+      this.allOrganizations = this.allOrganizations.map((org) => {
+        if (org.original_action_hash?.toString() === entity_original_action_hash.toString()) {
+          return {
+            ...org,
+            status: new_status
+          };
+        }
+        return org;
+      });
+    }
+
+    return success;
   }
 
   async getAllRevisionsForAllOrganizations(): Promise<Revision[]> {
