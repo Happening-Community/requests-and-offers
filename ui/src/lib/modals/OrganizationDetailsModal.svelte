@@ -54,14 +54,14 @@
       <div class="min-w-0 flex-1">
         <h2 class="h2 mb-1 truncate font-bold">{organization.name}</h2>
         {#if organization.description}
-          <p class="text-surface-600-300-token leading-relaxed">{organization.description}</p>
+          <p class="text-surface-100 leading-relaxed">{organization.description}</p>
         {/if}
       </div>
     </div>
 
     <!-- Status Section (Admin Only) -->
     {#if $page.url.pathname.startsWith('/admin')}
-      <div class="card mb-6 p-4">
+      <div class="mb-6 p-4">
         <h3 class="h4 mb-3 font-semibold">Status Information</h3>
         <div class="space-y-3">
           <div class="flex items-center">
@@ -71,7 +71,7 @@
               class:variant-ghost-primary={organization!.status?.status_type === 'pending'}
               class:variant-ghost-error={organization!.status?.status_type === 'rejected' ||
                 organization!.status?.status_type === 'suspended indefinitely'}
-              class:variant-ghost-green={organization!.status?.status_type === 'accepted'}
+              class:variant-ghost-success={organization!.status?.status_type === 'accepted'}
               class:variant-ghost-warning={organization!.status?.status_type ===
                 `suspended temporarily`}
             >
@@ -90,7 +90,7 @@
 
     <!-- Contact Information -->
     <div class="space-y-6">
-      <div class="card p-4">
+      <div class="rounded-lg border-2 border-slate-400 p-4">
         <h3 class="h4 mb-3 font-semibold">Contact Information</h3>
         <div class="space-y-3">
           <div class="flex items-center">
@@ -110,7 +110,7 @@
 
       <!-- Links Section -->
       {#if organization.urls?.length}
-        <div class="card p-4">
+        <div class="rounded-lg border-2 border-slate-400 p-4">
           <h3 class="h4 mb-3 font-semibold">Links & Resources</h3>
           <div class="space-y-2">
             {#each organization.urls as url}

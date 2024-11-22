@@ -58,16 +58,16 @@
       </div>
       <div class="min-w-0 flex-1">
         <h2 class="h2 mb-1 truncate font-bold">{user.name}</h2>
-        <p class="text-surface-600-300-token">@{user.nickname}</p>
+        <p class="text-surface-300">@{user.nickname}</p>
         {#if user.bio}
-          <p class="text-surface-700-200-token mt-3 leading-relaxed">{user.bio}</p>
+          <p class="text-surface-100 mt-3 leading-relaxed">{user.bio}</p>
         {/if}
       </div>
     </div>
 
     <!-- Status Section (Admin Only) -->
     {#if $page.url.pathname.startsWith('/admin')}
-      <div class="card mb-6 p-4">
+      <div class=" mb-6 p-4">
         <h3 class="h4 mb-3 font-semibold">Status Information</h3>
         <div class="space-y-3">
           <div class="flex items-center">
@@ -77,7 +77,7 @@
               class:variant-ghost-primary={user!.status?.status_type === 'pending'}
               class:variant-ghost-error={user!.status?.status_type === 'rejected' ||
                 user!.status?.status_type === 'suspended indefinitely'}
-              class:variant-ghost-green={user!.status?.status_type === 'accepted'}
+              class:variant-ghost-success={user!.status?.status_type === 'accepted'}
               class:variant-ghost-warning={user!.status?.status_type === `suspended temporarily`}
             >
               {userStatus?.status_type || 'Active'}
@@ -101,12 +101,12 @@
 
     <!-- Basic Information -->
     <div class="space-y-6">
-      <div class="card p-4">
+      <div class=" rounded-lg border-2 border-slate-400 p-4">
         <h3 class="h4 mb-3 font-semibold">Basic Information</h3>
         <div class="space-y-3">
           <div class="flex items-center">
             <span class="min-w-[120px] font-medium">Type:</span>
-            <span class="chip variant-ghost">{user.user_type}</span>
+            <span class="chip variant-ghost-secondary">{user.user_type}</span>
           </div>
           <div class="flex items-center">
             <span class=" min-w-[120px] font-medium">Email:</span>
@@ -125,7 +125,7 @@
 
       <!-- Additional Information -->
       {#if user.skills?.length || user.time_zone || user.location}
-        <div class="card p-4">
+        <div class=" rounded-lg border-2 border-slate-400 p-4">
           <h3 class="h4 mb-3 font-semibold">Additional Information</h3>
           <div class="space-y-3">
             {#if user.skills?.length}
@@ -133,7 +133,7 @@
                 <span class="mt-1 min-w-[120px] font-medium">Skills:</span>
                 <div class="flex flex-wrap gap-2">
                   {#each user.skills as skill}
-                    <span class="chip variant-soft">{skill}</span>
+                    <span class="chip variant-ghost-primary">{skill}</span>
                   {/each}
                 </div>
               </div>
@@ -161,9 +161,3 @@
     <button class="btn variant-filled-surface" onclick={() => modalStore.close()}> Close </button>
   </div>
 </article>
-
-<style lang="postcss">
-  .card {
-    @apply border-surface-600  rounded-container-token;
-  }
-</style>
