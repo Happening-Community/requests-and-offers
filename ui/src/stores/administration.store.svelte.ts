@@ -320,13 +320,46 @@ class AdministrationStore {
     status_previous_action_hash: ActionHash,
     new_status: StatusInDHT
   ): Promise<boolean> {
-    return await AdministrationService.updateEntityStatus(
+    const success = await AdministrationService.updateEntityStatus(
       AdministrationEntity.Users,
       entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
       new_status
     );
+
+    if (success) {
+      // Update the specific user's status in the store
+      this.allUsers = this.allUsers.map((user) => {
+        if (user.original_action_hash?.toString() === entity_original_action_hash.toString()) {
+          return {
+            ...user,
+            status: new_status
+          };
+        }
+        return user;
+      });
+
+      // Also update administrators list if the user is an administrator
+      if (
+        this.administrators.some(
+          (admin) =>
+            admin.original_action_hash?.toString() === entity_original_action_hash.toString()
+        )
+      ) {
+        this.administrators = this.administrators.map((admin) => {
+          if (admin.original_action_hash?.toString() === entity_original_action_hash.toString()) {
+            return {
+              ...admin,
+              status: new_status
+            };
+          }
+          return admin;
+        });
+      }
+    }
+
+    return success;
   }
 
   async suspendUserIndefinitely(
