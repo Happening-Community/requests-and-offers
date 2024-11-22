@@ -46,7 +46,7 @@
 <article class="hcron-modal">
   {#if user}
     {#if $page.url.pathname.startsWith('/admin')}
-      <div class="mb-6">
+      <div class="pb-6">
         <ActionBar entity={user} />
       </div>
     {/if}

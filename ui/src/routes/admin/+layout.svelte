@@ -24,21 +24,19 @@
   });
 </script>
 
-<div class="flex h-screen flex-col overflow-hidden">
+<div class="flex h-screen flex-col">
   <!-- Header -->
   <NavBar />
 
   <!-- Content Container -->
   <div class="flex flex-1 overflow-hidden">
     <!-- Sidebar -->
-    <div class="hidden sm:block">
+    <div class="hidden sm:block h-full">
       <AdminSideBar />
     </div>
 
     <!-- Main Content -->
-    <main
-      class="bg-surface-800 flex min-h-full w-full flex-1 flex-col items-center overflow-auto px-5 py-10"
-    >
+    <main class="bg-surface-800 w-full flex-1 px-5 py-10 overflow-y-auto">
       {#if !hc.isConnected}
         <p>Not connected yet.</p>
         <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
