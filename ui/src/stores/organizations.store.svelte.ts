@@ -172,22 +172,32 @@ class OrganizationsStore {
 
   async getUserOrganizations(userActionHash: ActionHash): Promise<UIOrganization[]> {
     const links = await OrganizationsService.getUserOrganizationsLinks(userActionHash);
-    return this.getOrganizationsByActionHashes(links.map((link) => link.target));
+    const organizations = await Promise.all(
+      links.map(async (link) => {
+        const organization = await this.getLatestOrganization(link.target);
+        if (!organization) return null;
+        return organization;
+      })
+    );
+    return organizations.filter((org): org is UIOrganization => org !== null);
   }
 
   async getUserCoordinatedOrganizations(
     userOriginalActionHash: ActionHash
   ): Promise<UIOrganization[]> {
     const links = await OrganizationsService.getUserOrganizationsLinks(userOriginalActionHash);
-
-    return this.getOrganizationsByActionHashes(
-      links
-        .filter((link) => link.target)
-        .map((link) => link.target)
-        .filter((link) => link)
-    ).filter((org) =>
-      org.coordinators.some((coordinator) => coordinator === userOriginalActionHash)
+    const organizations = await Promise.all(
+      links.map(async (link) => {
+        const organization = await this.getLatestOrganization(link.target);
+        if (!organization) return null;
+        return organization;
+      })
     );
+    return organizations
+      .filter((org): org is UIOrganization => org !== null)
+      .filter((org) =>
+        org.coordinators.some((coordinator) => coordinator === userOriginalActionHash)
+      );
   }
 
   async getAcceptedOrganizations(): Promise<UIOrganization[]> {

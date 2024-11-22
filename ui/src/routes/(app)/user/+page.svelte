@@ -6,7 +6,7 @@
     type ModalComponent,
     type ModalSettings
   } from '@skeletonlabs/skeleton';
-  import type { Revision, UIOrganization, UIStatus, UIUser } from '@/types/ui';
+  import type { Revision, UIOrganization } from '@/types/ui';
   import usersStore from '@/stores/users.store.svelte';
   import administrationStore from '@stores/administration.store.svelte';
   import organizationsStore from '@/stores/organizations.store.svelte';
@@ -46,23 +46,7 @@
         return;
       }
 
-      // Optimize organization fetching
-      if (currentUser.organizations?.length) {
-        const orgPromises = currentUser.organizations.map((link) =>
-          organizationsStore.getLatestOrganization(link)
-        );
-      }
-
-      // Handle suspension status
-      if (currentUser.status?.suspended_until) {
-        const date = new Date(currentUser.status.suspended_until);
-        const now = new Date();
-
-        isExpired = date < now;
-        suspensionDate = date.toLocaleDateString();
-      }
-
-      // Fetch user organizations
+      // Fetch organizations
       myOrganizations = await organizationsStore.getUserOrganizations(
         currentUser.original_action_hash!
       );
@@ -178,10 +162,10 @@
       {#if currentUser.location}
         <p><b>Location :</b> {currentUser.location}</p>
       {/if}
-      {#if myOrganizations.length > 0}
+      {#if myOrganizations?.length > 0}
         <OrganizationsTable title="My Organizations" organizations={myOrganizations} />
       {/if}
-      {#if myCoordinatedOrganizations.length > 0}
+      {#if myCoordinatedOrganizations?.length > 0}
         <OrganizationsTable
           title="My Coordinated Organizations"
           organizations={myCoordinatedOrganizations}
