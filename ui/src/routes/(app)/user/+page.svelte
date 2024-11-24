@@ -12,7 +12,8 @@
   import organizationsStore from '@/stores/organizations.store.svelte';
   import StatusHistoryModal from '@lib/modals/StatusHistoryModal.svelte';
   import NavButton from '@lib/NavButton.svelte';
-  import OrganizationsTable from '@/lib/tables/OrganizationsTable.svelte';
+  import { OrganizationRole } from '@/types/ui';
+  import UserOrganizationsTable from '@/lib/tables/UserOrganizationsTable.svelte';
 
   const modalStore = getModalStore();
   const { currentUser } = $derived(usersStore);
@@ -162,15 +163,24 @@
       {#if currentUser.location}
         <p><b>Location :</b> {currentUser.location}</p>
       {/if}
-      {#if myOrganizations?.length > 0}
-        <OrganizationsTable title="My Organizations" organizations={myOrganizations} />
-      {/if}
-      {#if myCoordinatedOrganizations?.length > 0}
-        <OrganizationsTable
-          title="My Coordinated Organizations"
-          organizations={myCoordinatedOrganizations}
-        />
-      {/if}
+
+      <!-- Organizations Section -->
+      <div class="w-full space-y-4">
+        {#if myOrganizations?.length > 0}
+          <UserOrganizationsTable
+            title="My Organizations"
+            organizations={myOrganizations}
+            role={OrganizationRole.Member}
+          />
+        {/if}
+        {#if myCoordinatedOrganizations?.length > 0}
+          <UserOrganizationsTable
+            title="My Coordinated Organizations"
+            organizations={myCoordinatedOrganizations}
+            role={OrganizationRole.Coordinator}
+          />
+        {/if}
+      </div>
     </div>
   {/if}
 </section>
