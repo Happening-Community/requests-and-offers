@@ -114,4 +114,36 @@ export class OrganizationsService {
       'organizations'
     )) as Link[];
   }
+
+  static async updateOrganization(
+    hash: ActionHash,
+    updates: Partial<OrganizationInDHT>
+  ): Promise<boolean> {
+    return (await hc.callZome('users_organizations', 'update_organization', {
+      hash,
+      updates
+    })) as boolean;
+  }
+
+  static async deleteOrganization(hash: ActionHash): Promise<boolean> {
+    return (await hc.callZome('users_organizations', 'delete_organization', {
+      hash
+    })) as boolean;
+  }
+
+  static async leaveOrganization(hash: ActionHash): Promise<boolean> {
+    return (await hc.callZome('users_organizations', 'leave_organization', {
+      hash
+    })) as boolean;
+  }
+
+  static async isOrganizationCoordinator(
+    organization_hash: ActionHash,
+    user_hash: ActionHash
+  ): Promise<boolean> {
+    return (await hc.callZome('users_organizations', 'is_organization_coordinator', {
+      organization_hash,
+      user_hash
+    })) as boolean;
+  }
 }

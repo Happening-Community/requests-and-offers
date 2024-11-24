@@ -214,6 +214,40 @@ class OrganizationsStore {
     return this.acceptedOrganizations;
   }
 
+  // New methods for organization management
+  async updateOrganization(hash: ActionHash, updates: Partial<OrganizationInDHT>): Promise<UIOrganization | null> {
+    const success = await OrganizationsService.updateOrganization(hash, updates);
+    if (success) {
+      return this.refreshOrganization(hash);
+    }
+    return null;
+  }
+
+  async deleteOrganization(hash: ActionHash): Promise<boolean> {
+    const success = await OrganizationsService.deleteOrganization(hash);
+    if (success) {
+      this.allOrganizations = this.allOrganizations.filter(
+        (org) => org.original_action_hash?.toString() !== hash.toString()
+      );
+      if (this.currentOrganization?.original_action_hash?.toString() === hash.toString()) {
+        this.currentOrganization = null;
+      }
+    }
+    return success;
+  }
+
+  async leaveOrganization(hash: ActionHash): Promise<boolean> {
+    const success = await OrganizationsService.leaveOrganization(hash);
+    if (success) {
+      await this.refresh();
+    }
+    return success;
+  }
+
+  async isOrganizationCoordinator(orgHash: ActionHash, userHash: ActionHash): Promise<boolean> {
+    return OrganizationsService.isOrganizationCoordinator(orgHash, userHash);
+  }
+
   // Helper methods
   getOrganizationsByActionHashes(actionHashes: ActionHash[]): UIOrganization[] {
     return this.allOrganizations.filter((org) =>
