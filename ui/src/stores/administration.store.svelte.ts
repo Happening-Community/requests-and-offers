@@ -273,6 +273,16 @@ class AdministrationStore {
     return revisions;
   }
 
+  async getEntityStatusLink(
+    entity_original_action_hash: ActionHash,
+    entity_type: AdministrationEntity
+  ) {
+    return await AdministrationService.getEntityStatusLink(
+      entity_original_action_hash,
+      entity_type
+    );
+  }
+
   // Organization status management methods
   async updateOrganizationStatus(
     entity_original_action_hash: ActionHash,

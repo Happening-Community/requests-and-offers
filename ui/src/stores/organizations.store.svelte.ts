@@ -214,6 +214,13 @@ class OrganizationsStore {
     return this.acceptedOrganizations;
   }
 
+  async getOrganizationStatusLink(original_action_hash: ActionHash) {
+    return await administrationStore.getEntityStatusLink(
+      original_action_hash,
+      AdministrationEntity.Organizations
+    );
+  }
+
   // New methods for organization management
   async updateOrganization(hash: ActionHash, updates: Partial<OrganizationInDHT>): Promise<UIOrganization | null> {
     const success = await OrganizationsService.updateOrganization(hash, updates);

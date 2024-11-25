@@ -1,55 +1,104 @@
 <script lang="ts">
-  import { page } from '$app/stores';
   import { Avatar, getModalStore } from '@skeletonlabs/skeleton';
   import type { UIOrganization, UIUser } from '@/types/ui';
+  import { OrganizationRole } from '@/types/ui';
   import organizationsStore from '@/stores/organizations.store.svelte';
-  import usersStore from '@/stores/users.store.svelte';
-  import type { ActionHash } from '@holochain/client';
+  import administrationStore from '@/stores/administration.store.svelte';
+  import { type StatusInDHT } from '@/types/holochain';
 
   type Props = {
     organization: UIOrganization;
+    searchQuery?: string;
+    sortBy?: 'name' | 'role' | 'status';
+    sortOrder?: 'asc' | 'desc';
+    onUpdateStatus?: (member: UIUser, status: StatusInDHT) => void;
   };
 
-  const { organization }: Props = $props();
+  const {
+    organization,
+    searchQuery = '',
+    sortBy = 'name',
+    sortOrder = 'asc',
+    onUpdateStatus
+  }: Props = $props();
 
-  let members: UIUser[] = $state([]);
-  let loading = $state(true);
-  let error: string | null = $state(null);
+  let members = $state<UIUser[]>([]);
+  let loading = $state(false);
+  let error = $state<string | null>(null);
+
+  // Sort and filter members
+  function getSortedAndFilteredMembers() {
+    if (members.length === 0) return [];
+
+    // First, sort the members
+    const sorted = [...members].sort((a, b) => {
+      if (sortBy === 'name') {
+        return sortOrder === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+      } else if (sortBy === 'role') {
+        const aIsCoordinator = organization.coordinators.includes(a.original_action_hash!);
+        const bIsCoordinator = organization.coordinators.includes(b.original_action_hash!);
+        return sortOrder === 'asc'
+          ? aIsCoordinator === bIsCoordinator
+            ? 0
+            : aIsCoordinator
+              ? 1
+              : -1
+          : aIsCoordinator === bIsCoordinator
+            ? 0
+            : aIsCoordinator
+              ? -1
+              : 1;
+      } else {
+        // Sort by status
+        const statusA = a.status?.status_type || '';
+        const statusB = b.status?.status_type || '';
+        return sortOrder === 'asc'
+          ? statusA.localeCompare(statusB)
+          : statusB.localeCompare(statusA);
+      }
+    });
+
+    // Then filter by search query
+    if (!searchQuery) return sorted;
+
+    return sorted.filter((member) => member.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }
+
+  const displayMembers = $derived(getSortedAndFilteredMembers());
+
+  const modalStore = getModalStore();
+  const isAdmin = $derived(administrationStore.agentIsAdministrator);
 
   async function loadMembers() {
     try {
       loading = true;
       error = null;
-      const memberHashes = await organizationsStore.getMemberUsers(organization);
-      const loadedMembers = await Promise.all(
-        memberHashes.map((user) => usersStore.getLatestUser(user.original_action_hash!))
-      );
-      members = loadedMembers.filter((user): user is UIUser => user !== null);
-    } catch (e: unknown) {
-      error = e instanceof Error ? e.message : 'An unknown error occurred';
+
+      const memberUsers = await organizationsStore.getMemberUsers(organization);
+      members = memberUsers;
+    } catch (e) {
+      console.error('Error loading members:', e);
+      error = e instanceof Error ? e.message : 'Failed to load members';
     } finally {
       loading = false;
     }
   }
 
-  async function handleRemoveMember(memberHash: ActionHash) {
-    try {
-      loading = true;
-      error = null;
-      await organizationsStore.removeMember(organization, memberHash);
-      await loadMembers();
-    } catch (e: unknown) {
-      error = e instanceof Error ? e.message : 'An unknown error occurred';
-    } finally {
-      loading = false;
-    }
+  function openStatusUpdateModal(member: UIUser) {
+    modalStore.trigger({
+      type: 'component',
+      component: {
+        ref: 'StatusUpdateModal',
+        props: {
+          entity: member,
+          onUpdate: onUpdateStatus
+        }
+      }
+    });
   }
 
-  // Load members when the component mounts
   $effect(() => {
-    if (organization) {
-      loadMembers();
-    }
+    loadMembers();
   });
 </script>
 
@@ -58,70 +107,56 @@
     <h3 class="h3">Organization Members</h3>
   </header>
 
-  {#if error}
+  {#if loading}
+    <div class="flex items-center justify-center p-4">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  {:else if error}
     <div class="alert variant-filled-error" role="alert">
       {error}
     </div>
-  {/if}
-
-  {#if loading}
-    <div class="flex justify-center p-4">
-      <span class="loading loading-spinner loading-lg"></span>
-    </div>
+  {:else if members.length === 0}
+    <div class="alert variant-ghost-surface" role="alert">No members found.</div>
   {:else}
-    <table class="table-hover table">
-      <thead>
-        <tr>
-          <th>Avatar</th>
-          <th>Name</th>
-          <th>Role</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each members as member (member.original_action_hash)}
+    <div class="table-container">
+      <table class="table-hover table">
+        <thead>
           <tr>
-            <td>
-              <Avatar
-                src={member.picture
-                  ? URL.createObjectURL(new Blob([new Uint8Array(member.picture)]))
-                  : '/default_avatar.webp'}
-                width="w-10"
-                rounded="rounded-full"
-              />
-            </td>
-            <td>{member.name}</td>
-            <td>
-              <span
-                class="badge {organization.coordinators.includes(member.original_action_hash!)
-                  ? 'variant-filled-primary'
-                  : 'variant-filled-surface'}"
-              >
-                {organization.coordinators.includes(member.original_action_hash!)
-                  ? 'Coordinator'
-                  : 'Member'}
-              </span>
-            </td>
-            <td>
-              <div class="flex gap-2">
-                {#if organization.coordinators.includes($page?.data?.user?.original_action_hash!)}
-                  <button
-                    class="btn btn-sm variant-filled-error"
-                    onclick={() => handleRemoveMember(member.original_action_hash!)}
-                    disabled={loading}
-                  >
-                    Remove
-                  </button>
-                {/if}
-              </div>
-            </td>
+            <th>Member</th>
+            <th>Role</th>
+            <th>Status</th>
           </tr>
-        {/each}
-      </tbody>
-    </table>
-
-    {#if members.length === 0}
-      <div class="text-surface-600-300-token flex justify-center p-4">No members found</div>
-    {/if}
+        </thead>
+        <tbody>
+          {#each displayMembers as member (member.original_action_hash)}
+            <tr>
+              <td class="flex items-center gap-2">
+                <Avatar initials={member.name.slice(0, 2)} />
+                <span>{member.name}</span>
+              </td>
+              <td>
+                <span class="badge variant-filled">
+                  {member.role || OrganizationRole.Member}
+                </span>
+              </td>
+              <td>
+                <button
+                  class="badge {member.status?.status_type === 'accepted'
+                    ? 'variant-filled-success'
+                    : member.status?.status_type.startsWith('rejected')
+                      ? 'variant-filled-warning'
+                      : 'variant-filled-surface'}"
+                  onclick={() => isAdmin && openStatusUpdateModal(member)}
+                  disabled={!isAdmin}
+                  aria-label={`Update status for ${member.name}`}
+                >
+                  {member.status?.status_type || 'No Status'}
+                </button>
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
   {/if}
 </div>

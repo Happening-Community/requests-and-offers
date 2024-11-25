@@ -6,11 +6,11 @@
   import OrganizationMembersTable from '@/lib/tables/OrganizationMembersTable.svelte';
   import OrganizationCoordinatorsTable from '@/lib/tables/OrganizationCoordinatorsTable.svelte';
   import MemberManagementModal from '@/lib/modals/MemberManagementModal.svelte';
-  import { decodeHashFromBase64 } from '@holochain/client';
+  import { decodeHashFromBase64, type ActionHash } from '@holochain/client';
 
   const modalStore = getModalStore();
   const organizationHashString = $page.params.id;
-  const organizationHash = decodeHashFromBase64(organizationHashString);
+  const organizationHash = decodeHashFromBase64(organizationHashString) as ActionHash;
 
   let organization: UIOrganization | null = $state(null);
   let loading = $state(true);
