@@ -3,8 +3,6 @@
   import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
   import type { Revision, UIOrganization, UIUser } from '@/types/ui';
   import organizationsStore from '@/stores/organizations.store.svelte';
-  import OrganizationMembersTable from '@/lib/tables/OrganizationMembersTable.svelte';
-  import OrganizationCoordinatorsTable from '@/lib/tables/OrganizationCoordinatorsTable.svelte';
   import MemberManagementModal from '@/lib/modals/MemberManagementModal.svelte';
   import { decodeHashFromBase64, type ActionHash } from '@holochain/client';
   import type { StatusInDHT } from '@/types/holochain';
@@ -25,6 +23,26 @@
   let error = $state<string | null>(null);
   let members: UIUser[] = $state([]);
   let coordinators: UIUser[] = $state([]);
+  let loadingMembers = $state(false);
+  let loadingCoordinators = $state(false);
+
+  // Form state
+  let formName = $state('');
+  let formDescription = $state('');
+  let formEmail = $state('');
+  let formLocation = $state('');
+  let formUrls = $state('');
+
+  // Update form values when organization changes
+  $effect(() => {
+    if (organization) {
+      formName = organization.name;
+      formDescription = organization.description;
+      formEmail = organization.email;
+      formLocation = organization.location;
+      formUrls = organization.urls.join(', ');
+    }
+  });
 
   // Table controls
   let memberSearchQuery = $state('');
@@ -229,12 +247,36 @@
       if (!organization) {
         throw new Error('Organization not found');
       }
-      if (!organization.original_action_hash || !usersStore.currentUser?.original_action_hash)
-        return;
 
       // Load members and coordinators
-      members = await organizationsStore.getMemberUsers(organization);
-      coordinators = await organizationsStore.getCoordinatorUsers(organization);
+      loadingMembers = true;
+      loadingCoordinators = true;
+      try {
+        members = await organizationsStore.getMemberUsers(organization);
+      } catch (e) {
+        console.error('Error loading members:', e);
+        toastStore.trigger({
+          message: 'Failed to load members',
+          background: 'variant-filled-error'
+        });
+      } finally {
+        loadingMembers = false;
+      }
+
+      try {
+        coordinators = await organizationsStore.getCoordinatorUsers(organization);
+      } catch (e) {
+        console.error('Error loading coordinators:', e);
+        toastStore.trigger({
+          message: 'Failed to load coordinators',
+          background: 'variant-filled-error'
+        });
+      } finally {
+        loadingCoordinators = false;
+      }
+
+      if (!organization.original_action_hash || !usersStore.currentUser?.original_action_hash)
+        return;
 
       agentIsAdministrator = await organizationsStore.isOrganizationCoordinator(
         organization.original_action_hash,
@@ -277,17 +319,21 @@
       if (!confirmed) return;
 
       loading = true;
-      await organizationsStore.deleteOrganization(organizationHash);
+      const success = await organizationsStore.deleteOrganization(organizationHash);
 
-      toastStore.trigger({
-        message: 'Organization deleted successfully',
-        background: 'variant-filled-success'
-      });
+      if (success) {
+        toastStore.trigger({
+          message: 'Organization deleted successfully',
+          background: 'variant-filled-success'
+        });
 
-      // Navigate back to organizations list
-      window.history.back();
+        // Navigate back to organizations list
+        window.history.back();
+      } else {
+        throw new Error('Failed to delete organization');
+      }
     } catch (e) {
-      error = e instanceof Error ? e.message : 'An unknown error occurred';
+      console.error('Error deleting organization:', e);
       toastStore.trigger({
         message: 'Failed to delete organization',
         background: 'variant-filled-error'
@@ -303,18 +349,32 @@
 
     try {
       loading = true;
-      error = null;
-      await organizationsStore.updateOrganization(organizationHash, {
-        name: organization.name,
-        description: organization.description
-      });
 
-      toastStore.trigger({
-        message: 'Organization updated successfully',
-        background: 'variant-filled-success'
-      });
+      // Get form data
+      const updates = {
+        name: formName,
+        description: formDescription,
+        email: formEmail,
+        location: formLocation,
+        urls: formUrls
+          .split(',')
+          .map((url) => url.trim())
+          .filter((url) => url !== '')
+      };
+
+      const updatedOrg = await organizationsStore.updateOrganization(organizationHash, updates);
+
+      if (updatedOrg) {
+        toastStore.trigger({
+          message: 'Organization updated successfully',
+          background: 'variant-filled-success'
+        });
+        await loadOrganization();
+      } else {
+        throw new Error('Failed to update organization');
+      }
     } catch (e) {
-      error = e instanceof Error ? e.message : 'An unknown error occurred';
+      console.error('Error updating organization:', e);
       toastStore.trigger({
         message: 'Failed to update organization',
         background: 'variant-filled-error'
@@ -430,8 +490,8 @@
     <!-- Members Section -->
     <div class="card mt-6 w-full p-6">
       <header class="mb-4 flex items-center justify-between">
-        <h2 class="h2">Members ({members.length})</h2>
-        {#if organization.coordinators.includes($page?.data?.user?.original_action_hash!)}
+        <h2 class="h2">Members ({members.length - coordinators.length})</h2>
+        {#if organization?.coordinators.includes($page?.data?.user?.original_action_hash!)}
           <button
             class="btn variant-filled-primary"
             onclick={() =>
@@ -444,7 +504,12 @@
           </button>
         {/if}
       </header>
-      {#if members.length === 0}
+
+      {#if loadingMembers}
+        <div class="flex items-center justify-center p-4">
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+      {:else if members.length === coordinators.length}
         <div class="alert variant-ghost-surface" role="alert">No members found.</div>
       {:else}
         <div class="table-container">
@@ -452,12 +517,11 @@
             <thead>
               <tr>
                 <th>Member</th>
-                <th>Role</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {#each members as member (member.original_action_hash)}
+              {#each members.filter((member) => !coordinators.some((coord) => coord.original_action_hash === member.original_action_hash)) as member (member.original_action_hash)}
                 <tr>
                   <td class="flex items-center gap-2">
                     <Avatar
@@ -467,15 +531,6 @@
                       initials={member.name.slice(0, 2)}
                     />
                     <span>{member.name}</span>
-                  </td>
-                  <td>
-                    <span class="badge variant-filled">
-                      {coordinators.some(
-                        (coord) => coord.original_action_hash === member.original_action_hash
-                      )
-                        ? 'Coordinator'
-                        : 'Member'}
-                    </span>
                   </td>
                   <td>
                     <button
@@ -505,7 +560,12 @@
       <header class="mb-4">
         <h2 class="h2">Coordinators ({coordinators.length})</h2>
       </header>
-      {#if coordinators.length === 0}
+
+      {#if loadingCoordinators}
+        <div class="flex items-center justify-center p-4">
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+      {:else if coordinators.length === 0}
         <div class="alert variant-ghost-surface" role="alert">No coordinators found.</div>
       {:else}
         <div class="table-container">
@@ -564,22 +624,66 @@
       {/if}
     </div>
 
-    <!-- Settings Section -->
+    <!-- Settings Section (Coordinators Only) -->
     {#if agentIsAdministrator}
       <div class="card mt-6 w-full p-6">
         <header class="mb-4">
-          <h2 class="h2">Settings</h2>
+          <h2 class="h2">Organization Settings</h2>
         </header>
-        <div class="flex gap-4">
-          <button class="btn variant-filled-error" onclick={handleDeleteOrganization}>
-            Delete Organization
-          </button>
-          {#if isAdmin}
-            <button class="btn variant-filled-warning" onclick={openOrganizationStatusUpdateModal}>
-              Update Status
+
+        <form onsubmit={handleUpdateSettings} class="space-y-4">
+          <label class="label">
+            <span>Name</span>
+            <input class="input" type="text" name="name" bind:value={formName} required />
+          </label>
+
+          <label class="label">
+            <span>Description</span>
+            <textarea
+              class="textarea"
+              name="description"
+              rows="3"
+              bind:value={formDescription}
+              required
+            ></textarea>
+          </label>
+
+          <label class="label">
+            <span>Email</span>
+            <input class="input" type="email" name="email" bind:value={formEmail} required />
+          </label>
+
+          <label class="label">
+            <span>Location</span>
+            <input class="input" type="text" name="location" bind:value={formLocation} required />
+          </label>
+
+          <label class="label">
+            <span>URLs (comma-separated)</span>
+            <input class="input" type="text" name="urls" bind:value={formUrls} />
+          </label>
+
+          <div class="flex gap-4">
+            <button type="submit" class="btn variant-filled-primary" disabled={loading}>
+              {#if loading}
+                <span class="loading loading-spinner loading-sm"></span>
+              {/if}
+              Save Changes
             </button>
-          {/if}
-        </div>
+
+            <button
+              type="button"
+              class="btn variant-filled-error"
+              onclick={handleDeleteOrganization}
+              disabled={loading}
+            >
+              {#if loading}
+                <span class="loading loading-spinner loading-sm"></span>
+              {/if}
+              Delete Organization
+            </button>
+          </div>
+        </form>
       </div>
     {/if}
   {:else}

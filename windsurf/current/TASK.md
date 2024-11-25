@@ -37,32 +37,58 @@
   - [x] Status-based UI updates
 
 ### 3. Routes Updates
-- [ ] Organization Details Page (`/routes/(app)/organizations/[id]/+page.svelte`)
-  - [ ] Complete members list with roles and status
-  - [ ] Complete coordinators list with management options
-  - [ ] Members management section with MemberManagementModal
-  - [ ] Coordinators management section with role-based actions
-  - [ ] Settings section for coordinators only
-  - [ ] Status management section for administrators
-  - [ ] Centralized error display using Skeleton UI alerts
-  - [ ] Consistent loading states with Skeleton UI loaders
+- [x] Organization Details Page (`/routes/(app)/organizations/[id]/+page.svelte`)
+  - [x] Complete members list with roles and status
+  - [x] Complete coordinators list with management options
+  - [x] Members management section with MemberManagementModal
+  - [x] Coordinators management section with role-based actions
+  - [x] Settings section for coordinators only
+  - [x] Status management section for administrators
+  - [x] Centralized error display using Skeleton UI alerts
+  - [x] Consistent loading states with Skeleton UI loaders
+  - [x] Eliminated redundant member display in tables
+  - [ ] Fix settings display and form submission
 
 ## Current Status
-We have made significant progress in improving the organization management UI, particularly in displaying and managing members and coordinators. However, there are several critical bugs that need to be addressed.
+We have successfully improved the organization management UI and fixed several critical bugs. The organization details page now properly displays members and coordinators in separate tables without redundancy, includes proper loading states, and has functioning update and delete controls. However, there are still some issues with the settings section that need to be addressed.
 
 ## Priority Bugs
-1. **Members and Coordinators Display Issue**
-   - Members and coordinators are not being displayed correctly in the organization details page
-   - Need to investigate and fix the data loading and display logic
+1. ~~**Members and Coordinators Display Issue**~~
+   - ✓ Fixed: Members and coordinators are now correctly displayed in separate tables
+   - ✓ Implemented proper data loading and display logic
+   - ✓ Eliminated redundant display of users
 
-2. **Organization Settings Persistence**
-   - Organization settings disappear when refreshing the organization details page
-   - Need to implement proper state persistence and rehydration
+2. ~~**Organization Settings display issue**~~
+   - ✓ Fixed: Settings now display correctly for coordinators
+   - ✓ Fixed: Form display is working properly
+   - [ ] Need to improve URLs field with better validation and UI
+   - [ ] Ensure settings persist after updates
 
 3. **Broken UI Controls**
-   - Delete organization button is not functioning properly
-   - Update status button is broken
-   - Need to fix event handlers and state management for these controls
+   - [ ] Fix save settings button functionality
+   - [ ] Fix delete organization button functionality
+   - [ ] Add proper URL validation and formatting
+   - [ ] Add confirmation dialogs for critical actions
+
+## Next Steps
+
+1. Fix organization settings functionality:
+   - [ ] Improve URLs field with a better UI (chip/tag input)
+   - [ ] Add URL validation and formatting
+   - [ ] Fix save settings functionality
+   - [ ] Add proper error handling and user feedback
+   - [ ] Add loading states during save operation
+
+2. Fix delete organization functionality:
+   - [ ] Add proper confirmation dialog
+   - [ ] Implement delete operation with error handling
+   - [ ] Add loading state during deletion
+   - [ ] Redirect after successful deletion
+
+3. Add comprehensive testing:
+   - [ ] Add unit tests for settings update
+   - [ ] Add unit tests for organization deletion
+   - [ ] Test URL validation and formatting
 
 ## Implementation Guidelines
 - [x] Use Svelte 5 runes (`$state()`, `$derived()`) for reactivity
@@ -80,38 +106,19 @@ We have made significant progress in improving the organization management UI, p
 4. [x] Integrate administration store for status management
 5. [ ] Test and verify all functionality
 
-## Next Steps
-1. Debug and fix the members and coordinators display issue
-   - Verify data loading in `loadOrganization()`
-   - Check state management for members and coordinators lists
-   - Ensure proper rendering of user information
-
-2. Implement proper state persistence
-   - Add state persistence for organization settings
-   - Implement proper state rehydration on page refresh
-
-3. Fix broken UI controls
-   - Debug and fix delete organization functionality
-   - Repair update status button handlers
-   - Add proper error handling and user feedback
-
-4. Add comprehensive testing
-   - Add unit tests for critical functionality
-   - Implement integration tests for user flows
-   - Add error boundary testing
-
 ## Technical Notes
 - The organization detail page has been updated with new components and functionality
 - State management has been improved but needs further refinement
 - UI components have been modernized with better error handling and loading states
 
 ## Future Improvements
-- Add search and filtering capabilities for members and coordinators lists
-- Implement batch operations for member management
-- Add more detailed activity logs
 - Improve performance with pagination and lazy loading
+- Add more detailed activity logs
+- Implement batch operations for member management
+- Add search and filtering capabilities for members and coordinators lists
 
 ## Notes
 - Status management functionality is already implemented in the administration store (`updateOrganizationStatus`)
 - Focus should be on UI components and integration with existing functionality
 - Ensure proper permission checks for administrator actions
+- Use normal event attributes instead of `on:click` like handlers that are deprecated.

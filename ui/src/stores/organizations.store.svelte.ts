@@ -47,6 +47,29 @@ class OrganizationsStore {
     organization.members = membersLinks.map((link) => link.target);
     organization.coordinators = coordinatorsLinks.map((link) => link.target);
 
+    // Get organization status
+    const statusLink = await this.getOrganizationStatusLink(original_action_hash);
+    if (statusLink) {
+      const status = await administrationStore.getLatestStatusForEntity(
+        statusLink.target,
+        AdministrationEntity.Organizations
+      );
+      if (status) {
+        organization.status = decodeRecords([status])[0] as UIStatus;
+      }
+    }
+
+    // Update in-memory cache
+    this.allOrganizations = this.allOrganizations.map((org) =>
+      org.original_action_hash?.toString() === original_action_hash.toString() ? organization : org
+    );
+
+    if (
+      this.currentOrganization?.original_action_hash?.toString() === original_action_hash.toString()
+    ) {
+      this.currentOrganization = organization;
+    }
+
     return organization;
   }
 
@@ -57,16 +80,6 @@ class OrganizationsStore {
     for (const link of links) {
       const organization = await this.getLatestOrganization(link.target);
       if (organization) {
-        const statusLink = await OrganizationsService.getOrganizationStatusLink(link.target);
-        if (statusLink) {
-          const status = await administrationStore.getLatestStatusForEntity(
-            statusLink.target,
-            AdministrationEntity.Organizations
-          );
-          if (status) {
-            organization.status = decodeRecords([status])[0] as UIStatus;
-          }
-        }
         organizations.push(organization);
       }
     }
@@ -86,17 +99,6 @@ class OrganizationsStore {
   async refreshOrganization(original_action_hash: ActionHash): Promise<UIOrganization | null> {
     const organization = await this.getLatestOrganization(original_action_hash);
     if (!organization) return null;
-
-    const statusLink = await OrganizationsService.getOrganizationStatusLink(original_action_hash);
-    if (statusLink) {
-      const status = await administrationStore.getLatestStatusForEntity(
-        statusLink.target,
-        AdministrationEntity.Organizations
-      );
-      if (status) {
-        organization.status = decodeRecords([status])[0] as UIStatus;
-      }
-    }
 
     this.allOrganizations = this.allOrganizations.map((org) =>
       org.original_action_hash?.toString() === original_action_hash.toString() ? organization : org

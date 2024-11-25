@@ -135,10 +135,26 @@ class UsersStore {
   }
 
   // Helper methods
-  getUsersByActionHashes(actionHashes: ActionHash[]): UIUser[] {
-    return this.allUsers.filter((user) =>
-      actionHashes.some((hash) => hash.toString() === user.original_action_hash?.toString())
+  async getUsersByActionHashes(actionHashes: ActionHash[]): Promise<UIUser[]> {
+    const users = await Promise.all(
+      actionHashes.map(async (hash) => {
+        // First try to get from memory
+        const cachedUser = this.allUsers.find(
+          (user) => user.original_action_hash?.toString() === hash.toString()
+        );
+        if (cachedUser) return cachedUser;
+
+        // If not in memory, fetch from DHT
+        const user = await this.getLatestUser(hash);
+        if (!user) return null;
+
+        // Add to allUsers cache
+        this.allUsers = [...this.allUsers, user];
+        return user;
+      })
     );
+
+    return users.filter((user): user is UIUser => user !== null);
   }
 
   async refresh(): Promise<void> {
