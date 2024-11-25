@@ -116,11 +116,11 @@ export class OrganizationsService {
   }
 
   static async updateOrganization(
-    hash: ActionHash,
+    organization_original_action_hash: ActionHash,
     updates: Partial<OrganizationInDHT>
   ): Promise<boolean> {
     return (await hc.callZome('users_organizations', 'update_organization', {
-      hash,
+      organization_original_action_hash,
       updates
     })) as boolean;
   }
@@ -138,12 +138,12 @@ export class OrganizationsService {
   }
 
   static async isOrganizationCoordinator(
-    organization_hash: ActionHash,
-    user_hash: ActionHash
+    organization_original_action_hash: ActionHash,
+    user_original_action_hash: ActionHash
   ): Promise<boolean> {
     return (await hc.callZome('users_organizations', 'is_organization_coordinator', {
-      organization_hash,
-      user_hash
+      organization_original_action_hash,
+      user_original_action_hash
     })) as boolean;
   }
 }

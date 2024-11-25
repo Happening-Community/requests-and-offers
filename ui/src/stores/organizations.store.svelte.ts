@@ -188,16 +188,39 @@ class OrganizationsStore {
     const links = await OrganizationsService.getUserOrganizationsLinks(userOriginalActionHash);
     const organizations = await Promise.all(
       links.map(async (link) => {
-        const organization = await this.getLatestOrganization(link.target);
-        if (!organization) return null;
-        return organization;
+        const isCoordinator = await OrganizationsService.isOrganizationCoordinator(
+          link.target,
+          userOriginalActionHash
+        );
+
+        if (!isCoordinator) return null;
+
+        return this.getLatestOrganization(link.target);
       })
     );
-    return organizations
-      .filter((org): org is UIOrganization => org !== null)
-      .filter((org) =>
-        org.coordinators.some((coordinator) => coordinator === userOriginalActionHash)
-      );
+
+    return organizations.filter((org): org is UIOrganization => org !== null);
+  }
+
+  async getUserMemberOnlyOrganizations(
+    userOriginalActionHash: ActionHash
+  ): Promise<UIOrganization[]> {
+    const links = await OrganizationsService.getUserOrganizationsLinks(userOriginalActionHash);
+    const organizations = await Promise.all(
+      links.map(async (link) => {
+        const isCoordinator = await OrganizationsService.isOrganizationCoordinator(
+          link.target,
+          userOriginalActionHash
+        );
+
+        // Only return organizations where the user is a member but not a coordinator
+        if (isCoordinator) return null;
+
+        return this.getLatestOrganization(link.target);
+      })
+    );
+
+    return organizations.filter((org): org is UIOrganization => org !== null);
   }
 
   async getAcceptedOrganizations(): Promise<UIOrganization[]> {
@@ -222,7 +245,10 @@ class OrganizationsStore {
   }
 
   // New methods for organization management
-  async updateOrganization(hash: ActionHash, updates: Partial<OrganizationInDHT>): Promise<UIOrganization | null> {
+  async updateOrganization(
+    hash: ActionHash,
+    updates: Partial<OrganizationInDHT>
+  ): Promise<UIOrganization | null> {
     const success = await OrganizationsService.updateOrganization(hash, updates);
     if (success) {
       return this.refreshOrganization(hash);

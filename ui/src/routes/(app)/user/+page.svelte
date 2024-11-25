@@ -48,7 +48,7 @@
       }
 
       // Fetch organizations
-      myOrganizations = await organizationsStore.getUserOrganizations(
+      myOrganizations = await organizationsStore.getUserMemberOnlyOrganizations(
         currentUser.original_action_hash!
       );
       myCoordinatedOrganizations = await organizationsStore.getUserCoordinatedOrganizations(
@@ -60,7 +60,7 @@
     }
   }
 
-  onMount(() => {
+  $effect(() => {
     fetchUserData();
   });
 

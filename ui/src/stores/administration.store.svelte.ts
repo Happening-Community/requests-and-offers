@@ -119,7 +119,7 @@ class AdministrationStore {
       AdministrationEntity.Network
     );
 
-    await this.checkIfAgentIsAdministrator((await hc.getAppInfo())!.agent_pub_key);
+    await this.checkIfAgentIsAdministrator();
 
     // If we already have all users loaded and the current agent is an administrator, use the cached users
     let allUsers: UIUser[];
@@ -146,7 +146,8 @@ class AdministrationStore {
     return admins;
   }
 
-  async checkIfAgentIsAdministrator(agent_pubkey: AgentPubKey): Promise<boolean> {
+  async checkIfAgentIsAdministrator(): Promise<boolean> {
+    const agent_pubkey = (await hc.getAppInfo())!.agent_pub_key;
     const isAdmin = await AdministrationService.checkIfAgentIsAdministrator(agent_pubkey);
     this.agentIsAdministrator = isAdmin;
     return isAdmin;

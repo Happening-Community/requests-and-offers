@@ -1,120 +1,211 @@
 <script lang="ts">
-  import { Avatar } from '@skeletonlabs/skeleton';
+  import { Avatar, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
   import type { UIOrganization, UIUser } from '@/types/ui';
   import organizationsStore from '@/stores/organizations.store.svelte';
+  import administrationStore from '@/stores/administration.store.svelte';
+  import { type StatusInDHT } from '@/types/holochain';
   import usersStore from '@/stores/users.store.svelte';
-  import { page } from '$app/stores';
-  import type { ActionHash } from '@holochain/client';
 
   type Props = {
     organization: UIOrganization;
+    searchQuery?: string;
+    sortBy?: 'name' | 'status';
+    sortOrder?: 'asc' | 'desc';
+    onUpdateStatus?: (coordinator: UIUser, status: StatusInDHT) => void;
   };
 
-  const { organization }: Props = $props();
+  const {
+    organization,
+    searchQuery = '',
+    sortBy = 'name',
+    sortOrder = 'asc',
+    onUpdateStatus
+  }: Props = $props();
 
-  let coordinators: UIUser[] = $state([]);
-  let loading = $state(true);
-  let error: string | null = $state(null);
+  let agentIsCoordinator = $state(false);
+  let coordinators = $state<UIUser[]>([]);
+  let loading = $state(false);
+  let error = $state<string | null>(null);
 
+  // Sort and filter coordinators
+  function getSortedAndFilteredCoordinators() {
+    if (coordinators.length === 0) return [];
+
+    // First, sort the coordinators
+    const sorted = [...coordinators].sort((a, b) => {
+      if (sortBy === 'name') {
+        return sortOrder === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+      } else {
+        // Sort by status
+        const statusA = a.status?.status_type || '';
+        const statusB = b.status?.status_type || '';
+        return sortOrder === 'asc'
+          ? statusA.localeCompare(statusB)
+          : statusB.localeCompare(statusA);
+      }
+    });
+
+    // Then filter by search query
+    if (!searchQuery) return sorted;
+
+    return sorted.filter((coordinator) =>
+      coordinator.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
+
+  const displayCoordinators = $derived(getSortedAndFilteredCoordinators());
+  const modalStore = getModalStore();
+  const toastStore = getToastStore();
+  const isAdmin = $derived(administrationStore.agentIsAdministrator);
   async function loadCoordinators() {
     try {
       loading = true;
       error = null;
       const coordinatorUsers = await organizationsStore.getCoordinatorUsers(organization);
-      const loadedCoordinators = await Promise.all(
-        coordinatorUsers.map((user) => usersStore.getLatestUser(user.original_action_hash!))
+      coordinators = coordinatorUsers;
+      if (!organization.original_action_hash || !usersStore.currentUser?.original_action_hash)
+        return;
+      agentIsCoordinator = await organizationsStore.isOrganizationCoordinator(
+        organization.original_action_hash,
+        usersStore.currentUser?.original_action_hash
       );
-      coordinators = loadedCoordinators.filter((user): user is UIUser => user !== null);
-    } catch (e: unknown) {
-      error = e instanceof Error ? e.message : 'An unknown error occurred';
+    } catch (e) {
+      console.error('Error loading coordinators:', e);
+      error = e instanceof Error ? e.message : 'Failed to load coordinators';
     } finally {
       loading = false;
     }
   }
 
-  async function handleRemoveCoordinator(coordHash: ActionHash) {
+  async function handleRemoveCoordinator(coordinator: UIUser) {
+    if (
+      !coordinator.original_action_hash ||
+      !organizationsStore.isOrganizationCoordinator(
+        organization.original_action_hash!,
+        coordinator.original_action_hash
+      ) ||
+      coordinators.length <= 1
+    )
+      return;
+
     try {
+      // Confirm removal
+      const confirmed = await new Promise<boolean>((resolve) => {
+        modalStore.trigger({
+          type: 'confirm',
+          title: 'Remove Coordinator',
+          body: `Are you sure you want to remove ${coordinator.name} as a coordinator? This action cannot be undone.`,
+          response: (r: boolean) => resolve(r)
+        });
+      });
+
+      if (!confirmed) return;
+
       loading = true;
-      error = null;
-      await organizationsStore.removeCoordinator(organization, coordHash);
+      await organizationsStore.removeCoordinator(organization, coordinator.original_action_hash);
+
+      toastStore.trigger({
+        message: 'Coordinator removed successfully',
+        background: 'variant-filled-success'
+      });
+
       await loadCoordinators();
-    } catch (e: unknown) {
-      error = e instanceof Error ? e.message : 'An unknown error occurred';
+    } catch (e) {
+      console.error('Error removing coordinator:', e);
+      toastStore.trigger({
+        message: 'Failed to remove coordinator',
+        background: 'variant-filled-error'
+      });
     } finally {
       loading = false;
     }
   }
 
-  // Load coordinators when the component mounts
+  function openStatusUpdateModal(coordinator: UIUser) {
+    if (!isAdmin || !coordinator.original_action_hash) return;
+
+    modalStore.trigger({
+      type: 'component',
+      component: {
+        ref: 'StatusUpdateModal',
+        props: {
+          entity: coordinator,
+          onUpdate: onUpdateStatus
+        }
+      }
+    });
+  }
+
   $effect(() => {
-    if (organization) {
-      loadCoordinators();
-    }
+    loadCoordinators();
   });
 </script>
 
 <div class="card p-4">
-  <header class="card-header">
+  <header class="card-header mb-4">
     <h3 class="h3">Organization Coordinators</h3>
   </header>
 
-  {#if error}
+  {#if loading}
+    <div class="flex items-center justify-center p-4">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+  {:else if error}
     <div class="alert variant-filled-error" role="alert">
       {error}
     </div>
-  {/if}
-
-  {#if loading}
-    <div class="flex justify-center p-4">
-      <span class="loading loading-spinner loading-lg"></span>
-    </div>
+  {:else if coordinators.length === 0}
+    <div class="alert variant-ghost-surface" role="alert">No coordinators found.</div>
   {:else}
-    <table class="table-hover table">
-      <thead>
-        <tr>
-          <th>Avatar</th>
-          <th>Name</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each coordinators as coordinator (coordinator.original_action_hash)}
+    <div class="table-container">
+      <table class="table-hover table">
+        <thead>
           <tr>
-            <td>
-              <Avatar
-                src={coordinator.picture
-                  ? URL.createObjectURL(new Blob([new Uint8Array(coordinator.picture)]))
-                  : '/default_avatar.webp'}
-                width="w-10"
-                rounded="rounded-full"
-              />
-            </td>
-            <td>{coordinator.name}</td>
-            <td>
-              <span class="badge variant-filled-success"> Active </span>
-            </td>
-            <td>
-              <div class="flex gap-2">
-                {#if organization.coordinators.includes($page?.data?.user?.original_action_hash!) && coordinators.length > 1}
-                  <button
-                    class="btn btn-sm variant-filled-error"
-                    onclick={() => handleRemoveCoordinator(coordinator.original_action_hash!)}
-                    disabled={loading}
-                    aria-label="Remove coordinator"
-                  >
-                    Remove
-                  </button>
-                {/if}
-              </div>
-            </td>
+            <th>Coordinator</th>
+            <th>Status</th>
+            <th>Actions</th>
           </tr>
-        {/each}
-      </tbody>
-    </table>
-
-    {#if coordinators.length === 0}
-      <div class="text-surface-600-300-token flex justify-center p-4">No coordinators found</div>
-    {/if}
+        </thead>
+        <tbody>
+          {#each displayCoordinators as coordinator (coordinator.original_action_hash)}
+            <tr>
+              <td class="flex items-center gap-2">
+                <Avatar initials={coordinator.name.slice(0, 2)} />
+                <span>{coordinator.name}</span>
+              </td>
+              <td>
+                <button
+                  class={`badge`}
+                  class:variant-filled-success={coordinator.status?.status_type === 'accepted'}
+                  class:variant-filled-warning={coordinator.status?.status_type.startsWith(
+                    'rejected'
+                  )}
+                  class:variant-filled-surface={!coordinator.status?.status_type}
+                  onclick={() => isAdmin && openStatusUpdateModal(coordinator)}
+                  disabled={!isAdmin}
+                  aria-label={`Update status for ${coordinator.name}`}
+                >
+                  {coordinator.status?.status_type || 'No Status'}
+                </button>
+              </td>
+              <td>
+                <div class="flex gap-2">
+                  {#if agentIsCoordinator && coordinators.length > 1}
+                    <button
+                      class="btn btn-sm variant-filled-error"
+                      onclick={() => handleRemoveCoordinator(coordinator)}
+                      disabled={loading}
+                      aria-label={`Remove ${coordinator.name} as coordinator`}
+                    >
+                      Remove
+                    </button>
+                  {/if}
+                </div>
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
   {/if}
 </div>
