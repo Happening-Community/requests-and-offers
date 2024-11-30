@@ -47,10 +47,10 @@
   - [x] Centralized error display using Skeleton UI alerts
   - [x] Consistent loading states with Skeleton UI loaders
   - [x] Eliminated redundant member display in tables
-  - [ ] Fix settings display and form submission
+  - [x] Fix settings display and form submission
 
 ## Current Status
-We have successfully improved the organization management UI and fixed several critical bugs. The organization details page now properly displays members and coordinators in separate tables without redundancy, includes proper loading states, and has functioning update and delete controls. However, there are still some issues with the settings section that need to be addressed.
+We have successfully improved the organization management UI and fixed several critical bugs. The organization details page now properly displays members and coordinators in separate tables without redundancy, includes proper loading states, and has functioning update and delete controls. The backend validation and error handling for organization management has been significantly enhanced, particularly around member and coordinator management.
 
 ## Priority Bugs
 1. ~~**Members and Coordinators Display Issue**~~
@@ -86,6 +86,8 @@ We have successfully improved the organization management UI and fixed several c
    - [ ] Redirect after successful deletion
 
 3. Add comprehensive testing:
+   - [x] Add unit tests for member management
+   - [x] Add unit tests for coordinator management
    - [ ] Add unit tests for settings update
    - [ ] Add unit tests for organization deletion
    - [ ] Test URL validation and formatting
@@ -108,8 +110,12 @@ We have successfully improved the organization management UI and fixed several c
 
 ## Technical Notes
 - The organization detail page has been updated with new components and functionality
-- State management has been improved but needs further refinement
-- UI components have been modernized with better error handling and loading states
+- State management has been improved with comprehensive validation
+- Backend validation for organization actions has been enhanced
+- Member and coordinator management now includes proper error handling and validation
+- Organization status checks are now enforced for all member/coordinator actions
+- Added checks to prevent removing the last coordinator
+- Improved link management for user-organization relationships
 
 ## Future Improvements
 - Improve performance with pagination and lazy loading

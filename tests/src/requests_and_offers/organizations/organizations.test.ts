@@ -175,24 +175,16 @@ test("create and manage Organizations", async () => {
       );
       assert.equal(organization.name, sampleOrg.name);
 
-      // Bob add Alice as a member of the Organization
-      assert.ok(
-        await addMemberToOrganization(
+      // Bob try to add Alice as a member of the Organization without the organization being accepted
+      expect(
+        addMemberToOrganization(
           bob.cells[0],
           bobOrganizationOriginalActionHash,
           aliceUserLink.target
         )
-      );
+      ).rejects.toThrow();
 
       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-
-      // Verify that Alice is a member of the Organization
-      organizationMembers = await getOrganizationMembersLinks(
-        bob.cells[0],
-        bobOrganizationOriginalActionHash
-      );
-      assert.lengthOf(organizationMembers, 2);
-      assert.deepEqual(organizationMembers[1].target, aliceUserLink.target);
 
       // Verify that Alice is not a coordinator of the Organization
       assert.notOk(
@@ -210,75 +202,16 @@ test("create and manage Organizations", async () => {
         )
       ).rejects.toThrow();
 
-      // Bob add Alice as a coordinator of the Organization
-      assert.ok(
-        await addCoordinatorToOrganization(
+      // Bob try to add Alice as a coordinator of the Organization
+      expect(
+        addCoordinatorToOrganization(
           bob.cells[0],
           bobOrganizationOriginalActionHash,
           aliceUserLink.target
         )
-      );
+      ).rejects.toThrow();
 
       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
-
-      // Verify that Alice is a coordinator of the Organization
-      organizationLinks = await getOrganizationCoordinatorsLinks(
-        alice.cells[0],
-        bobOrganizationOriginalActionHash
-      );
-      assert.lengthOf(organizationLinks, 2);
-      assert.deepEqual(organizationLinks[1].target, aliceUserLink.target);
-
-      // Bob remove Alice as a coordinator of the Organization
-      assert.ok(
-        await removeOrganizationCoordinator(
-          bob.cells[0],
-          bobOrganizationOriginalActionHash,
-          aliceUserLink.target
-        )
-      );
-
-      await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
-
-      // Verify that Alice is not a coordinator of the Organization
-      assert.notOk(
-        await checkIfAgentIsOrganizationCoordinator(
-          alice.cells[0],
-          bobOrganizationOriginalActionHash
-        )
-      );
-
-      organizationLinks = await getOrganizationCoordinatorsLinks(
-        bob.cells[0],
-        bobOrganizationOriginalActionHash
-      );
-      assert.lengthOf(organizationLinks, 1);
-
-      // Verify that Alice still is a member of the Organization
-      organizationMembers = await getOrganizationMembersLinks(
-        bob.cells[0],
-        bobOrganizationOriginalActionHash
-      );
-      assert.lengthOf(organizationMembers, 2);
-      assert.deepEqual(organizationMembers[1].target, aliceUserLink.target);
-
-      // Bob remove Alice as a member of the Organization
-      assert.ok(
-        await removeOrganizationMember(
-          bob.cells[0],
-          bobOrganizationOriginalActionHash,
-          aliceUserLink.target
-        )
-      );
-
-      await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
-
-      // Verify that Alice is not a member of the Organization
-      organizationMembers = await getOrganizationMembersLinks(
-        bob.cells[0],
-        bobOrganizationOriginalActionHash
-      );
-      assert.lengthOf(organizationMembers, 1);
 
       // Alice, as a network administrator, accept her user profile
       const aliceStatusOriginalActionHash = (
@@ -408,7 +341,102 @@ test("create and manage Organizations", async () => {
 
       await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
-      // Bob leave Alice's Organization
+      // Verify that Bob is a member of the Organization
+      organizationMembers = await getOrganizationMembersLinks(
+        alice.cells[0],
+        aliceOrganizationOriginalActionHash
+      );
+      assert.lengthOf(organizationMembers, 2);
+      assert.deepEqual(organizationMembers[1].target, bobUserLink.target);
+
+      // Alice add Bob as a coordinator of the Organization
+      assert.ok(
+        await addCoordinatorToOrganization(
+          alice.cells[0],
+          aliceOrganizationOriginalActionHash,
+          bobUserLink.target
+        )
+      );
+
+      await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+      // Verify that Bob is a coordinator of the Organization
+      organizationLinks = await getOrganizationCoordinatorsLinks(
+        alice.cells[0],
+        aliceOrganizationOriginalActionHash
+      );
+      assert.lengthOf(organizationLinks, 2);
+      assert.ok(
+        await checkIfAgentIsOrganizationCoordinator(
+          bob.cells[0],
+          aliceOrganizationOriginalActionHash
+        )
+      );
+
+      // Bob remove Alice as a coordinator of the Organization
+      assert.ok(
+        await removeOrganizationCoordinator(
+          bob.cells[0],
+          aliceOrganizationOriginalActionHash,
+          aliceUserLink.target
+        )
+      );
+
+      await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
+
+      // Verify that Alice is not a coordinator of the Organization
+      assert.notOk(
+        await checkIfAgentIsOrganizationCoordinator(
+          alice.cells[0],
+          aliceOrganizationOriginalActionHash
+        )
+      );
+
+      organizationLinks = await getOrganizationCoordinatorsLinks(
+        bob.cells[0],
+        aliceOrganizationOriginalActionHash
+      );
+      assert.lengthOf(organizationLinks, 1);
+      assert.deepEqual(organizationLinks[0].target, bobUserLink.target);
+
+      // Bob remove Alice as a member of the Organization
+      assert.ok(
+        await removeOrganizationMember(
+          bob.cells[0],
+          aliceOrganizationOriginalActionHash,
+          aliceUserLink.target
+        )
+      );
+
+      await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
+
+      // Verify that Alice is no longer a member of the Organization
+      organizationMembers = await getOrganizationMembersLinks(
+        bob.cells[0],
+        aliceOrganizationOriginalActionHash
+      );
+      assert.lengthOf(organizationMembers, 1);
+      assert.deepEqual(organizationMembers[0].target, bobUserLink.target);
+
+      // Bob can not leave Alice's Organization because he is the last coordinator
+      await expect(
+        leaveOrganization(bob.cells[0], aliceOrganizationOriginalActionHash)
+      ).rejects.toThrow();
+
+      await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
+
+      // Bob add Alice as a coordinator of the Organization
+      assert.ok(
+        await addCoordinatorToOrganization(
+          bob.cells[0],
+          aliceOrganizationOriginalActionHash,
+          aliceUserLink.target
+        )
+      );
+
+      await dhtSync([alice, bob], bob.cells[0].cell_id[0]);
+
+      // Bob can now leave Alice's Organization
       assert.ok(
         await leaveOrganization(
           bob.cells[0],
@@ -425,9 +453,9 @@ test("create and manage Organizations", async () => {
       );
       assert.lengthOf(organizationMembers, 1);
 
-      // Alice leave her Organization
+      // Alice delete her Organization
       assert.ok(
-        await leaveOrganization(
+        await deleteOrganization(
           alice.cells[0],
           aliceOrganizationOriginalActionHash
         )
