@@ -70,3 +70,11 @@ pub fn get_accepted_entities(entity: String) -> ExternResult<Vec<Link>> {
 pub fn delete_status(original_action_hash: EntityActionHash) -> ExternResult<bool> {
   external_local_call("delete_status", "administration", original_action_hash)
 }
+
+pub fn check_if_entity_is_accepted(original_action_hash: EntityActionHash) -> ExternResult<bool> {
+  external_local_call(
+    "check_if_entity_is_accepted",
+    "administration",
+    original_action_hash,
+  )
+}

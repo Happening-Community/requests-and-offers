@@ -204,7 +204,9 @@ pub fn is_organization_member(input: OrganizationUser) -> ExternResult<bool> {
       .target
       .clone()
       .into_action_hash()
-      .map_or(false, |hash| hash == input.organization_original_action_hash)
+      .map_or(false, |hash| {
+        hash == input.organization_original_action_hash
+      })
   });
 
   // Both links must exist for valid membership
@@ -657,7 +659,8 @@ pub fn delete_organization(organization_original_action_hash: ActionHash) -> Ext
   }
 
   // Delete coordinator links directly without using remove_organization_coordinator
-  let coordinator_links = get_organization_coordinators_links(organization_original_action_hash.clone())?;
+  let coordinator_links =
+    get_organization_coordinators_links(organization_original_action_hash.clone())?;
   for link in coordinator_links {
     delete_link(link.create_link_hash)?;
   }
@@ -681,7 +684,8 @@ pub fn delete_organization(organization_original_action_hash: ActionHash) -> Ext
   }
 
   // Delete status links
-  let organization_status_links = get_organization_status_link(organization_original_action_hash.clone())?;
+  let organization_status_links =
+    get_organization_status_link(organization_original_action_hash.clone())?;
   if let Some(link) = organization_status_links {
     delete_link(link.create_link_hash)?;
   }
