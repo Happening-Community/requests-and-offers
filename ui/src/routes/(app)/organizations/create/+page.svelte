@@ -8,6 +8,7 @@
   import AlertModal from '@lib/dialogs/AlertModal.svelte';
   import type { AlertModalMeta } from '@lib/types';
   import usersStore from '@stores/users.store.svelte';
+  import { encodeHashToBase64 } from '@holochain/client';
 
   const alertModalComponent: ModalComponent = { ref: AlertModal };
   const alertModal = (meta: AlertModalMeta): ModalSettings => ({
@@ -77,7 +78,7 @@
         })
       );
 
-      goto('/user');
+      goto(`/organizations/${encodeHashToBase64(record.signed_action.hashed.hash)}`);
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to create organization';
       console.error('Organization creation error:', err);

@@ -2,7 +2,6 @@
   import moment from 'moment-timezone';
   import { Avatar, FileDropzone, InputChip, getModalStore } from '@skeletonlabs/skeleton';
   import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
   import NavButton from '@lib/NavButton.svelte';
   import usersStore from '@stores/users.store.svelte';
   import type { UserInDHT, UserType } from '@/types/holochain';
@@ -83,7 +82,7 @@
     usersStore.currentUser!.picture = undefined;
   }
 
-  onMount(async () => {
+  $effect(() => {
     if (currentUser?.picture) userPicture = new Blob([currentUser?.picture]);
   });
 

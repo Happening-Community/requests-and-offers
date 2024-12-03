@@ -11,6 +11,7 @@
   import { Avatar, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
   import StatusHistoryModal from '@lib/modals/StatusHistoryModal.svelte';
   import usersStore from '@/stores/users.store.svelte';
+  import { FileDropzone } from '@skeletonlabs/skeleton';
 
   const modalStore = getModalStore();
   const toastStore = getToastStore();
@@ -33,6 +34,11 @@
   let formLocation = $state('');
   let formUrls = $state('');
 
+  // Logo state
+  let organizationLogo: File | null = $state(null);
+  let logoFiles: FileList | undefined = $state();
+  let logoFileMessage: string = $state('');
+
   // Update form values when organization changes
   $effect(() => {
     if (organization) {
@@ -41,6 +47,13 @@
       formEmail = organization.email;
       formLocation = organization.location;
       formUrls = organization.urls.join(', ');
+    }
+  });
+
+  // Update logo when organization changes
+  $effect(() => {
+    if (organization?.logo) {
+      organizationLogo = new File([organization.logo], 'organizationLogo');
     }
   });
 
@@ -351,7 +364,7 @@
       loading = true;
 
       // Get form data
-      const updates = {
+      const updates: Record<string, any> = {
         name: formName,
         description: formDescription,
         email: formEmail,
@@ -361,6 +374,11 @@
           .map((url) => url.trim())
           .filter((url) => url !== '')
       };
+
+      if (organizationLogo) {
+        const arrayBuffer = await organizationLogo.arrayBuffer();
+        updates.logo = new Uint8Array(arrayBuffer);
+      }
 
       const updatedOrg = await organizationsStore.updateOrganization(organizationHash, updates);
 
@@ -420,11 +438,22 @@
     }
   }
 
+  function handleLogoUpload() {
+    if (logoFiles && logoFiles.length > 0) {
+      organizationLogo = logoFiles[0] as File;
+      logoFileMessage = `Selected file: ${organizationLogo.name}`;
+    } else {
+      logoFileMessage = 'No file selected';
+    }
+  }
+
   // Memoized organization logo URL
   let organizationLogoUrl = $derived.by(() =>
-    organization?.logo
-      ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
-      : '/default_avatar.webp'
+    organizationLogo
+      ? URL.createObjectURL(organizationLogo)
+      : organization?.logo
+        ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
+        : '/default_avatar.webp'
   );
 
   // Load organization when the component mounts
@@ -662,6 +691,13 @@
             <span>URLs (comma-separated)</span>
             <input class="input" type="text" name="urls" bind:value={formUrls} />
           </label>
+
+          <!-- Organization Logo Upload -->
+          <div class="form-group">
+            <label for="organization-logo" class="form-label">Organization Logo</label>
+            <FileDropzone bind:files={logoFiles} on:change={handleLogoUpload} name="logo" />
+            <p class="file-message">{logoFileMessage}</p>
+          </div>
 
           <div class="flex gap-4">
             <button type="submit" class="btn variant-filled-primary" disabled={loading}>

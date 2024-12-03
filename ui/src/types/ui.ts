@@ -3,7 +3,7 @@ import type { UserInDHT, StatusInDHT, OrganizationInDHT } from './holochain';
 
 export enum OrganizationRole {
   Member = 'member',
-  Coordinator = 'coordinator',
+  Coordinator = 'coordinator'
 }
 
 export type UIStatus = StatusInDHT & {
