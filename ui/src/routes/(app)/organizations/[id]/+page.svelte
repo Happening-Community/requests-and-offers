@@ -12,6 +12,7 @@
   import StatusHistoryModal from '@lib/modals/StatusHistoryModal.svelte';
   import usersStore from '@/stores/users.store.svelte';
   import { FileDropzone } from '@skeletonlabs/skeleton';
+  import { goto } from '$app/navigation';
 
   const modalStore = getModalStore();
   const toastStore = getToastStore();
@@ -341,6 +342,7 @@
       if (!confirmed) return;
 
       loading = true;
+
       const success = await organizationsStore.deleteOrganization(organizationHash);
 
       if (success) {
@@ -349,7 +351,7 @@
           background: 'variant-filled-success'
         });
 
-        window.history.back();
+        goto('/organizations');
       } else {
         throw new Error('Failed to delete organization');
       }

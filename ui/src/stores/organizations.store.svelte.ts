@@ -258,13 +258,19 @@ class OrganizationsStore {
     return null;
   }
 
-  async deleteOrganization(hash: ActionHash): Promise<boolean> {
-    const success = await OrganizationsService.deleteOrganization(hash);
+  async deleteOrganization(organization_original_action_hash: ActionHash): Promise<boolean> {
+    const success = await OrganizationsService.deleteOrganization(
+      organization_original_action_hash
+    );
     if (success) {
       this.allOrganizations = this.allOrganizations.filter(
-        (org) => org.original_action_hash?.toString() !== hash.toString()
+        (org) =>
+          org.original_action_hash?.toString() !== organization_original_action_hash.toString()
       );
-      if (this.currentOrganization?.original_action_hash?.toString() === hash.toString()) {
+      if (
+        this.currentOrganization?.original_action_hash?.toString() ===
+        organization_original_action_hash.toString()
+      ) {
         this.currentOrganization = null;
       }
     }
