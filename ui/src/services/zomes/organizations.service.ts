@@ -125,15 +125,15 @@ export class OrganizationsService {
     })) as boolean;
   }
 
-  static async deleteOrganization(hash: ActionHash): Promise<boolean> {
+  static async deleteOrganization(organization_original_action_hash: ActionHash): Promise<boolean> {
     return (await hc.callZome('users_organizations', 'delete_organization', {
-      hash
+      organization_original_action_hash
     })) as boolean;
   }
 
-  static async leaveOrganization(hash: ActionHash): Promise<boolean> {
+  static async leaveOrganization(organization_original_action_hash: ActionHash): Promise<boolean> {
     return (await hc.callZome('users_organizations', 'leave_organization', {
-      hash
+      organization_original_action_hash
     })) as boolean;
   }
 

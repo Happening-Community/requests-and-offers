@@ -15,10 +15,9 @@
 
   const modalStore = getModalStore();
   const toastStore = getToastStore();
-  const organizationHashString = $page.params.id;
-  const organizationHash = decodeHashFromBase64(organizationHashString) as ActionHash;
+  const organizationHash = decodeHashFromBase64($page.params.id) as ActionHash;
 
-  let agentIsAdministrator = $state(false);
+  let agentIsCoordinator = $state(false);
   let organization: UIOrganization | null = $state(null);
   let loading = $state(true);
   let error = $state<string | null>(null);
@@ -291,10 +290,7 @@
       if (!organization.original_action_hash || !usersStore.currentUser?.original_action_hash)
         return;
 
-      agentIsAdministrator = await organizationsStore.isOrganizationCoordinator(
-        organization.original_action_hash,
-        usersStore.currentUser?.original_action_hash
-      );
+      console.log('agentIsCoordinator:', agentIsCoordinator);
     } catch (e) {
       error = e instanceof Error ? e.message : 'An unknown error occurred';
       organization = null;
@@ -302,6 +298,19 @@
       loading = false;
     }
   }
+
+  $effect(() => {
+    async function isCoordinator() {
+      if (!organization?.original_action_hash || !usersStore.currentUser?.original_action_hash)
+        return;
+      agentIsCoordinator = await organizationsStore.isOrganizationCoordinator(
+        organization.original_action_hash,
+        usersStore.currentUser.original_action_hash
+      );
+    }
+
+    isCoordinator();
+  });
 
   function handleOpenMemberModal() {
     if (!organization) return;
@@ -340,7 +349,6 @@
           background: 'variant-filled-success'
         });
 
-        // Navigate back to organizations list
         window.history.back();
       } else {
         throw new Error('Failed to delete organization');
@@ -603,7 +611,7 @@
               <tr>
                 <th>Coordinator</th>
                 <th>Status</th>
-                {#if agentIsAdministrator}
+                {#if agentIsCoordinator}
                   <th>Actions</th>
                 {/if}
               </tr>
@@ -635,7 +643,7 @@
                       {coordinator.status?.status_type || 'No Status'}
                     </button>
                   </td>
-                  {#if agentIsAdministrator && coordinators.length > 1}
+                  {#if agentIsCoordinator && coordinators.length > 1}
                     <td>
                       <button
                         class="btn btn-sm variant-filled-error"
@@ -654,7 +662,7 @@
     </div>
 
     <!-- Settings Section (Coordinators Only) -->
-    {#if agentIsAdministrator}
+    {#if agentIsCoordinator}
       <div class="card mt-6 w-full p-6">
         <header class="mb-4">
           <h2 class="h2">Organization Settings</h2>
