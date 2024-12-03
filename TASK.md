@@ -52,45 +52,87 @@
 ## Current Status
 We have successfully improved the organization management UI and fixed several critical bugs. The organization details page now properly displays members and coordinators in separate tables without redundancy, includes proper loading states, and has functioning update and delete controls. The backend validation and error handling for organization management has been significantly enhanced, particularly around member and coordinator management.
 
-## Priority Bugs
-1. ~~**Members and Coordinators Display Issue**~~
-   - ✓ Fixed: Members and coordinators are now correctly displayed in separate tables
-   - ✓ Implemented proper data loading and display logic
-   - ✓ Eliminated redundant display of users
+## Current Issues
 
-2. ~~**Organization Settings display issue**~~
-   - ✓ Fixed: Settings now display correctly for coordinators
-   - ✓ Fixed: Form display is working properly
-   - [ ] Need to improve URLs field with better validation and UI
-   - [ ] Ensure settings persist after updates
+1. **Status Link Management**
+   - [ ] Fix status link error after organization update
+   - [ ] Ensure coordinator permissions persist after updates
+   - [ ] Add proper error handling for missing status links
+   - [ ] Add retry mechanism for status link fetching
+
+2. **Data Synchronization**
+   - [ ] Fix state synchronization between store and UI components
+   - [ ] Ensure proper refresh of organization data after updates
+   - [ ] Add proper error handling for failed updates
+   - [ ] Implement proper loading states
 
 3. **Broken UI Controls**
    - [ ] Fix save settings button functionality
-   - [ ] Fix delete organization button functionality
+   - [x] Fix delete organization button functionality
    - [ ] Add proper URL validation and formatting
    - [ ] Add confirmation dialogs for critical actions
 
-## Next Steps
+4. **Code Quality**
+   - [ ] Add proper TypeScript types for all components
+   - [ ] Implement error boundaries
+   - [ ] Add proper logging
+   - [ ] Add loading states during save operation
 
-1. Fix organization settings functionality:
-   - [ ] Improve URLs field with a better UI (chip/tag input)
-   - [ ] Add URL validation and formatting
-   - [ ] Fix save settings functionality
-   - [ ] Add proper error handling and user feedback
+## Implementation Plan
+
+1. Fix organization update functionality:
+   - [x] Implement proper update flow in OrganizationsService
+   - [x] Fix logo handling during updates
+   - [ ] Fix status link management after updates
+   - [ ] Fix coordinator permissions after updates
    - [ ] Add loading states during save operation
 
 2. Fix delete organization functionality:
-   - [ ] Add proper confirmation dialog
-   - [ ] Implement delete operation with error handling
+   - [x] Add proper confirmation dialog
+   - [x] Implement delete operation with error handling
    - [ ] Add loading state during deletion
-   - [ ] Redirect after successful deletion
+   - [x] Redirect after successful deletion
 
 3. Add comprehensive testing:
-   - [x] Add unit tests for member management
-   - [x] Add unit tests for coordinator management
+   - [ ] Add unit tests for member management
+   - [ ] Add unit tests for coordinator management
    - [ ] Add unit tests for settings update
    - [ ] Add unit tests for organization deletion
    - [ ] Test URL validation and formatting
+
+## Known Bugs
+
+1. **Status Link Error**
+   - After updating an organization, a "Guest('Could not find the entity's Status link')" error occurs
+   - This prevents coordinators from managing the organization after an update
+   - Root cause might be related to how status links are handled during organization updates
+
+2. **UI State Management**
+   - Organization state not properly synchronized after updates
+   - Coordinator permissions not properly refreshed after updates
+   - Loading states not properly handled during operations
+
+3. **Data Validation**
+   - URL validation and formatting not implemented
+   - No input validation for organization fields
+   - No proper error messages for invalid inputs
+
+## Next Steps
+
+1. Investigate and fix the status link error:
+   - [ ] Debug the status link creation/update process
+   - [ ] Ensure status links are properly maintained during updates
+   - [ ] Add proper error handling for missing status links
+
+2. Improve state management:
+   - [ ] Implement proper state synchronization
+   - [ ] Add proper loading states
+   - [ ] Improve error handling and user feedback
+
+3. Add data validation:
+   - [ ] Implement URL validation
+   - [ ] Add input validation for all fields
+   - [ ] Add proper error messages
 
 ## Implementation Guidelines
 - [x] Use Svelte 5 runes (`$state()`, `$derived()`) for reactivity

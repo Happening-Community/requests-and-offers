@@ -246,14 +246,39 @@ class OrganizationsStore {
     );
   }
 
-  // New methods for organization management
   async updateOrganization(
     hash: ActionHash,
     updates: Partial<OrganizationInDHT>
   ): Promise<UIOrganization | null> {
-    const success = await OrganizationsService.updateOrganization(hash, updates);
+    // Get the current organization to merge with updates
+    const currentOrg = await OrganizationsService.getLatestOrganizationRecord(hash);
+    if (!currentOrg) {
+      throw new Error('Organization not found');
+    }
+
+    const currentEntry = decodeRecords([currentOrg])[0] as OrganizationInDHT;
+
+    // Create the update input with all required fields
+    const input = {
+      original_action_hash: hash,
+      previous_action_hash: currentOrg.signed_action.hashed.hash,
+      updated_organization: {
+        name: updates.name ?? currentEntry.name,
+        description: updates.description ?? currentEntry.description,
+        email: updates.email ?? currentEntry.email,
+        location: updates.location ?? currentEntry.location,
+        urls: updates.urls ?? currentEntry.urls,
+        ...(updates.logo ? { logo: updates.logo } : {})
+      }
+    };
+
+    const success = await OrganizationsService.updateOrganization(input);
     if (success) {
-      return this.refreshOrganization(hash);
+      const updatedOrg = await this.refreshOrganization(hash);
+      if (updatedOrg && this.currentOrganization?.original_action_hash === hash) {
+        this.currentOrganization = updatedOrg;
+      }
+      return updatedOrg;
     }
     return null;
   }

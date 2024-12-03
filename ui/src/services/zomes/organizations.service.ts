@@ -115,14 +115,12 @@ export class OrganizationsService {
     )) as Link[];
   }
 
-  static async updateOrganization(
-    organization_original_action_hash: ActionHash,
-    updates: Partial<OrganizationInDHT>
-  ): Promise<boolean> {
-    return (await hc.callZome('users_organizations', 'update_organization', {
-      organization_original_action_hash,
-      updates
-    })) as boolean;
+  static async updateOrganization(input: {
+    original_action_hash: ActionHash;
+    previous_action_hash: ActionHash;
+    updated_organization: OrganizationInDHT;
+  }): Promise<boolean> {
+    return (await hc.callZome('users_organizations', 'update_organization', input)) as boolean;
   }
 
   static async deleteOrganization(organization_original_action_hash: ActionHash): Promise<boolean> {

@@ -366,41 +366,52 @@
     }
   }
 
-  async function handleUpdateSettings(event: SubmitEvent) {
+  async function handleUpdateSettings(event: Event) {
     event.preventDefault();
     if (!organization) return;
 
     try {
       loading = true;
 
-      // Get form data
-      const updates: Record<string, any> = {
+      // Parse URLs from comma-separated string
+      const urls = formUrls
+        .split(',')
+        .map((url) => url.trim())
+        .filter(Boolean);
+
+      // Create update object
+      const updates = {
         name: formName,
         description: formDescription,
         email: formEmail,
         location: formLocation,
-        urls: formUrls
-          .split(',')
-          .map((url) => url.trim())
-          .filter((url) => url !== '')
+        urls,
+        ...(organizationLogo
+          ? { logo: new Uint8Array(await organizationLogo.arrayBuffer()) }
+          : organization.logo)
       };
 
-      if (organizationLogo) {
-        const arrayBuffer = await organizationLogo.arrayBuffer();
-        updates.logo = new Uint8Array(arrayBuffer);
+      // Update organization
+      if (!organization.original_action_hash) {
+        throw new Error('Organization action hash not found');
       }
 
-      const updatedOrg = await organizationsStore.updateOrganization(organizationHash, updates);
+      const updatedOrganization = await organizationsStore.updateOrganization(
+        organization.original_action_hash,
+        updates
+      );
 
-      if (updatedOrg) {
-        toastStore.trigger({
-          message: 'Organization updated successfully',
-          background: 'variant-filled-success'
-        });
-        await loadOrganization();
-      } else {
+      if (!updatedOrganization) {
         throw new Error('Failed to update organization');
       }
+
+      // Refresh the organization data to ensure UI is up to date
+      organization = updatedOrganization;
+
+      toastStore.trigger({
+        message: 'Organization updated successfully',
+        background: 'variant-filled-success'
+      });
     } catch (e) {
       console.error('Error updating organization:', e);
       toastStore.trigger({
