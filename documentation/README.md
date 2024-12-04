@@ -17,8 +17,10 @@ Implementation details and architecture:
   - [hREA Integration](./technical/architecture/hrea-integration.md) - Economic resource management
 - **[Zomes](./technical/zomes/)**
   - [Overview](./technical/zomes/README.md) - Zome structure and guidelines
-  - [Users Organizations](./technical/zomes/users.md) - User and organization management
-  - [Administration](./technical/zomes/administration.md) - System administration
+  - [Users & Organizations](./technical/zomes/users_organizations.md)
+    - [User Management](./technical/zomes/users/users.md)
+    - [Organization Management](./technical/zomes/organizations/organizations.md)
+  - [Administration](./technical/zomes/administration.md)
 
 ### [Specifications](./specifications/)
 Detailed project specifications:

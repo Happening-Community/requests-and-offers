@@ -4,16 +4,23 @@ This directory contains detailed documentation for the Holochain zomes in the Re
 
 ## Zome Structure
 
-### [Users Organizations Zome](./users.md)
-Manages user profiles, organizations, and their relationships:
+### [Users and Organizations Zome](./users_organizations.md)
+Core zome managing user and organization profiles:
 - User profile management
-- Organization management
 - Agent relationships
 - Profile status tracking
+- Organization profile management
+- Member and coordinator management
+- Organization-user relationships
+- Organization status tracking
 
 Implementation:
 - Integrity: `dnas/requests_and_offers/zomes/integrity/users_organizations`
 - Coordinator: `dnas/requests_and_offers/zomes/coordinator/users_organizations`
+
+Components:
+- [User Management](./users/users.md) - User profiles and relationships
+- [Organization Management](./organizations/organizations.md) - Organization profiles and member management
 
 ### [Administration Zome](./administration.md)
 Handles system administration and status management:
