@@ -191,6 +191,8 @@ test("create and update User", async () => {
       sample
     );
 
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
     latestUserRecord = await getLatestUser(alice.cells[0], originalUserHash);
     aliceUser = decodeRecords([latestUserRecord])[0] as User;
     assert.equal(aliceUser.nickname, sample.nickname);

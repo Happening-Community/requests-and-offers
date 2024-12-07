@@ -29,6 +29,8 @@
     )
   });
 
+  $inspect('allUsers', allUsers);
+
   const userCategories = $derived([
     { title: 'Pending Users', users: usersByStatus.pending, titleClass: 'text-primary-400' },
     { title: 'Accepted Users', users: usersByStatus.accepted, titleClass: 'text-green-600' },

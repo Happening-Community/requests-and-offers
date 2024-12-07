@@ -38,7 +38,7 @@ class AdministrationStore {
       const user = await usersStore.getLatestUser(link.target);
       if (!user?.original_action_hash) continue;
 
-      const record = await administrationStore.getLatestStatusForEntity(
+      const record = await this.getLatestStatusForEntity(
         user.original_action_hash,
         AdministrationEntity.Users
       );

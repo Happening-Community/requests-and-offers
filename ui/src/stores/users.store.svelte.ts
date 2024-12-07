@@ -7,7 +7,6 @@ import { AdministrationEntity, type UserInDHT } from '@/types/holochain';
 import administrationStore from './administration.store.svelte';
 
 class UsersStore {
-  allUsers: UIUser[] = $state([]);
   currentUser: UIUser | null = $state(null);
   acceptedUsers: UIUser[] = $state([]);
 
@@ -19,7 +18,7 @@ class UsersStore {
       previous_action_hash: record.signed_action.hashed.hash
     };
 
-    this.allUsers = [...this.allUsers, newUser];
+    administrationStore.allUsers = [...administrationStore.allUsers, newUser];
     return newUser;
   }
 
@@ -36,7 +35,7 @@ class UsersStore {
 
   async getUserByActionHash(actionHash: ActionHash): Promise<UIUser | null> {
     return (
-      this.allUsers.find(
+      administrationStore.allUsers.find(
         (user) => user.original_action_hash?.toString() === actionHash.toString()
       ) || null
     );
@@ -69,7 +68,7 @@ class UsersStore {
       previous_action_hash: userRecord.signed_action.hashed.hash
     };
 
-    this.allUsers = this.allUsers.map((u) =>
+    administrationStore.allUsers = administrationStore.allUsers.map((u) =>
       u.original_action_hash?.toString() === this.currentUser?.original_action_hash?.toString()
         ? this.currentUser!
         : u
@@ -98,11 +97,16 @@ class UsersStore {
     };
 
     this.setCurrentUser(updatedUser);
-    this.allUsers = this.allUsers.map((u) =>
+
+    console.log('allUsers', administrationStore.allUsers);
+
+    administrationStore.allUsers = administrationStore.allUsers.map((u) =>
       u.original_action_hash?.toString() === this.currentUser?.original_action_hash?.toString()
         ? this.currentUser!
         : u
     );
+
+    console.log('allUsers', administrationStore.allUsers);
 
     return updatedUser;
   }
@@ -139,7 +143,7 @@ class UsersStore {
     const users = await Promise.all(
       actionHashes.map(async (hash) => {
         // First try to get from memory
-        const cachedUser = this.allUsers.find(
+        const cachedUser = administrationStore.allUsers.find(
           (user) => user.original_action_hash?.toString() === hash.toString()
         );
         if (cachedUser) return cachedUser;
@@ -149,7 +153,7 @@ class UsersStore {
         if (!user) return null;
 
         // Add to allUsers cache
-        this.allUsers = [...this.allUsers, user];
+        administrationStore.allUsers = [...administrationStore.allUsers, user];
         return user;
       })
     );

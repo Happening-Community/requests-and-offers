@@ -1,7 +1,6 @@
 import { dhtSync } from "@holochain/tryorama";
-import { Record } from "@holochain/client";
 import { assert, expect, test } from "vitest";
-import { decodeRecords, runScenarioWithTwoAgents } from "../utils";
+import { runScenarioWithTwoAgents } from "../utils";
 import {
   User,
   createUser,
@@ -11,6 +10,7 @@ import {
   getUserAgents,
   getUserStatusLink,
   sampleUser,
+  updateUser,
 } from "../users/common";
 import {
   checkIfAgentIsAdministrator,
@@ -33,12 +33,11 @@ import {
 test("create a User, register administrator and remove administrator", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: User;
-    let record: Record;
 
     sample = sampleUser({ name: "Alice" });
-    record = await createUser(alice.cells[0], sample);
+    await createUser(alice.cells[0], sample);
     sample = sampleUser({ name: "Bob" });
-    record = await createUser(bob.cells[0], sample);
+    await createUser(bob.cells[0], sample);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     let aliceUserLink = (
       await getAgentUser(alice.cells[0], alice.agentPubKey)
@@ -109,22 +108,43 @@ test("create a User, register administrator and remove administrator", async () 
 test("update User status", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: User;
-    let record: Record;
 
     sample = sampleUser({ name: "Alice" });
-    record = await createUser(alice.cells[0], sample);
+    await createUser(alice.cells[0], sample);
     sample = sampleUser({ name: "Bob" });
-    record = await createUser(bob.cells[0], sample);
+    await createUser(bob.cells[0], sample);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     let aliceUserLink = (
       await getAgentUser(alice.cells[0], alice.agentPubKey)
     )[0];
     let bobUserLink = (await getAgentUser(bob.cells[0], bob.agentPubKey))[0];
-    // Register AlicUser administrator
+    // Register Alice as administrator
     await registerNetworkAdministrator(alice.cells[0], aliceUserLink.target, [
       alice.agentPubKey,
     ]);
     await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    // Verify that Alice is an administrator
+    assert.ok(
+      await checkIfEntityIsAdministrator(alice.cells[0], aliceUserLink.target)
+    );
+
+    // Alice update her user profile
+    sample = sampleUser({
+      name: "Alice",
+      nickname: "Alicia",
+    });
+    await updateUser(
+      alice.cells[0],
+      aliceUserLink.target,
+      aliceUserLink.target,
+      sample
+    );
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
+    // Verify that Alice still in All Users
+    let allUsers = await getAllUsers(alice.cells[0]);
+    assert.equal(allUsers.length, 2);
 
     // Update Alice's status
     const aliceStatusOriginalActionHash = (
@@ -159,7 +179,7 @@ test("update User status", async () => {
     assert.equal(aliceStatus.status_type, "accepted");
 
     // Verify the all_users list
-    let allUsers = await getAllUsers(alice.cells[0]);
+    allUsers = await getAllUsers(alice.cells[0]);
     assert.equal(allUsers.length, 2);
 
     // Verify the accepted_users list

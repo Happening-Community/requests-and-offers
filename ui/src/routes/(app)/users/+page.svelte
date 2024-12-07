@@ -3,9 +3,10 @@
   import UsersTable from '@lib/tables/UsersTable.svelte';
   import { type ConicStop, ConicGradient } from '@skeletonlabs/skeleton';
   import usersStore from '@stores/users.store.svelte';
-  import { onMount } from 'svelte';
 
   const { currentUser, acceptedUsers } = $derived(usersStore);
+
+  $inspect('users:', acceptedUsers);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
@@ -13,11 +14,22 @@
   ];
 
   let isLoading = $state(true);
+  let error = $state<string | null>(null);
 
-  onMount(async () => {
-    await usersStore.getAcceptedUsers();
+  async function loadUsers() {
+    try {
+      isLoading = true;
+      error = null;
+      await usersStore.getAcceptedUsers();
+    } catch (e) {
+      error = e instanceof Error ? e.message : 'Failed to load users';
+    } finally {
+      isLoading = false;
+    }
+  }
 
-    isLoading = false;
+  $effect(() => {
+    loadUsers();
   });
 </script>
 
@@ -30,6 +42,8 @@
   </div>
   {#if acceptedUsers.length}
     <UsersTable users={acceptedUsers} />
+  {:else if error}
+    <p class="h3 text-error-500">{error}</p>
   {:else}
     <p class="h3 text-error-500">No users found.</p>
   {/if}

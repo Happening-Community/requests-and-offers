@@ -8,7 +8,6 @@ import usersStore from './users.store.svelte';
 import administrationStore from './administration.store.svelte';
 
 class OrganizationsStore {
-  allOrganizations: UIOrganization[] = $state([]);
   acceptedOrganizations: UIOrganization[] = $state([]);
   currentOrganization: UIOrganization | null = $state(null);
 
@@ -22,7 +21,10 @@ class OrganizationsStore {
       coordinators: []
     };
 
-    this.allOrganizations = [...this.allOrganizations, newOrganization];
+    administrationStore.allOrganizations = [
+      ...administrationStore.allOrganizations,
+      newOrganization
+    ];
     return record;
   }
 
@@ -60,7 +62,7 @@ class OrganizationsStore {
     }
 
     // Update in-memory cache
-    this.allOrganizations = this.allOrganizations.map((org) =>
+    administrationStore.allOrganizations = administrationStore.allOrganizations.map((org) =>
       org.original_action_hash?.toString() === original_action_hash.toString() ? organization : org
     );
 
@@ -84,13 +86,13 @@ class OrganizationsStore {
       }
     }
 
-    this.allOrganizations = organizations;
+    administrationStore.allOrganizations = organizations;
     return organizations;
   }
 
   async getOrganizationByActionHash(actionHash: ActionHash): Promise<UIOrganization | null> {
     return (
-      this.allOrganizations.find(
+      administrationStore.allOrganizations.find(
         (org) => org.original_action_hash?.toString() === actionHash.toString()
       ) || null
     );
@@ -100,7 +102,7 @@ class OrganizationsStore {
     const organization = await this.getLatestOrganization(original_action_hash);
     if (!organization) return null;
 
-    this.allOrganizations = this.allOrganizations.map((org) =>
+    administrationStore.allOrganizations = administrationStore.allOrganizations.map((org) =>
       org.original_action_hash?.toString() === original_action_hash.toString() ? organization : org
     );
 
@@ -288,7 +290,7 @@ class OrganizationsStore {
       organization_original_action_hash
     );
     if (success) {
-      this.allOrganizations = this.allOrganizations.filter(
+      administrationStore.allOrganizations = administrationStore.allOrganizations.filter(
         (org) =>
           org.original_action_hash?.toString() !== organization_original_action_hash.toString()
       );
@@ -316,7 +318,7 @@ class OrganizationsStore {
 
   // Helper methods
   getOrganizationsByActionHashes(actionHashes: ActionHash[]): UIOrganization[] {
-    return this.allOrganizations.filter((org) =>
+    return administrationStore.allOrganizations.filter((org) =>
       actionHashes.some((hash) => hash.toString() === org.original_action_hash?.toString())
     );
   }
