@@ -1,17 +1,14 @@
 <script lang="ts">
-  import { Avatar, getModalStore } from '@skeletonlabs/skeleton';
+  import { Avatar } from '@skeletonlabs/skeleton';
   import type { UIOrganization, UIUser } from '@/types/ui';
-  import { OrganizationRole } from '@/types/ui';
   import organizationsStore from '@/stores/organizations.store.svelte';
-  import administrationStore from '@/stores/administration.store.svelte';
-  import { type StatusInDHT } from '@/types/holochain';
 
   type Props = {
     organization: UIOrganization;
     searchQuery?: string;
     sortBy?: 'name' | 'role' | 'status';
     sortOrder?: 'asc' | 'desc';
-    onUpdateStatus?: (member: UIUser, status: StatusInDHT) => void;
+    memberOnly?: boolean;
   };
 
   const {
@@ -19,7 +16,7 @@
     searchQuery = '',
     sortBy = 'name',
     sortOrder = 'asc',
-    onUpdateStatus
+    memberOnly = false
   }: Props = $props();
 
   let members = $state<UIUser[]>([]);
@@ -31,7 +28,7 @@
     if (members.length === 0) return [];
 
     // First, sort the members
-    const sorted = [...members].sort((a, b) => {
+    let sorted = [...members].sort((a, b) => {
       if (sortBy === 'name') {
         return sortOrder === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
       } else if (sortBy === 'role') {
@@ -58,7 +55,23 @@
       }
     });
 
-    // Then filter by search query
+    // Then filter by search query and member-only
+
+    if (memberOnly) {
+      sorted = sorted.filter((member) =>
+        organization.coordinators.includes(member.original_action_hash!)
+      );
+    }
+
+    console.log(
+      'Organization Members:',
+      sorted.map((member) => ({
+        name: member.name,
+        role: member.role,
+        status: member.status?.status_type
+      }))
+    );
+
     if (!searchQuery) return sorted;
 
     return sorted.filter((member) => member.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -66,43 +79,29 @@
 
   const displayMembers = $derived(getSortedAndFilteredMembers());
 
-  const modalStore = getModalStore();
-  const isAdmin = $derived(administrationStore.agentIsAdministrator);
-
   async function loadMembers() {
-    try {
-      loading = true;
-      error = null;
+    if (!organization) return;
 
-      const memberUsers = await organizationsStore.getMemberUsers(organization);
-      members = memberUsers;
-    } catch (e) {
-      console.error('Error loading members:', e);
-      error = e instanceof Error ? e.message : 'Failed to load members';
+    loading = true;
+    error = null;
+    try {
+      if (!organization.original_action_hash) return;
+      members = await organizationsStore.getMemberUsers(organization);
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to load members';
+      console.error(error);
     } finally {
       loading = false;
     }
   }
 
-  function openStatusUpdateModal(member: UIUser) {
-    modalStore.trigger({
-      type: 'component',
-      component: {
-        ref: 'StatusUpdateModal',
-        props: {
-          entity: member,
-          onUpdate: onUpdateStatus
-        }
-      }
-    });
-  }
-
+  // Reactive statement to load members when organization changes
   $effect(() => {
     loadMembers();
   });
 </script>
 
-<div class="card p-4">
+<div class="card space-y-4 p-4">
   <header class="card-header">
     <h3 class="h3">Organization Members</h3>
   </header>
@@ -122,9 +121,9 @@
       <table class="table-hover table">
         <thead>
           <tr>
-            <th>Member</th>
-            <th>Role</th>
-            <th>Status</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -135,23 +134,9 @@
                 <span>{member.name}</span>
               </td>
               <td>
-                <span class="badge variant-filled">
-                  {member.role || OrganizationRole.Member}
+                <span>
+                  {member.user_type.charAt(0).toUpperCase() + member.user_type.slice(1)}
                 </span>
-              </td>
-              <td>
-                <button
-                  class="badge {member.status?.status_type === 'accepted'
-                    ? 'variant-filled-success'
-                    : member.status?.status_type.startsWith('rejected')
-                      ? 'variant-filled-warning'
-                      : 'variant-filled-surface'}"
-                  onclick={() => isAdmin && openStatusUpdateModal(member)}
-                  disabled={!isAdmin}
-                  aria-label={`Update status for ${member.name}`}
-                >
-                  {member.status?.status_type || 'No Status'}
-                </button>
               </td>
             </tr>
           {/each}

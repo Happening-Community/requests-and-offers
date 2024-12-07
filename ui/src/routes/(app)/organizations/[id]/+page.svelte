@@ -11,8 +11,9 @@
   import { Avatar, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
   import StatusHistoryModal from '@lib/modals/StatusHistoryModal.svelte';
   import usersStore from '@/stores/users.store.svelte';
-  import { FileDropzone } from '@skeletonlabs/skeleton';
   import { goto } from '$app/navigation';
+  import OrganizationMembersTable from '@/lib/tables/OrganizationMembersTable.svelte';
+  import OrganizationCoordinatorsTable from '@/lib/tables/OrganizationCoordinatorsTable.svelte';
 
   const modalStore = getModalStore();
   const toastStore = getToastStore();
@@ -449,139 +450,45 @@
 
     <!-- Members Section -->
     <div class="card mt-6 w-full p-6">
-      <header class="mb-4 flex items-center justify-between">
-        <h2 class="h2">Members ({members.length - coordinators.length})</h2>
-        {#if organization?.coordinators.includes($page?.data?.user?.original_action_hash!)}
-          <button
-            class="btn variant-filled-primary"
-            onclick={() =>
-              modalStore.trigger({
-                type: 'component',
-                component: { ref: MemberManagementModal, props: { organization } }
-              })}
-          >
-            Manage Members
-          </button>
-        {/if}
-      </header>
-
-      {#if loadingMembers}
-        <div class="flex items-center justify-center p-4">
-          <span class="loading loading-spinner loading-lg"></span>
+      <div class="mb-4 flex items-center gap-4">
+        <div class="input-group input-group-divider w-full max-w-sm grid-cols-[auto_1fr_auto]">
+          <div class="input-group-shim">🔍</div>
+          <input
+            type="search"
+            placeholder="Search members..."
+            bind:value={memberSearchQuery}
+            class="border-0 bg-transparent ring-0 focus:ring-0"
+          />
         </div>
-      {:else if members.length === coordinators.length}
-        <div class="alert variant-ghost-surface" role="alert">No members found.</div>
-      {:else}
-        <div class="table-container">
-          <table class="table-hover table">
-            <thead>
-              <tr>
-                <th>Member</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {#each members.filter((member) => !coordinators.some((coord) => coord.original_action_hash === member.original_action_hash)) as member (member.original_action_hash)}
-                <tr>
-                  <td class="flex items-center gap-2">
-                    <Avatar
-                      src={member.picture
-                        ? URL.createObjectURL(new Blob([new Uint8Array(member.picture)]))
-                        : '/default_avatar.webp'}
-                      initials={member.name.slice(0, 2)}
-                    />
-                    <span>{member.name}</span>
-                  </td>
-                  <td>
-                    <button
-                      class="badge {member.status?.status_type === 'accepted'
-                        ? 'variant-filled-success'
-                        : member.status?.status_type.startsWith('rejected')
-                          ? 'variant-filled-warning'
-                          : 'variant-filled-surface'}"
-                      onclick={() =>
-                        isAdmin && openStatusUpdateModal(member, handleUpdateUserStatus)}
-                      disabled={!isAdmin}
-                      aria-label={`Update status for ${member.name}`}
-                    >
-                      {member.status?.status_type || 'No Status'}
-                    </button>
-                  </td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-      {/if}
+      </div>
+      <OrganizationMembersTable
+        {organization}
+        searchQuery={memberSearchQuery}
+        sortBy={memberSortBy}
+        sortOrder={memberSortOrder}
+        memberOnly
+      />
     </div>
 
     <!-- Coordinators Section -->
     <div class="card mt-6 w-full p-6">
-      <header class="mb-4">
-        <h2 class="h2">Coordinators ({coordinators.length})</h2>
-      </header>
-
-      {#if loadingCoordinators}
-        <div class="flex items-center justify-center p-4">
-          <span class="loading loading-spinner loading-lg"></span>
+      <div class="mb-4 flex items-center gap-4">
+        <div class="input-group input-group-divider w-full max-w-sm grid-cols-[auto_1fr_auto]">
+          <div class="input-group-shim">🔍</div>
+          <input
+            type="search"
+            placeholder="Search coordinators..."
+            bind:value={coordinatorSearchQuery}
+            class="border-0 bg-transparent ring-0 focus:ring-0"
+          />
         </div>
-      {:else if coordinators.length === 0}
-        <div class="alert variant-ghost-surface" role="alert">No coordinators found.</div>
-      {:else}
-        <div class="table-container">
-          <table class="table-hover table">
-            <thead>
-              <tr>
-                <th>Coordinator</th>
-                <th>Status</th>
-                {#if agentIsCoordinator}
-                  <th>Actions</th>
-                {/if}
-              </tr>
-            </thead>
-            <tbody>
-              {#each coordinators as coordinator (coordinator.original_action_hash)}
-                <tr>
-                  <td class="flex items-center gap-2">
-                    <Avatar
-                      src={coordinator.picture
-                        ? URL.createObjectURL(new Blob([new Uint8Array(coordinator.picture)]))
-                        : '/default_avatar.webp'}
-                      initials={coordinator.name.slice(0, 2)}
-                    />
-                    <span>{coordinator.name}</span>
-                  </td>
-                  <td>
-                    <button
-                      class="badge {coordinator.status?.status_type === 'accepted'
-                        ? 'variant-filled-success'
-                        : coordinator.status?.status_type.startsWith('rejected')
-                          ? 'variant-filled-warning'
-                          : 'variant-filled-surface'}"
-                      onclick={() =>
-                        isAdmin && openStatusUpdateModal(coordinator, handleUpdateUserStatus)}
-                      disabled={!isAdmin}
-                      aria-label={`Update status for ${coordinator.name}`}
-                    >
-                      {coordinator.status?.status_type || 'No Status'}
-                    </button>
-                  </td>
-                  {#if agentIsCoordinator && coordinators.length > 1}
-                    <td>
-                      <button
-                        class="btn btn-sm variant-filled-error"
-                        onclick={() => handleRemoveCoordinator(coordinator)}
-                      >
-                        Remove
-                      </button>
-                    </td>
-                  {/if}
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-      {/if}
+      </div>
+      <OrganizationCoordinatorsTable
+        {organization}
+        searchQuery={coordinatorSearchQuery}
+        sortBy={coordinatorSortBy}
+        sortOrder={coordinatorSortOrder}
+      />
     </div>
   {:else}
     <div class="flex justify-center p-8">

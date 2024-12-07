@@ -3,7 +3,6 @@
   import type { UIOrganization, UIUser } from '@/types/ui';
   import organizationsStore from '@/stores/organizations.store.svelte';
   import administrationStore from '@/stores/administration.store.svelte';
-  import { type StatusInDHT } from '@/types/holochain';
   import usersStore from '@/stores/users.store.svelte';
 
   type Props = {
@@ -11,16 +10,9 @@
     searchQuery?: string;
     sortBy?: 'name' | 'status';
     sortOrder?: 'asc' | 'desc';
-    onUpdateStatus?: (coordinator: UIUser, status: StatusInDHT) => void;
   };
 
-  const {
-    organization,
-    searchQuery = '',
-    sortBy = 'name',
-    sortOrder = 'asc',
-    onUpdateStatus
-  }: Props = $props();
+  const { organization, searchQuery = '', sortBy = 'name', sortOrder = 'asc' }: Props = $props();
 
   let agentIsCoordinator = $state(false);
   let coordinators = $state<UIUser[]>([]);
@@ -56,26 +48,31 @@
   const displayCoordinators = $derived(getSortedAndFilteredCoordinators());
   const modalStore = getModalStore();
   const toastStore = getToastStore();
-  const isAdmin = $derived(administrationStore.agentIsAdministrator);
+
   async function loadCoordinators() {
+    if (!organization) return;
+
+    loading = true;
+    error = null;
     try {
-      loading = true;
-      error = null;
-      const coordinatorUsers = await organizationsStore.getCoordinatorUsers(organization);
-      coordinators = coordinatorUsers;
-      if (!organization.original_action_hash || !usersStore.currentUser?.original_action_hash)
-        return;
-      agentIsCoordinator = await organizationsStore.isOrganizationCoordinator(
-        organization.original_action_hash,
-        usersStore.currentUser?.original_action_hash
+      coordinators = await organizationsStore.getCoordinatorUsers(organization);
+
+      // Check if current agent is a coordinator
+      agentIsCoordinator = coordinators.some(
+        (coord) => coord.original_action_hash === usersStore.currentUser?.original_action_hash
       );
-    } catch (e) {
-      console.error('Error loading coordinators:', e);
-      error = e instanceof Error ? e.message : 'Failed to load coordinators';
+    } catch (err) {
+      error = err instanceof Error ? err.message : 'Failed to load coordinators';
+      console.error(error);
     } finally {
       loading = false;
     }
   }
+
+  // Reactive statement to load coordinators when organization changes
+  $effect(() => {
+    loadCoordinators();
+  });
 
   async function handleRemoveCoordinator(coordinator: UIUser) {
     if (
@@ -120,29 +117,10 @@
       loading = false;
     }
   }
-
-  function openStatusUpdateModal(coordinator: UIUser) {
-    if (!isAdmin || !coordinator.original_action_hash) return;
-
-    modalStore.trigger({
-      type: 'component',
-      component: {
-        ref: 'StatusUpdateModal',
-        props: {
-          entity: coordinator,
-          onUpdate: onUpdateStatus
-        }
-      }
-    });
-  }
-
-  $effect(() => {
-    loadCoordinators();
-  });
 </script>
 
-<div class="card p-4">
-  <header class="card-header mb-4">
+<div class="card space-y-4 p-4">
+  <header class="card-header">
     <h3 class="h3">Organization Coordinators</h3>
   </header>
 
@@ -161,8 +139,8 @@
       <table class="table-hover table">
         <thead>
           <tr>
-            <th>Coordinator</th>
-            <th>Status</th>
+            <th>Name</th>
+            <th>Type</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -174,19 +152,9 @@
                 <span>{coordinator.name}</span>
               </td>
               <td>
-                <button
-                  class={`badge`}
-                  class:variant-filled-success={coordinator.status?.status_type === 'accepted'}
-                  class:variant-filled-warning={coordinator.status?.status_type.startsWith(
-                    'rejected'
-                  )}
-                  class:variant-filled-surface={!coordinator.status?.status_type}
-                  onclick={() => isAdmin && openStatusUpdateModal(coordinator)}
-                  disabled={!isAdmin}
-                  aria-label={`Update status for ${coordinator.name}`}
-                >
-                  {coordinator.status?.status_type || 'No Status'}
-                </button>
+                <span>
+                  {coordinator.user_type.charAt(0).toUpperCase() + coordinator.user_type.slice(1)}
+                </span>
               </td>
               <td>
                 <div class="flex gap-2">
