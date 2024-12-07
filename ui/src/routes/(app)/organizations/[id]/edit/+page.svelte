@@ -1,15 +1,17 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { getToastStore } from '@skeletonlabs/skeleton';
+  import { Avatar, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
   import { FileDropzone } from '@skeletonlabs/skeleton';
   import { goto } from '$app/navigation';
   import type { UIOrganization } from '@/types/ui';
   import organizationsStore from '@/stores/organizations.store.svelte';
   import { decodeHashFromBase64, type ActionHash } from '@holochain/client';
 
+  const modalStore = getModalStore();
   const toastStore = getToastStore();
   const organizationHash = decodeHashFromBase64($page.params.id) as ActionHash;
 
+  let form: HTMLFormElement | undefined = $state();
   let organization: UIOrganization | null = $state(null);
   let loading = $state(true);
   let error = $state<string | null>(null);
@@ -22,9 +24,10 @@
   let formUrls = $state('');
 
   // Logo state
-  let organizationLogo: File | null = $state(null);
-  let logoFiles: FileList | undefined = $state();
-  let logoFileMessage: string = $state('');
+  let organizationLogo: Blob | null = $state(null);
+  let files: FileList | undefined = $state();
+  let fileMessage: string = $state('');
+  let isChanged = $state(false);
 
   // Update form values when organization changes
   $effect(() => {
@@ -40,16 +43,27 @@
   // Update logo when organization changes
   $effect(() => {
     if (organization?.logo) {
-      organizationLogo = new File([organization.logo], 'organizationLogo');
+      organizationLogo = new Blob([organization.logo]);
     }
   });
 
-  function handleLogoUpload() {
-    if (logoFiles && logoFiles.length > 0) {
-      organizationLogo = logoFiles[0] as File;
-      logoFileMessage = `Selected file: ${organizationLogo.name}`;
-    } else {
-      logoFileMessage = 'No file selected';
+  async function onLogoFileChange() {
+    fileMessage = `${files![0].name}`;
+    organizationLogo = new Blob([new Uint8Array(await files![0].arrayBuffer())]);
+    isChanged = true;
+  }
+
+  function RemoveOrganizationLogo() {
+    isChanged = true;
+    organizationLogo = null;
+    fileMessage = '';
+    const logoInput = form!.querySelector('input[name="logo"]') as HTMLInputElement;
+    if (logoInput) {
+      logoInput.value = '';
+    }
+
+    if (organization) {
+      organization.logo = undefined;
     }
   }
 
@@ -73,9 +87,13 @@
         email: formEmail,
         location: formLocation,
         urls,
-        ...(organizationLogo
-          ? { logo: new Uint8Array(await organizationLogo.arrayBuffer()) }
-          : organization.logo)
+        ...(isChanged
+          ? {
+              logo: organizationLogo
+                ? new Uint8Array(await organizationLogo.arrayBuffer())
+                : undefined
+            }
+          : { logo: organization.logo })
       };
 
       // Update organization
@@ -111,18 +129,35 @@
   }
 
   async function handleDeleteOrganization() {
-    if (!organization?.original_action_hash) return;
+    if (!organization) return;
 
     try {
-      loading = true;
-      await organizationsStore.deleteOrganization(organization.original_action_hash);
-
-      toastStore.trigger({
-        message: 'Organization deleted successfully',
-        background: 'variant-filled-success'
+      // Confirm deletion
+      const confirmed = await new Promise<boolean>((resolve) => {
+        modalStore.trigger({
+          type: 'confirm',
+          title: 'Delete Organization',
+          body: `Are you sure you want to delete the organization <b>${organization!.name}</b>? This action cannot be undone.`,
+          response: (r: boolean) => resolve(r)
+        });
       });
 
-      goto('/organizations');
+      if (!confirmed) return;
+
+      loading = true;
+
+      const success = await organizationsStore.deleteOrganization(organizationHash);
+
+      if (success) {
+        toastStore.trigger({
+          message: 'Organization deleted successfully',
+          background: 'variant-filled-success'
+        });
+
+        goto('/organizations');
+      } else {
+        throw new Error('Failed to delete organization');
+      }
     } catch (e) {
       console.error('Error deleting organization:', e);
       toastStore.trigger({
@@ -179,7 +214,7 @@
         </div>
       </header>
 
-      <form onsubmit={handleUpdateSettings} class="space-y-4">
+      <form bind:this={form} onsubmit={handleUpdateSettings} class="space-y-4">
         <label class="label">
           <span>Name</span>
           <input class="input" type="text" name="name" bind:value={formName} required />
@@ -211,11 +246,29 @@
           <input class="input" type="text" name="urls" bind:value={formUrls} />
         </label>
 
-        <!-- Organization Logo Upload -->
-        <div class="form-group">
-          <label for="organization-logo" class="form-label">Organization Logo</label>
-          <FileDropzone bind:files={logoFiles} on:change={handleLogoUpload} name="logo" />
-          <p class="file-message">{logoFileMessage}</p>
+        <div class="space-y-2">
+          <label class="label">
+            <span>Organization Logo</span>
+            <FileDropzone name="logo" accept="image/*" bind:files onchange={onLogoFileChange} />
+            <div class="mt-2 flex items-center gap-2">
+              {#if fileMessage}
+                <span class="text-sm">{fileMessage}</span>
+              {/if}
+              <button
+                type="button"
+                class="btn btn-sm variant-soft"
+                onclick={RemoveOrganizationLogo}
+              >
+                Remove
+              </button>
+            </div>
+          </label>
+
+          {#if organizationLogo}
+            <div class="mt-4">
+              <Avatar src={URL.createObjectURL(organizationLogo)} width="w-32" />
+            </div>
+          {/if}
         </div>
 
         <div class="flex gap-4">

@@ -176,24 +176,26 @@
         <textarea class="textarea h-52" name="bio">{currentUser.bio}</textarea>
       </label>
 
-      <p class="label text-lg">User picture :</p>
-      <FileDropzone name="picture" bind:files onchange={onPictureFileChange} accept="image/*" />
-      <div class="flex items-center justify-between">
-        <p class="italic">{fileMessage}</p>
-        {#if files && userPicture}
-          <div>
-            <Avatar src={URL.createObjectURL(userPicture)} />
-            <button class="cursor-pointer underline" onclick={RemoveUserPicture}> Remove </button>
+      <div class="space-y-2">
+        <label class="label space-y-2">
+          <span>User Picture :</span>
+          <FileDropzone name="picture" accept="image/*" bind:files onchange={onPictureFileChange} />
+          <div class="mt-2 flex items-center gap-2">
+            {#if fileMessage}
+              <span class="text-sm">{fileMessage}</span>
+            {/if}
+            <button type="button" class="btn btn-sm variant-soft" onclick={RemoveUserPicture}>
+              Remove
+            </button>
+          </div>
+        </label>
+
+        {#if userPicture}
+          <div class="mt-4">
+            <Avatar src={URL.createObjectURL(userPicture)} width="w-32" />
           </div>
         {/if}
       </div>
-
-      {#if userPicture && !files}
-        <div class="flex items-center gap-2">
-          <Avatar src={URL.createObjectURL(userPicture)} />
-          <button class="cursor-pointer underline" onclick={RemoveUserPicture}> Remove </button>
-        </div>
-      {/if}
 
       <div class="flex gap-6">
         <p class="label text-lg">Type* :</p>
