@@ -175,6 +175,19 @@ test("create and manage Organizations", async () => {
       );
       assert.equal(organization.name, sampleOrg.name);
 
+      // Verify that Bob still a coordinator of the Organization
+      organizationLinks = await getOrganizationCoordinatorsLinks(
+        bob.cells[0],
+        bobOrganizationOriginalActionHash
+      );
+      assert.lengthOf(organizationLinks, 1);
+      assert.ok(
+        await checkIfAgentIsOrganizationCoordinator(
+          bob.cells[0],
+          bobOrganizationOriginalActionHash
+        )
+      );
+
       // Bob try to add Alice as a member of the Organization without the organization being accepted
       expect(
         addMemberToOrganization(

@@ -14,7 +14,7 @@
   const { organizations, title, role }: Props = $props();
 </script>
 
-<div class="card p-4">
+<div class="card space-y-4 p-4">
   <header class="card-header">
     <h3 class="h3">{title}</h3>
   </header>

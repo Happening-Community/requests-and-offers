@@ -27,36 +27,6 @@
   let loadingMembers = $state(false);
   let loadingCoordinators = $state(false);
 
-  // Form state
-  let formName = $state('');
-  let formDescription = $state('');
-  let formEmail = $state('');
-  let formLocation = $state('');
-  let formUrls = $state('');
-
-  // Logo state
-  let organizationLogo: File | null = $state(null);
-  let logoFiles: FileList | undefined = $state();
-  let logoFileMessage: string = $state('');
-
-  // Update form values when organization changes
-  $effect(() => {
-    if (organization) {
-      formName = organization.name;
-      formDescription = organization.description;
-      formEmail = organization.email;
-      formLocation = organization.location;
-      formUrls = organization.urls.join(', ');
-    }
-  });
-
-  // Update logo when organization changes
-  $effect(() => {
-    if (organization?.logo) {
-      organizationLogo = new File([organization.logo], 'organizationLogo');
-    }
-  });
-
   // Table controls
   let memberSearchQuery = $state('');
   let memberSortBy = $state<'name' | 'role' | 'status'>('name');
@@ -366,63 +336,6 @@
     }
   }
 
-  async function handleUpdateSettings(event: Event) {
-    event.preventDefault();
-    if (!organization) return;
-
-    try {
-      loading = true;
-
-      // Parse URLs from comma-separated string
-      const urls = formUrls
-        .split(',')
-        .map((url) => url.trim())
-        .filter(Boolean);
-
-      // Create update object
-      const updates = {
-        name: formName,
-        description: formDescription,
-        email: formEmail,
-        location: formLocation,
-        urls,
-        ...(organizationLogo
-          ? { logo: new Uint8Array(await organizationLogo.arrayBuffer()) }
-          : organization.logo)
-      };
-
-      // Update organization
-      if (!organization.original_action_hash) {
-        throw new Error('Organization action hash not found');
-      }
-
-      const updatedOrganization = await organizationsStore.updateOrganization(
-        organization.original_action_hash,
-        updates
-      );
-
-      if (!updatedOrganization) {
-        throw new Error('Failed to update organization');
-      }
-
-      // Refresh the organization data to ensure UI is up to date
-      organization = updatedOrganization;
-
-      toastStore.trigger({
-        message: 'Organization updated successfully',
-        background: 'variant-filled-success'
-      });
-    } catch (e) {
-      console.error('Error updating organization:', e);
-      toastStore.trigger({
-        message: 'Failed to update organization',
-        background: 'variant-filled-error'
-      });
-    } finally {
-      loading = false;
-    }
-  }
-
   const statusHistoryModalComponent: ModalComponent = { ref: StatusHistoryModal };
   const statusHistoryModal = (statusHistory: Revision[]): ModalSettings => {
     return {
@@ -459,22 +372,11 @@
     }
   }
 
-  function handleLogoUpload() {
-    if (logoFiles && logoFiles.length > 0) {
-      organizationLogo = logoFiles[0] as File;
-      logoFileMessage = `Selected file: ${organizationLogo.name}`;
-    } else {
-      logoFileMessage = 'No file selected';
-    }
-  }
-
   // Memoized organization logo URL
   let organizationLogoUrl = $derived.by(() =>
-    organizationLogo
-      ? URL.createObjectURL(organizationLogo)
-      : organization?.logo
-        ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
-        : '/default_avatar.webp'
+    organization?.logo
+      ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
+      : '/default_avatar.webp'
   );
 
   // Load organization when the component mounts
@@ -504,14 +406,22 @@
         <div class="flex-1">
           <div class="flex items-center justify-between">
             <h1 class="h1">{organization.name}</h1>
-            {#if organization.status}
-              <button
-                class="badge {getStatusClass(organization.status.status_type)}"
-                onclick={handleStatusHistoryModal}
-              >
-                {organization.status.status_type}
-              </button>
-            {/if}
+            <div class="ml-4 flex flex-col gap-4">
+              {#if isAdmin}
+                <button
+                  class="btn variant-filled"
+                  onclick={openOrganizationStatusUpdateModal}
+                  disabled={loading}
+                >
+                  Update Status
+                </button>
+              {/if}
+              {#if agentIsCoordinator}
+                <a href="/organizations/{$page.params.id}/edit" class="btn variant-filled-primary">
+                  Edit Organization
+                </a>
+              {/if}
+            </div>
           </div>
           <p class="text-lg">{organization.description}</p>
         </div>
@@ -673,76 +583,6 @@
         </div>
       {/if}
     </div>
-
-    <!-- Settings Section (Coordinators Only) -->
-    {#if agentIsCoordinator}
-      <div class="card mt-6 w-full p-6">
-        <header class="mb-4">
-          <h2 class="h2">Organization Settings</h2>
-        </header>
-
-        <form onsubmit={handleUpdateSettings} class="space-y-4">
-          <label class="label">
-            <span>Name</span>
-            <input class="input" type="text" name="name" bind:value={formName} required />
-          </label>
-
-          <label class="label">
-            <span>Description</span>
-            <textarea
-              class="textarea"
-              name="description"
-              rows="3"
-              bind:value={formDescription}
-              required
-            ></textarea>
-          </label>
-
-          <label class="label">
-            <span>Email</span>
-            <input class="input" type="email" name="email" bind:value={formEmail} required />
-          </label>
-
-          <label class="label">
-            <span>Location</span>
-            <input class="input" type="text" name="location" bind:value={formLocation} required />
-          </label>
-
-          <label class="label">
-            <span>URLs (comma-separated)</span>
-            <input class="input" type="text" name="urls" bind:value={formUrls} />
-          </label>
-
-          <!-- Organization Logo Upload -->
-          <div class="form-group">
-            <label for="organization-logo" class="form-label">Organization Logo</label>
-            <FileDropzone bind:files={logoFiles} on:change={handleLogoUpload} name="logo" />
-            <p class="file-message">{logoFileMessage}</p>
-          </div>
-
-          <div class="flex gap-4">
-            <button type="submit" class="btn variant-filled-primary" disabled={loading}>
-              {#if loading}
-                <span class="loading loading-spinner loading-sm"></span>
-              {/if}
-              Save Changes
-            </button>
-
-            <button
-              type="button"
-              class="btn variant-filled-error"
-              onclick={handleDeleteOrganization}
-              disabled={loading}
-            >
-              {#if loading}
-                <span class="loading loading-spinner loading-sm"></span>
-              {/if}
-              Delete Organization
-            </button>
-          </div>
-        </form>
-      </div>
-    {/if}
   {:else}
     <div class="flex justify-center p-8">
       <p class="text-surface-600-300-token">Organization not found</p>
