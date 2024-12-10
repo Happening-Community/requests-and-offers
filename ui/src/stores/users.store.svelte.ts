@@ -28,7 +28,7 @@ class UsersStore {
 
     return {
       ...decodeRecords([record])[0],
-      original_action_hash: record.signed_action.hashed.hash,
+      original_action_hash: original_action_hash,
       previous_action_hash: record.signed_action.hashed.hash
     };
   }
@@ -98,15 +98,11 @@ class UsersStore {
 
     this.setCurrentUser(updatedUser);
 
-    console.log('allUsers', administrationStore.allUsers);
-
     administrationStore.allUsers = administrationStore.allUsers.map((u) =>
       u.original_action_hash?.toString() === this.currentUser?.original_action_hash?.toString()
         ? this.currentUser!
         : u
     );
-
-    console.log('allUsers', administrationStore.allUsers);
 
     return updatedUser;
   }

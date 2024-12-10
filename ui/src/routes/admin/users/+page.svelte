@@ -30,6 +30,7 @@
   });
 
   $inspect('allUsers', allUsers);
+  $inspect('usersByStatus', usersByStatus);
 
   const userCategories = $derived([
     { title: 'Pending Users', users: usersByStatus.pending, titleClass: 'text-primary-400' },
@@ -66,7 +67,9 @@
     }
   }
 
-  onMount(loadUsers);
+  $effect(() => {
+    loadUsers();
+  });
 </script>
 
 <section class="flex flex-col gap-10">

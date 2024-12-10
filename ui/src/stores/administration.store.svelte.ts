@@ -38,13 +38,16 @@ class AdministrationStore {
       const user = await usersStore.getLatestUser(link.target);
       if (!user?.original_action_hash) continue;
 
-      const record = await this.getLatestStatusForEntity(
-        user.original_action_hash,
-        AdministrationEntity.Users
-      );
-      if (!record) continue;
+      const userStatusLink = await usersStore.getUserStatusLink(link.target);
+      if (!userStatusLink) continue;
 
-      user.status = decodeRecords([record])[0];
+      const status = await this.getLatestStatus(userStatusLink.target);
+      if (!status) continue;
+
+      console.log('user status', status);
+
+      user.status = status;
+
       users.push(user);
     }
 
@@ -55,7 +58,8 @@ class AdministrationStore {
 
   async fetchAllUsers() {
     this.allUsers = await this.getAllUsers();
-    await this.getAllNetworkAdministrators(); // This will update administrators and nonAdministrators
+    await this.getAllNetworkAdministrators();
+
     return this.allUsers;
   }
 
