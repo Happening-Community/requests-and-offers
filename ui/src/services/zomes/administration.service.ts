@@ -25,11 +25,10 @@ export class AdministrationService {
     entity_original_action_hash: ActionHash,
     entity_type: AdministrationEntity
   ): Promise<StatusInDHT | null> {
-    const link = await this.getEntityStatusLink(entity_original_action_hash, entity_type);
-    if (!link) return null;
-
-    const record = await this.getLatestStatusRecord(link.target);
-    return record ? ((record.entry as any).Present.entry as StatusInDHT) : null;
+    return (await hc.callZome('administration', 'get_latest_status_for_entity', {
+      entity: entity_type,
+      entity_original_action_hash
+    })) as StatusInDHT | null;
   }
 
   static async getEntityStatusLink(

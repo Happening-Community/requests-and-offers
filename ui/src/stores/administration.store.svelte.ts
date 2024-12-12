@@ -38,10 +38,10 @@ class AdministrationStore {
       const user = await usersStore.getLatestUser(link.target);
       if (!user?.original_action_hash) continue;
 
-      const userStatusLink = await usersStore.getUserStatusLink(link.target);
-      if (!userStatusLink) continue;
-
-      const status = await this.getLatestStatus(userStatusLink.target);
+      const status = await this.getLatestStatusForEntity(
+        user.original_action_hash,
+        AdministrationEntity.Users
+      );
       if (!status) continue;
 
       console.log('user status', status);
@@ -200,15 +200,22 @@ class AdministrationStore {
     return revisions;
   }
 
-  async getLatestStatus(original_action_hash: ActionHash): Promise<UIStatus | null> {
-    const record = await AdministrationService.getLatestStatusRecord(original_action_hash);
-    if (!record) return null;
+  async getLatestStatusForEntity(
+    entity_original_action_hash: ActionHash,
+    entity_type: AdministrationEntity
+  ): Promise<UIStatus | null> {
+    const status = await AdministrationService.getLatestStatusForEntity(
+      entity_original_action_hash,
+      entity_type
+    );
 
-    const status = decodeRecords([record])[0] as StatusInDHT;
+    console.log(status);
+    if (!status) return null;
+
     return this.convertToUIStatus(status);
   }
 
-  async getLatestStatusForEntity(
+  async getLatestStatusRecordForEntity(
     entity_original_action_hash: ActionHash,
     entity_type: AdministrationEntity
   ): Promise<Record | null> {

@@ -82,7 +82,7 @@
         throw new Error('Could not find status link');
       }
 
-      const currentStatus = await administrationStore.getLatestStatusForEntity(
+      const currentStatus = await administrationStore.getLatestStatusRecordForEntity(
         member.original_action_hash,
         AdministrationEntity.Users
       );
@@ -194,13 +194,7 @@
 
     <!-- Members Table -->
     <div class="card p-4">
-      <OrganizationMembersTable
-        {organization}
-        {searchQuery}
-        {sortBy}
-        {sortOrder}
-        onUpdateStatus={(member, status) => handleUpdateMemberStatus(member, status)}
-      />
+      <OrganizationMembersTable {organization} {searchQuery} {sortBy} {sortOrder} />
     </div>
   </div>
 </Modal>

@@ -55,15 +55,15 @@ class UsersStore {
     const userRecord = await UsersService.getLatestUserRecord(links[0].target);
     if (!userRecord) return null;
 
-    const statusRecord = await administrationStore.getLatestStatusForEntity(
+    const status = await administrationStore.getLatestStatusForEntity(
       links[0].target,
       AdministrationEntity.Users
     );
-    if (!statusRecord) return null;
+    if (!status) return null;
 
     this.currentUser = {
       ...decodeRecords([userRecord])[0],
-      status: decodeRecords([statusRecord])[0],
+      status: status,
       original_action_hash: links[0].target,
       previous_action_hash: userRecord.signed_action.hashed.hash
     };
@@ -114,13 +114,13 @@ class UsersStore {
     for (const link of links) {
       const user = await this.getLatestUser(link.target);
       if (user?.original_action_hash) {
-        const record = await administrationStore.getLatestStatusForEntity(
+        const status = await administrationStore.getLatestStatusForEntity(
           user.original_action_hash,
           AdministrationEntity.Users
         );
-        if (!record) continue;
+        if (!status) continue;
 
-        user.status = decodeRecords([record])[0];
+        user.status = status;
         users.push(user);
       }
     }

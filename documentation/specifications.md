@@ -14,7 +14,9 @@ This application is specifically tailored for the participants in the Holochain 
 
 - **Holochain Creators/Projects/Developers**: Individuals or groups actively involved in creating or developing projects within the Holochain ecosystem.
 - **Holochain Advocates**: Individuals passionate about the Holochain technology, looking to support projects within the ecosystem.
-- **HoloHosts**: Organizations or individuals hosting Holochain nodes, contributing to the network's infrastructure.
+
+Additionally, the application is supported by:
+- **HoloHosts**: External ecosystem agents who support the community by providing Holo hosting infrastructure for the happ. While not direct users of the application, they play a crucial role in making the application accessible to end-users through the Holo network.
 
 ## 4. Core Features
 

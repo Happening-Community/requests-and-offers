@@ -45,7 +45,7 @@
         throw new Error('Could not find status link');
       }
 
-      const currentStatus = await administrationStore.getLatestStatusForEntity(
+      const currentStatus = await administrationStore.getLatestStatusRecordForEntity(
         organization.original_action_hash,
         AdministrationEntity.Organizations
       );

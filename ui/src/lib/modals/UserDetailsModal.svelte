@@ -28,7 +28,7 @@
     async function fetchDashboardData() {
       if (!user.original_action_hash) return;
 
-      const userStatusRecord = await administrationStore.getLatestStatusForEntity(
+      const userStatusRecord = await administrationStore.getLatestStatusRecordForEntity(
         user.original_action_hash!,
         AdministrationEntity.Users
       );

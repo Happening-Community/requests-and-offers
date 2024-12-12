@@ -1,6 +1,6 @@
 import type { ActionHash, Record } from '@holochain/client';
 import { decodeRecords } from '@utils';
-import type { UIOrganization, UIUser, UIStatus } from '@/types/ui';
+import type { UIOrganization, UIUser } from '@/types/ui';
 import type { OrganizationInDHT } from '@/types/holochain';
 import { AdministrationEntity } from '@/types/holochain';
 import { OrganizationsService } from '@/services/zomes/organizations.service';
@@ -57,7 +57,7 @@ class OrganizationsStore {
         AdministrationEntity.Organizations
       );
       if (status) {
-        organization.status = decodeRecords([status])[0] as UIStatus;
+        organization.status = status;
       }
     }
 

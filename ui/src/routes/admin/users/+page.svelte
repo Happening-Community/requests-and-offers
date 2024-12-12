@@ -30,7 +30,10 @@
   });
 
   $inspect('allUsers', allUsers);
-  $inspect('usersByStatus', usersByStatus);
+  $inspect(
+    'usersStatus',
+    allUsers.map((user) => user.status)
+  );
 
   const userCategories = $derived([
     { title: 'Pending Users', users: usersByStatus.pending, titleClass: 'text-primary-400' },
@@ -52,7 +55,7 @@
     try {
       isLoading = true;
       error = null;
-      await administrationStore.fetchAllUsers();
+      await administrationStore.getAllUsers();
     } catch (e) {
       error = e instanceof Error ? e.message : 'Failed to load users';
       const t = {

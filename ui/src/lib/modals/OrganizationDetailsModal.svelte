@@ -22,7 +22,7 @@
   $effect(() => {
     if (organization) {
       administrationStore
-        .getLatestStatusForEntity(
+        .getLatestStatusRecordForEntity(
           organization.original_action_hash!,
           AdministrationEntity.Organizations
         )

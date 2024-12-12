@@ -24,7 +24,7 @@
 
   async function updateOrganizationStatuses() {
     const statusPromises = allOrganizations.map(async (organization) => {
-      const record = await administrationStore.getLatestStatusForEntity(
+      const record = await administrationStore.getLatestStatusRecordForEntity(
         organization.original_action_hash!,
         AdministrationEntity.Organizations
       );

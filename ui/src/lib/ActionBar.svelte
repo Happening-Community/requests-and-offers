@@ -29,7 +29,7 @@
 
   onMount(async () => {
     if (entity?.original_action_hash) {
-      const userStatusRecord = await administrationStore.getLatestStatusForEntity(
+      const userStatusRecord = await administrationStore.getLatestStatusRecordForEntity(
         entity.original_action_hash,
         AdministrationEntity.Users
       );
@@ -233,7 +233,7 @@
   async function updateStatus(status: StatusInDHT) {
     if (!entity?.original_action_hash || !entity.previous_action_hash) return;
 
-    const latestStatusRecord = await administrationStore.getLatestStatusForEntity(
+    const latestStatusRecord = await administrationStore.getLatestStatusRecordForEntity(
       entity.original_action_hash,
       entityType
     );
@@ -261,7 +261,7 @@
     const reason = data.get('reason');
     if (!reason || typeof reason !== 'string') return;
 
-    const latestStatus = await administrationStore.getLatestStatusForEntity(
+    const latestStatus = await administrationStore.getLatestStatusRecordForEntity(
       entity.original_action_hash,
       AdministrationEntity.Users
     );
@@ -294,7 +294,7 @@
     const suspendedDays = Number(duration);
     if (isNaN(suspendedDays)) return;
 
-    const latestStatus = await administrationStore.getLatestStatusForEntity(
+    const latestStatus = await administrationStore.getLatestStatusRecordForEntity(
       entity.original_action_hash,
       AdministrationEntity.Users
     );
