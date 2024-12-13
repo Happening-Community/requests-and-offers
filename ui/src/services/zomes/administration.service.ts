@@ -90,11 +90,13 @@ export class AdministrationService {
     return (await hc.callZome('administration', 'get_all_administrators_links', entity)) as Link[];
   }
 
-  static async getAllRevisionsForStatus(original_status_hash: ActionHash): Promise<Record[]> {
+  static async getAllRevisionsForStatus(
+    status_original_action_hash: ActionHash
+  ): Promise<Record[]> {
     return (await hc.callZome(
       'administration',
       'get_all_revisions_for_status',
-      original_status_hash
+      status_original_action_hash
     )) as Record[];
   }
 

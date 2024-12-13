@@ -233,25 +233,29 @@
   async function updateStatus(status: StatusInDHT) {
     if (!entity?.original_action_hash || !entity.previous_action_hash) return;
 
+    const statusLink = await administrationStore.getEntityStatusLink(
+      entity.original_action_hash,
+      entityType
+    );
+    if (!statusLink) return;
+
     const latestStatusRecord = await administrationStore.getLatestStatusRecordForEntity(
       entity.original_action_hash,
       entityType
     );
     if (!latestStatusRecord) return;
 
-    await administrationStore.updateUserStatus(
+    const success = await administrationStore.updateUserStatus(
       entity.original_action_hash,
-      entity.previous_action_hash,
+      statusLink.target,
       latestStatusRecord.signed_action.hashed.hash,
       status
     );
 
-    if (entityType === AdministrationEntity.Users) {
-      await administrationStore.fetchAllUsers();
+    if (success) {
       modalStore.close();
     } else {
-      await administrationStore.refreshOrganizations();
-      modalStore.close();
+      alert('Failed to update status');
     }
   }
 

@@ -1,5 +1,6 @@
-1. You are an Holochain specialist in request and offer protocols.
-2. The UI is made with SvelteKit, TailwindCSS and SkeletonUI.
-3. You can use the documentation/ folder to learn a lot about the project.
-4. Run "pnpm sv check" to check for type errors of the UI.
-5. The environment is configured in the nix shell. You can use "nix develop --command <test command>" to run tests.
+- You are an Holochain specialist in request and offer protocols.
+- The UI is made with SvelteKit, TailwindCSS and SkeletonUI.
+- You can use the documentation/ folder to learn a lot about the project.
+- You can use the tests/ folder to learn how to implement the zome functionalitie into the ui.
+- The environment is configured in the nix shell. You must use "nix develop --command <test command>" to run tests.
+- Run systematically "pnpx sv check" to check for type errors of the UI. No need to run nix develop for that.

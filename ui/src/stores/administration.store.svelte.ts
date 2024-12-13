@@ -8,7 +8,8 @@ import organizationsStore from './organizations.store.svelte';
 import hc from '@/services/HolochainClientService.svelte';
 
 class AdministrationStore {
-  allStatusesHistory: Revision[] = $state([]);
+  allUsersStatusesHistory: Revision[] = $state([]);
+  allOrganizationsStatusesHistory: Revision[] = $state([]);
   administrators: UIUser[] = $state([]);
   nonAdministrators: UIUser[] = $state([]);
   agentIsAdministrator = $state(false);
@@ -38,6 +39,12 @@ class AdministrationStore {
       const user = await usersStore.getLatestUser(link.target);
       if (!user?.original_action_hash) continue;
 
+      const statusLink = await this.getEntityStatusLink(
+        user.original_action_hash,
+        AdministrationEntity.Users
+      );
+      if (!statusLink) continue;
+
       const status = await this.getLatestStatusForEntity(
         user.original_action_hash,
         AdministrationEntity.Users
@@ -46,6 +53,7 @@ class AdministrationStore {
 
       console.log('user status', status);
 
+      status.original_action_hash = statusLink.target;
       user.status = status;
 
       users.push(user);
@@ -64,8 +72,27 @@ class AdministrationStore {
   }
 
   async fetchAllOrganizations() {
-    this.allOrganizations = await organizationsStore.getAllOrganizations();
-    return this.allOrganizations;
+    const organizations = await organizationsStore.getAllOrganizations();
+    for (const organization of organizations) {
+      if (!organization.original_action_hash) continue;
+
+      const statusLink = await this.getEntityStatusLink(
+        organization.original_action_hash,
+        AdministrationEntity.Organizations
+      );
+      if (!statusLink) continue;
+
+      const status = await this.getLatestStatusForEntity(
+        organization.original_action_hash,
+        AdministrationEntity.Organizations
+      );
+      if (!status) continue;
+
+      status.original_action_hash = statusLink.target;
+      organization.status = status;
+    }
+    this.allOrganizations = organizations;
+    return organizations;
   }
 
   // Network administrator methods
@@ -183,11 +210,10 @@ class AdministrationStore {
     const records = await AdministrationService.getAllRevisionsForStatus(original_status_hash);
     const revisions: Revision[] = [];
 
+    console.log('records', records);
+
     for (const record of records) {
       const status = decodeRecords([record])[0] as StatusInDHT;
-      const user = await usersStore.getLatestUser(original_status_hash);
-      if (!user) continue;
-
       const timestamp = Math.floor(record.signed_action.hashed.content.timestamp / 1_000);
       const revision: Revision = {
         entity: uiEntity,
@@ -251,7 +277,7 @@ class AdministrationStore {
       revisions.push(revision);
     }
 
-    this.allStatusesHistory = revisions;
+    this.allUsersStatusesHistory = revisions;
     return revisions.map((revision) => revision.status);
   }
 
@@ -260,28 +286,38 @@ class AdministrationStore {
     const revisions: Revision[] = [];
 
     for (const user of allUsers) {
-      if (!user.original_action_hash) continue;
-      const statusLink = await AdministrationService.getEntityStatusLink(
-        user.original_action_hash,
-        AdministrationEntity.Users
-      );
-      if (!statusLink) continue;
+      if (!user.original_action_hash || !user.status?.original_action_hash) continue;
 
-      const records = await AdministrationService.getAllRevisionsForStatus(statusLink.target);
-      for (const record of records) {
-        const status = decodeRecords([record])[0] as StatusInDHT;
-        const timestamp = Math.floor(record.signed_action.hashed.content.timestamp / 1_000);
-        const revision: Revision = {
-          entity: user,
-          status: this.convertToUIStatus(status, timestamp),
-          timestamp
-        };
-        revisions.push(revision);
-      }
+      const userRevisions = await this.getAllRevisionsForStatus(
+        user,
+        user.status.original_action_hash
+      );
+      console.log('revisions', userRevisions);
+
+      revisions.push(...userRevisions);
     }
 
     revisions.sort((a, b) => b.timestamp - a.timestamp);
-    this.allStatusesHistory = revisions;
+    this.allUsersStatusesHistory = revisions;
+    return revisions;
+  }
+
+  async getAllRevisionsForAllOrganizations(): Promise<Revision[]> {
+    const revisions: Revision[] = [];
+
+    for (const organization of this.allOrganizations) {
+      if (!organization.original_action_hash || !organization.status?.original_action_hash)
+        continue;
+
+      const organizationRevisions = await this.getAllRevisionsForStatus(
+        organization,
+        organization.status.original_action_hash
+      );
+      revisions.push(...organizationRevisions);
+    }
+
+    revisions.sort((a, b) => b.timestamp - a.timestamp);
+    this.allOrganizationsStatusesHistory = revisions;
     return revisions;
   }
 
@@ -324,34 +360,6 @@ class AdministrationStore {
     }
 
     return success;
-  }
-
-  async getAllRevisionsForAllOrganizations(): Promise<Revision[]> {
-    const revisions: Revision[] = [];
-
-    for (const organization of this.allOrganizations) {
-      if (!organization.original_action_hash) continue;
-      const statusLink = await AdministrationService.getEntityStatusLink(
-        organization.original_action_hash,
-        AdministrationEntity.Organizations
-      );
-      if (!statusLink) continue;
-
-      const records = await AdministrationService.getAllRevisionsForStatus(statusLink.target);
-      for (const record of records) {
-        const status = decodeRecords([record])[0] as StatusInDHT;
-        const timestamp = Math.floor(record.signed_action.hashed.content.timestamp / 1_000);
-        const revision: Revision = {
-          entity: organization,
-          status: this.convertToUIStatus(status, timestamp),
-          timestamp
-        };
-        revisions.push(revision);
-      }
-    }
-
-    revisions.sort((a, b) => b.timestamp - a.timestamp);
-    return revisions;
   }
 
   // User status management methods

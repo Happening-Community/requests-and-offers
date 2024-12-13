@@ -8,6 +8,7 @@ export enum OrganizationRole {
 
 export type UIStatus = StatusInDHT & {
   duration?: number;
+  original_action_hash?: ActionHash;
 };
 
 export type Revision = {
