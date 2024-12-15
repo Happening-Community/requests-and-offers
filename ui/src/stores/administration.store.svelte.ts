@@ -358,28 +358,33 @@ class AdministrationStore {
     status_previous_action_hash: ActionHash,
     new_status: StatusInDHT
   ): Promise<boolean> {
-    const success = await AdministrationService.updateEntityStatus(
-      AdministrationEntity.Organizations,
-      entity_original_action_hash,
-      status_original_action_hash,
-      status_previous_action_hash,
-      new_status
-    );
+    try {
+      const success = await AdministrationService.updateEntityStatus(
+        AdministrationEntity.Organizations,
+        entity_original_action_hash,
+        status_original_action_hash,
+        status_previous_action_hash,
+        new_status
+      );
 
-    if (success) {
-      // Update the specific organization's status in the store
-      this.allOrganizations = this.allOrganizations.map((org) => {
-        if (org.original_action_hash?.toString() === entity_original_action_hash.toString()) {
-          return {
-            ...org,
-            status: new_status
-          };
-        }
-        return org;
-      });
+      if (success) {
+        // Update the specific organization's status in the store
+        this.allOrganizations = this.allOrganizations.map((org) => {
+          if (org.original_action_hash?.toString() === entity_original_action_hash.toString()) {
+            return {
+              ...org,
+              status: new_status
+            };
+          }
+          return org;
+        });
+      }
+
+      return success;
+    } catch (error) {
+      console.error('AdministrationStore.updateOrganizationStatus failed', error);
+      return false;
     }
-
-    return success;
   }
 
   // User status management methods

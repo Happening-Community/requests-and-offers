@@ -18,7 +18,7 @@
   const modalStore = getModalStore();
   const { administrators } = $derived(administrationStore);
   const entityType =
-    'agents' in entity ? AdministrationEntity.Users : AdministrationEntity.Organizations;
+    'user_type' in entity ? AdministrationEntity.Users : AdministrationEntity.Organizations;
 
   let suspensionDate = $state('');
   let isTheOnlyAdmin = $derived(administrators.length === 1);
@@ -33,6 +33,9 @@
       userStatus = statusRecord ? decodeRecords([statusRecord])[0] : null;
     }
   }
+
+  $inspect(entity);
+  $inspect(entityType);
 
   $effect(() => {
     loadStatusRecord();
@@ -202,14 +205,16 @@
   function updateStatus(newStatus: { status_type: string }) {
     const statusType = newStatus.status_type as StatusType;
     if (entityType === AdministrationEntity.Users) {
+      console.log('Update status for user');
       administrationStore.updateUserStatus(
         entity.original_action_hash!,
         entity.previous_action_hash!,
         entity.status?.original_action_hash!,
         { status_type: statusType }
       );
-    } else {
-      administrationStore.updateUserStatus(
+    } else if (entityType === AdministrationEntity.Organizations) {
+      console.log('Update status for organization');
+      administrationStore.updateOrganizationStatus(
         entity.original_action_hash!,
         entity.previous_action_hash!,
         entity.status?.original_action_hash!,
@@ -332,10 +337,16 @@
         Remove Admin
       </button>
     {/if}
-    <button class="btn variant-filled-warning rounded-lg" onclick={() => handlePromptModal('temporarily')}>
+    <button
+      class="btn variant-filled-warning rounded-lg"
+      onclick={() => handlePromptModal('temporarily')}
+    >
       Suspend Temporarily
     </button>
-    <button class="btn variant-filled-error rounded-lg" onclick={() => handlePromptModal('indefinitely')}>
+    <button
+      class="btn variant-filled-error rounded-lg"
+      onclick={() => handlePromptModal('indefinitely')}
+    >
       Suspend Indefinitely
     </button>
   {/if}
