@@ -36,6 +36,7 @@
 <article class="hcron-modal">
   {#if organization}
     {#if $page.url.pathname.startsWith('/admin')}
+      <!-- Admin Actions -->
       <div class="mb-6">
         <ActionBar entity={organization} />
       </div>

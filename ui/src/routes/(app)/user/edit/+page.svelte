@@ -114,13 +114,14 @@
     event.preventDefault();
 
     const data = new FormData(form);
-    const picture = (await (data.get('picture') as File).arrayBuffer()) as Uint8Array;
+    const pictureBuffer = await (data.get('picture') as File).arrayBuffer();
+    const picture = new Uint8Array(pictureBuffer);
 
     const user: UserInDHT = {
       name: data.get('name') as string,
       nickname: data.get('nickname') as string,
       bio: data.get('bio') as string,
-      picture: picture.byteLength > 0 ? new Uint8Array(picture) : currentUser?.picture,
+      picture: picture.byteLength > 0 ? picture : currentUser?.picture,
       user_type: data.get('user_type') as UserType,
       skills: data.getAll('skills') as string[],
       email: data.get('email') as string,

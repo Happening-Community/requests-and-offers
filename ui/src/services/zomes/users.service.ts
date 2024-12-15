@@ -1,5 +1,6 @@
 import type { ActionHash, AgentPubKey, Link, Record } from '@holochain/client';
 import type { UserInDHT } from '@/types/holochain';
+import { AdministrationEntity } from '@/types/holochain';
 import hc from '../HolochainClientService.svelte';
 
 export class UsersService {
@@ -44,7 +45,11 @@ export class UsersService {
   }
 
   static async getAcceptedUsersLinks(): Promise<Link[]> {
-    return (await hc.callZome('administration', 'get_accepted_entities', 'users')) as Link[];
+    return (await hc.callZome(
+      'administration',
+      'get_accepted_entities',
+      AdministrationEntity.Users
+    )) as Link[];
   }
 
   static async getAgentUser(agent: AgentPubKey): Promise<Link[]> {

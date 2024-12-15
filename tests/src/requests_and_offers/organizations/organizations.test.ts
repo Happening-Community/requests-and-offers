@@ -7,6 +7,7 @@ import { Record } from "@holochain/client";
 import { imagePathToArrayBuffer, runScenarioWithTwoAgents } from "../utils.js";
 import {
   createUser,
+  getAcceptedUsersLinks,
   getAgentUser,
   getUserStatusLink,
   sampleUser,
@@ -342,6 +343,10 @@ test("create and manage Organizations", async () => {
         alice.cells[0]
       );
       assert.lengthOf(acceptedOrganizations, 2);
+
+      // Verify that the accepted Organizations is not counted as accepted users
+      const acceptedUsers = await getAcceptedUsersLinks(alice.cells[0]);
+      assert.lengthOf(acceptedUsers, 2);
 
       // Alice add Bob as a member of the Organization
       assert.ok(

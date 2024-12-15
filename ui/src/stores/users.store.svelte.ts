@@ -109,6 +109,7 @@ class UsersStore {
 
   async getAcceptedUsers(): Promise<UIUser[]> {
     const links = await UsersService.getAcceptedUsersLinks();
+
     const users: UIUser[] = [];
 
     for (const link of links) {

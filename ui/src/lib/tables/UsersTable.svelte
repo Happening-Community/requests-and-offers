@@ -60,7 +60,11 @@
             </td>
             <td>{user.name}</td>
             <td>
-              {user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1)}
+              {#if user.user_type}
+                {user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1)}
+              {:else}
+                <span class="text-surface-500">Unknown</span>
+              {/if}
             </td>
             {#if user.remaining_time}
               <td class="text-center">

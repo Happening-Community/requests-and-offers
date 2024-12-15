@@ -105,12 +105,13 @@
     error = null;
 
     const data = new FormData(event.target as HTMLFormElement);
-    const logo = (await (data.get('logo') as File).arrayBuffer()) as Uint8Array;
+    const logoBuffer = await (data.get('logo') as File).arrayBuffer();
+    const logo = new Uint8Array(logoBuffer);
 
     const organization: OrganizationInDHT = {
       name: data.get('name') as string,
       description: data.get('description') as string,
-      logo: logo.byteLength > 0 ? new Uint8Array(logo) : undefined,
+      logo: logo.byteLength > 0 ? logo : undefined,
       email: data.get('email') as string,
       urls: data.getAll('urls') as string[],
       location: data.get('location') as string

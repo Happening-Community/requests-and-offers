@@ -1,5 +1,6 @@
 import type { ActionHash, Link, Record } from '@holochain/client';
 import type { OrganizationInDHT } from '@/types/holochain';
+import { AdministrationEntity } from '@/types/holochain';
 import hc from '../HolochainClientService.svelte';
 
 export class OrganizationsService {
@@ -111,7 +112,7 @@ export class OrganizationsService {
     return (await hc.callZome(
       'administration',
       'get_accepted_entities',
-      'organizations'
+      AdministrationEntity.Organizations
     )) as Link[];
   }
 
