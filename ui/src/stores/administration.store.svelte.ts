@@ -6,6 +6,7 @@ import { AdministrationService } from '@/services/zomes/administration.service';
 import usersStore from './users.store.svelte';
 import organizationsStore from './organizations.store.svelte';
 import hc from '@/services/HolochainClientService.svelte';
+import { OrganizationsService } from '@/services/zomes/organizations.service';
 
 class AdministrationStore {
   allUsersStatusesHistory: Revision[] = $state([]);
@@ -32,67 +33,90 @@ class AdministrationStore {
   }
 
   async getAllUsers(): Promise<UIUser[]> {
-    const links = await AdministrationService.getAllUsersLinks();
-    const users: UIUser[] = [];
+    try {
+      const links = await AdministrationService.getAllUsersLinks();
+      const users: UIUser[] = [];
 
-    for (const link of links) {
-      const user = await usersStore.getLatestUser(link.target);
-      if (!user?.original_action_hash) continue;
+      for (const link of links) {
+        const user = await usersStore.getLatestUser(link.target);
+        if (!user?.original_action_hash) continue;
 
-      const statusLink = await this.getEntityStatusLink(
-        user.original_action_hash,
-        AdministrationEntity.Users
-      );
-      if (!statusLink) continue;
+        const statusLink = await this.getEntityStatusLink(
+          user.original_action_hash,
+          AdministrationEntity.Users
+        );
+        if (!statusLink) continue;
 
-      const status = await this.getLatestStatusForEntity(
-        user.original_action_hash,
-        AdministrationEntity.Users
-      );
-      if (!status) continue;
+        const status = await this.getLatestStatusForEntity(
+          user.original_action_hash,
+          AdministrationEntity.Users
+        );
+        if (!status) continue;
 
-      console.log('user status', status);
+        status.original_action_hash = statusLink.target;
+        user.status = status;
+        users.push(user);
+      }
 
-      status.original_action_hash = statusLink.target;
-      user.status = status;
-
-      users.push(user);
+      return users;
+    } catch (error) {
+      console.error('Error in getAllUsers:', error);
+      throw error;
     }
-
-    this.allUsers = users;
-
-    return users;
   }
 
   async fetchAllUsers() {
-    this.allUsers = await this.getAllUsers();
-    await this.getAllNetworkAdministrators();
+    try {
+      this.allUsers = await this.getAllUsers();
+      await this.getAllNetworkAdministrators();
+      return this.allUsers;
+    } catch (error) {
+      console.error('Error in fetchAllUsers:', error);
+      throw error;
+    }
+  }
 
-    return this.allUsers;
+  async getAllOrganizations(): Promise<UIOrganization[]> {
+    try {
+      const links = await OrganizationsService.getAllOrganizationsLinks();
+      const organizations: UIOrganization[] = [];
+
+      for (const link of links) {
+        const organization = await organizationsStore.getLatestOrganization(link.target);
+        if (!organization?.original_action_hash) continue;
+
+        const statusLink = await this.getEntityStatusLink(
+          link.target,
+          AdministrationEntity.Organizations
+        );
+        if (!statusLink) continue;
+
+        const status = await this.getLatestStatusForEntity(
+          link.target,
+          AdministrationEntity.Organizations
+        );
+        if (!status) continue;
+
+        status.original_action_hash = statusLink.target;
+        organization.status = status;
+        organizations.push(organization);
+      }
+
+      return organizations;
+    } catch (error) {
+      console.error('Error in getAllOrganizations:', error);
+      throw error;
+    }
   }
 
   async fetchAllOrganizations() {
-    const organizations = await organizationsStore.getAllOrganizations();
-    for (const organization of organizations) {
-      if (!organization.original_action_hash) continue;
-
-      const statusLink = await this.getEntityStatusLink(
-        organization.original_action_hash,
-        AdministrationEntity.Organizations
-      );
-      if (!statusLink) continue;
-
-      const status = await this.getLatestStatusForEntity(
-        organization.original_action_hash,
-        AdministrationEntity.Organizations
-      );
-      if (!status) continue;
-
-      status.original_action_hash = statusLink.target;
-      organization.status = status;
+    try {
+      this.allOrganizations = await this.getAllOrganizations();
+      return this.allOrganizations;
+    } catch (error) {
+      console.error('Error in fetchAllOrganizations:', error);
+      throw error;
     }
-    this.allOrganizations = organizations;
-    return organizations;
   }
 
   // Network administrator methods
@@ -210,8 +234,6 @@ class AdministrationStore {
     const records = await AdministrationService.getAllRevisionsForStatus(original_status_hash);
     const revisions: Revision[] = [];
 
-    console.log('records', records);
-
     for (const record of records) {
       const status = decodeRecords([record])[0] as StatusInDHT;
       const timestamp = Math.floor(record.signed_action.hashed.content.timestamp / 1_000);
@@ -235,7 +257,6 @@ class AdministrationStore {
       entity_type
     );
 
-    console.log(status);
     if (!status) return null;
 
     return this.convertToUIStatus(status);
@@ -292,7 +313,6 @@ class AdministrationStore {
         user,
         user.status.original_action_hash
       );
-      console.log('revisions', userRevisions);
 
       revisions.push(...userRevisions);
     }
@@ -369,46 +389,51 @@ class AdministrationStore {
     status_previous_action_hash: ActionHash,
     new_status: StatusInDHT
   ): Promise<boolean> {
-    const success = await AdministrationService.updateEntityStatus(
-      AdministrationEntity.Users,
-      entity_original_action_hash,
-      status_original_action_hash,
-      status_previous_action_hash,
-      new_status
-    );
+    try {
+      const success = await AdministrationService.updateEntityStatus(
+        AdministrationEntity.Users,
+        entity_original_action_hash,
+        status_original_action_hash,
+        status_previous_action_hash,
+        new_status
+      );
 
-    if (success) {
-      // Update the specific user's status in the store
-      this.allUsers = this.allUsers.map((user) => {
-        if (user.original_action_hash?.toString() === entity_original_action_hash.toString()) {
-          return {
-            ...user,
-            status: new_status
-          };
-        }
-        return user;
-      });
-
-      // Also update administrators list if the user is an administrator
-      if (
-        this.administrators.some(
-          (admin) =>
-            admin.original_action_hash?.toString() === entity_original_action_hash.toString()
-        )
-      ) {
-        this.administrators = this.administrators.map((admin) => {
-          if (admin.original_action_hash?.toString() === entity_original_action_hash.toString()) {
+      if (success) {
+        // Update the specific user's status in the store
+        this.allUsers = this.allUsers.map((user) => {
+          if (user.original_action_hash?.toString() === entity_original_action_hash.toString()) {
             return {
-              ...admin,
+              ...user,
               status: new_status
             };
           }
-          return admin;
+          return user;
         });
-      }
-    }
 
-    return success;
+        // Also update administrators list if the user is an administrator
+        if (
+          this.administrators.some(
+            (admin) =>
+              admin.original_action_hash?.toString() === entity_original_action_hash.toString()
+          )
+        ) {
+          this.administrators = this.administrators.map((admin) => {
+            if (admin.original_action_hash?.toString() === entity_original_action_hash.toString()) {
+              return {
+                ...admin,
+                status: new_status
+              };
+            }
+            return admin;
+          });
+        }
+      }
+
+      return success;
+    } catch (error) {
+      console.error('Error in updateUserStatus:', error);
+      throw error;
+    }
   }
 
   async suspendUserIndefinitely(

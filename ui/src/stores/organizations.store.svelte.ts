@@ -75,21 +75,6 @@ class OrganizationsStore {
     return organization;
   }
 
-  async getAllOrganizations(): Promise<UIOrganization[]> {
-    const links = await OrganizationsService.getAllOrganizationsLinks();
-    const organizations: UIOrganization[] = [];
-
-    for (const link of links) {
-      const organization = await this.getLatestOrganization(link.target);
-      if (organization) {
-        organizations.push(organization);
-      }
-    }
-
-    administrationStore.allOrganizations = organizations;
-    return organizations;
-  }
-
   async getOrganizationByActionHash(actionHash: ActionHash): Promise<UIOrganization | null> {
     return (
       administrationStore.allOrganizations.find(
@@ -332,7 +317,7 @@ class OrganizationsStore {
   }
 
   async refresh(): Promise<void> {
-    await this.getAllOrganizations();
+    await this.getAcceptedOrganizations();
     if (this.currentOrganization) {
       await this.refreshCurrentOrganization();
     }

@@ -1,99 +1,116 @@
 <script lang="ts">
-  import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
-  import { onMount } from 'svelte';
+  import { ConicGradient, type ConicStop, getToastStore } from '@skeletonlabs/skeleton';
   import administrationStore from '@/stores/administration.store.svelte';
-  import type { UIOrganization, UIStatus } from '@/types/ui';
-  import organizationsStore from '@/stores/organizations.store.svelte';
-  import { AdministrationEntity } from '@/types/holochain';
-  import { decodeRecords } from '@/utils';
   import OrganizationsTable from '@/lib/tables/OrganizationsTable.svelte';
 
+  const toastStore = getToastStore();
   const { allOrganizations } = $derived(administrationStore);
 
   let isLoading = $state(true);
-  let organizationsByStatus: Record<string, UIOrganization[]> = $state({
-    pending: [],
-    accepted: [],
-    rejected: []
-  });
+  let error = $state<string | null>(null);
 
   const conicStops: ConicStop[] = [
     { color: 'transparent', start: 0, end: 0 },
     { color: 'rgb(var(--color-secondary-500))', start: 75, end: 50 }
   ];
 
-  async function updateOrganizationStatuses() {
-    const statusPromises = allOrganizations.map(async (organization) => {
-      const record = await administrationStore.getLatestStatusRecordForEntity(
-        organization.original_action_hash!,
-        AdministrationEntity.Organizations
-      );
-      if (!record) return null;
-
-      const status: UIStatus = decodeRecords([record])[0];
-      return { organization, status: status.status_type };
-    });
-
-    const results = await Promise.all(statusPromises);
-
-    // Reset status arrays
-    organizationsByStatus = {
-      pending: [],
-      accepted: [],
-      rejected: []
-    };
-
-    // Group organizations by status
-    results.forEach((result) => {
-      if (!result) return;
-      const { organization, status } = result;
-      if (status in organizationsByStatus) {
-        organizationsByStatus[status].push(organization);
-      }
-    });
-  }
-
-  onMount(async () => {
-    await organizationsStore.getAllOrganizations();
-    await updateOrganizationStatuses();
-    isLoading = false;
+  // Derived stores for different organization categories
+  const organizationsByStatus = $derived({
+    pending: allOrganizations.filter((org) => org.status?.status_type === 'pending'),
+    accepted: allOrganizations.filter((org) => org.status?.status_type === 'accepted'),
+    rejected: allOrganizations.filter((org) => org.status?.status_type === 'rejected'),
+    temporarilySuspended: allOrganizations.filter(
+      (org) => org.status?.status_type === 'suspended temporarily'
+    ),
+    indefinitelySuspended: allOrganizations.filter(
+      (org) => org.status?.status_type === 'suspended indefinitely'
+    )
   });
 
-  // Update statuses when organizations change
-  $effect(() => {
-    if (allOrganizations.length > 0) {
-      updateOrganizationStatuses();
+  const organizationCategories = $derived([
+    {
+      title: 'Pending Organizations',
+      organizations: organizationsByStatus.pending,
+      titleClass: 'text-primary-400'
+    },
+    {
+      title: 'Accepted Organizations',
+      organizations: organizationsByStatus.accepted,
+      titleClass: 'text-green-600'
+    },
+    {
+      title: 'Temporarily Suspended Organizations',
+      organizations: organizationsByStatus.temporarilySuspended,
+      titleClass: 'text-orange-600'
+    },
+    {
+      title: 'Indefinitely Suspended Organizations',
+      organizations: organizationsByStatus.indefinitelySuspended,
+      titleClass: 'text-gray-600'
+    },
+    {
+      title: 'Rejected Organizations',
+      organizations: organizationsByStatus.rejected,
+      titleClass: 'text-red-600'
     }
+  ]);
+
+  async function loadOrganizations() {
+    try {
+      isLoading = true;
+      error = null;
+      await administrationStore.fetchAllOrganizations();
+      console.log('allOrganizations :', allOrganizations);
+    } catch (e) {
+      error = e instanceof Error ? e.message : 'Failed to load organizations';
+      const t = {
+        message: 'Failed to load organizations. Please try again.',
+        background: 'variant-filled-error',
+        autohide: true,
+        timeout: 5000
+      };
+      toastStore.trigger(t);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  $effect(() => {
+    loadOrganizations();
   });
 </script>
 
 <section class="flex flex-col gap-10">
-  <h1 class="h1 text-center">Organizations management</h1>
+  <h1 class="h1 text-center">Organizations Management</h1>
 
-  {#if isLoading && allOrganizations.length === 0}
-    <div class="flex justify-center">
-      <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
+  <div class="flex justify-center gap-4">
+    <a href="/admin/organizations/status-history" class="btn variant-ghost-secondary w-fit">
+      Status History
+    </a>
+    {#if !isLoading && error}
+      <button class="btn variant-filled-primary" onclick={loadOrganizations}>
+        Retry Loading
+      </button>
+    {/if}
+  </div>
+
+  {#if isLoading}
+    <div class="flex items-center justify-center gap-2">
+      <ConicGradient stops={conicStops} spin />
+      <p>Loading organizations...</p>
+    </div>
+  {:else if error}
+    <div class="alert variant-filled-error">
+      <span class="text-white">{error}</span>
     </div>
   {:else}
-    <div class="flex flex-col gap-8 lg:flex-row lg:gap-0 lg:divide-x-2">
-      <div class="flex-1 lg:pr-8">
-        <OrganizationsTable
-          organizations={organizationsByStatus.pending}
-          title="Pending Organizations"
-        />
-      </div>
-      <div class="flex-1 lg:px-8">
-        <OrganizationsTable
-          organizations={organizationsByStatus.accepted}
-          title="Accepted Organizations"
-        />
-      </div>
-      <div class="flex-1 lg:pl-8">
-        <OrganizationsTable
-          organizations={organizationsByStatus.rejected}
-          title="Rejected Organizations"
-        />
-      </div>
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
+      {#each organizationCategories as { title, organizations, titleClass }}
+        <div class="card p-4">
+          <h3 class="h4 mb-4 {titleClass}">{title}</h3>
+          <OrganizationsTable {organizations} />
+        </div>
+      {/each}
     </div>
   {/if}
 </section>
