@@ -269,7 +269,7 @@
       );
     } else {
       // Fallback to user method if organization method doesn't exist
-      await administrationStore.suspendUserIndefinitely(
+      await administrationStore.suspendOrganizationIndefinitely(
         entity.original_action_hash,
         entity.previous_action_hash,
         latestStatus.signed_action.hashed.hash,
@@ -302,7 +302,7 @@
       );
     } else {
       // Fallback to user method if organization method doesn't exist
-      await administrationStore.suspendUserTemporarily(
+      await administrationStore.suspendOrganizationTemporarily(
         entity.original_action_hash,
         entity.previous_action_hash,
         latestStatus.signed_action.hashed.hash,

@@ -28,7 +28,7 @@
 </script>
 
 <section class="container mx-auto p-4">
-  <h1 class="h1 mb-6 text-center">Admin Requests</h1>
+  <h1 class="h1 mb-6 text-center">Requests Management</h1>
 
   {#if error}
     <div class="alert variant-filled-error mb-4">

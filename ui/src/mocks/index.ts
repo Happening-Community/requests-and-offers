@@ -1,6 +1,5 @@
 import { SimpleFaker, faker } from '@faker-js/faker';
 import { fetchImageAndConvertToUInt8Array, getRandomNumber } from '@utils';
-import type { Project } from '@stores/projects.svelte';
 import type { OrganizationInDHT, UserInDHT, UserType } from '@/types/holochain';
 
 export async function createMockedUsers(count: number = 1): Promise<UserInDHT[]> {
@@ -44,21 +43,4 @@ export async function createMockedOrganizations(count: number = 1): Promise<Orga
   }
 
   return organizations;
-}
-
-export async function createMockedProjects(count: number = 1): Promise<Project[]> {
-  const projects: Project[] = [];
-
-  for (let i = 0; i < count; i++) {
-    projects.push({
-      name: faker.company.name(),
-      description: faker.company.catchPhrase(),
-      picture: await fetchImageAndConvertToUInt8Array('https://picsum.photos/200/300'),
-      status: 'pending',
-      team_members: [],
-      admins: []
-    });
-  }
-
-  return projects;
 }

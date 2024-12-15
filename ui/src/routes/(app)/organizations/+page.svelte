@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import OrganizationsTable from '@/lib/tables/OrganizationsTable.svelte';
   import usersStore from '@/stores/users.store.svelte';
   import type { UIOrganization } from '@/types/ui';
   import { Avatar, ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
@@ -38,7 +39,9 @@
     }
   }
 
-  onMount(fetchOrganizationsData);
+  $effect(() => {
+    fetchOrganizationsData();
+  });
 
   function handleCreateOrganization() {
     if (!currentUser) {
@@ -74,29 +77,6 @@
   {#if isLoading}
     <ConicGradient stops={conicStops} spin>Loading</ConicGradient>
   {:else if !error && acceptedOrganizations.length}
-    <table class="table">
-      <thead>
-        <tr>
-          <th class="text-center">Logo</th>
-          <th class="text-center">Name</th>
-          <th class="text-center">Description</th>
-          <th class="text-center"># Members</th>
-          <th class="text-center">Email</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each acceptedOrganizations as organization}
-          <tr>
-            <td class="text-center">
-              <Avatar src={getOrganizationLogo(organization)} />
-            </td>
-            <td class="text-center">{organization.name}</td>
-            <td class="text-center">{organization.description}</td>
-            <td class="text-center">{organization.members.length}</td>
-            <td class="text-center">{organization.email}</td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
+    <OrganizationsTable organizations={acceptedOrganizations} />
   {/if}
 </section>

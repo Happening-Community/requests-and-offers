@@ -358,33 +358,65 @@ class AdministrationStore {
     status_previous_action_hash: ActionHash,
     new_status: StatusInDHT
   ): Promise<boolean> {
-    try {
-      const success = await AdministrationService.updateEntityStatus(
-        AdministrationEntity.Organizations,
-        entity_original_action_hash,
-        status_original_action_hash,
-        status_previous_action_hash,
-        new_status
-      );
+    const success = await AdministrationService.updateEntityStatus(
+      AdministrationEntity.Organizations,
+      entity_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
+      new_status
+    );
 
-      if (success) {
-        // Update the specific organization's status in the store
-        this.allOrganizations = this.allOrganizations.map((org) => {
-          if (org.original_action_hash?.toString() === entity_original_action_hash.toString()) {
-            return {
-              ...org,
-              status: new_status
-            };
-          }
-          return org;
-        });
-      }
-
-      return success;
-    } catch (error) {
-      console.error('AdministrationStore.updateOrganizationStatus failed', error);
-      return false;
+    if (success) {
+      // Update the specific organization's status in the store
+      this.allOrganizations = this.allOrganizations.map((org) => {
+        if (org.original_action_hash?.toString() === entity_original_action_hash.toString()) {
+          return {
+            ...org,
+            status: new_status
+          };
+        }
+        return org;
+      });
     }
+
+    return success;
+  }
+
+  async suspendOrganizationIndefinitely(
+    entity_original_action_hash: ActionHash,
+    status_original_action_hash: ActionHash,
+    status_previous_action_hash: ActionHash,
+    reason: string
+  ): Promise<boolean> {
+    return await this.updateOrganizationStatus(
+      entity_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
+      {
+        status_type: 'suspended indefinitely',
+        reason
+      }
+    );
+  }
+
+  async suspendOrganizationTemporarily(
+    entity_original_action_hash: ActionHash,
+    status_original_action_hash: ActionHash,
+    status_previous_action_hash: ActionHash,
+    reason: string,
+    duration_in_days: number
+  ): Promise<boolean> {
+    const suspended_until = Date.now() + duration_in_days * 24 * 60 * 60 * 1000;
+    return await this.updateOrganizationStatus(
+      entity_original_action_hash,
+      status_original_action_hash,
+      status_previous_action_hash,
+      {
+        status_type: 'suspended temporarily',
+        reason,
+        suspended_until: suspended_until.toString()
+      }
+    );
   }
 
   // User status management methods

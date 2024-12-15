@@ -2,7 +2,6 @@
   import { onMount } from 'svelte';
   import type { UIOrganization, UIUser } from '@/types/ui';
   import administrationStore from '@/stores/administration.store.svelte';
-  import projectsStore, { type Project } from '@/stores/projects.svelte';
   import { ConicGradient, type ConicStop, getToastStore } from '@skeletonlabs/skeleton';
 
   const toastStore = getToastStore();
@@ -13,7 +12,7 @@
     data: {
       administrators: [] as UIUser[],
       pendingUsers: [] as UIUser[],
-      pendingProjects: [] as Project[],
+      pendingProjects: [] as any[],
       pendingOrganizations: [] as UIOrganization[]
     }
   });
@@ -60,20 +59,7 @@
         }
       }
 
-      // Fetch pending projects separately since they're not part of initialize
-      try {
-        dashboardState.data.pendingProjects = projectsStore.projects.filter(
-          (project) => project.status === 'pending'
-        );
-      } catch (e) {
-        console.error('Error fetching pending projects:', e);
-        toastStore.trigger({
-          message: 'Failed to load pending projects. Some data may be incomplete.',
-          background: 'variant-filled-warning',
-          autohide: true,
-          timeout: 5000
-        });
-      }
+      dashboardState.data.pendingProjects = [];
     } catch (e) {
       dashboardState.error = e instanceof Error ? e.message : 'Failed to load dashboard data';
       toastStore.trigger({

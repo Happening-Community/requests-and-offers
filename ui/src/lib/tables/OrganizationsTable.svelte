@@ -1,7 +1,10 @@
 <script lang="ts">
   import { Avatar, getModalStore, type ModalComponent } from '@skeletonlabs/skeleton';
-  import type { UIOrganization, UIStatus } from '@/types/ui';
+  import type { UIOrganization } from '@/types/ui';
   import OrganizationDetailsModal from '@/lib/modals/OrganizationDetailsModal.svelte';
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+  import { encodeHashToBase64 } from '@holochain/client';
 
   type Props = {
     organizations: UIOrganization[];
@@ -13,19 +16,17 @@
   const modalStore = getModalStore();
   const modalComponent: ModalComponent = { ref: OrganizationDetailsModal };
 
-  function handleViewOrganization(organization: UIOrganization) {
-    modalStore.trigger({
-      type: 'component',
-      component: modalComponent,
-      meta: { organization }
-    });
-  }
-
-  function formatRemainingTime(status?: UIStatus) {
-    if (status?.status_type === 'suspended temporarily') {
-      return 'Temporarily Suspended';
+  function handleOrganizationAction(organization: UIOrganization) {
+    if ($page.url.pathname.startsWith('/admin')) {
+      modalStore.trigger({
+        type: 'component',
+        component: modalComponent,
+        meta: { organization }
+      });
+    } else {
+      console.log('organization:', organization);
+      goto(`/organizations/${encodeHashToBase64(organization.original_action_hash!)}`);
     }
-    return '';
   }
 </script>
 
@@ -37,11 +38,11 @@
     <table class="table-hover table drop-shadow-lg">
       <thead>
         <tr>
-          <th>Avatar</th>
+          <th>Logo</th>
           <th>Name</th>
-          {#if organizations[0].status?.status_type === 'suspended temporarily'}
-            <th>Suspension</th>
-          {/if}
+          <th>Description</th>
+          <th>Members</th>
+          <th>Email</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -56,19 +57,15 @@
               />
             </td>
             <td>{organization.name}</td>
-            {#if organizations[0].status?.status_type === 'suspended temporarily'}
-              <td>
-                <span class="text-surface-500 text-sm">
-                  {formatRemainingTime(organization.status) || 'Indefinite'}
-                </span>
-              </td>
-            {/if}
+            <td class="max-w-md truncate">{organization.description}</td>
+            <td class="text-center">{organization.members.length}</td>
+            <td>{organization.email || 'N/A'}</td>
             <td>
               <button
                 class="btn variant-filled-secondary"
-                onclick={() => handleViewOrganization(organization)}
+                onclick={() => handleOrganizationAction(organization)}
               >
-                View
+                {$page.url.pathname.startsWith('/admin') ? 'View' : 'Details'}
               </button>
             </td>
           </tr>
