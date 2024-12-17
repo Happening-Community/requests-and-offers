@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
-  import type { UIOrganization } from '@/types/ui';
+  import type { Revision, UIOrganization } from '@/types/ui';
   import organizationsStore from '@/stores/organizations.store.svelte';
   import { decodeHashFromBase64, type ActionHash } from '@holochain/client';
   import type { StatusInDHT } from '@/types/holochain';
@@ -11,6 +11,8 @@
   import usersStore from '@/stores/users.store.svelte';
   import OrganizationMembersTable from '@/lib/tables/OrganizationMembersTable.svelte';
   import OrganizationCoordinatorsTable from '@/lib/tables/OrganizationCoordinatorsTable.svelte';
+  import StatusHistoryModal from '@/lib/modals/StatusHistoryModal.svelte';
+  import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
 
   const modalStore = getModalStore();
   const toastStore = getToastStore();
@@ -30,6 +32,16 @@
   let coordinatorSortOrder = $state<'asc' | 'desc'>('asc');
 
   const isAdmin = $derived(administrationStore.agentIsAdministrator);
+
+  const statusHistoryModalComponent: ModalComponent = { ref: StatusHistoryModal };
+  const statusHistoryModal = (statusHistory: Revision[]): ModalSettings => ({
+    type: 'component',
+    component: statusHistoryModalComponent,
+    meta: {
+      statusHistory,
+      title: 'Organization Status History'
+    }
+  });
 
   async function handleUpdateOrganizationStatus(status: StatusInDHT) {
     if (!organization?.original_action_hash || !isAdmin) return;
@@ -139,6 +151,32 @@
       loadOrganization();
     }
   });
+
+  async function handleStatusHistoryModal() {
+    try {
+      const statusLink = await administrationStore.getEntityStatusLink(
+        organization!.original_action_hash!,
+        AdministrationEntity.Organizations
+      );
+      if (!statusLink) return;
+
+      const statusHistory = await administrationStore.getAllRevisionsForStatus(
+        organization!,
+        statusLink.target
+      );
+
+      console.log('statusHistory:', statusHistory);
+
+      modalStore.trigger(statusHistoryModal(statusHistory));
+      modalStore.update((modals) => modals.reverse());
+    } catch (err) {
+      console.error('Failed to fetch status history:', err);
+      toastStore.trigger({
+        message: 'Failed to load status history',
+        background: 'variant-filled-error'
+      });
+    }
+  }
 </script>
 
 <section class="flex flex-col items-center">
@@ -178,6 +216,33 @@
             </div>
           </div>
           <p class="text-lg">{organization.description}</p>
+          <div class="mt-4 flex flex-col gap-2">
+            <h3 class="h3 text-wrap">
+              <b>Status :</b>
+              <span
+                class:text-primary-500={organization.status?.status_type === 'pending'}
+                class:text-error-500={organization.status?.status_type === 'rejected' ||
+                  organization.status?.status_type === 'suspended indefinitely'}
+                class:text-green-400={organization.status?.status_type === 'accepted'}
+                class:text-warning-500={organization.status?.status_type ===
+                  `suspended temporarily`}
+              >
+                {organization.status?.status_type || 'pending'}
+              </span>
+            </h3>
+            {#if organization?.status?.status_type && organization.status.status_type.startsWith('suspended')}
+              <p class="text-wrap"><b>Reason :</b> {organization.status.reason}</p>
+              {#if organization.status.suspended_until}
+                <p class="text-wrap">
+                  <b>Suspended until :</b>
+                  {new Date(organization.status.suspended_until).toLocaleString()}
+                </p>
+              {/if}
+            {/if}
+            <button class="btn variant-filled-secondary w-fit" onclick={handleStatusHistoryModal}>
+              Status History
+            </button>
+          </div>
         </div>
       </header>
 
@@ -203,7 +268,7 @@
 
     <!-- Members Section -->
     <div class="card mt-6 w-full p-6">
-      <div class="mb-4 flex items-center gap-4">
+      <div class="mb-4 flex items-center justify-between gap-4">
         <div class="input-group input-group-divider w-full max-w-sm grid-cols-[auto_1fr_auto]">
           <div class="input-group-shim">🔍</div>
           <input
@@ -213,6 +278,9 @@
             class="border-0 bg-transparent ring-0 focus:ring-0"
           />
         </div>
+        {#if agentIsCoordinator && organization?.status?.status_type === 'accepted'}
+          <button class="btn variant-filled-primary">Add Member</button>
+        {/if}
       </div>
       <OrganizationMembersTable
         {organization}
@@ -225,7 +293,7 @@
 
     <!-- Coordinators Section -->
     <div class="card mt-6 w-full p-6">
-      <div class="mb-4 flex items-center gap-4">
+      <div class="mb-4 flex items-center justify-between gap-4">
         <div class="input-group input-group-divider w-full max-w-sm grid-cols-[auto_1fr_auto]">
           <div class="input-group-shim">🔍</div>
           <input
@@ -235,6 +303,9 @@
             class="border-0 bg-transparent ring-0 focus:ring-0"
           />
         </div>
+        {#if agentIsCoordinator && organization?.status?.status_type === 'accepted'}
+          <button class="btn variant-filled-primary">Add Coordinator</button>
+        {/if}
       </div>
       <OrganizationCoordinatorsTable
         {organization}

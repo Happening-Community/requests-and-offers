@@ -113,7 +113,7 @@
       description: data.get('description') as string,
       logo: logo.byteLength > 0 ? logo : undefined,
       email: data.get('email') as string,
-      urls: data.getAll('urls') as string[],
+      urls: (data.get('urls') as string).split(',').map(url => url.trim()),
       location: data.get('location') as string
     };
 
@@ -181,23 +181,8 @@
     <legend class="border-surface-500 flex flex-col gap-2 rounded-lg border-2 p-4">
       <p class="label text-lg font-bold">URLs</p>
       <label class="label text-lg">
-        Website :
-        <input type="text" class="input" name="urls" />
-      </label>
-
-      <label class="label text-lg">
-        X :
-        <input type="text" class="input" name="urls" />
-      </label>
-
-      <label class="label text-lg">
-        GitHub :
-        <input type="text" class="input" name="urls" />
-      </label>
-
-      <label class="label text-lg">
-        Other :
-        <input type="text" class="input" name="urls" />
+        <span>URLs (comma-separated)</span>
+        <input type="text" class="input" name="urls" placeholder="website, x, github, other..." />
       </label>
     </legend>
 

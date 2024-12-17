@@ -30,7 +30,7 @@ class OrganizationsStore {
 
   async getLatestOrganization(original_action_hash: ActionHash): Promise<UIOrganization | null> {
     const record = await OrganizationsService.getLatestOrganizationRecord(original_action_hash);
-    if (!record) return null;
+    if (!record) throw new Error('Organization not found');
 
     const organization: UIOrganization = {
       ...decodeRecords([record])[0],
@@ -50,16 +50,15 @@ class OrganizationsStore {
     organization.coordinators = coordinatorsLinks.map((link) => link.target);
 
     // Get organization status
-    const statusLink = await this.getOrganizationStatusLink(original_action_hash);
-    if (statusLink) {
-      const status = await administrationStore.getLatestStatusForEntity(
-        statusLink.target,
-        AdministrationEntity.Organizations
-      );
-      if (status) {
-        organization.status = status;
-      }
+    const status = await administrationStore.getLatestStatusForEntity(
+      original_action_hash,
+      AdministrationEntity.Organizations
+    );
+    if (!status) {
+      throw new Error('Organization status not found');
     }
+
+    organization.status = status;
 
     // Update in-memory cache
     administrationStore.allOrganizations = administrationStore.allOrganizations.map((org) =>

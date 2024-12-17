@@ -45,6 +45,13 @@
     );
   }
 
+  // Get user picture URL
+  function getUserPictureUrl(user: UIUser): string {
+    return user?.picture
+      ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
+      : '/default_avatar.webp';
+  }
+
   const displayCoordinators = $derived(getSortedAndFilteredCoordinators());
   const modalStore = getModalStore();
   const toastStore = getToastStore();
@@ -148,7 +155,7 @@
           {#each displayCoordinators as coordinator (coordinator.original_action_hash)}
             <tr>
               <td class="flex items-center gap-2">
-                <Avatar initials={coordinator.name.slice(0, 2)} />
+                <Avatar src={getUserPictureUrl(coordinator)} width="w-12" />
                 <span>{coordinator.name}</span>
               </td>
               <td>

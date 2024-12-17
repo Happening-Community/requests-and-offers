@@ -77,6 +77,13 @@
     return sorted.filter((member) => member.name.toLowerCase().includes(searchQuery.toLowerCase()));
   }
 
+  // Get user picture URL
+  function getUserPictureUrl(user: UIUser): string {
+    return user?.picture
+      ? URL.createObjectURL(new Blob([new Uint8Array(user.picture)]))
+      : '/default_avatar.webp';
+  }
+
   const displayMembers = $derived(getSortedAndFilteredMembers());
 
   async function loadMembers() {
@@ -130,7 +137,7 @@
           {#each displayMembers as member (member.original_action_hash)}
             <tr>
               <td class="flex items-center gap-2">
-                <Avatar initials={member.name.slice(0, 2)} />
+                <Avatar src={getUserPictureUrl(member)} width="w-12" />
                 <span>{member.name}</span>
               </td>
               <td>
