@@ -25,7 +25,12 @@
     { color: 'rgb(var(--color-secondary-500))', start: 75, end: 50 }
   ];
 
-  onMount(async () => {
+  function compareUint8Arrays(a: Uint8Array, b: Uint8Array): boolean {
+    if (a.length !== b.length) return false;
+    return a.every((val, i) => val === b[i]);
+  }
+
+  async function loadUsers() {
     try {
       await usersStore.getAcceptedUsers();
 
@@ -36,7 +41,10 @@
 
       // Filter out existing members
       filteredUsers = users.filter(
-        (user) => !existingMemberHashes.includes(user.original_action_hash!)
+        (user) =>
+          !existingMemberHashes.some((memberLink) =>
+            compareUint8Arrays(memberLink.target, user.original_action_hash!)
+          )
       );
     } catch (error) {
       toastStore.trigger({
@@ -46,6 +54,10 @@
     } finally {
       isLoading = false;
     }
+  }
+
+  $effect(() => {
+    loadUsers();
   });
 
   const addMemberConfirmationModalMeta: ConfirmModalMeta = {
@@ -58,24 +70,42 @@
   const confirmModalComponent: any = { ref: ConfirmModal };
 
   async function handleSearch() {
-    // Get existing members
-    const existingMemberHashes = await organizationsStore.getOrganizationMembers(
-      organization.original_action_hash!
+    try {
+      // Get existing members
+      const existingMemberHashes = await organizationsStore.getOrganizationMembers(
+        organization.original_action_hash!
+      );
+
+      // Filter users
+      filteredUsers = users.filter((user) => {
+        const isNotMember = !existingMemberHashes.some((memberLink) =>
+          compareUint8Arrays(memberLink.target, user.original_action_hash!)
+        );
+        const matchesSearch =
+          user.name.toLowerCase().includes(searchInput.toLowerCase()) ||
+          user.email.toLowerCase().includes(searchInput.toLowerCase());
+
+        return isNotMember && matchesSearch;
+      });
+    } catch (error) {
+      console.error('Error in handleSearch:', error);
+      filteredUsers = [];
+    }
+  }
+
+  async function handleAddMember(user: UIUser) {
+    if (!organization?.original_action_hash || !user.original_action_hash) return;
+
+    await organizationsStore.addMember(
+      organization.original_action_hash,
+      user.original_action_hash
     );
 
-    // Get coordinators
-    const coordinatorHashes = await organizationsStore.getOrganizationCoordinators(
-      organization.original_action_hash!
-    );
-
-    // Filter users
-    filteredUsers = users.filter(
-      (user) =>
-        !existingMemberHashes.includes(user.original_action_hash!) &&
-        !coordinatorHashes.includes(user.original_action_hash!) &&
-        (user.name.toLowerCase().includes(searchInput.toLowerCase()) ||
-          user.email.toLowerCase().includes(searchInput.toLowerCase()))
-    );
+    toastStore.trigger({
+      message: 'Member added successfully',
+      background: 'variant-filled-success'
+    });
+    modalStore.close();
   }
 
   const confirmModal = (meta: ConfirmModalMeta, user: UIUser): any => {
@@ -88,19 +118,7 @@
 
         isProcessing = true;
         try {
-          if (!organization?.original_action_hash || !user.original_action_hash) return;
-
-          // Add member to organization
-          await organizationsStore.addMember(
-            organization.original_action_hash,
-            user.original_action_hash
-          );
-
-          toastStore.trigger({
-            message: 'Member added successfully',
-            background: 'variant-filled-success'
-          });
-          modalStore.close();
+          await handleAddMember(user);
         } catch (error) {
           toastStore.trigger({
             message: 'Failed to add member. Please try again.',

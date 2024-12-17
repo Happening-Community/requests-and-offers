@@ -62,11 +62,11 @@ export class OrganizationsService {
 
   static async addOrganizationMember(
     organization_original_action_hash: ActionHash,
-    member_original_action_hash: ActionHash
+    user_original_action_hash: ActionHash
   ): Promise<boolean> {
-    return (await hc.callZome('users_organizations', 'add_organization_member', {
+    return (await hc.callZome('users_organizations', 'add_member_to_organization', {
       organization_original_action_hash,
-      member_original_action_hash
+      user_original_action_hash
     })) as boolean;
   }
 

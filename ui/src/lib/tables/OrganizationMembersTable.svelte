@@ -2,6 +2,7 @@
   import { Avatar } from '@skeletonlabs/skeleton';
   import type { UIOrganization, UIUser } from '@/types/ui';
   import organizationsStore from '@/stores/organizations.store.svelte';
+  import usersStore from '@/stores/users.store.svelte';
 
   type Props = {
     title?: string;
@@ -29,13 +30,20 @@
   function getSortedAndFilteredMembers() {
     if (members.length === 0) return [];
 
+    console.log('Organization Members:', members);
+    console.log('Organization coordinators:', organization.coordinators);
+
     // First, sort the members
     let sorted = [...members].sort((a, b) => {
       if (sortBy === 'name') {
         return sortOrder === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
       } else if (sortBy === 'role') {
-        const aIsCoordinator = organization.coordinators.includes(a.original_action_hash!);
-        const bIsCoordinator = organization.coordinators.includes(b.original_action_hash!);
+        const aIsCoordinator = organization.coordinators.some((coordinatorHash) =>
+          compareUint8Arrays(coordinatorHash, a.original_action_hash!)
+        );
+        const bIsCoordinator = organization.coordinators.some((coordinatorHash) =>
+          compareUint8Arrays(coordinatorHash, b.original_action_hash!)
+        );
         return sortOrder === 'asc'
           ? aIsCoordinator === bIsCoordinator
             ? 0
@@ -58,25 +66,34 @@
     });
 
     // Then filter by search query and member-only
-
     if (memberOnly) {
       sorted = sorted.filter((member) =>
-        organization.coordinators.includes(member.original_action_hash!)
+        !organization.coordinators.some((coordinatorHash) =>
+          compareUint8Arrays(coordinatorHash, member.original_action_hash!)
+        )
       );
     }
 
     console.log(
-      'Organization Members:',
+      'Organization Members after filtering:',
       sorted.map((member) => ({
         name: member.name,
         role: member.role,
-        status: member.status?.status_type
+        status: member.status?.status_type,
+        isCoordinator: organization.coordinators.some((coordinatorHash) =>
+          compareUint8Arrays(coordinatorHash, member.original_action_hash!)
+        )
       }))
     );
 
     if (!searchQuery) return sorted;
 
     return sorted.filter((member) => member.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }
+
+  function compareUint8Arrays(a: Uint8Array, b: Uint8Array): boolean {
+    if (a.length !== b.length) return false;
+    return a.every((val, i) => val === b[i]);
   }
 
   // Get user picture URL
@@ -95,7 +112,10 @@
     error = null;
     try {
       if (!organization.original_action_hash) return;
-      members = await organizationsStore.getMemberUsers(organization);
+      const membersLinks = await organizationsStore.getOrganizationMembers(
+        organization.original_action_hash
+      );
+      members = await usersStore.getUsersByActionHashes(membersLinks.map((link) => link.target));
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to load members';
       console.error(error);
@@ -104,7 +124,7 @@
     }
   }
 
-  // Reactive statement to load members when organization changes
+  // Reactive statement to load members when organization or its members change
   $effect(() => {
     loadMembers();
   });

@@ -139,16 +139,16 @@
     }
   }
 
-  $effect(() => {
-    async function isCoordinator() {
-      if (!organization?.original_action_hash || !usersStore.currentUser?.original_action_hash)
-        return;
-      agentIsCoordinator = await organizationsStore.isOrganizationCoordinator(
-        organization.original_action_hash,
-        usersStore.currentUser.original_action_hash
-      );
-    }
+  async function isCoordinator() {
+    if (!organization?.original_action_hash || !usersStore.currentUser?.original_action_hash)
+      return;
+    agentIsCoordinator = await organizationsStore.isOrganizationCoordinator(
+      organization.original_action_hash,
+      usersStore.currentUser.original_action_hash
+    );
+  }
 
+  $effect(() => {
     isCoordinator();
   });
 

@@ -1,4 +1,4 @@
-import type { ActionHash, Record } from '@holochain/client';
+import type { ActionHash, Link, Record } from '@holochain/client';
 import { decodeRecords } from '@utils';
 import type { UIOrganization, UIUser } from '@/types/ui';
 import type { OrganizationInDHT } from '@/types/holochain';
@@ -306,20 +306,18 @@ class OrganizationsStore {
     return OrganizationsService.isOrganizationCoordinator(orgHash, userHash);
   }
 
-  async getOrganizationMembers(organizationHash: ActionHash) {
+  async getOrganizationMembers(organizationHash: ActionHash): Promise<Link[]> {
     try {
-      const membersLinks = await OrganizationsService.getOrganizationMembersLinks(organizationHash);
-      return membersLinks.map((link) => link.target);
+      return await OrganizationsService.getOrganizationMembersLinks(organizationHash);
     } catch (error) {
       console.error('Failed to get organization members:', error);
       return [];
     }
   }
 
-  async getOrganizationCoordinators(organizationHash: ActionHash) {
+  async getOrganizationCoordinators(organizationHash: ActionHash): Promise<Link[]> {
     try {
-      const coordinatorsLinks = await OrganizationsService.getOrganizationCoordinatorsLinks(organizationHash);
-      return coordinatorsLinks.map((link) => link.target);
+      return await OrganizationsService.getOrganizationCoordinatorsLinks(organizationHash);
     } catch (error) {
       console.error('Failed to get organization coordinators:', error);
       return [];
