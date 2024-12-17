@@ -68,7 +68,13 @@
     loading = true;
     error = null;
     try {
-      coordinators = await organizationsStore.getCoordinatorUsers(organization);
+      if (!organization.original_action_hash) return;
+      const coordinatorsLinks = await organizationsStore.getOrganizationCoordinators(
+        organization.original_action_hash
+      );
+      coordinators = await usersStore.getUsersByActionHashes(
+        coordinatorsLinks.map((link) => link.target)
+      );
 
       // Check if current agent is a coordinator
       agentIsCoordinator = coordinators.some(

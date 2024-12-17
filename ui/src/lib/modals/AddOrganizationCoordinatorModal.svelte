@@ -6,7 +6,6 @@
   import usersStore from '@/stores/users.store.svelte';
   import organizationsStore from '@/stores/organizations.store.svelte';
   import { queueAndReverseModal } from '@utils';
-  import { onMount } from 'svelte';
 
   const modalStore = getModalStore();
   const { organization } = $modalStore[0].meta as { organization: UIOrganization };
@@ -34,16 +33,16 @@
     try {
       await usersStore.getAcceptedUsers();
 
-      // Get existing members
-      const existingMemberLinks = await organizationsStore.getOrganizationMembers(
+      // Get existing coordinators
+      const existingCoordinatorLinks = await organizationsStore.getOrganizationCoordinators(
         organization.original_action_hash!
       );
 
-      // Filter out existing members
+      // Filter users
       filteredUsers = users.filter(
         (user) =>
-          !existingMemberLinks.some((memberLink) =>
-            compareUint8Arrays(memberLink.target, user.original_action_hash!)
+          !existingCoordinatorLinks.some((coordinatorLink) =>
+            compareUint8Arrays(coordinatorLink.target, user.original_action_hash!)
           )
       );
     } catch (error) {
@@ -60,9 +59,9 @@
     loadUsers();
   });
 
-  const addMemberConfirmationModalMeta: ConfirmModalMeta = {
-    id: 'confirm-add-organization-member',
-    message: 'Do you really want to add this user as a member of the organization?',
+  const addCoordinatorConfirmationModalMeta: ConfirmModalMeta = {
+    id: 'confirm-add-organization-coordinator',
+    message: 'Do you really want to add this user as a coordinator of the organization?',
     confirmLabel: 'Yes',
     cancelLabel: 'No'
   };
@@ -71,21 +70,21 @@
 
   async function handleSearch() {
     try {
-      // Get existing members
-      const existingMemberLinks = await organizationsStore.getOrganizationMembers(
+      // Get existing coordinators
+      const existingCoordinatorLinks = await organizationsStore.getOrganizationCoordinators(
         organization.original_action_hash!
       );
 
       // Filter users
       filteredUsers = users.filter((user) => {
-        const isNotMember = !existingMemberLinks.some((memberLink) =>
-          compareUint8Arrays(memberLink.target, user.original_action_hash!)
+        const isNotCoordinator = !existingCoordinatorLinks.some((coordinatorLink) =>
+          compareUint8Arrays(coordinatorLink.target, user.original_action_hash!)
         );
         const matchesSearch =
           user.name.toLowerCase().includes(searchInput.toLowerCase()) ||
           user.email.toLowerCase().includes(searchInput.toLowerCase());
 
-        return isNotMember && matchesSearch;
+        return isNotCoordinator && matchesSearch;
       });
     } catch (error) {
       console.error('Error in handleSearch:', error);
@@ -93,16 +92,16 @@
     }
   }
 
-  async function handleAddMember(user: UIUser) {
+  async function handleAddCoordinator(user: UIUser) {
     if (!organization?.original_action_hash || !user.original_action_hash) return;
 
-    await organizationsStore.addMember(
+    await organizationsStore.addCoordinator(
       organization.original_action_hash,
       user.original_action_hash
     );
 
     toastStore.trigger({
-      message: 'Member added successfully',
+      message: 'Coordinator added successfully',
       background: 'variant-filled-success'
     });
     modalStore.close();
@@ -118,10 +117,10 @@
 
         isProcessing = true;
         try {
-          await handleAddMember(user);
+          await handleAddCoordinator(user);
         } catch (error) {
           toastStore.trigger({
-            message: 'Failed to add member. Please try again.',
+            message: 'Failed to add coordinator. Please try again.',
             background: 'variant-filled-error'
           });
         } finally {
@@ -134,7 +133,7 @@
 
 <article class="hcron-modal p-4">
   <header class="mb-4">
-    <h3 class="h3">Add Member to {organization.name}</h3>
+    <h3 class="h3">Add Coordinator to {organization.name}</h3>
     <div class="input-group input-group-divider mt-4 grid-cols-[auto_1fr_auto]">
       <div class="input-group-shim">🔍</div>
       <input
@@ -151,7 +150,7 @@
       <ConicGradient stops={conicStops} spin />
     </div>
   {:else if filteredUsers.length === 0}
-    <p class="text-surface-400 text-center">No users available to add as members</p>
+    <p class="text-surface-400 text-center">No users available to add as coordinators</p>
   {:else}
     <section class="space-y-4">
       {#each filteredUsers as user (user.original_action_hash)}
@@ -159,7 +158,10 @@
           type="button"
           class="card !bg-surface-700 hover:!bg-surface-600 w-full cursor-pointer p-4 text-left"
           onclick={() =>
-            queueAndReverseModal(confirmModal(addMemberConfirmationModalMeta, user), modalStore)}
+            queueAndReverseModal(
+              confirmModal(addCoordinatorConfirmationModalMeta, user),
+              modalStore
+            )}
         >
           <div class="flex items-center gap-4">
             <Avatar

@@ -13,6 +13,7 @@
   import OrganizationCoordinatorsTable from '@/lib/tables/OrganizationCoordinatorsTable.svelte';
   import StatusHistoryModal from '@/lib/modals/StatusHistoryModal.svelte';
   import AddOrganizationMemberModal from '@/lib/modals/AddOrganizationMemberModal.svelte';
+  import AddOrganizationCoordinatorModal from '@/lib/modals/AddOrganizationCoordinatorModal.svelte';
   import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
 
   const modalStore = getModalStore();
@@ -52,6 +53,15 @@
   const addMemberModal = (): ModalSettings => ({
     type: 'component',
     component: addMemberModalComponent,
+    meta: {
+      organization
+    }
+  });
+
+  const addCoordinatorModalComponent: ModalComponent = { ref: AddOrganizationCoordinatorModal };
+  const addCoordinatorModal = (): ModalSettings => ({
+    type: 'component',
+    component: addCoordinatorModalComponent,
     meta: {
       organization
     }
@@ -128,7 +138,7 @@
         throw new Error('Organization not found');
       }
 
-      if (!organization.original_action_hash) return;
+      organizationsStore.setCurrentOrganization(organization);
 
       console.log('agentIsCoordinator:', agentIsCoordinator);
     } catch (e) {
@@ -161,9 +171,7 @@
 
   // Load organization when the component mounts
   $effect(() => {
-    if (organizationHash) {
-      loadOrganization();
-    }
+    loadOrganization();
   });
 
   async function handleStatusHistoryModal() {
@@ -324,7 +332,12 @@
           />
         </div>
         {#if agentIsCoordinator && organization?.status?.status_type === 'accepted' && currentUserIsAccepted}
-          <button class="btn variant-filled-primary">Add Coordinator</button>
+          <button
+            class="btn variant-filled-primary"
+            onclick={() => modalStore.trigger(addCoordinatorModal())}
+          >
+            Add Coordinator
+          </button>
         {/if}
       </div>
       <OrganizationCoordinatorsTable
