@@ -12,6 +12,7 @@
   import OrganizationMembersTable from '@/lib/tables/OrganizationMembersTable.svelte';
   import OrganizationCoordinatorsTable from '@/lib/tables/OrganizationCoordinatorsTable.svelte';
   import StatusHistoryModal from '@/lib/modals/StatusHistoryModal.svelte';
+  import AddOrganizationMemberModal from '@/lib/modals/AddOrganizationMemberModal.svelte';
   import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton';
 
   const modalStore = getModalStore();
@@ -33,6 +34,10 @@
 
   const isAdmin = $derived(administrationStore.agentIsAdministrator);
 
+  const currentUserIsAccepted = $derived(
+    usersStore.currentUser?.status?.status_type === 'accepted'
+  );
+
   const statusHistoryModalComponent: ModalComponent = { ref: StatusHistoryModal };
   const statusHistoryModal = (statusHistory: Revision[]): ModalSettings => ({
     type: 'component',
@@ -40,6 +45,15 @@
     meta: {
       statusHistory,
       title: 'Organization Status History'
+    }
+  });
+
+  const addMemberModalComponent: ModalComponent = { ref: AddOrganizationMemberModal };
+  const addMemberModal = (): ModalSettings => ({
+    type: 'component',
+    component: addMemberModalComponent,
+    meta: {
+      organization
     }
   });
 
@@ -278,8 +292,13 @@
             class="border-0 bg-transparent ring-0 focus:ring-0"
           />
         </div>
-        {#if agentIsCoordinator && organization?.status?.status_type === 'accepted'}
-          <button class="btn variant-filled-primary">Add Member</button>
+        {#if agentIsCoordinator && organization?.status?.status_type === 'accepted' && currentUserIsAccepted}
+          <button
+            class="btn variant-filled-primary"
+            onclick={() => modalStore.trigger(addMemberModal())}
+          >
+            Add Member
+          </button>
         {/if}
       </div>
       <OrganizationMembersTable
@@ -288,6 +307,7 @@
         sortBy={memberSortBy}
         sortOrder={memberSortOrder}
         memberOnly
+        title="Members"
       />
     </div>
 
@@ -303,11 +323,12 @@
             class="border-0 bg-transparent ring-0 focus:ring-0"
           />
         </div>
-        {#if agentIsCoordinator && organization?.status?.status_type === 'accepted'}
+        {#if agentIsCoordinator && organization?.status?.status_type === 'accepted' && currentUserIsAccepted}
           <button class="btn variant-filled-primary">Add Coordinator</button>
         {/if}
       </div>
       <OrganizationCoordinatorsTable
+        title="Coordinators"
         {organization}
         searchQuery={coordinatorSearchQuery}
         sortBy={coordinatorSortBy}

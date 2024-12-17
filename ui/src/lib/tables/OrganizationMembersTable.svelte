@@ -4,6 +4,7 @@
   import organizationsStore from '@/stores/organizations.store.svelte';
 
   type Props = {
+    title?: string;
     organization: UIOrganization;
     searchQuery?: string;
     sortBy?: 'name' | 'role' | 'status';
@@ -12,6 +13,7 @@
   };
 
   const {
+    title,
     organization,
     searchQuery = '',
     sortBy = 'name',
@@ -110,7 +112,7 @@
 
 <div class="card space-y-4 p-4">
   <header class="card-header">
-    <h3 class="h3">Organization Members</h3>
+    <h3 class="h3">{title || 'Organization Members'}</h3>
   </header>
 
   {#if loading}

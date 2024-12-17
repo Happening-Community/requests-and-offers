@@ -108,52 +108,58 @@ class OrganizationsStore {
     return this.refreshOrganization(this.currentOrganization.original_action_hash);
   }
 
-  async addMember(organization: UIOrganization, memberActionHash: ActionHash): Promise<boolean> {
+  async addMember(
+    organization_original_action_hash: ActionHash,
+    memberActionHash: ActionHash
+  ): Promise<boolean> {
     const success = await OrganizationsService.addOrganizationMember(
-      organization.original_action_hash!,
+      organization_original_action_hash,
       memberActionHash
     );
     if (success) {
-      await this.refreshOrganization(organization.original_action_hash!);
+      await this.refreshOrganization(organization_original_action_hash);
     }
     return success;
   }
 
-  async removeMember(organization: UIOrganization, memberActionHash: ActionHash): Promise<boolean> {
+  async removeMember(
+    organization_original_action_hash: ActionHash,
+    memberActionHash: ActionHash
+  ): Promise<boolean> {
     const success = await OrganizationsService.removeOrganizationMember(
-      organization.original_action_hash!,
+      organization_original_action_hash,
       memberActionHash
     );
     if (success) {
-      await this.refreshOrganization(organization.original_action_hash!);
+      await this.refreshOrganization(organization_original_action_hash);
     }
     return success;
   }
 
   async addCoordinator(
-    organization: UIOrganization,
+    organization_original_action_hash: ActionHash,
     coordinatorActionHash: ActionHash
   ): Promise<boolean> {
     const success = await OrganizationsService.addOrganizationCoordinator(
-      organization.original_action_hash!,
+      organization_original_action_hash,
       coordinatorActionHash
     );
     if (success) {
-      await this.refreshOrganization(organization.original_action_hash!);
+      await this.refreshOrganization(organization_original_action_hash);
     }
     return success;
   }
 
   async removeCoordinator(
-    organization: UIOrganization,
+    organization_original_action_hash: ActionHash,
     coordinatorActionHash: ActionHash
   ): Promise<boolean> {
     const success = await OrganizationsService.removeOrganizationCoordinator(
-      organization.original_action_hash!,
+      organization_original_action_hash,
       coordinatorActionHash
     );
     if (success) {
-      await this.refreshOrganization(organization.original_action_hash!);
+      await this.refreshOrganization(organization_original_action_hash);
     }
     return success;
   }
@@ -298,6 +304,26 @@ class OrganizationsStore {
 
   async isOrganizationCoordinator(orgHash: ActionHash, userHash: ActionHash): Promise<boolean> {
     return OrganizationsService.isOrganizationCoordinator(orgHash, userHash);
+  }
+
+  async getOrganizationMembers(organizationHash: ActionHash) {
+    try {
+      const membersLinks = await OrganizationsService.getOrganizationMembersLinks(organizationHash);
+      return membersLinks.map((link) => link.target);
+    } catch (error) {
+      console.error('Failed to get organization members:', error);
+      return [];
+    }
+  }
+
+  async getOrganizationCoordinators(organizationHash: ActionHash) {
+    try {
+      const coordinatorsLinks = await OrganizationsService.getOrganizationCoordinatorsLinks(organizationHash);
+      return coordinatorsLinks.map((link) => link.target);
+    } catch (error) {
+      console.error('Failed to get organization coordinators:', error);
+      return [];
+    }
   }
 
   // Helper methods

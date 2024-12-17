@@ -2,17 +2,23 @@
   import { Avatar, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
   import type { UIOrganization, UIUser } from '@/types/ui';
   import organizationsStore from '@/stores/organizations.store.svelte';
-  import administrationStore from '@/stores/administration.store.svelte';
   import usersStore from '@/stores/users.store.svelte';
 
   type Props = {
+    title?: string;
     organization: UIOrganization;
     searchQuery?: string;
     sortBy?: 'name' | 'status';
     sortOrder?: 'asc' | 'desc';
   };
 
-  const { organization, searchQuery = '', sortBy = 'name', sortOrder = 'asc' }: Props = $props();
+  const {
+    title,
+    organization,
+    searchQuery = '',
+    sortBy = 'name',
+    sortOrder = 'asc'
+  }: Props = $props();
 
   let agentIsCoordinator = $state(false);
   let coordinators = $state<UIUser[]>([]);
@@ -106,7 +112,10 @@
       if (!confirmed) return;
 
       loading = true;
-      await organizationsStore.removeCoordinator(organization, coordinator.original_action_hash);
+      await organizationsStore.removeCoordinator(
+        organization.original_action_hash!,
+        coordinator.original_action_hash
+      );
 
       toastStore.trigger({
         message: 'Coordinator removed successfully',
@@ -128,7 +137,7 @@
 
 <div class="card space-y-4 p-4">
   <header class="card-header">
-    <h3 class="h3">Organization Coordinators</h3>
+    <h3 class="h3">{title || 'Organization Coordinators'}</h3>
   </header>
 
   {#if loading}

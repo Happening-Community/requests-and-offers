@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
   import { Modal, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
   import type { UIOrganization, UIUser } from '@/types/ui';
   import organizationsStore from '@/stores/organizations.store.svelte';
@@ -54,7 +53,7 @@
 
       if (!confirmed) return;
 
-      await organizationsStore.addMember(organization, newMemberHash);
+      await organizationsStore.addMember(organization.original_action_hash!, newMemberHash);
       newMemberHash = undefined;
 
       toastStore.trigger({
