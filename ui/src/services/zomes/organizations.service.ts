@@ -72,11 +72,11 @@ export class OrganizationsService {
 
   static async removeOrganizationMember(
     organization_original_action_hash: ActionHash,
-    member_original_action_hash: ActionHash
+    user_original_action_hash: ActionHash
   ): Promise<boolean> {
     return (await hc.callZome('users_organizations', 'remove_organization_member', {
       organization_original_action_hash,
-      member_original_action_hash
+      user_original_action_hash
     })) as boolean;
   }
 
@@ -92,11 +92,11 @@ export class OrganizationsService {
 
   static async removeOrganizationCoordinator(
     organization_original_action_hash: ActionHash,
-    coordinator_original_action_hash: ActionHash
+    user_original_action_hash: ActionHash
   ): Promise<boolean> {
     return (await hc.callZome('users_organizations', 'remove_organization_coordinator', {
       organization_original_action_hash,
-      coordinator_original_action_hash
+      user_original_action_hash
     })) as boolean;
   }
 

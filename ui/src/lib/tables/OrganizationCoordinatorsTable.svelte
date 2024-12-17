@@ -94,15 +94,7 @@
   });
 
   async function handleRemoveCoordinator(coordinator: UIUser) {
-    if (
-      !coordinator.original_action_hash ||
-      !organizationsStore.isOrganizationCoordinator(
-        organization.original_action_hash!,
-        coordinator.original_action_hash
-      ) ||
-      coordinators.length <= 1
-    )
-      return;
+    if (!coordinator.original_action_hash || !organization.original_action_hash) return;
 
     try {
       // Confirm removal
@@ -139,6 +131,19 @@
       loading = false;
     }
   }
+
+  async function isCoordinator() {
+    if (!organization?.original_action_hash || !usersStore.currentUser?.original_action_hash)
+      return;
+    agentIsCoordinator = await organizationsStore.isOrganizationCoordinator(
+      organization.original_action_hash,
+      usersStore.currentUser?.original_action_hash
+    );
+  }
+
+  $effect(() => {
+    isCoordinator();
+  });
 </script>
 
 <div class="card space-y-4 p-4">
@@ -180,11 +185,12 @@
               </td>
               <td>
                 <div class="flex gap-2">
-                  {#if agentIsCoordinator && coordinators.length > 1}
+                  {#if agentIsCoordinator}
                     <button
                       class="btn btn-sm variant-filled-error"
                       onclick={() => handleRemoveCoordinator(coordinator)}
-                      disabled={loading}
+                      disabled={loading || coordinators.length <= 1}
+                      title={`${coordinators.length <= 1 ? 'Cannot remove last coordinator' : ''}`}
                       aria-label={`Remove ${coordinator.name} as coordinator`}
                     >
                       Remove

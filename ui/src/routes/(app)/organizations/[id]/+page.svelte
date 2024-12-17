@@ -139,8 +139,6 @@
       }
 
       organizationsStore.setCurrentOrganization(organization);
-
-      console.log('agentIsCoordinator:', agentIsCoordinator);
     } catch (e) {
       error = e instanceof Error ? e.message : 'An unknown error occurred';
       organization = null;
@@ -153,8 +151,8 @@
     if (!organization?.original_action_hash || !usersStore.currentUser?.original_action_hash)
       return;
     agentIsCoordinator = await organizationsStore.isOrganizationCoordinator(
-      organization.original_action_hash,
-      usersStore.currentUser.original_action_hash
+      organizationHash,
+      usersStore.currentUser?.original_action_hash
     );
   }
 

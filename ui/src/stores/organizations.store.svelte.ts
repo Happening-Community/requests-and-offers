@@ -116,6 +116,7 @@ class OrganizationsStore {
       organization_original_action_hash,
       memberActionHash
     );
+    console.log('success', success);
     if (success) {
       await this.refreshOrganization(organization_original_action_hash);
     }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Avatar } from '@skeletonlabs/skeleton';
+  import { Avatar, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
   import type { UIOrganization, UIUser } from '@/types/ui';
   import organizationsStore from '@/stores/organizations.store.svelte';
   import usersStore from '@/stores/users.store.svelte';
@@ -22,9 +22,13 @@
     memberOnly = false
   }: Props = $props();
 
+  let agentIsCoordinator = $state(false);
   let members = $state<UIUser[]>([]);
   let loading = $state(false);
   let error = $state<string | null>(null);
+
+  const modalStore = getModalStore();
+  const toastStore = getToastStore();
 
   // Sort and filter members
   function getSortedAndFilteredMembers() {
@@ -67,10 +71,11 @@
 
     // Then filter by search query and member-only
     if (memberOnly) {
-      sorted = sorted.filter((member) =>
-        !organization.coordinators.some((coordinatorHash) =>
-          compareUint8Arrays(coordinatorHash, member.original_action_hash!)
-        )
+      sorted = sorted.filter(
+        (member) =>
+          !organization.coordinators.some((coordinatorHash) =>
+            compareUint8Arrays(coordinatorHash, member.original_action_hash!)
+          )
       );
     }
 
@@ -124,9 +129,61 @@
     }
   }
 
+  async function handleRemoveMember(member: UIUser) {
+    if (!member.original_action_hash || !organization.original_action_hash) return;
+
+    try {
+      // Confirm removal
+      const confirmed = await new Promise<boolean>((resolve) => {
+        modalStore.trigger({
+          type: 'confirm',
+          title: 'Remove Member',
+          body: `Are you sure you want to remove ${member.name} from the organization? This action cannot be undone.`,
+          response: (r: boolean) => resolve(r)
+        });
+      });
+
+      if (!confirmed) return;
+
+      loading = true;
+      await organizationsStore.removeMember(
+        organization.original_action_hash,
+        member.original_action_hash
+      );
+
+      toastStore.trigger({
+        message: 'Member removed successfully',
+        background: 'variant-filled-success'
+      });
+
+      await loadMembers();
+    } catch (e) {
+      console.error('Error removing member:', e);
+      toastStore.trigger({
+        message: 'Failed to remove member',
+        background: 'variant-filled-error'
+      });
+    } finally {
+      loading = false;
+    }
+  }
+
   // Reactive statement to load members when organization or its members change
   $effect(() => {
     loadMembers();
+  });
+
+  async function isCoordinator() {
+    if (!organization?.original_action_hash || !usersStore.currentUser?.original_action_hash)
+      return;
+    agentIsCoordinator = await organizationsStore.isOrganizationCoordinator(
+      organization.original_action_hash,
+      usersStore.currentUser?.original_action_hash
+    );
+  }
+
+  $effect(() => {
+    isCoordinator();
   });
 </script>
 
@@ -166,6 +223,18 @@
                 <span>
                   {member.user_type.charAt(0).toUpperCase() + member.user_type.slice(1)}
                 </span>
+              </td>
+              <td>
+                {#if agentIsCoordinator}
+                  <button
+                    class="btn btn-sm variant-filled-error"
+                    onclick={() => handleRemoveMember(member)}
+                    disabled={loading}
+                    aria-label={`Remove ${member.name} from organization`}
+                  >
+                    Remove
+                  </button>
+                {/if}
               </td>
             </tr>
           {/each}
