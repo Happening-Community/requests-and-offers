@@ -106,14 +106,14 @@ export class AdministrationService {
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash,
     new_status: StatusInDHT
-  ): Promise<boolean> {
+  ): Promise<Record> {
     return (await hc.callZome('administration', 'update_entity_status', {
       entity: entity_type,
       entity_original_action_hash,
       status_original_action_hash,
       status_previous_action_hash,
       new_status
-    })) as boolean;
+    })) as Record;
   }
 
   static async getLatestStatusRecordForEntity(

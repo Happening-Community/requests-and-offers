@@ -105,7 +105,7 @@ test("create a User, register administrator and remove administrator", async () 
   });
 });
 
-test("update User status", async () => {
+test.only("update User status", async () => {
   await runScenarioWithTwoAgents(async (scenario, alice, bob) => {
     let sample: User;
 
@@ -266,6 +266,12 @@ test("update User status", async () => {
     // Alice suspends Bob for 7 days
     let bobUserRecord = await getLatestUser(bob.cells[0], bobUserLink.target);
 
+    bobLatestStatusRecord = await getLatestStatusRecordForEntity(
+      bob.cells[0],
+      AdministrationEntity.Users,
+      bobUserLink.target
+    );
+
     await suspendEntityTemporarily(
       alice.cells[0],
       AdministrationEntity.Users,
@@ -298,6 +304,12 @@ test("update User status", async () => {
     // Alice try to unsuspends Bob with the unsuspendEntityIfTimePassed function
     bobUserRecord = await getLatestUser(bob.cells[0], bobUserLink.target);
 
+    bobLatestStatusRecord = await getLatestStatusRecordForEntity(
+      bob.cells[0],
+      AdministrationEntity.Users,
+      bobUserLink.target
+    );
+
     const isUnsuspended = await unsuspendEntityIfTimePassed(
       alice.cells[0],
       AdministrationEntity.Users,
@@ -309,6 +321,12 @@ test("update User status", async () => {
     assert.equal(isUnsuspended, false);
 
     // Alice unsuspends Bob again
+    bobLatestStatusRecord = await getLatestStatusRecordForEntity(
+      bob.cells[0],
+      AdministrationEntity.Users,
+      bobUserLink.target
+    );
+
     await unsuspendEntity(
       alice.cells[0],
       AdministrationEntity.Users,

@@ -53,7 +53,6 @@ class AdministrationStore {
         );
         if (!status) continue;
 
-        status.original_action_hash = statusLink.target;
         user.status = status;
         users.push(user);
       }
@@ -97,7 +96,6 @@ class AdministrationStore {
         );
         if (!status) continue;
 
-        status.original_action_hash = statusLink.target;
         organization.status = status;
         organizations.push(organization);
       }
@@ -239,7 +237,7 @@ class AdministrationStore {
       const timestamp = Math.floor(record.signed_action.hashed.content.timestamp / 1_000);
       const revision: Revision = {
         entity: uiEntity,
-        status: this.convertToUIStatus(status, timestamp),
+        status,
         timestamp
       };
       revisions.push(revision);
@@ -252,14 +250,20 @@ class AdministrationStore {
     entity_original_action_hash: ActionHash,
     entity_type: AdministrationEntity
   ): Promise<UIStatus | null> {
-    const status = await AdministrationService.getLatestStatusForEntity(
+    const statusLink = await AdministrationService.getEntityStatusLink(
       entity_original_action_hash,
       entity_type
     );
+    if (!statusLink) return null;
 
-    if (!status) return null;
+    const latestStatus = await AdministrationService.getLatestStatusRecord(statusLink.target);
+    if (!latestStatus) return null;
 
-    return this.convertToUIStatus(status);
+    const status = this.convertToUIStatus(decodeRecords([latestStatus])[0]);
+    status.original_action_hash = statusLink.target;
+    status.previous_action_hash = latestStatus.signed_action.hashed.hash;
+
+    return status;
   }
 
   async getLatestStatusRecordForEntity(
@@ -273,35 +277,6 @@ class AdministrationStore {
     return record;
   }
 
-  async getAllStatusesForEntity(original_action_hash: ActionHash): Promise<StatusInDHT[]> {
-    const statusLink = await AdministrationService.getEntityStatusLink(
-      original_action_hash,
-      AdministrationEntity.Users
-    );
-    if (!statusLink) return [];
-
-    const records = await AdministrationService.getAllRevisionsForStatus(statusLink.target);
-
-    const revisions: Revision[] = [];
-
-    for (const record of records) {
-      const status = decodeRecords([record])[0] as StatusInDHT;
-      const user = await usersStore.getLatestUser(record.signed_action.hashed.hash);
-      if (!user) continue;
-
-      const timestamp = Math.floor(record.signed_action.hashed.content.timestamp / 1_000);
-      const revision: Revision = {
-        entity: user,
-        status: this.convertToUIStatus(status, timestamp),
-        timestamp
-      };
-      revisions.push(revision);
-    }
-
-    this.allUsersStatusesHistory = revisions;
-    return revisions.map((revision) => revision.status);
-  }
-
   async getAllRevisionsForAllUsers(): Promise<Revision[]> {
     const allUsers = await this.getAllUsers();
     const revisions: Revision[] = [];
@@ -313,6 +288,8 @@ class AdministrationStore {
         user,
         user.status.original_action_hash
       );
+
+      console.log('User Revisions:', userRevisions);
 
       revisions.push(...userRevisions);
     }
@@ -357,8 +334,8 @@ class AdministrationStore {
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash,
     new_status: StatusInDHT
-  ): Promise<boolean> {
-    const success = await AdministrationService.updateEntityStatus(
+  ): Promise<Record> {
+    const record = await AdministrationService.updateEntityStatus(
       AdministrationEntity.Organizations,
       entity_original_action_hash,
       status_original_action_hash,
@@ -366,20 +343,26 @@ class AdministrationStore {
       new_status
     );
 
-    if (success) {
+    const status = {
+      ...decodeRecords([record])[0],
+      original_action_hash: status_original_action_hash,
+      previous_action_hash: record.signed_action.hashed.hash
+    };
+
+    if (record) {
       // Update the specific organization's status in the store
       this.allOrganizations = this.allOrganizations.map((org) => {
         if (org.original_action_hash?.toString() === entity_original_action_hash.toString()) {
           return {
             ...org,
-            status: new_status
+            status
           };
         }
         return org;
       });
     }
 
-    return success;
+    return record;
   }
 
   async suspendOrganizationIndefinitely(
@@ -387,7 +370,7 @@ class AdministrationStore {
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash,
     reason: string
-  ): Promise<boolean> {
+  ): Promise<Record> {
     return await this.updateOrganizationStatus(
       entity_original_action_hash,
       status_original_action_hash,
@@ -405,7 +388,7 @@ class AdministrationStore {
     status_previous_action_hash: ActionHash,
     reason: string,
     duration_in_days: number
-  ): Promise<boolean> {
+  ): Promise<Record> {
     const suspended_until = Date.now() + duration_in_days * 24 * 60 * 60 * 1000;
     return await this.updateOrganizationStatus(
       entity_original_action_hash,
@@ -425,9 +408,9 @@ class AdministrationStore {
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash,
     new_status: StatusInDHT
-  ): Promise<boolean> {
+  ): Promise<Record> {
     try {
-      const success = await AdministrationService.updateEntityStatus(
+      const record = await AdministrationService.updateEntityStatus(
         AdministrationEntity.Users,
         entity_original_action_hash,
         status_original_action_hash,
@@ -435,13 +418,21 @@ class AdministrationStore {
         new_status
       );
 
-      if (success) {
+      const status = {
+        ...decodeRecords([record])[0],
+        original_action_hash: status_original_action_hash,
+        previous_action_hash: record.signed_action.hashed.hash
+      };
+
+      console.log('Updating user status:', status);
+
+      if (record) {
         // Update the specific user's status in the store
         this.allUsers = this.allUsers.map((user) => {
           if (user.original_action_hash?.toString() === entity_original_action_hash.toString()) {
             return {
               ...user,
-              status: new_status
+              status
             };
           }
           return user;
@@ -458,7 +449,7 @@ class AdministrationStore {
             if (admin.original_action_hash?.toString() === entity_original_action_hash.toString()) {
               return {
                 ...admin,
-                status: new_status
+                status
               };
             }
             return admin;
@@ -466,7 +457,7 @@ class AdministrationStore {
         }
       }
 
-      return success;
+      return record;
     } catch (error) {
       console.error('Error in updateUserStatus:', error);
       throw error;
@@ -478,7 +469,7 @@ class AdministrationStore {
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash,
     reason: string
-  ): Promise<boolean> {
+  ): Promise<Record> {
     return await this.updateUserStatus(
       entity_original_action_hash,
       status_original_action_hash,
@@ -496,7 +487,7 @@ class AdministrationStore {
     status_previous_action_hash: ActionHash,
     reason: string,
     duration_in_days: number
-  ): Promise<boolean> {
+  ): Promise<Record> {
     const suspended_until = Date.now() + duration_in_days * 24 * 60 * 60 * 1000;
     return await this.updateUserStatus(
       entity_original_action_hash,
@@ -514,7 +505,7 @@ class AdministrationStore {
     entity_original_action_hash: ActionHash,
     status_original_action_hash: ActionHash,
     status_previous_action_hash: ActionHash
-  ): Promise<boolean> {
+  ): Promise<Record> {
     return await this.updateUserStatus(
       entity_original_action_hash,
       status_original_action_hash,

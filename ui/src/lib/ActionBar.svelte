@@ -20,7 +20,6 @@
   const entityType =
     'user_type' in entity ? AdministrationEntity.Users : AdministrationEntity.Organizations;
 
-  let suspensionDate = $state('');
   let isTheOnlyAdmin = $derived(administrators.length === 1);
   let userStatus: StatusInDHT | null = $state(null);
 
@@ -39,12 +38,6 @@
 
   $effect(() => {
     loadStatusRecord();
-  });
-
-  $effect(() => {
-    if (userStatus?.suspended_until) {
-      suspensionDate = new Date(userStatus.suspended_until).toLocaleString();
-    }
   });
 
   const suspendTemporarilyModalMeta: PromptModalMeta = $derived({
@@ -202,22 +195,22 @@
     );
   }
 
-  function updateStatus(newStatus: { status_type: string }) {
+  async function updateStatus(newStatus: { status_type: string }) {
     const statusType = newStatus.status_type as StatusType;
     if (entityType === AdministrationEntity.Users) {
       console.log('Update status for user');
       administrationStore.updateUserStatus(
         entity.original_action_hash!,
-        entity.previous_action_hash!,
         entity.status?.original_action_hash!,
+        entity.status?.previous_action_hash!,
         { status_type: statusType }
       );
     } else if (entityType === AdministrationEntity.Organizations) {
       console.log('Update status for organization');
       administrationStore.updateOrganizationStatus(
         entity.original_action_hash!,
-        entity.previous_action_hash!,
         entity.status?.original_action_hash!,
+        entity.status?.previous_action_hash!,
         { status_type: statusType }
       );
     }
@@ -254,25 +247,18 @@
 
     if (!entity.original_action_hash || !entity.previous_action_hash) return;
 
-    const latestStatus = await administrationStore.getLatestStatusRecordForEntity(
-      entity.original_action_hash,
-      entityType
-    );
-    if (!latestStatus) return;
-
     if (entityType === AdministrationEntity.Users) {
       await administrationStore.suspendUserIndefinitely(
-        entity.original_action_hash,
-        entity.previous_action_hash,
-        latestStatus.signed_action.hashed.hash,
+        entity.original_action_hash!,
+        entity.status?.original_action_hash!,
+        entity.status?.previous_action_hash!,
         reason
       );
     } else {
-      // Fallback to user method if organization method doesn't exist
       await administrationStore.suspendOrganizationIndefinitely(
-        entity.original_action_hash,
-        entity.previous_action_hash,
-        latestStatus.signed_action.hashed.hash,
+        entity.original_action_hash!,
+        entity.status?.original_action_hash!,
+        entity.status?.previous_action_hash!,
         reason
       );
     }
@@ -286,26 +272,19 @@
 
     if (!entity.original_action_hash || !entity.previous_action_hash) return;
 
-    const latestStatus = await administrationStore.getLatestStatusRecordForEntity(
-      entity.original_action_hash,
-      entityType
-    );
-    if (!latestStatus) return;
-
     if (entityType === AdministrationEntity.Users) {
       await administrationStore.suspendUserTemporarily(
-        entity.original_action_hash,
-        entity.previous_action_hash,
-        latestStatus.signed_action.hashed.hash,
+        entity.original_action_hash!,
+        entity.status?.original_action_hash!,
+        entity.status?.previous_action_hash!,
         reason,
         duration
       );
     } else {
-      // Fallback to user method if organization method doesn't exist
       await administrationStore.suspendOrganizationTemporarily(
-        entity.original_action_hash,
-        entity.previous_action_hash,
-        latestStatus.signed_action.hashed.hash,
+        entity.original_action_hash!,
+        entity.status?.original_action_hash!,
+        entity.status?.previous_action_hash!,
         reason,
         duration
       );
