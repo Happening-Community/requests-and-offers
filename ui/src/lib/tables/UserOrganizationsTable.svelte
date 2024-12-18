@@ -12,6 +12,13 @@
   };
 
   const { organizations, title, role }: Props = $props();
+
+  function getOrganizationLogoUrl(organization: UIOrganization): string {
+    console.log('organization logo:', organization.location);
+    return organization?.logo
+      ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
+      : '/default_avatar.webp';
+  }
 </script>
 
 <div class="card space-y-4 p-4">
@@ -40,9 +47,7 @@
             <tr>
               <td>
                 <Avatar
-                  src={organization.logo
-                    ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
-                    : '/default_org_logo.webp'}
+                  src={getOrganizationLogoUrl(organization)}
                   width="w-10"
                   rounded="rounded-full"
                 />

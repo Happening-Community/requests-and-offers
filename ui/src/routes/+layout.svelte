@@ -34,13 +34,11 @@
     const agentPubKey = (await hc.getAppInfo())?.agent_pub_key;
     if (agentPubKey) {
       await administrationStore.getAllNetworkAdministrators();
-      console.log('administrationStore.administrators :', administrationStore.administrators);
     }
 
     await usersStore.refresh();
 
     console.log('Ping response:', record);
-    console.log('agentIsAdministrator :', agentIsAdministrator);
     console.log('clientInfo :', hc.client);
     console.log('appInfo :', await hc.getAppInfo());
   });

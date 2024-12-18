@@ -7,8 +7,6 @@
   const { agentIsAdministrator } = $derived(administrationStore);
 
   let error: string | null = $state(null);
-
-  $inspect('Is administrator:', agentIsAdministrator);
 </script>
 
 <section class="flex flex-col items-center">

@@ -28,6 +28,13 @@
       goto(`/organizations/${encodeHashToBase64(organization.original_action_hash!)}`);
     }
   }
+
+  function getOrganizationLogoUrl(organization: UIOrganization): string {
+    console.log('organization logo:', organization.location);
+    return organization?.logo
+      ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
+      : '/default_avatar.webp';
+  }
 </script>
 
 <div class="flex flex-col gap-4">
@@ -50,11 +57,7 @@
         {#each organizations as organization}
           <tr>
             <td>
-              <Avatar
-                src={organization.logo
-                  ? URL.createObjectURL(new Blob([new Uint8Array(organization.logo)]))
-                  : '/default_avatar.webp'}
-              />
+              <Avatar src={getOrganizationLogoUrl(organization)} />
             </td>
             <td>{organization.name}</td>
             <td class="max-w-md truncate">{organization.description}</td>
